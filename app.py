@@ -39,6 +39,26 @@ st.markdown("""
         margin-bottom: 10px;
         line-height: 1.6;
     }
+    .customer-card {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 5px solid #3182ce;
+        border-radius: 8px;
+        padding: 14px 18px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        line-height: 1.6;
+    }
+    .customer-card-vip {
+        background-color: #fffaf0;
+        border: 1px solid #feebc8;
+        border-left: 5px solid #dd6b20;
+        border-radius: 8px;
+        padding: 14px 18px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        line-height: 1.6;
+    }
     .remind-card-red {
         background-color: #fff5f5;
         border-left: 5px solid #e53e3e;
@@ -56,6 +76,14 @@ st.markdown("""
         padding: 2px 8px;
         border-radius: 12px;
         font-size: 12px;
+        font-weight: bold;
+    }
+    .badge-permit {
+        background-color: #edf2f7;
+        color: #4a5568;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 11.5px;
         font-weight: bold;
     }
     .calc-box-orange {
@@ -90,7 +118,7 @@ def check_password():
     c1, c2, c3 = st.columns([1, 1.2, 1])
     with c2:
         st.markdown("### 🏢 우리부동산 통합 업무 시스템")
-        st.caption("공장 전문 중개 & 고객 관리 CRM - 사무실 보안 인증")
+        st.caption("인천 공장 중개 & 엔터프라이즈 손님 CRM - 사무실 보안 인증")
         pwd_input = st.text_input("사무실 전용 비밀번호", type="password", key="pwd_box")
         if st.button("🔓 시스템 접속하기", type="primary", use_container_width=True):
             if pwd_input == CORRECT_PASSWORD:
@@ -104,7 +132,7 @@ if not check_password():
     st.stop()
 
 # =============================================================
-# ⚡ CSV 데이터베이스 관리 함수 (손님 장부 컬럼 대폭 강화)
+# ⚡ CSV 데이터베이스 관리 함수 (상담 히스토리 및 인허가 요건 컬럼 탑재)
 # =============================================================
 CUSTOMERS_CSV = "customers.csv"
 PROPERTIES_CSV = "properties.csv"
@@ -112,12 +140,14 @@ PROPERTIES_CSV = "properties.csv"
 def load_customers():
     if os.path.exists(CUSTOMERS_CSV):
         df = pd.read_csv(CUSTOMERS_CSV)
-        # 이전 버전 호환 컬럼 자동 보정
+        # 호환성 컬럼 자동 보정
         if "거래구분" not in df.columns: df["거래구분"] = "임대차(월세)"
         if "중요도" not in df.columns: df["중요도"] = "⭐⭐ A급(유력)"
         if "최근연락일" not in df.columns: df["최근연락일"] = df["접수일자"] if "접수일자" in df.columns else datetime.today().strftime("%Y-%m-%d")
+        if "업종인허가" not in df.columns: df["업종인허가"] = "일반제조(소음·진동)"
+        if "상담히스토리" not in df.columns: df["상담히스토리"] = ""
         return df
-    cols = ["접수일자", "최근연락일", "중요도", "거래구분", "상호/고객명", "연락처", "희망권역", "희망평수", "예산(보증금/월세/매매가)", "입주시기", "호이스트", "대형차진입", "희망전력kW", "상담메모", "진행상태"]
+    cols = ["접수일자", "최근연락일", "중요도", "거래구분", "업종인허가", "상호/고객명", "연락처", "희망권역", "희망평수", "예산(보증금/월세/매매가)", "입주시기", "호이스트", "대형차진입", "희망전력kW", "상담메모", "상담히스토리", "진행상태"]
     return pd.DataFrame(columns=cols)
 
 def save_all_customers(df):
@@ -149,7 +179,7 @@ def parse_pyung_numbers(text):
     nums = re.findall(r'\d+', str(text))
     return [float(n) for n in nums if 5 <= float(n) <= 5000]
 
-# 🎯 공장 매물 ➡️ 대기 손님 정밀 스캔 & 일치율 평가 (거래형태 대조 반영)
+# 🎯 [양방향 매칭 1] 공장 매물 ➡️ 대기 손님 역매칭
 def match_customers_advanced(fac_loc, fac_deal_type, fac_hoist, fac_truck, fac_area_text, fac_power_text=""):
     df = load_customers()
     if df.empty: return []
@@ -166,41 +196,37 @@ def match_customers_advanced(fac_loc, fac_deal_type, fac_hoist, fac_truck, fac_a
         score = 0
         reasons = []
 
-        # 0. 거래구분(매매/임대) 일치 여부
         c_deal = str(row.get("거래구분", ""))
         if "매매" in fac_deal_type and "매매" in c_deal:
             score += 20
-            reasons.append("매매 조건 일치")
+            reasons.append("매매 일치")
         elif "임대" in fac_deal_type and "임대" in c_deal:
             score += 20
-            reasons.append("임대 조건 일치")
+            reasons.append("임대 일치")
         elif "겸용" in c_deal or "겸용" in fac_deal_type:
             score += 15
             reasons.append("거래조건 협의가능")
         else:
-            score -= 30  # 매매 찾는 손님에게 월세 주면 감점
+            score -= 30
 
-        # 1. 지역 대조
         c_loc = str(row.get("희망권역", ""))
         loc_words = [w for w in fac_loc.replace("(", " ").replace(")", " ").split() if len(w) >= 2]
         if (not c_loc.strip()) or any(w in c_loc for w in loc_words) or any(w in fac_loc for w in c_loc.split()):
             score += 25
             reasons.append("권역 일치")
 
-        # 2. 평수 대조 (±20% 이내 적합)
         c_pyungs = parse_pyung_numbers(row.get("희망평수", ""))
         if f_pyung and c_pyungs:
             c_pyung = c_pyungs[0]
             if (c_pyung * 0.8) <= f_pyung <= (c_pyung * 1.25):
                 score += 30
-                reasons.append(f"희망평수({int(c_pyung)}평) 부합")
+                reasons.append(f"평수({int(c_pyung)}평) 부합")
             elif (c_pyung * 0.6) <= f_pyung <= (c_pyung * 1.4):
                 score += 15
                 reasons.append("평수 근사치")
         else:
             score += 10
 
-        # 3. 호이스트 대조
         c_hoist = str(row.get("호이스트", ""))
         if "필수" in c_hoist:
             if f_has_hoist:
@@ -211,7 +237,6 @@ def match_customers_advanced(fac_loc, fac_deal_type, fac_hoist, fac_truck, fac_a
         else:
             score += 10
 
-        # 4. 화물 진입 대조
         c_truck = str(row.get("대형차진입", ""))
         c_truck_lv = 4 if any(k in c_truck for k in ["츄레라", "트레일러"]) else (3 if any(k in c_truck for k in ["11T", "11톤", "윙바디"]) else (2 if any(k in c_truck for k in ["5T", "5톤"]) else 1))
         if f_truck_lv >= c_truck_lv:
@@ -220,7 +245,6 @@ def match_customers_advanced(fac_loc, fac_deal_type, fac_hoist, fac_truck, fac_a
         else:
             score -= 20
 
-        # 중요도 가산점 (VIP 손님 우선)
         c_star = str(row.get("중요도", ""))
         if "S급" in c_star: score += 10
         elif "A급" in c_star: score += 5
@@ -241,6 +265,59 @@ def match_customers_advanced(fac_loc, fac_deal_type, fac_hoist, fac_truck, fac_a
 
     results.sort(key=lambda x: x["일치점수"], reverse=True)
     return results
+
+# 🎯 [양방향 매칭 2] 특정 손님 ➡️ 보유 매물 즉시 추천 알고리즘
+def match_properties_for_customer(cust_row):
+    df_p = load_properties()
+    if df_p.empty: return []
+
+    c_deal = str(cust_row.get("거래구분", ""))
+    c_loc = str(cust_row.get("희망권역", ""))
+    c_pyungs = parse_pyung_numbers(cust_row.get("희망평수", ""))
+    c_pyung = c_pyungs[0] if c_pyungs else None
+    c_hoist = str(cust_row.get("호이스트", ""))
+    c_truck = str(cust_row.get("대형차진입", ""))
+    c_truck_lv = 4 if any(k in c_truck for k in ["츄레라", "트레일러"]) else (3 if any(k in c_truck for k in ["11T", "11톤", "윙바디"]) else (2 if any(k in c_truck for k in ["5T", "5톤"]) else 1))
+
+    matched_props = []
+    for _, prop in df_p.iterrows():
+        p_deal = str(prop.get("거래구분", ""))
+        p_loc = str(prop.get("소재지(권역)", ""))
+        p_area = str(prop.get("면적", ""))
+        p_hoist = str(prop.get("호이스트", ""))
+        p_truck = str(prop.get("대형차량", ""))
+
+        # 1. 거래구분
+        if ("매매" in c_deal and "매매" not in p_deal) and ("겸용" not in p_deal and "겸용" not in c_deal):
+            continue
+        if ("임대" in c_deal and "임대" not in p_deal) and ("겸용" not in p_deal and "겸용" not in c_deal):
+            continue
+
+        # 2. 지역
+        loc_words = [w for w in c_loc.replace("(", " ").replace(")", " ").split() if len(w) >= 2]
+        if loc_words and not any(w in p_loc for w in loc_words):
+            continue
+
+        # 3. 평수 (오차 ±25% 범위)
+        p_pyungs = parse_pyung_numbers(p_area)
+        if c_pyung and p_pyungs:
+            p_p = p_pyungs[0]
+            if not ((c_pyung * 0.75) <= p_p <= (c_pyung * 1.3)):
+                continue
+
+        # 4. 호이스트 필수 여부
+        p_has_hoist = any(k in p_hoist for k in ["완비", "설치", "톤", "T", "더블거더"]) and ("없음" not in p_hoist)
+        if "필수" in c_hoist and not p_has_hoist:
+            continue
+
+        # 5. 차량 진입
+        p_truck_lv = 4 if any(k in p_truck for k in ["츄레라", "트레일러"]) else (3 if any(k in p_truck for k in ["11T", "11톤", "윙바디"]) else (2 if any(k in p_truck for k in ["5T", "5톤"]) else 1))
+        if p_truck_lv < c_truck_lv:
+            continue
+
+        matched_props.append(prop)
+
+    return matched_props
 
 # =============================================================
 # ⚖️ 대법원 법원경매정보 데이터베이스
@@ -354,7 +431,7 @@ menu = st.sidebar.radio(
         "🏢 [부업] 수도권 청약 알림 허브 & 수지분석",
         "⚖️ [부업] 법원경매 허브 & 인천공장 시설분석"
     ],
-    index=1  # 업그레이드된 손님 장부로 기본 설정
+    index=1
 )
 
 st.sidebar.markdown("---")
@@ -464,16 +541,16 @@ if menu == "🏭 [주업] 공장 매물 등록 & 손님 자동매칭":
                 st.info("현재 대기 손님 장부 중 이 매물과 일치율 55% 이상인 고객이 없습니다.")
 
 # =============================================================
-# 2. 📋 [주업] 공장 손님 장부 (대폭 디벨롭: CRM, 수정/삭제, 리마인드)
+# 2. 📋 [주업] 공장 손님 장부 (5대 핵심 기능 완비 CRM)
 # =============================================================
 elif menu == "📋 [주업] 공장 손님 장부 (CRM & 리마인드)":
     st.title("📋 공장 손님 CRM 관리 장부")
-    st.caption("매매/임대 구분, 중요도(별표 등급), 주기적 안부·재상담 리마인드, 손님 정보 실시간 수정/삭제를 종합 지원합니다.")
+    st.caption("손님별 누적 상담 일지, 보유 매물 양방향 역추천, 업종 인허가 요건, VIP 별표, 안부톡 자동 생성을 완벽 지원합니다.")
 
     df_c = load_customers()
-
-    # 🚨 [신규 기능 1] 연락 리마인드 알림 바 (최근 연락 후 7일/14일 초과 손님 자동 추적)
     today = datetime.today()
+
+    # 🚨 리마인드 알림 바 (연락 후 7일 경과 손님 추적)
     remind_targets = []
     if not df_c.empty:
         for idx, row in df_c.iterrows():
@@ -484,32 +561,145 @@ elif menu == "📋 [주업] 공장 손님 장부 (CRM & 리마인드)":
                     passed_days = (today - last_contact_dt).days
                     if passed_days >= 7:
                         remind_targets.append({
-                            "고객명": row["상호/고객명"],
-                            "연락처": row["연락처"],
-                            "중요도": row["중요도"],
-                            "경과일": passed_days,
-                            "메모": row["상담메모"]
+                            "idx": idx, "고객명": row["상호/고객명"], "연락처": row["연락처"],
+                            "중요도": row["중요도"], "경과일": passed_days, "메모": row["상담메모"]
                         })
                 except Exception:
                     pass
 
     if remind_targets:
-        st.markdown(f"##### 🔔 [재상담 리마인드] 연락한 지 7일 이상 경과한 손님 ({len(remind_targets)}명)")
-        for rt in remind_targets[:3]:  # 상위 3명 노출
+        st.markdown(f"##### 🔔 [재상담 리마인드] 연락 후 7일 이상 경과한 손님 ({len(remind_targets)}명)")
+        for rt in remind_targets[:3]:
             st.markdown(f"""
             <div class="remind-card-red">
                 🚨 <b>{rt['고객명']}</b> ({rt['연락처']}) | <span style="color:#d69e2e;">{rt['중요도']}</span> | 마지막 연락 후 <b>{rt['경과일']}일 경과</b><br>
-                • 메모: {rt['메모']} ➡️ <i>"신규 매물 여부 안부 전화 권장"</i>
+                • 최근 메모: {rt['메모']} ➡️ <i>"신규 매물 체크 및 안부 전화 권장"</i>
             </div>
             """, unsafe_allow_html=True)
         st.markdown("---")
 
-    # 탭 구성: [1] 신규 등록 / 수정·삭제, [2] 전체 장부 열람 및 필터
-    c_tab1, c_tab2 = st.tabs(["✍️ 손님 신규 등록 및 수정/삭제", "📊 손님 장부 조회 및 필터링"])
+    # 4개 탭 구성
+    tab_list, tab_edit = st.tabs(["📊 손님 장부 목록 (상태별 탭 & 매물 즉시 추천)", "✍️ 손님 신규 등록 및 수정/삭제"])
 
-    with c_tab1:
-        st.subheader("손님 정보 등록 및 수정")
+    with tab_list:
+        if not df_c.empty:
+            # 1. 상태별 서브 탭 분리 (5번 디벨롭)
+            subtab_vip, subtab_active, subtab_done, subtab_all = st.tabs([
+                "🔥 집중 관리 (S/A급 VIP)",
+                "🏃 상담·브리핑 진행중",
+                "🤝 계약 완료 (사후관리)",
+                "📁 전체 보기 / 보류·마감"
+            ])
 
+            def render_customer_cards(filtered_customers):
+                if filtered_customers.empty:
+                    st.info("해당 조건의 손님이 없습니다.")
+                    return
+
+                for orig_idx, c_row in filtered_customers.iterrows():
+                    is_vip = "S급" in str(c_row["중요도"]) or "A급" in str(c_row["중요도"])
+                    card_class = "customer-card-vip" if is_vip else "customer-card"
+
+                    st.markdown(f"""
+                    <div class="{card_class}">
+                        <b style="font-size: 17px; color: #1a365d;">👤 {c_row['상호/고객명']}</b> 
+                        <span style="color:#d69e2e; font-weight: bold; margin-left: 6px;">{c_row['중요도']}</span> | 
+                        <b>{c_row['거래구분']}</b> | 📞 {c_row['연락처']} | 
+                        <span class="badge-permit">{c_row.get('업종인허가', '일반제조')}</span><br>
+                        • <b>희망지역/평수</b>: {c_row['희망권역']} | 📐 <b>{c_row['희망평수']}</b> | 💰 <b>{c_row['예산(보증금/월세/매매가)']}</b> | 🗓️ <b>{c_row['입주시기']}</b><br>
+                        • <b>설비조건</b>: {c_row['호이스트']} | 🚛 {c_row['대형차진입']} | 📅 최근연락일: {c_row['최근연락일']}<br>
+                        • <b>상담메모</b>: {c_row['상담메모']}
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    btn_c1, btn_c2, btn_c3 = st.columns([1.5, 1.5, 1.2])
+
+                    # 🎯 기능 2: 손님 ➡️ 보유 매물 즉시 역추천
+                    with btn_c1:
+                        show_prop_match = st.button(f"🎯 추천 보유매물 조회", key=f"btn_match_{orig_idx}")
+                    # 💬 기능 4: 원클릭 안부 카톡 생성
+                    with btn_c2:
+                        show_kakao_gen = st.button(f"💬 안부/체크 카톡 생성", key=f"btn_kakao_{orig_idx}")
+                    # 📞 기능 1: 상담 히스토리 열기
+                    with btn_c3:
+                        show_history = st.button(f"📝 상담일지 열기", key=f"btn_hist_{orig_idx}")
+
+                    # 추천 매물 결과창
+                    if show_prop_match:
+                        matched_props = match_properties_for_customer(c_row)
+                        st.markdown(f"###### 🏢 [{c_row['상호/고객명']} 대표님] 조건 부합 추천 공장 ({len(matched_props)}건 발견)")
+                        if matched_props:
+                            for p in matched_props:
+                                st.markdown(f"""
+                                <div class="match-card-gold" style="padding: 8px 14px; margin-bottom: 6px;">
+                                    <b>{p['소재지(권역)']}</b> ({p['거래구분']}) | 💰 {p['가격(보/월)']} | 📐 {p['면적']} | 층고 {p['층고']} | 동력 {p['동력']}<br>
+                                    • {p['호이스트']} | {p['대형차량']} | 💡 {p['특징메모']}
+                                </div>
+                                """, unsafe_allow_html=True)
+                        else:
+                            st.info("현재 보유 매물 중 조건(평수±25%, 거래형태, 호이스트, 진입차량)에 딱 맞는 매물이 없습니다.")
+
+                    # 안부 카톡 결과창
+                    if show_kakao_gen:
+                        hello_talk = f"""[{c_row['상호/고객명']} 대표님, 우리부동산 안부 안내]
+
+대표님 안녕하십니까!
+인천 공장·창고 전문 우리부동산 김태형 소장입니다.
+
+지난번 문의해 주신 공장({c_row['희망권역']}, {c_row['희망평수']} 내외, {c_row['거래구분']}) 조건과 관련하여 신규 접수 매물 체크차 안부 연락드렸습니다.
+
+현재 찾으시는 면적대 주변 공장 시세와 신규 공실 물건들을 면밀히 모니터링하고 있습니다. 혹시 조업 일정이나 입주 시기에 변동이 있으시거나, 추가로 찾으시는 설비 조건이 있으시면 편하게 말씀해 주십시오.
+
+조건에 딱 맞는 최적의 매물이 나오는 대로 가장 먼저 보고드리겠습니다.
+환절기 건강 유의하시고 번창하십시오!
+
+우리부동산 공인중개사사무소 대표 김태형
+☎ 010-2660-8276
+"""
+                        st.text_area(f"카톡 안부 복사창 ({c_row['상호/고객명']})", hello_talk, height=280)
+
+                    # 📝 기능 1: 상담 일지(히스토리) 누적 타임라인
+                    if show_history:
+                        st.markdown(f"###### 📝 [{c_row['상호/고객명']} 대표님] 누적 상담 히스토리 일지")
+                        current_hist = str(c_row.get("상담히스토리", ""))
+                        if current_hist.strip():
+                            st.text_area("이전 상담 기록", current_hist, height=130, disabled=True, key=f"hist_view_{orig_idx}")
+                        else:
+                            st.caption("아직 누적된 상담 일지가 없습니다.")
+
+                        with st.form(f"form_hist_add_{orig_idx}"):
+                            new_log = st.text_input("오늘 통화/상담 내용 입력", placeholder="예: 2차 유선 통화. 가좌동 120평 브리핑 완료, 내일 오후 3시 현장 답사 약속")
+                            if st.form_submit_button("💾 상담 일지에 추가 저장"):
+                                if new_log.strip():
+                                    time_tag = datetime.today().strftime("%Y-%m-%d %H:%M")
+                                    updated_hist_str = f"[{time_tag}] {new_log.strip()}\n" + current_hist
+                                    df_c.at[orig_idx, "상담히스토리"] = updated_hist_str
+                                    df_c.at[orig_idx, "최근연락일"] = datetime.today().strftime("%Y-%m-%d")
+                                    save_all_customers(df_c)
+                                    st.success("✅ 상담 일지가 타임라인에 누적 저장되었습니다!")
+                                    st.rerun()
+
+                    st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
+
+            with subtab_vip:
+                vip_df = df_c[df_c["중요도"].str.contains("S급|A급", na=False) & ~df_c["진행상태"].isin(["계약 완료", "보류/마감"])]
+                render_customer_cards(vip_df)
+
+            with subtab_active:
+                act_df = df_c[~df_c["진행상태"].isin(["계약 완료", "보류/마감"])]
+                render_customer_cards(act_df)
+
+            with subtab_done:
+                done_df = df_c[df_c["진행상태"] == "계약 완료"]
+                render_customer_cards(done_df)
+
+            with subtab_all:
+                render_customer_cards(df_c)
+        else:
+            st.info("등록된 손님이 없습니다.")
+
+    with tab_edit:
+        st.subheader("손님 정보 등록 및 수정 / 삭제")
         edit_mode = st.checkbox("🔄 기존 손님 정보 수정 / 삭제 모드 켜기")
         selected_cust_idx = None
         target_row = None
@@ -521,7 +711,6 @@ elif menu == "📋 [주업] 공장 손님 장부 (CRM & 리마인드)":
             target_row = df_c.iloc[selected_cust_idx]
 
         with st.form("customer_manage_form", clear_on_submit=False):
-            # 1행: 중요도(별표) & 거래구분(매매/임대) & 고객명 & 연락처
             r1, r2, r3, r4 = st.columns(4)
             with r1:
                 star_val = target_row["중요도"] if target_row is not None else "⭐⭐ A급(유력)"
@@ -532,49 +721,50 @@ elif menu == "📋 [주업] 공장 손님 장부 (CRM & 리마인드)":
                 deal_idx = ["임대차(월세)", "매매", "매매/임대 겸용"].index(deal_val) if deal_val in ["임대차(월세)", "매매", "매매/임대 겸용"] else 0
                 c_deal_type = st.selectbox("🏷️ 거래 구분 *", ["임대차(월세)", "매매", "매매/임대 겸용"], index=deal_idx)
             with r3:
+                permit_val = target_row.get("업종인허가", "일반제조(소음·진동)") if target_row is not None else "일반제조(소음·진동)"
+                permit_opts = ["일반제조(소음·진동)", "폐수·대기 배출 인허가 필수", "식품가공(HACCP)", "단순물류·창고", "자원순환·고물상", "기타 특수업종"]
+                permit_idx = permit_opts.index(permit_val) if permit_val in permit_opts else 0
+                c_permit = st.selectbox("🏭 업종 및 인허가 요건 *", permit_opts, index=permit_idx)
+            with r4:
                 name_default = str(target_row["상호/고객명"]) if target_row is not None else ""
                 c_name = st.text_input("상호 / 고객명 *", value=name_default, placeholder="예: (주)대한정밀 김대표")
-            with r4:
-                phone_default = str(target_row["연락처"]) if target_row is not None else ""
-                c_phone = st.text_input("연락처 *", value=phone_default, placeholder="예: 010-1234-5678")
 
-            # 2행: 권역 & 평수 & 예산 & 입주시기
             r5, r6, r7, r8 = st.columns(4)
             with r5:
+                phone_default = str(target_row["연락처"]) if target_row is not None else ""
+                c_phone = st.text_input("연락처 *", value=phone_default, placeholder="예: 010-1234-5678")
+            with r6:
                 loc_default = str(target_row["희망권역"]) if target_row is not None else "인천 서구 가좌/석남"
                 c_loc = st.text_input("희망 권역 *", value=loc_default)
-            with r6:
+            with r7:
                 area_default = str(target_row["희망평수"]) if target_row is not None else "100~130평"
                 c_area = st.text_input("희망 면적/평수 *", value=area_default)
-            with r7:
+            with r8:
                 price_default = str(target_row["예산(보증금/월세/매매가)"]) if target_row is not None else "보 3천 / 월 260만 (매매 시 15억)"
                 c_price = st.text_input("희망 예산 (보/월 or 매매)", value=price_default)
-            with r8:
-                movein_default = str(target_row["입주시기"]) if target_row is not None else "1~2개월 이내"
-                c_movein = st.text_input("입주 희망 시기", value=movein_default)
 
-            # 3행: 호이스트 & 대형차 & 진행상태 & 최근연락일
             r9, r10, r11, r12 = st.columns(4)
             with r9:
+                movein_default = str(target_row["입주시기"]) if target_row is not None else "1~2개월 이내"
+                c_movein = st.text_input("입주 희망 시기", value=movein_default)
+            with r10:
                 hoist_val = str(target_row["호이스트"]) if target_row is not None else "호이스트 필수 (3T~5T)"
                 hoist_opts = ["호이스트 필수 (3T~5T)", "있으면 좋음", "불필요"]
                 hoist_idx = hoist_opts.index(hoist_val) if hoist_val in hoist_opts else 0
                 c_hoist = st.selectbox("호이스트 요구", hoist_opts, index=hoist_idx)
-            with r10:
+            with r11:
                 truck_val = str(target_row["대형차진입"]) if target_row is not None else "11T/윙바디 필수"
                 truck_opts = ["츄레라/트레일러 필수", "11T/윙바디 필수", "5T 진입 수월", "1T 위주"]
                 truck_idx = truck_opts.index(truck_val) if truck_val in truck_opts else 1
                 c_truck = st.selectbox("진입 차량 요구", truck_opts, index=truck_idx)
-            with r11:
+            with r12:
                 stat_val = str(target_row["진행상태"]) if target_row is not None else "상담 접수 (매물 대기중)"
                 stat_opts = ["상담 접수 (매물 대기중)", "브리핑 진행중", "현장 미팅 예정", "계약 완료", "보류/마감"]
                 stat_idx = stat_opts.index(stat_val) if stat_val in stat_opts else 0
                 c_status = st.selectbox("진행 상태", stat_opts, index=stat_idx)
-            with r12:
-                c_contact_date = st.date_input("최근 상담/연락 일자", value=today)
 
             memo_default = str(target_row["상담메모"]) if target_row is not None else ""
-            c_memo = st.text_area("상담 메모 (업종, 필요 전력, 세부 특이사항)", value=memo_default, placeholder="예: 자동차부품 금형가공, 동력 75kW 필수, 처마 8m 이상 요망")
+            c_memo = st.text_area("기본 상담 메모 (필요 동력, 층고, 도로 폭 등)", value=memo_default, placeholder="예: 자동차부품 금형가공, 동력 75kW 필수, 처마 8m 이상 요망")
 
             sub_c1, sub_c2 = st.columns([4, 1])
             with sub_c1:
@@ -589,9 +779,10 @@ elif menu == "📋 [주업] 공장 손님 장부 (CRM & 리마인드)":
                 else:
                     new_entry = {
                         "접수일자": target_row["접수일자"] if target_row is not None else today.strftime("%Y-%m-%d"),
-                        "최근연락일": c_contact_date.strftime("%Y-%m-%d"),
+                        "최근연락일": today.strftime("%Y-%m-%d"),
                         "중요도": c_star,
                         "거래구분": c_deal_type,
+                        "업종인허가": c_permit,
                         "상호/고객명": c_name,
                         "연락처": c_phone,
                         "희망권역": c_loc,
@@ -602,6 +793,7 @@ elif menu == "📋 [주업] 공장 손님 장부 (CRM & 리마인드)":
                         "대형차진입": c_truck,
                         "희망전력kW": "",
                         "상담메모": c_memo,
+                        "상담히스토리": target_row.get("상담히스토리", "") if target_row is not None else f"[{today.strftime('%Y-%m-%d %H:%M')}] 최초 접수 완료\n",
                         "진행상태": c_status
                     }
                     if edit_mode and selected_cust_idx is not None:
@@ -618,43 +810,6 @@ elif menu == "📋 [주업] 공장 손님 장부 (CRM & 리마인드)":
                 save_all_customers(df_c)
                 st.warning("🗑️ 손님 데이터가 삭제되었습니다.")
                 st.rerun()
-
-    with c_tab2:
-        st.subheader("📊 손님 CRM 장부 검색 및 맞춤 필터")
-        if not df_c.empty:
-            f1, f2, f3, f4 = st.columns(4)
-            with f1: filter_deal = st.selectbox("거래구분 필터", ["전체 거래", "임대차(월세)", "매매", "매매/임대 겸용"])
-            with f2: filter_star = st.selectbox("중요도 필터", ["전체 중요도", "⭐⭐⭐ S급만 보기", "⭐⭐ A급 이상만 보기"])
-            with f3: filter_stat = st.selectbox("진행상태 필터", ["전체 상태", "진행중인 손님만 (계약/마감 제외)", "계약 완료"])
-            with f4: search_cust = st.text_input("고객명 / 연락처 / 메모 검색", placeholder="김대표, 정밀...")
-
-            view_df = df_c.copy()
-
-            if filter_deal != "전체 거래":
-                view_df = view_df[view_df["거래구분"] == filter_deal]
-
-            if filter_star == "⭐⭐⭐ S급만 보기":
-                view_df = view_df[view_df["중요도"].str.contains("S급", na=False)]
-            elif filter_star == "⭐⭐ A급 이상만 보기":
-                view_df = view_df[view_df["중요도"].str.contains("S급|A급", na=False)]
-
-            if filter_stat == "진행중인 손님만 (계약/마감 제외)":
-                view_df = view_df[~view_df["진행상태"].isin(["계약 완료", "보류/마감"])]
-            elif filter_stat == "계약 완료":
-                view_df = view_df[view_df["진행상태"] == "계약 완료"]
-
-            if search_cust.strip():
-                kw = search_cust.strip()
-                view_df = view_df[
-                    view_df["상호/고객명"].str.contains(kw, na=False) |
-                    view_df["연락처"].str.contains(kw, na=False) |
-                    view_df["상담메모"].str.contains(kw, na=False)
-                ]
-
-            st.markdown(f"**조회된 손님: 총 {len(view_df)}명** (전체 {len(df_c)}명 중)")
-            st.dataframe(view_df, use_container_width=True, height=450)
-        else:
-            st.info("등록된 손님이 없습니다.")
 
 # =============================================================
 # 3. 📁 [주업] 공장 보유 매물 장부 (드롭다운 필터 완비)
@@ -864,7 +1019,7 @@ elif menu == "🏢 [부업] 수도권 청약 알림 허브 & 수지분석":
 # 6. ⚖️ [부업] 법원경매 허브 & 인천공장 시설분석
 # =============================================================
 else:
-    st.title("⚖️ 법원경매 허브 & 인천 서구 공장 시설 인프라 분석")
+    st.title("⚖️️ 법원경매 허브 & 인천 서구 공장 시설 인프라 분석")
     factory_list, apt_list = get_auction_data()
     auction_tab1, auction_tab2 = st.tabs(["🏭 인천 전지역 공장·창고 경매 & 시설비 수지표", "🏢 수도권 광역 아파트 경매 (서울 25개 자치구 완비)"])
 
