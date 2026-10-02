@@ -408,7 +408,7 @@ MENU_DICT = {
 menu_choice = st.sidebar.radio(
     "📌 업무 시스템 메뉴",
     list(MENU_DICT.values()),
-    index=1
+    index=0
 )
 
 st.sidebar.markdown("---")
@@ -416,48 +416,66 @@ if st.sidebar.button("🔒 로그아웃"):
     st.session_state["authenticated"] = False
     st.rerun()
 
-st.sidebar.caption("🏗️ **인천 전지역 신축공장 맞춤 분양 엔진 가동 중**")
+st.sidebar.caption("🏢 **인천 공장 중개 & 맞춤 블로그 포스팅 엔진 활성**")
 
 # =============================================================
-# 1. 🏭 [주업] 공장 매물 등록 & 손님 자동 역매칭
+# 1. 🏭 [주업] 공장 매물 등록 & 손님 자동매칭 & 블로그 포스팅
 # =============================================================
 if menu_choice == MENU_DICT["FACTORY_REG"]:
-    st.title("🏭 공장 매물 등록 & 대기 손님 1:1 맞춤 역매칭")
-    st.caption("신규 접수된 공장을 등록하면, 대기 손님 장부에서 조건이 일치하는 타겟 고객을 자동으로 찾아냅니다.")
+    st.title("🏭 공장 매물 등록 & 대기 손님 역매칭 & 블로그 포스팅")
+    st.caption("신규 매물을 등록하면 매물장부 저장, 대기 손님 실시간 역매칭, 그리고 네이버 블로그 실전 포스팅 본문이 한 번에 자동 생성됩니다.")
 
     with st.expander("🔒 [중개사 비밀 보관용] 상세 지번 및 건물주 직통 연락처", expanded=False):
         s1, s2, s3 = st.columns(3)
-        with s1: secret_address = st.text_input("📌 상세 지번/호수 (비공개)", placeholder="예: 인천 서구 가좌동 556-12 1층")
-        with s2: owner_name = st.text_input("👤 건물주 성함 (비공개)", placeholder="예: 홍길동 회장님")
-        with s3: owner_phone = st.text_input("📞 건물주 연락처 (비공개)", placeholder="예: 010-9999-8888")
+        with s1: secret_address = st.text_input("📌 상세 지번/호수 (비공개)", placeholder="예: 인천 제물포구 송현동 123-45")
+        with s2: owner_name = st.text_input("👤 건물주 성함 (비공개)", placeholder="예: 박회장님")
+        with s3: owner_phone = st.text_input("📞 건물주 연락처 (비공개)", placeholder="예: 010-8888-9999")
 
     st.markdown("##### 📌 공장 기본 제원 및 거래 조건 입력")
     b1, b2, b3, b4 = st.columns(4)
-    with b1: loc = st.text_input("소재지 / 권역 *", value="인천 서구 가좌동")
+    with b1: loc = st.text_input("소재지 / 권역 *", value="인천 제물포구 송현동")
     with b2: deal_type = st.selectbox("거래 형태 *", ["임대차(월세)", "매매", "임대/매매 겸용", "전대차(동의완료)"])
-    with b3: vacancy_status = st.selectbox("입주 상태 *", ["현재 공실(즉시입주)", "현재 임대중(만기 전)", "건물주 사용중(협의)", "신축 첫입주"])
+    with b3: vacancy_status = st.selectbox("입주 상태 *", ["현재 공실(즉시입주)", "협의 입주", "만기 후 입주", "신축 첫입주"])
     with b4: expire_date = st.text_input("입주 가능일", value="즉시 협의 가능")
 
     c1, c2, c3 = st.columns(3)
     with c1:
-        price = st.text_input("보증금 / 월세 (또는 매매가) *", placeholder="예: 보증금 3,000만 원 / 월세 280만 원")
-        area = st.text_input("실사용 면적/평수 *", placeholder="예: 바닥 120평")
+        price = st.text_input("보증금 / 월세 (또는 매매가) *", value="보증금 3,000만 원 / 월세 230만 원")
+        area = st.text_input("실사용 면적/평수 *", value="1층 75평 + 2층 15평 사무실 (총 90평)")
     with c2:
-        ceiling = st.text_input("처마 층고", value="처마 8m (유효 9m)")
-        power = st.text_input("인입 동력 (kW) *", value="제조 동력 75kW")
-        hoist = st.selectbox("호이스트 설비 *", ["호이스트 크레인 완비 (3T)", "호이스트 크레인 완비 (5T)", "호이스트 크레인 완비 (2.8T)", "호이스트 없음", "직접 입력"])
+        ceiling = st.text_input("처마 층고", value="처마 7.5m (호이스트 주행 넉넉한 하이 층고)")
+        power = st.text_input("인입 동력 (kW) *", value="30kW (가공 설비 구동 충분)")
+        hoist = st.selectbox("호이스트 설비 *", ["호이스트 2.8톤 완비", "호이스트 5톤 완비", "호이스트 3톤 완비", "호이스트 없음", "직접 입력"])
         if hoist == "직접 입력": hoist = st.text_input("호이스트 스펙 직접 입력")
     with c3:
-        road = st.text_input("도로 조건", value="10m 도로 접")
-        parking = st.selectbox("주차 여건", ["단독 마당 5대 이상", "전면 2~3대 가능", "1~2대 가능"])
-        big_truck = st.selectbox("화물차 진입 여건 *", ["츄레라 / 트레일러 진출입 및 상하차 원활", "11T / 대형 윙바디 접안 원활", "5T 화물차 상하차 수월", "1T 화물 최적화"])
+        road = st.text_input("도로 조건", value="8m 도로 접 (문 앞 차량 접안 편리)")
+        parking = st.selectbox("주차 여건", ["문 앞 차량 작업 및 접안 편리", "단독 마당 5대 이상", "전면 2~3대 가능", "1~2대 가능"])
+        big_truck = st.selectbox("화물차 진입 여건 *", ["1톤~5톤 화물차 문 앞 접안 최적", "츄레라 / 트레일러 진출입 및 상하차 원활", "11T / 대형 윙바디 접안 원활"])
 
-    memo = st.text_area("매물 특이사항 / 입지 메모", placeholder="예: 가좌IC 인접, 민원 없는 공업지역")
+    # 블로그 포스팅용 추가 디테일 입력칸
+    st.markdown("##### 📝 블로그 포스팅 정밀 작성을 위한 추가 디테일")
+    d1, d2, d3 = st.columns(3)
+    with d1:
+        office_toilet = st.text_input("사무실 / 화장실 스펙", value="2층 15평 독립 사무실 완비 / 2층 내부 단독 화장실 구비")
+        use_approval_date = st.text_input("사용승인일 / 건축구조", value="1997.1.17 / 일반철골구조")
+    with d2:
+        zoning_type = st.text_input("용도지역 / 층수 / 방향", value="일반공업지역 / 1층~2층 / 북서향")
+        door_type = st.text_input("출입문 형태 / 관리비", value="대형 슬라이딩 도어 / 실비 정산")
+    with d3:
+        target_recom = st.text_input("추천 업종", value="정밀 금형 가공, 기계 조립, 선반·밀링 임가공, 부품 유통")
 
-    if st.button("🚀 매물 저장 및 대기 손님 즉시 역매칭 실행", type="primary", use_container_width=True):
+    memo = st.text_area(
+        "매물 핵심 특이사항 / 입지 강점 메모 (스토리텔링용)",
+        value="인천산업유통센터 및 송현 공구상가 초인접으로 볼트, 공구 수급 및 외주 가공 네트워크 최상. 호이스트 2.8T 완비로 크레인 설치비 수천만 원 굳히고 입주."
+    )
+
+    uploaded_factory_imgs = st.file_uploader("📷 공장 현장 사진 첨부 (외관, 진입로, 1층 작업장, 호이스트, 사무실 등)", accept_multiple_files=True, type=['png', 'jpg', 'jpeg'], key="fac_reg_imgs")
+
+    if st.button("🚀 매물 저장 및 대기 손님 역매칭 & 블로그 포스팅 생성", type="primary", use_container_width=True):
         if not price or not area:
             st.error("가격과 면적은 필수 입력 항목입니다.")
         else:
+            # 1. 매물 장부 영구 저장
             new_prop = {
                 "등록일자": datetime.today().strftime("%Y-%m-%d"), "입주/공실상태": vacancy_status, "계약만료일": expire_date,
                 "거래구분": deal_type, "소재지(권역)": loc, "상세주소(지번)": secret_address, "임대인(건물주)": owner_name,
@@ -466,6 +484,130 @@ if menu_choice == MENU_DICT["FACTORY_REG"]:
             }
             save_property(new_prop)
             st.success("✅ 매물이 '공장 보유 매물 장부'에 안전하게 저장되었습니다!")
+
+            # 2. 대기 손님 역매칭 실행
+            matched = match_customers_advanced(loc, deal_type, hoist, big_truck, area, power)
+
+            st.markdown("---")
+            if matched:
+                st.subheader(f"🎯 이 공장 매물에 딱 맞는 대기 고객 ({len(matched)}명 자동 발굴)")
+                for idx, cust in enumerate(matched):
+                    score_color = "#38a169" if cust['일치점수'] >= 80 else "#d69e2e"
+                    st.markdown(f"""
+                    <div class="match-card-gold">
+                        <span class="badge-score" style="background-color: {score_color};">조건 일치율 {cust['일치점수']}점</span> 
+                        <b style="font-size: 16px; margin-left: 8px;">{cust['고객명']} 대표님</b> <span style="color:#d69e2e;">{cust['중요도']}</span> ({cust['연락처']}) | <b>{cust['거래구분']}</b><br>
+                        • <b>손님 요구조건</b>: 희망 {cust['희망권역']} | {cust['희망평수']} | 메모: {cust['상담메모']}<br>
+                        • <b>자동 매칭 사유</b>: <span style="color: #2b6cb0; font-weight: bold;">{cust['매칭사유']}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    cust_kakao = f"""[{cust['고객명']} 대표님 맞춤 공장 매물 추천 안내]
+
+대표님 안녕하십니까,
+인천 산업단지 공장·창고 전문 우리부동산 김태형 소장입니다.
+
+지난번 말씀해 주신 조건({cust['희망평수']}, {cust['희망권역']}, {cust['거래구분']})에 부합하는 알짜 공장 매물이 오늘 신규 접수되어 가장 먼저 안내드립니다.
+
+• 소재지: {loc}
+• 거래구분: {deal_type}
+• 가격조건: {price}
+• 실사용 면적: {area}
+• 층고 제원: {ceiling}
+• 인입 동력: {power}
+• 호이스트: {hoist}
+• 물류 여건: {big_truck}
+• 입주 시기: {vacancy_status} ({expire_date})
+
+💡 현장 핵심 포인트: {memo}
+
+대표님 조업에 최적화된 물건입니다. 현장 답사나 세부 도면 검토를 원하시면 편하게 회신 주십시오.
+
+우리부동산 공인중개사사무소 대표 김태형
+☎ 010-2660-8276
+"""
+                    with st.expander(f"📱 {cust['고객명']} 대표님 맞춤 전송용 카카오톡 브리핑문 열기"):
+                        st.text_area(f"카톡 전송문_{idx}", cust_kakao, height=280)
+            else:
+                st.info("현재 대기 손님 장부 중 이 매물과 일치율 55% 이상인 고객이 없습니다.")
+
+            # 3. 대표님 전용 네이버 블로그 실전 포스팅 양식 자동 생성
+            st.markdown("---")
+            st.subheader("📝 네이버 블로그 실전 포스팅 본문 (대표님 전용 맞춤 템플릿)")
+
+            # 해시태그 생성 로직
+            clean_loc_words = [w for w in loc.replace("인천", "").replace("광역시", "").split() if len(w) >= 2]
+            loc_base = clean_loc_words[0] if clean_loc_words else "인천"
+            loc_sub = clean_loc_words[1] if len(clean_loc_words) > 1 else loc_base
+
+            blog_full_text = f"""안녕하세요. 인천 공장·창고 전문 우리부동산입니다.
+{loc} 공장 {deal_type.split('(')[0]} 매물 중 산업 인프라 배후에서 {hoist}와 사무실을 갖추고 이 가격에 나오는 곳은 정말 귀합니다.
+요즘 인근 산업유통센터나 주요 공구상가 배후에서 이 정도 평형대 1층 공장을 찾아보시면 임대료가 만만치 않은 데다, 호이스트가 없거나 사무실이 마땅치 않아 시설 설치비로 수천만 원이 깨지는 경우가 허다합니다. 오늘 소개해 드리는 매물은 {loc} {area} 통임대 건으로, {price}라는 주변 시세 대비 아주 저렴한 금액으로 나와 강력 추천해 드립니다.
+
+(사진 1 - 공장 외관 및 대표 사진)
+인천 주요 공구상가 및 산업단지가 바로 인접해 있어 볼트, 공구, 철재 부품 수급 및 외주 가공 연계성이 인천에서 으뜸인 입지입니다. 공장 정면으로 진입 도로가 반듯하게 열려 있어 화물차가 문 앞까지 수월하게 접안해 상하차 작업을 진행하기에 최적화된 동선을 자랑합니다.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 매물 제원표
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+항목 | 세부 제원
+---|---
+매물 명칭 | {loc} 공장 {deal_type.split('(')[0]}
+소재지 | {loc} 공업지역
+가격 조건 | {price}
+매물 구분 / 주 용도 | {deal_type} / 공장 및 제조장
+입주 가능일 | {vacancy_status} ({expire_date})
+용도지역 / 건축구조 | {zoning_type} / {use_approval_date}
+실사용 면적 | {area}
+층고 제원 | {ceiling}
+인입 동력 | {power}
+호이스트 설비 | {hoist}
+도로 및 주차 | {road} / {parking}
+화물 접안 여건 | {big_truck}
+출입문 / 관리비 | {door_type}
+사무실 / 화장실 | {office_toilet}
+
+💡 김소장의 현장 체크포인트
+✅ {loc} 공장 매물 중 {price}의 특급 시세 가성비
+✅ {hoist} 기본 완비로 H빔 보강 및 크레인 신규 설치비 수천만 원 굳히고 입주
+✅ 동력 {power} 기본 인입으로 추가 승압 공사비 없이 공작기계·가공설비 즉시 연결 가동
+✅ {office_toilet.split('/')[0].strip()}로 1층 바닥 공간을 온전히 작업장으로 통활용
+✅ 주요 간선도로 및 산업유통센터 초인접으로 원부자재 수급 및 물류 네트워크 최상
+✅ {target_recom} 공장으로 강력 추천
+
+(사진 2 - 공장 메인 진입로 및 화물차 접안 전경)
+공장 메인 진입로 및 화물차 문 앞 접안 전경입니다. 출입문 바로 앞으로 화물 트럭이 바짝 들어와 자재를 싣고 내리기에 최적화된 동선입니다. 출입구 폭과 높이가 널찍해 무거운 원자재를 내부로 직결 반입하기 수월합니다.
+
+(사진 3 - 1층 메인 작업장 전체 전경 1)
+1층 메인 가공 작업장 전체 전경입니다. 기계 하중을 단단하게 버텨주는 바닥 기초 위에 선반, 밀링, 가공 설비가 안정적으로 안착될 수 있는 튼튼한 하중 구조를 자랑합니다. 신축 공장 눈치 볼 필요 없이 편하게 조업하실 '진짜 제조업' 사장님들께 최고의 사업장입니다.
+
+(사진 4 - 호이스트 크레인 및 상부 골조 상세 뷰)
+상단 {hoist} 및 크레인 주행 구역입니다. 상부 골조를 따라 호이스트가 쌩쌩하게 가동되고 있어 무거운 중량 금속 자재와 완제품을 힘들이지 않고 전 구역으로 안전하게 인양할 수 있습니다.
+
+(사진 5 - 1층 작업장 중앙에서 사무실 방향 뷰)
+중앙 통로 폭이 넓어 지게차와 대차 이동이 자유로우며, 현장과 사무 공간이 완벽하게 분리되어 쾌적한 업무 환경을 제공합니다.
+
+(사진 6 - 2층 독립 사무실 내부 및 집무 공간)
+{office_toilet.split('/')[0].strip()} 공간입니다. 책상, 도면 검토대, 상담용 소파를 여유롭게 두고 쓸 수 있는 아늑한 오피스 공간으로, 현장 소음 간섭 없이 바이어 미팅과 수주 관리를 보기에 안성맞춤입니다.
+
+(사진 7 - 전용 단독 화장실 및 편의시설)
+{office_toilet.split('/')[-1].strip()}입니다. 쾌적하게 관리되어 외부 공용 화장실을 이용하는 불편함이 전혀 없습니다.
+
+{loc} 공업지역에서 물류와 부품 수급이 가장 빠르고, {area} 작업장에 {hoist}, {power}, 사무실까지 다 갖춘 공장을 {price} 조건에 얻을 수 있는 기회는 흔치 않습니다.
+임대 고정비를 획기적으로 줄이면서 즉시 기계를 안착시켜 조업에 들어갈 알짜배기 공장을 찾으시는 사장님들께서는 서둘러 현장을 확인해 보시길 권해드립니다.
+
+(명함 이미지 - 명함을 누르시면 전화 연결이 됩니다)
+언제든 편하게 연락 주시기 바랍니다.
+
+매물 상담 문의, 접수 문의 언제든 환영합니다.
+우리부동산 공인중개사사무소 대표
+김태형 010-2660-8276
+
+정직하고 최선을 다하여 중개하겠습니다.
+
+#{loc_base}공장임대 #{loc_sub}공장임대 #{loc_sub}공장 #{loc_base}호이스트공장 #{loc_sub}호이스트공장 #인천공장임대 #인천창고임대 #인천호이스트공장 #가좌동공장임대 #석남동공장임대 #원창동공장임대 #송현동공장임대 #도화동공장임대 #인천산업단지공장 #인천공장전문 #우리부동산 #소형공장임대 #인천공장매매
+"""
+            st.text_area("네이버 블로그 복사용 전체 본문", blog_full_text, height=450)
 
 # =============================================================
 # 2. 🏗️ [주업] 신축공장 맞춤 분양 설계 & 제안서 (인천 전지역 범용)
@@ -514,7 +656,6 @@ elif menu_choice == MENU_DICT["NEW_DEV"]:
         with pr4:
             power_spec = st.text_input("인입 동력", value="30kW 기본 인입")
 
-        # 건폐율 및 마당 자동 계산
         actual_bcr = round((f1_pyung / custom_land) * 100, 1) if custom_land > 0 else 0
         yard_pyung = max(0, custom_land - f1_pyung)
 
@@ -529,16 +670,11 @@ elif menu_choice == MENU_DICT["NEW_DEV"]:
             max_floor_cnt = len(active_floors)
             total_bldg_area = sum(floor_list)
 
-            # 1층 기본가 (대지평수 * 1층단가)
             base_cost = int(custom_land * base_unit_price * 10000)
-
-            # 2~5층 증축비 (상층부면적 * 증축단가)
             extra_bldg_area = sum(floor_list[1:])
             extra_cost = int(extra_bldg_area * add_unit_price * 10000)
-
             total_dev_price = base_cost + extra_cost
 
-            # 금융 분석
             loan_80 = int(total_dev_price * 0.80)
             pure_cash = total_dev_price - loan_80
             acq_tax = int(total_dev_price * 0.046)
@@ -573,7 +709,6 @@ elif menu_choice == MENU_DICT["NEW_DEV"]:
 
             with out_c2:
                 st.markdown("##### 📐 2D 평면 캐드 배치도")
-                # 2D 평면도 (도로폭 연동)
                 bldg_w_svg = int(max(20, min(80, (f1_pyung / custom_land) * 100))) if custom_land > 0 else 50
                 yard_w_svg = 100 - bldg_w_svg
                 truck_text = "40ft 트레일러 / 츄레라 접안 최적" if road_width >= 10 else "11T 윙바디 / 대형 화물 접안"
@@ -605,10 +740,8 @@ elif menu_choice == MENU_DICT["NEW_DEV"]:
                 """
                 st.markdown(svg_2d, unsafe_allow_html=True)
 
-            # 4. 하단 동적 토지이용계획 분석 박스
             st.markdown("---")
             with st.expander("🌐 [공공데이터 분석] 입력 주소 기반 토지이용계획 및 인허가 가이드", expanded=True):
-                # 주소 키워드 분석
                 is_sandan = any(k in site_addr for k in ["산단", "산업단지", "오류동", "고잔동", "도화동"])
                 zoning_name = "일반공업지역 (산업단지 관리구역)" if is_sandan else "일반공업지역 / 준공업지역"
                 legal_bcr = "80% (산업단지 특례)" if is_sandan else "70% (지자체 조례)"
@@ -629,7 +762,6 @@ elif menu_choice == MENU_DICT["NEW_DEV"]:
 
                 st.caption("※ 토지e음(eum.go.kr) 공공데이터 및 관할 지자체 산업단지 관리기본계획 기준이 실시간 적용됩니다.")
 
-            # 신축 전용 매물장부 저장 버튼
             st.markdown("---")
             if st.button("💾 이 신축 분양 견적을 '신축공장 분양 전용 매물장부'에 저장하기", type="secondary", use_container_width=True):
                 new_dev_row = {
