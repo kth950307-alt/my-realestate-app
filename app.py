@@ -15,7 +15,7 @@ except ImportError:
 
 st.set_page_config(page_title="우리부동산 통합 업무 시스템", page_icon="🏢", layout="wide")
 
-# 크롬/사파리 번역 방지 및 인쇄 전용 CSS
+# 크롬/사파리 번역 방지 및 공통 스타일
 st.markdown("""
 <script>
     document.documentElement.lang = 'ko';
@@ -99,16 +99,6 @@ st.markdown("""
         border-radius: 8px;
         padding: 16px;
         margin: 12px 0;
-    }
-    @media print {
-        [data-testid="stSidebar"], [data-testid="stHeader"], .stButton, header, footer {
-            display: none !important;
-        }
-        .print-container {
-            width: 100% !important;
-            padding: 0 !important;
-            margin: 0 !important;
-        }
     }
 </style>
 </div>
@@ -396,7 +386,7 @@ def match_properties_for_customer(cust_row):
 # =============================================================
 MENU_DICT = {
     "FACTORY_REG": "🏭 [주업] 공장 매물 등록 & 손님 자동매칭",
-    "NEW_DEV": "🏗️ [주업] 신축공장 맞춤 분양 설계 & 제안서",
+    "NEW_DEV": "🏗️️ [주업] 신축공장 맞춤 분양 설계 & 제안서",
     "CUSTOMER_CRM": "📋 [주업] 공장 손님 장부 (CRM & 리마인드)",
     "FACTORY_BOOK": "📁 [주업] 공장 보유 매물 장부 (드롭다운 필터)",
     "PRICE_AI": "🔍 [주업] 공장·창고 AI 시세 추정기",
@@ -408,7 +398,7 @@ MENU_DICT = {
 menu_choice = st.sidebar.radio(
     "📌 업무 시스템 메뉴",
     list(MENU_DICT.values()),
-    index=0
+    index=1
 )
 
 st.sidebar.markdown("---")
@@ -416,7 +406,7 @@ if st.sidebar.button("🔒 로그아웃"):
     st.session_state["authenticated"] = False
     st.rerun()
 
-st.sidebar.caption("🏢 **인천 공장 중개 & 맞춤 블로그 포스팅 엔진 활성**")
+st.sidebar.caption("🏗️ **인천 전지역 신축공장 맞춤 분양 엔진 가동 중**")
 
 # =============================================================
 # 1. 🏭 [주업] 공장 매물 등록 & 손님 자동매칭 & 블로그 포스팅
@@ -452,7 +442,6 @@ if menu_choice == MENU_DICT["FACTORY_REG"]:
         parking = st.selectbox("주차 여건", ["문 앞 차량 작업 및 접안 편리", "단독 마당 5대 이상", "전면 2~3대 가능", "1~2대 가능"])
         big_truck = st.selectbox("화물차 진입 여건 *", ["1톤~5톤 화물차 문 앞 접안 최적", "츄레라 / 트레일러 진출입 및 상하차 원활", "11T / 대형 윙바디 접안 원활"])
 
-    # 블로그 포스팅용 추가 디테일 입력칸
     st.markdown("##### 📝 블로그 포스팅 정밀 작성을 위한 추가 디테일")
     d1, d2, d3 = st.columns(3)
     with d1:
@@ -469,13 +458,12 @@ if menu_choice == MENU_DICT["FACTORY_REG"]:
         value="인천산업유통센터 및 송현 공구상가 초인접으로 볼트, 공구 수급 및 외주 가공 네트워크 최상. 호이스트 2.8T 완비로 크레인 설치비 수천만 원 굳히고 입주."
     )
 
-    uploaded_factory_imgs = st.file_uploader("📷 공장 현장 사진 첨부 (외관, 진입로, 1층 작업장, 호이스트, 사무실 등)", accept_multiple_files=True, type=['png', 'jpg', 'jpeg'], key="fac_reg_imgs")
+    uploaded_factory_imgs = st.file_uploader("📷 공장 현장 사진 첨부", accept_multiple_files=True, type=['png', 'jpg', 'jpeg'], key="fac_reg_imgs")
 
     if st.button("🚀 매물 저장 및 대기 손님 역매칭 & 블로그 포스팅 생성", type="primary", use_container_width=True):
         if not price or not area:
             st.error("가격과 면적은 필수 입력 항목입니다.")
         else:
-            # 1. 매물 장부 영구 저장
             new_prop = {
                 "등록일자": datetime.today().strftime("%Y-%m-%d"), "입주/공실상태": vacancy_status, "계약만료일": expire_date,
                 "거래구분": deal_type, "소재지(권역)": loc, "상세주소(지번)": secret_address, "임대인(건물주)": owner_name,
@@ -485,7 +473,6 @@ if menu_choice == MENU_DICT["FACTORY_REG"]:
             save_property(new_prop)
             st.success("✅ 매물이 '공장 보유 매물 장부'에 안전하게 저장되었습니다!")
 
-            # 2. 대기 손님 역매칭 실행
             matched = match_customers_advanced(loc, deal_type, hoist, big_truck, area, power)
 
             st.markdown("---")
@@ -502,40 +489,6 @@ if menu_choice == MENU_DICT["FACTORY_REG"]:
                     </div>
                     """, unsafe_allow_html=True)
 
-                    cust_kakao = f"""[{cust['고객명']} 대표님 맞춤 공장 매물 추천 안내]
-
-대표님 안녕하십니까,
-인천 산업단지 공장·창고 전문 우리부동산 김태형 소장입니다.
-
-지난번 말씀해 주신 조건({cust['희망평수']}, {cust['희망권역']}, {cust['거래구분']})에 부합하는 알짜 공장 매물이 오늘 신규 접수되어 가장 먼저 안내드립니다.
-
-• 소재지: {loc}
-• 거래구분: {deal_type}
-• 가격조건: {price}
-• 실사용 면적: {area}
-• 층고 제원: {ceiling}
-• 인입 동력: {power}
-• 호이스트: {hoist}
-• 물류 여건: {big_truck}
-• 입주 시기: {vacancy_status} ({expire_date})
-
-💡 현장 핵심 포인트: {memo}
-
-대표님 조업에 최적화된 물건입니다. 현장 답사나 세부 도면 검토를 원하시면 편하게 회신 주십시오.
-
-우리부동산 공인중개사사무소 대표 김태형
-☎ 010-2660-8276
-"""
-                    with st.expander(f"📱 {cust['고객명']} 대표님 맞춤 전송용 카카오톡 브리핑문 열기"):
-                        st.text_area(f"카톡 전송문_{idx}", cust_kakao, height=280)
-            else:
-                st.info("현재 대기 손님 장부 중 이 매물과 일치율 55% 이상인 고객이 없습니다.")
-
-            # 3. 대표님 전용 네이버 블로그 실전 포스팅 양식 자동 생성
-            st.markdown("---")
-            st.subheader("📝 네이버 블로그 실전 포스팅 본문 (대표님 전용 맞춤 템플릿)")
-
-            # 해시태그 생성 로직
             clean_loc_words = [w for w in loc.replace("인천", "").replace("광역시", "").split() if len(w) >= 2]
             loc_base = clean_loc_words[0] if clean_loc_words else "인천"
             loc_sub = clean_loc_words[1] if len(clean_loc_words) > 1 else loc_base
@@ -607,14 +560,14 @@ if menu_choice == MENU_DICT["FACTORY_REG"]:
 
 #{loc_base}공장임대 #{loc_sub}공장임대 #{loc_sub}공장 #{loc_base}호이스트공장 #{loc_sub}호이스트공장 #인천공장임대 #인천창고임대 #인천호이스트공장 #가좌동공장임대 #석남동공장임대 #원창동공장임대 #송현동공장임대 #도화동공장임대 #인천산업단지공장 #인천공장전문 #우리부동산 #소형공장임대 #인천공장매매
 """
-            st.text_area("네이버 블로그 복사용 전체 본문", blog_full_text, height=450)
+            st.text_area("네이버 블로그 복사용 전체 본문", blog_full_text, height=400)
 
 # =============================================================
 # 2. 🏗️ [주업] 신축공장 맞춤 분양 설계 & 제안서 (인천 전지역 범용)
 # =============================================================
 elif menu_choice == MENU_DICT["NEW_DEV"]:
     st.title("🏗️ 신축공장 맞춤 분양 설계 & 고객 제안서")
-    st.caption("인천 전지역 분양 현장 맞춤형 설계안 산출, 도로 폭(m) 연동, 2D 캐드형 평면도, 가변 토지이용계획 분석 및 A4 제안서 인쇄를 지원합니다.")
+    st.caption("인천 전지역 분양 현장 맞춤형 설계안 산출, 도로 폭(m) 연동, 2D 캐드형 평면도, 가변 토지이용계획 분석 및 A4 제안서 단독 인쇄를 지원합니다.")
 
     dev_tab1, dev_tab2 = st.tabs(["📐 맞춤 분양 설계 & 2D 평면도", "🏢 신축공장 분양 전용 매물장부"])
 
@@ -823,52 +776,238 @@ elif menu_choice == MENU_DICT["NEW_DEV"]:
             st.subheader("📱 대표님 전송용 카카오톡 완성형 분양 브리핑문")
             st.text_area("카톡 분양 브리핑 복사창", briefing_text, height=330)
 
-            with st.expander("🖨️ [A4 컬러 인쇄 전용] 고객 미팅용 공식 분양 제안서 리포트 보기 (Ctrl+P / Cmd+P 로 PDF 저장 가능)"):
-                st.markdown(f"""
-                <div class="print-container" style="background-color: white; border: 2px solid #2d3748; padding: 25px; border-radius: 6px; font-family: sans-serif; color: #1a202c;">
-                    <div style="border-bottom: 2px solid #3182ce; padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: flex-end;">
-                        <div>
-                            <span style="font-size: 13px; color: #718096; font-weight: bold;">[신축공장 맞춤형 분양 제안 리포트]</span>
-                            <h2 style="margin: 0; color: #1a365d;">{site_name} 신축공장 분양계획서</h2>
+            # =====================================================
+            # 🖨️ [신규 핵심] 오직 분양 리포트만 A4 1장으로 단독 팝업 인쇄
+            # =====================================================
+            st.markdown("---")
+            st.subheader("🖨️ 고객 미팅용 A4 공식 분양 제안서 리포트")
+
+            print_html_content = f"""
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <title>{site_name} 신축공장 분양계획서</title>
+                <style>
+                    @page {{
+                        size: A4 portrait;
+                        margin: 15mm 15mm 15mm 15mm;
+                    }}
+                    body {{
+                        font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+                        color: #1a202c;
+                        background: white;
+                        margin: 0;
+                        padding: 0;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }}
+                    .report-box {{
+                        width: 100%;
+                        border: 2px solid #2d3748;
+                        border-radius: 6px;
+                        padding: 24px;
+                        box-sizing: border-box;
+                    }}
+                    .header-flex {{
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-end;
+                        border-bottom: 3px solid #3182ce;
+                        padding-bottom: 12px;
+                        margin-bottom: 16px;
+                    }}
+                    .title-area h2 {{
+                        margin: 0;
+                        color: #1a365d;
+                        font-size: 22px;
+                        letter-spacing: -0.5px;
+                    }}
+                    .sub-tag {{
+                        font-size: 12px;
+                        color: #718096;
+                        font-weight: bold;
+                    }}
+                    .biz-card {{
+                        text-align: right;
+                        font-size: 13px;
+                        line-height: 1.4;
+                        color: #2d3748;
+                    }}
+                    .biz-card b {{
+                        font-size: 14px;
+                        color: #2b6cb0;
+                    }}
+                    .info-bar {{
+                        font-size: 13.5px;
+                        margin-bottom: 12px;
+                        padding: 6px 10px;
+                        background-color: #f7fafc;
+                        border-left: 4px solid #3182ce;
+                    }}
+                    table {{
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-bottom: 14px;
+                        font-size: 13px;
+                    }}
+                    th, td {{
+                        border: 1px solid #cbd5e0;
+                        padding: 8px 10px;
+                        text-align: left;
+                    }}
+                    th {{
+                        background-color: #ebf8ff;
+                        color: #2c5282;
+                        font-weight: bold;
+                        width: 25%;
+                    }}
+                    .price-row {{
+                        background-color: #fffaf0 !important;
+                    }}
+                    .price-highlight {{
+                        font-size: 16px;
+                        font-weight: bold;
+                        color: #c53030;
+                    }}
+                    .notice-box {{
+                        font-size: 11.5px;
+                        color: #4a5568;
+                        line-height: 1.5;
+                        background-color: #f8fafc;
+                        border: 1px dashed #cbd5e0;
+                        padding: 10px 12px;
+                        border-radius: 4px;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="report-box">
+                    <div class="header-flex">
+                        <div class="title-area">
+                            <span class="sub-tag">[신축공장 맞춤형 분양 제안서]</span>
+                            <h2>{site_name} 신축공장 분양계획서</h2>
                         </div>
-                        <div style="text-align: right; font-size: 12px; color: #4a5568;">
+                        <div class="biz-card">
                             우리부동산 공인중개사사무소<br>
-                            대표 김태형 (010-2660-8276)
+                            <b>대표 김태형 (010-2660-8276)</b>
                         </div>
                     </div>
-                    <p style="font-size: 14px;"><b>수신</b>: {company_display} 귀하 | <b>일자</b>: {datetime.today().strftime('%Y년 %m월 %d일')}</p>
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13.5px;">
-                        <tr style="background-color: #ebf8ff; border-top: 1px solid #cbd5e0; border-bottom: 1px solid #cbd5e0;">
-                            <th style="padding: 8px; text-align: left; width: 25%;">사업지 위치</th>
-                            <td style="padding: 8px; text-align: left;">{site_addr} (전면 {road_width}m 도로 접)</td>
+
+                    <div class="info-bar">
+                        <b>수신</b>: {company_display} 귀하 &nbsp;|&nbsp; <b>발행일</b>: {datetime.today().strftime('%Y년 %m월 %d일')}
+                    </div>
+
+                    <table>
+                        <tr>
+                            <th>사업지 위치</th>
+                            <td>{site_addr} (전면 {road_width}m 광폭 도로 접)</td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #cbd5e0;">
-                            <th style="padding: 8px; text-align: left; background-color: #f7fafc;">입지 특성</th>
-                            <td style="padding: 8px; text-align: left;">{site_features}</td>
+                        <tr>
+                            <th>입지 강점</th>
+                            <td>{site_features}</td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #cbd5e0;">
-                            <th style="padding: 8px; text-align: left; background-color: #f7fafc;">분양 대지면적</th>
-                            <td style="padding: 8px; text-align: left;"><b>{custom_land}평</b> (단독 전용 마당 약 {yard_pyung}평 확보)</td>
+                        <tr>
+                            <th>분양 대지면적</th>
+                            <td><b>{custom_land}평</b> (단독 전용 마당/주차장 약 {yard_pyung}평 확보)</td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #cbd5e0;">
-                            <th style="padding: 8px; text-align: left; background-color: #f7fafc;">건축 층수 / 연면적</th>
-                            <td style="padding: 8px; text-align: left;"><b>지상 {max_floor_cnt}층 공장 (총 연면적 {total_bldg_area}평)</b> | {floor_desc}</td>
+                        <tr>
+                            <th>건축 층수 / 연면적</th>
+                            <td><b>지상 {max_floor_cnt}층 (총 연면적 {total_bldg_area}평)</b> | {floor_desc}</td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #cbd5e0;">
-                            <th style="padding: 8px; text-align: left; background-color: #f7fafc;">설비 제원</th>
-                            <td style="padding: 8px; text-align: left;">{ceiling_spec} / {power_spec}</td>
+                        <tr>
+                            <th>설비 스펙</th>
+                            <td>{ceiling_spec} / {power_spec}</td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #cbd5e0; background-color: #fffaf0;">
-                            <th style="padding: 8px; text-align: left; color: #c05621;">최종 분양 공급가액</th>
-                            <td style="padding: 8px; text-align: left; font-size: 16px; font-weight: bold; color: #c53030;">{total_dev_price:,}원 (시설자금 대출 80% 가능)</td>
+                        <tr class="price-row">
+                            <th style="background-color: #feebc8; color: #c05621;">최종 분양 공급가액</th>
+                            <td>
+                                <span class="price-highlight">{total_dev_price:,}원</span> 
+                                <span style="font-size: 12px; color: #718096; margin-left: 8px;">(시설자금대출 최대 80% 가능 / 실투자금 약 {pure_cash:,}원)</span>
+                            </td>
                         </tr>
                     </table>
-                    <div style="font-size: 12px; color: #718096; line-height: 1.5;">
-                        • 본 견적은 기본 층고와 인입 동력 기준이며, 기업체의 추가 요구(호이스트 설치, 전력 증설)에 맞춰 턴키 설계가 가능합니다.<br>
-                        • 브라우저 인쇄 단축키(Ctrl+P / Cmd+P)를 눌러 PDF 파일로 즉시 저장하거나 컬러 출력하여 대면 미팅용으로 활용하실 수 있습니다.
+
+                    <div class="notice-box">
+                        • <b>안내사항</b>: 본 견적은 기본 층고 및 인입 동력 기준이며, 기업체의 조업 환경에 맞춘 호이스트 크레인 설치, 수전용량 승압 증설 등 턴키 맞춤 시공이 가능합니다.<br>
+                        • <b>문의 및 상담</b>: 현장 부지 답사 및 세부 맞춤 도면 협의는 우리부동산 김태형 대표(☎ 010-2660-8276)에게 언제든 편하게 연락 주십시오.
                     </div>
                 </div>
-                """, unsafe_allow_html=True)
+            </body>
+            </html>
+            """
+
+            # 새 창으로 오직 리포트만 분리 인쇄하는 원클릭 스크립트 버튼
+            st.components.v1.html(f"""
+            <button onclick="printReport()" style="
+                background-color: #2b6cb0;
+                color: white;
+                font-size: 15px;
+                font-weight: bold;
+                padding: 12px 24px;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                width: 100%;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            ">
+                🖨️ 이 분양제안서만 바로 인쇄하기 (A4 전용 / 전화번호 잘림 방지)
+            </button>
+            <script>
+            function printReport() {{
+                var printWindow = window.open('', '_blank');
+                printWindow.document.open();
+                printWindow.document.write(`{print_html_content}`);
+                printWindow.document.close();
+                printWindow.focus();
+                setTimeout(function() {{
+                    printWindow.print();
+                }}, 300);
+            }}
+            </script>
+            """, height=65)
+
+            # 웹 화면 미리보기용 박스
+            st.markdown(f"""
+            <div style="background-color: white; border: 2px solid #2d3748; padding: 20px; border-radius: 6px; font-family: sans-serif; color: #1a202c; margin-top: 10px;">
+                <div style="border-bottom: 2px solid #3182ce; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div>
+                        <span style="font-size: 12px; color: #718096; font-weight: bold;">[신축공장 맞춤형 분양 제안서]</span>
+                        <h3 style="margin: 0; color: #1a365d;">{site_name} 신축공장 분양계획서</h3>
+                    </div>
+                    <div style="text-align: right; font-size: 12px; color: #4a5568;">
+                        우리부동산 공인중개사사무소<br>
+                        <b>대표 김태형 (010-2660-8276)</b>
+                    </div>
+                </div>
+                <p style="font-size: 13px; margin: 4px 0 8px 0;"><b>수신</b>: {company_display} 귀하 | <b>발행일</b>: {datetime.today().strftime('%Y년 %m월 %d일')}</p>
+                <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+                    <tr style="background-color: #ebf8ff; border-top: 1px solid #cbd5e0; border-bottom: 1px solid #cbd5e0;">
+                        <th style="padding: 6px; width: 25%; text-align: left;">사업지 위치</th>
+                        <td style="padding: 6px;">{site_addr} (전면 {road_width}m 도로 접)</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #cbd5e0;">
+                        <th style="padding: 6px; text-align: left; background-color: #f7fafc;">입지 특성</th>
+                        <td style="padding: 6px;">{site_features}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #cbd5e0;">
+                        <th style="padding: 6px; text-align: left; background-color: #f7fafc;">분양 대지면적</th>
+                        <td style="padding: 6px;"><b>{custom_land}평</b> (단독 전용 마당 약 {yard_pyung}평 확보)</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #cbd5e0;">
+                        <th style="padding: 6px; text-align: left; background-color: #f7fafc;">건축 층수 / 연면적</th>
+                        <td style="padding: 6px;"><b>지상 {max_floor_cnt}층 공장 (총 연면적 {total_bldg_area}평)</b> | {floor_desc}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #cbd5e0;">
+                        <th style="padding: 6px; text-align: left; background-color: #f7fafc;">설비 제원</th>
+                        <td style="padding: 6px;">{ceiling_spec} / {power_spec}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #cbd5e0; background-color: #fffaf0;">
+                        <th style="padding: 6px; text-align: left; color: #c05621;">최종 분양 공급가액</th>
+                        <td style="padding: 6px; font-size: 15px; font-weight: bold; color: #c53030;">{total_dev_price:,}원 (시설자금 대출 80% 가능)</td>
+                    </tr>
+                </table>
+            </div>
+            """, unsafe_allow_html=True)
 
     with dev_tab2:
         st.subheader("🏢 신축공장 분양 전용 매물장부")
