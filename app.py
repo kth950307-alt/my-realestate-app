@@ -15,7 +15,7 @@ except ImportError:
 
 st.set_page_config(page_title="우리부동산 통합 업무 시스템", page_icon="🏢", layout="wide")
 
-# 크롬/사파리 번역 방지 및 공통 스타일 (A4 인쇄 전용 스타일 포함)
+# 크롬/사파리 번역 방지 및 인쇄 전용 CSS
 st.markdown("""
 <script>
     document.documentElement.lang = 'ko';
@@ -128,7 +128,7 @@ def check_password():
     c1, c2, c3 = st.columns([1, 1.2, 1])
     with c2:
         st.markdown("### 🏢 우리부동산 통합 업무 시스템")
-        st.caption("인천 공장 중개 & 신축공장 분양 관리 시스템 - 사무실 보안 인증")
+        st.caption("인천 공장 중개 & 신축공장 맞춤 분양 시스템 - 사무실 보안 인증")
         pwd_input = st.text_input("사무실 전용 비밀번호", type="password", key="pwd_box")
         if st.button("🔓 시스템 접속하기", type="primary", use_container_width=True):
             if pwd_input == CORRECT_PASSWORD:
@@ -192,7 +192,7 @@ def save_property(new_data):
 def load_new_devs():
     if os.path.exists(NEW_DEV_CSV):
         return pd.read_csv(NEW_DEV_CSV)
-    cols = ["등록일자", "사업지명", "소재지", "분양대지평수", "건폐율", "1층바닥평수", "건물층수", "총연면적", "분양공급가", "층고제원", "인입동력", "특징메모"]
+    cols = ["등록일자", "사업지명", "소재지", "분양대지평수", "건폐율", "1층바닥평수", "건물층수", "총연면적", "분양공급가", "도로여건", "층고제원", "인입동력", "특징메모"]
     return pd.DataFrame(columns=cols)
 
 def save_new_dev(new_data):
@@ -220,36 +220,11 @@ def get_safe_cust_val(row, col_name, default=""):
 # =============================================================
 def get_auction_data():
     factory_auctions = [
-        {
-            "사건번호": "2026타경10452", "법원": "인천지방법원 본원", "소재지": "인천광역시 서구 가좌동 556-12", "세부용도": "일반공장 / 제조장",
-            "대지면적": "661.1㎡ (약 200평)", "건물면적": "528.9㎡ (약 160평)", "바닥평수": 160, "현재동력kW": 75, "현재호이스트": "호이스트 5T 완비",
-            "감정가원": 1850000000, "감정가": "18억 5,000만 원", "최저가원": 1295000000, "최저가": "12억 9,500만 원 (70%)",
-            "입찰보증금": "1억 2,950만 원 (10%)", "매각기일": "2026-10-22", "진행상태": "유찰 1회",
-            "제원및권리": "처마 8m, 호이스트 5T 완비, 동력 75kW 인입, 11톤 윙바디 진입 원활, 말소기준권리 이후 소멸"
-        },
-        {
-            "사건번호": "2026타경11208", "법원": "인천지방법원 본원", "소재지": "인천광역시 서구 오류동 검단일반산단 42-5", "세부용도": "신축급 공장",
-            "대지면적": "991.7㎡ (약 300평)", "건물면적": "793.3㎡ (약 240평)", "바닥평수": 240, "현재동력kW": 150, "현재호이스트": "호이스트 레일 완비 (본체 철거)",
-            "감정가원": 2680000000, "감정가": "26억 8,000만 원", "최저가원": 1876000000, "최저가": "18억 7,600만 원 (70%)",
-            "입찰보증금": "1억 8,760만 원 (10%)", "매각기일": "2026-10-27", "진행상태": "유찰 1회",
-            "제원및권리": "검단산단 내 코너 필지, 츄레라 회전 가능 마당, 층고 10m, 동력 150kW, 대항력 없는 임차인"
-        },
-        {
-            "사건번호": "2026타경09874", "법원": "인천지방법원 본원", "소재지": "인천광역시 남동구 고잔동 남동국가산단 112-8", "세부용도": "공장 및 부속사무실",
-            "대지면적": "1,322.3㎡ (약 400평)", "건물면적": "1,157.0㎡ (약 350평)", "바닥평수": 350, "현재동력kW": 200, "현재호이스트": "호이스트 3T / 5T 복수 완비",
-            "감정가원": 3820000000, "감정가": "38억 2,000만 원", "최저가원": 2674000000, "최저가": "26억 7,400만 원 (70%)",
-            "입찰보증금": "2억 6,740만 원 (10%)", "매각기일": "2026-11-03", "진행상태": "유찰 1회",
-            "제원및권리": "호이스트 3T/5T 복수 설치, 수전용량 200kW 대용량, 호구포역 인근"
-        },
-        {
-            "사건번호": "2026타경12541", "법원": "인천지방법원 본원", "소재지": "인천광역시 서구 원창동 북항배후단지 208-14", "세부용도": "물류창고 / 유통시설",
-            "대지면적": "1,652.8㎡ (약 500평)", "건물면적": "1,322.3㎡ (약 400평)", "바닥평수": 400, "현재동력kW": 50, "현재호이스트": "호이스트 없음 (도크 완비)",
-            "감정가원": 4500000000, "감정가": "45억 원", "최저가원": 3150000000, "최저가": "31억 5,000만 원 (70%)",
-            "입찰보증금": "3억 1,500만 원 (10%)", "매각기일": "2026-11-10", "진행상태": "유찰 1회",
-            "제원및권리": "인천북항 배후 도로망 우수, 40ft 트레일러 동시 접안 도크, 층고 11m"
-        }
+        {"사건번호": "2026타경10452", "법원": "인천지방법원 본원", "소재지": "인천광역시 서구 가좌동 556-12", "세부용도": "일반공장 / 제조장", "대지면적": "661.1㎡ (약 200평)", "건물면적": "528.9㎡ (약 160평)", "바닥평수": 160, "현재동력kW": 75, "현재호이스트": "호이스트 5T 완비", "감정가원": 1850000000, "감정가": "18억 5,000만 원", "최저가원": 1295000000, "최저가": "12억 9,500만 원 (70%)", "입찰보증금": "1억 2,950만 원 (10%)", "매각기일": "2026-10-22", "진행상태": "유찰 1회", "제원및권리": "처마 8m, 호이스트 5T 완비, 동력 75kW 인입, 11톤 윙바디 진입 원활, 말소기준권리 이후 소멸"},
+        {"사건번호": "2026타경11208", "법원": "인천지방법원 본원", "소재지": "인천광역시 서구 오류동 검단일반산단 42-5", "세부용도": "신축급 공장", "대지면적": "991.7㎡ (약 300평)", "건물면적": "793.3㎡ (약 240평)", "바닥평수": 240, "현재동력kW": 150, "현재호이스트": "호이스트 레일 완비 (본체 철거)", "감정가원": 2680000000, "감정가": "26억 8,000만 원", "최저가원": 1876000000, "최저가": "18억 7,600만 원 (70%)", "입찰보증금": "1억 8,760만 원 (10%)", "매각기일": "2026-10-27", "진행상태": "유찰 1회", "제원및권리": "검단산단 내 코너 필지, 츄레라 회전 가능 마당, 층고 10m, 동력 150kW, 대항력 없는 임차인"},
+        {"사건번호": "2026타경09874", "법원": "인천지방법원 본원", "소재지": "인천광역시 남동구 고잔동 남동국가산단 112-8", "세부용도": "공장 및 부속사무실", "대지면적": "1,322.3㎡ (약 400평)", "건물면적": "1,157.0㎡ (약 350평)", "바닥평수": 350, "현재동력kW": 200, "현재호이스트": "호이스트 3T / 5T 복수 완비", "감정가원": 3820000000, "감정가": "38억 2,000만 원", "최저가원": 2674000000, "최저가": "26억 7,400만 원 (70%)", "입찰보증금": "2억 6,740만 원 (10%)", "매각기일": "2026-11-03", "진행상태": "유찰 1회", "제원및권리": "호이스트 3T/5T 복수 설치, 수전용량 200kW 대용량, 호구포역 인근"},
+        {"사건번호": "2026타경12541", "법원": "인천지방법원 본원", "소재지": "인천광역시 서구 원창동 북항배후단지 208-14", "세부용도": "물류창고 / 유통시설", "대지면적": "1,652.8㎡ (약 500평)", "건물면적": "1,322.3㎡ (약 400평)", "바닥평수": 400, "현재동력kW": 50, "현재호이스트": "호이스트 없음 (도크 완비)", "감정가원": 4500000000, "감정가": "45억 원", "최저가원": 3150000000, "최저가": "31억 5,000만 원 (70%)", "입찰보증금": "3억 1,500만 원 (10%)", "매각기일": "2026-11-10", "진행상태": "유찰 1회", "제원및권리": "인천북항 배후 도로망 우수, 40ft 트레일러 동시 접안 도크, 층고 11m"}
     ]
-
     apt_auctions = [
         {"사건번호": "2026타경10892", "법원": "인천지방법원 본원", "시도": "인천광역시", "자치구": "연수구", "소재지": "인천광역시 연수구 송도동 101 (송도센트럴파크푸르지오)", "평형타입": "전용 84.92㎡ (35평형)", "층수": "32층 / 46층", "감정가원": 950000000, "감정가": "9억 5,000만 원", "최저가원": 665000000, "최저가": "6억 6,500만 원 (70%)", "입찰보증금": "6,650만 원 (10%)", "매각기일": "2026-10-20", "진행상태": "유찰 1회", "권리및코멘트": "센트럴파크 영구조망 로열동·로열층, 소유자 점유 중, 말소기준권리 이후 소멸"},
         {"사건번호": "2026타경11430", "법원": "인천지방법원 본원", "시도": "인천광역시", "자치구": "서구", "소재지": "인천광역시 서구 청라동 155-2 (청라호수공원 한신더휴)", "평형타입": "전용 84.88㎡ (34평형)", "층수": "18층 / 30층", "감정가원": 820000000, "감정가": "8억 2,000만 원", "최저가원": 574000000, "최저가": "5억 7,400만 원 (70%)", "입찰보증금": "5,740만 원 (10%)", "매각기일": "2026-10-22", "진행상태": "유찰 1회", "권리및코멘트": "청라 호수공원 인접권, 7호선 연장선 개통 수혜지, 대항력 없는 임차인 배당 요구"},
@@ -417,23 +392,23 @@ def match_properties_for_customer(cust_row):
     return matched_props
 
 # =============================================================
-# 📌 업무 메뉴 네비게이션 (사이드바 메뉴 및 라우팅 키 완전 일치)
+# 📌 업무 메뉴 네비게이션
 # =============================================================
-MENU_LIST = [
-    "🏭 [주업] 공장 매물 등록 & 손님 자동매칭",
-    "🏗️ [주업] 신축공장 분양 맞춤설계 (도화동 930-1)",
-    "📋 [주업] 공장 손님 장부 (CRM & 리마인드)",
-    "📁 [주업] 공장 보유 매물 장부 (드롭다운 필터)",
-    "🔍 [주업] 공장·창고 AI 시세 추정기",
-    "🍜 [부업] 맛집 & 🧢 일상 블로그 글쓰기",
-    "🏢 [부업] 수도권 청약 알림 허브 & 수지분석",
-    "⚖️ [부업] 법원경매 허브 & 인천공장 시설분석"
-]
+MENU_DICT = {
+    "FACTORY_REG": "🏭 [주업] 공장 매물 등록 & 손님 자동매칭",
+    "NEW_DEV": "🏗️ [주업] 신축공장 맞춤 분양 설계 & 제안서",
+    "CUSTOMER_CRM": "📋 [주업] 공장 손님 장부 (CRM & 리마인드)",
+    "FACTORY_BOOK": "📁 [주업] 공장 보유 매물 장부 (드롭다운 필터)",
+    "PRICE_AI": "🔍 [주업] 공장·창고 AI 시세 추정기",
+    "BLOG_TOOL": "🍜 [부업] 맛집 & 🧢 일상 블로그 글쓰기",
+    "APPLY_HOME": "🏢 [부업] 수도권 청약 알림 허브 & 수지분석",
+    "AUCTION_HUB": "⚖️ [부업] 법원경매 허브 & 인천공장 시설분석"
+}
 
-selected_menu = st.sidebar.radio(
+menu_choice = st.sidebar.radio(
     "📌 업무 시스템 메뉴",
-    MENU_LIST,
-    index=1  # 신축공장 분양 탭으로 기본 오픈
+    list(MENU_DICT.values()),
+    index=1
 )
 
 st.sidebar.markdown("---")
@@ -441,12 +416,12 @@ if st.sidebar.button("🔒 로그아웃"):
     st.session_state["authenticated"] = False
     st.rerun()
 
-st.sidebar.caption("🏗️ **도화동 930-1 분양 & 토지이용계획 연동 가동 중**")
+st.sidebar.caption("🏗️ **인천 전지역 신축공장 맞춤 분양 엔진 가동 중**")
 
 # =============================================================
 # 1. 🏭 [주업] 공장 매물 등록 & 손님 자동 역매칭
 # =============================================================
-if selected_menu == MENU_LIST[0]:
+if menu_choice == MENU_DICT["FACTORY_REG"]:
     st.title("🏭 공장 매물 등록 & 대기 손님 1:1 맞춤 역매칭")
     st.caption("신규 접수된 공장을 등록하면, 대기 손님 장부에서 조건이 일치하는 타겟 고객을 자동으로 찾아냅니다.")
 
@@ -493,81 +468,101 @@ if selected_menu == MENU_LIST[0]:
             st.success("✅ 매물이 '공장 보유 매물 장부'에 안전하게 저장되었습니다!")
 
 # =============================================================
-# 2. 🏗️ [주업] 신축공장 분양 맞춤설계 & 수지분석 (도화동 930-1)
+# 2. 🏗️ [주업] 신축공장 맞춤 분양 설계 & 제안서 (인천 전지역 범용)
 # =============================================================
-elif selected_menu == MENU_LIST[1]:
-    st.title("🏗️ 신축공장 분양 맞춤설계 & 토지이용계획 브리핑 (도화동 930-1)")
-    st.caption("인천 미추홀구 도화동 930-1(총 대지 915평) 분양 전용 설계안 산출, 토지이용계획 공공데이터 연동, 2D/3D 레이아웃, 신축 전용 장부 저장 및 A4 PDF 인쇄를 완벽 지원합니다.")
+elif menu_choice == MENU_DICT["NEW_DEV"]:
+    st.title("🏗️ 신축공장 맞춤 분양 설계 & 고객 제안서")
+    st.caption("인천 전지역 분양 현장 맞춤형 설계안 산출, 도로 폭(m) 연동, 2D 캐드형 평면도, 가변 토지이용계획 분석 및 A4 제안서 인쇄를 지원합니다.")
 
-    dev_tab1, dev_tab2 = st.tabs(["📐 맞춤 분양 설계 & 2D·3D 조감도", "🏢 신축공장 분양 전용 매물장부"])
+    dev_tab1, dev_tab2 = st.tabs(["📐 맞춤 분양 설계 & 2D 평면도", "🏢 신축공장 분양 전용 매물장부"])
 
     with dev_tab1:
-        with st.expander("🌐 [토지e음 공공데이터] 도화동 930-1 토지이용계획확인원 정보 조회", expanded=True):
-            info_c1, info_c2, info_c3, info_c4 = st.columns(4)
-            with info_c1:
-                st.markdown("**소재지 / 지목**")
-                st.write("인천 미추홀구 도화동 930-1 / 공장용지(장)")
-            with info_c2:
-                st.markdown("**용도지역 / 지구**")
-                st.write("일반공업지역 / 인천지방산업단지")
-            with info_c3:
-                st.markdown("**법정 건폐율 / 용적률**")
-                st.write("건폐율 70% (산단 80%) / 용적률 350~400%")
-            with info_c4:
-                st.markdown("**허용 업종군**")
-                st.write("기계제조, 정밀가공, 금형, 전기전자, 첨단물류")
-            st.caption("※ 국토교통부 토지e음(eum.go.kr) 공공데이터 및 인천지방산업단지 관리기본계획 법정 기준이 실시간 적용되었습니다.")
-
-        st.markdown("##### 📐 맞춤 건축 설계 및 분양 조건 입력")
-        p1, p2, p3, p4 = st.columns(4)
+        st.markdown("##### 📌 1. 분양 사업지 기본 제원 및 입지 특성")
+        p1, p2, p3 = st.columns(3)
         with p1:
-            site_addr = st.text_input("사업지 주소", value="인천광역시 미추홀구 도화동 930-1 (총 대지 915평)")
-            custom_land = st.number_input("희망 분양 대지면적 (평) *", value=100, min_value=50, max_value=915, step=10)
+            site_name = st.text_input("프로젝트/단지명 *", placeholder="예: 도화동 930-1 신축공장, 가좌 첨단제조단지 등")
+            site_addr = st.text_input("사업지 상세 주소 *", placeholder="예: 인천 미추홀구 도화동 930-1 (지번/일대)")
         with p2:
-            bcr_rate = st.selectbox("적용 건폐율 (%) *", [70, 80], index=0, help="일반 70%, 산업단지 특례 적용 시 80%")
-            base_unit_price = st.number_input("1층 기준 분양가 (대지 평당 만 원)", value=1200, step=50, help="층고 7m, 동력 30kW 기본 인입")
+            custom_land = st.number_input("분양 대지면적 (평) *", min_value=10, max_value=5000, value=100, step=10, help="해당 호실의 전용 분양 대지 평수")
+            road_width = st.number_input("접면 도로 폭 (m) *", min_value=4, max_value=50, value=12, step=1, help="공장 진출입로 도로 폭(미터)")
         with p3:
-            building_floors = st.selectbox("공장 층수 구성 *", ["1층 공장", "2층 공장", "3층 공장"])
-            add_unit_price = st.number_input("상층부 건축 단가 (건축 평당 만 원)", value=350, step=10, help="2층/3층 증축 시 바닥면적당 평당 350만 원")
-        with p4:
-            cust_company = st.text_input("제안 대상 기업명/대표님", value="(주)대한정밀 대표님")
-            cust_usage = st.text_input("권장 조업 용도", value="정밀기계제조 / 금형 / e-커머스 물류")
+            cust_company = st.text_input("제안 대상 기업명/대표님", placeholder="예: (주)대한정밀 대표님")
+            cust_usage = st.text_input("권장 조업 업종/용도", placeholder="예: 정밀기계제조 / 금형가공 / 물류유통")
 
-        exec_calc = st.button("🚀 신축공장 맞춤 분양 설계 & 2D·3D 조감도 산출하기", type="primary", use_container_width=True)
+        site_features = st.text_area(
+            "💡 사업지 입지 특성 및 교통망 (브리핑 핵심 강점)",
+            placeholder="예: 경인고속도로 가좌IC/도화IC 3분 거리, 인천항 15분 직결, 40ft 트레일러 진입 원활, 민원 없는 공업지역"
+        )
+
+        st.markdown("---")
+        st.markdown("##### 📐 2. 층별 건축 바닥 평수 (1층 ~ 최대 5층)")
+        fl1, fl2, fl3, fl4, fl5 = st.columns(5)
+        with fl1: f1_pyung = st.number_input("1층 바닥평수 (평) *", min_value=5, max_value=5000, value=70, step=5)
+        with fl2: f2_pyung = st.number_input("2층 바닥평수 (평)", min_value=0, max_value=5000, value=0, step=5)
+        with fl3: f3_pyung = st.number_input("3층 바닥평수 (평)", min_value=0, max_value=5000, value=0, step=5)
+        with fl4: f4_pyung = st.number_input("4층 바닥평수 (평)", min_value=0, max_value=5000, value=0, step=5)
+        with fl5: f5_pyung = st.number_input("5층 바닥평수 (평)", min_value=0, max_value=5000, value=0, step=5)
+
+        st.markdown("##### 💰 3. 분양가 및 증축 단가 설정")
+        pr1, pr2, pr3, pr4 = st.columns(4)
+        with pr1:
+            base_unit_price = st.number_input("1층 분양단가 (대지 평당 만 원) *", value=1200, step=50, help="1층 기본 층고 7m, 동력 30kW 포함")
+        with pr2:
+            add_unit_price = st.number_input("상층부 증축단가 (건축 평당 만 원) *", value=350, step=10, help="2층~5층 상층부 증축 시 평당 건축비")
+        with pr3:
+            ceiling_spec = st.text_input("층고 제원", value="처마 7m (유효 7.5m)")
+        with pr4:
+            power_spec = st.text_input("인입 동력", value="30kW 기본 인입")
+
+        # 건폐율 및 마당 자동 계산
+        actual_bcr = round((f1_pyung / custom_land) * 100, 1) if custom_land > 0 else 0
+        yard_pyung = max(0, custom_land - f1_pyung)
+
+        if actual_bcr > 80.0:
+            st.warning(f"⚠️ 현재 1층 건폐율이 {actual_bcr}%입니다. 일반공업지역(70%) 및 산업단지(80%) 기준 초과 여부를 확인해 주세요.")
+
+        exec_calc = st.button("🚀 신축공장 맞춤 분양 설계 & 제안서 산출하기", type="primary", use_container_width=True)
 
         if exec_calc:
-            floor1_area = int(custom_land * (bcr_rate / 100.0))
-            yard_area = int(custom_land - floor1_area)
+            floor_list = [f1_pyung, f2_pyung, f3_pyung, f4_pyung, f5_pyung]
+            active_floors = [p for p in floor_list if p > 0]
+            max_floor_cnt = len(active_floors)
+            total_bldg_area = sum(floor_list)
+
+            # 1층 기본가 (대지평수 * 1층단가)
             base_cost = int(custom_land * base_unit_price * 10000)
 
-            extra_floors_cnt = 0
-            if building_floors == "2층 공장": extra_floors_cnt = 1
-            elif building_floors == "3층 공장": extra_floors_cnt = 2
+            # 2~5층 증축비 (상층부면적 * 증축단가)
+            extra_bldg_area = sum(floor_list[1:])
+            extra_cost = int(extra_bldg_area * add_unit_price * 10000)
 
-            extra_area = floor1_area * extra_floors_cnt
-            extra_cost = int(extra_area * add_unit_price * 10000)
-
-            total_building_area = floor1_area + extra_area
             total_dev_price = base_cost + extra_cost
 
+            # 금융 분석
             loan_80 = int(total_dev_price * 0.80)
             pure_cash = total_dev_price - loan_80
             acq_tax = int(total_dev_price * 0.046)
 
+            floor_desc = ", ".join([f"{idx+1}F {p}평" for idx, p in enumerate(floor_list) if p > 0])
+            company_display = cust_company if cust_company.strip() else "고객사"
+
             st.markdown("---")
-            out_c1, out_c2 = st.columns([1.3, 1.2])
+            out_c1, out_c2 = st.columns([1.2, 1.3])
 
             with out_c1:
                 st.markdown(f"""
                 <div class="calc-box-orange">
-                    <h4 style="color: #c05621; margin-bottom: 8px;">📊 [{cust_company}] 신축공장 맞춤 분양 견적서</h4>
-                    • <b>분양 대지면적</b>: <b>{custom_land}평</b> (도화동 930-1 내 전용 분할 필지)<br>
-                    • <b>건축 제원</b>: 건폐율 {bcr_rate}% ➡ <b>1층 바닥면적 {floor1_area}평</b> (단독 마당/주차장 {yard_area}평 확보)<br>
-                    • <b>건물 층수 및 총 연면적</b>: <b>{building_floors} (총 연면적 {total_building_area}평)</b> | 층고 7m / 동력 30kW 기본 완비<br>
+                    <h4 style="color: #c05621; margin-bottom: 8px;">📊 [{company_display}] 신축공장 맞춤 분양 견적서</h4>
+                    • <b>사업지</b>: {site_name} ({site_addr})<br>
+                    • <b>분양 대지면적</b>: <b>{custom_land}평</b> | <b>건폐율</b>: <b>{actual_bcr}%</b><br>
+                    • <b>건축 규모</b>: <b>지상 {max_floor_cnt}층 공장 (총 연면적 {total_bldg_area}평)</b><br>
+                    • <b>층별 면적</b>: {floor_desc}<br>
+                    • <b>단독 마당 및 주차</b>: <b>약 {yard_pyung}평 확보</b> (전면 {road_width}m 도로 접)<br>
+                    • <b>설비 제원</b>: {ceiling_spec} | {power_spec}<br>
                     <hr style="margin: 8px 0; border: 0; border-top: 1px dashed #feebc8;">
-                    <b>[분양 공급 금액 상세 산출 내역]</b><br>
-                    1. <b>1층 기준 분양금액 (대지 {custom_land}평 × 평당 {base_unit_price}만 원)</b>: <b>{base_cost:,}원</b><br>
-                    2. <b>상층부 추가 건축비 ({extra_area}평 × 평당 {add_unit_price}만 원)</b>: <b>{extra_cost:,}원</b><br>
+                    <b>[분양 공급 금액 산출 내역]</b><br>
+                    1. <b>1층 기준 분양금액 (대지 {custom_land}평 × 평당 {base_unit_price}만)</b>: <b>{base_cost:,}원</b><br>
+                    2. <b>상층부 증축 건축비 ({extra_bldg_area}평 × 평당 {add_unit_price}만)</b>: <b>{extra_cost:,}원</b><br>
                     🚩 <b>최종 분양 공급가액</b>: <span style="font-size: 20px; font-weight: bold; color: #c53030;">{total_dev_price:,}원</span><br>
                     <hr style="margin: 8px 0; border: 0; border-top: 1px dashed #feebc8;">
                     🏦 <b>금융 자금 조달 가이드 (시설자금 분양대출 최대 80%)</b><br>
@@ -577,113 +572,118 @@ elif selected_menu == MENU_LIST[1]:
                 """, unsafe_allow_html=True)
 
             with out_c2:
-                vis_tab1, vis_tab2 = st.tabs(["📐 2D 평면 배치도", "🏢 3D 입체 투시도 조감도"])
-                b_width = int(bcr_rate)
-                y_width = 100 - b_width
+                st.markdown("##### 📐 2D 평면 캐드 배치도")
+                # 2D 평면도 (도로폭 연동)
+                bldg_w_svg = int(max(20, min(80, (f1_pyung / custom_land) * 100))) if custom_land > 0 else 50
+                yard_w_svg = 100 - bldg_w_svg
+                truck_text = "40ft 트레일러 / 츄레라 접안 최적" if road_width >= 10 else "11T 윙바디 / 대형 화물 접안"
 
-                with vis_tab1:
-                    layout_2d = f"""
-                    <div style="background-color: #f8fafc; border: 2px solid #cbd5e0; border-radius: 8px; padding: 12px; font-family: sans-serif;">
-                        <div style="background-color: #2d3748; color: white; text-align: center; padding: 7px; font-weight: bold; border-radius: 4px; margin-bottom: 8px; font-size: 13px;">
-                            ▲ 전면 12m 광폭 간선도로 (40ft 트레일러 / 11T 윙바디 양방향 교행 접안) ▲
+                svg_2d = f"""
+                <div style="background-color: #ffffff; border: 2px solid #cbd5e0; border-radius: 8px; padding: 12px; font-family: sans-serif;">
+                    <div style="background-color: #2d3748; color: white; text-align: center; padding: 8px; font-weight: bold; border-radius: 4px; font-size: 13px; margin-bottom: 8px;">
+                        ▲ 전면 {road_width}m 광폭 도로 접 ({truck_text}) ▲
+                    </div>
+                    <div style="border: 2px dashed #3182ce; padding: 10px; background-color: #ebf8ff; border-radius: 6px;">
+                        <div style="font-size: 12px; font-weight: bold; color: #2b6cb0; margin-bottom: 6px;">
+                            [분양 대지 경계: {custom_land}평 | 도로 접면 {road_width}m]
                         </div>
-                        <div style="border: 2px dashed #3182ce; padding: 8px; background-color: #ebf8ff; border-radius: 6px;">
-                            <div style="font-size: 12px; font-weight: bold; color: #2b6cb0; margin-bottom: 4px;">
-                                [분양 대지 경계: {custom_land}평]
+                        <div style="display: flex; gap: 8px; height: 175px;">
+                            <div style="flex: {bldg_w_svg}; background-color: #bee3f8; border: 2px solid #1a365d; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 6px;">
+                                <span style="font-weight: bold; font-size: 15px; color: #1a365d;">🏭 신축 공장동</span>
+                                <span style="font-size: 13px; color: #2c5282; font-weight: bold;">지상 {max_floor_cnt}층 (1F {f1_pyung}평)</span>
+                                <span style="font-size: 11px; color: #4a5568; margin-top: 4px;">{ceiling_spec}</span>
+                                <span style="font-size: 11px; color: #718096;">연면적 {total_bldg_area}평</span>
                             </div>
-                            <div style="display: flex; gap: 6px; height: 160px;">
-                                <div style="flex: {b_width}; background-color: #bee3f8; border: 2px solid #3182ce; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 4px;">
-                                    <span style="font-weight: bold; font-size: 15px; color: #1a365d;">🏭 {building_floors}</span>
-                                    <span style="font-size: 12.5px; color: #2c5282;">1F 바닥 {floor1_area}평 (층고 7m)</span>
-                                    {"<span style='font-size: 11.5px; color: #c05621; font-weight:bold;'>+ 2F 증축 " + str(floor1_area) + "평</span>" if extra_floors_cnt >= 1 else ""}
-                                    {"<span style='font-size: 11.5px; color: #c05621; font-weight:bold;'>+ 3F 증축 " + str(floor1_area) + "평</span>" if extra_floors_cnt == 2 else ""}
-                                </div>
-                                <div style="flex: {y_width}; background-color: #edf2f7; border: 2px dashed #a0aec0; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 4px;">
-                                    <span style="font-weight: bold; font-size: 13px; color: #4a5568;">🚛 단독 마당</span>
-                                    <span style="font-size: 12px; color: #718096;">약 {yard_area}평</span>
-                                    <span style="font-size: 11px; color: #4a5568;">컨테이너 회전</span>
-                                </div>
+                            <div style="flex: {yard_w_svg}; background-color: #edf2f7; border: 2px dashed #718096; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 6px;">
+                                <span style="font-weight: bold; font-size: 13px; color: #4a5568;">🚛 단독 마당</span>
+                                <span style="font-size: 12px; color: #718096; font-weight: bold;">약 {yard_pyung}평</span>
+                                <span style="font-size: 10.5px; color: #4a5568; margin-top: 4px;">단독 주차 및 상하차</span>
                             </div>
                         </div>
                     </div>
-                    """
-                    st.markdown(layout_2d, unsafe_allow_html=True)
+                </div>
+                """
+                st.markdown(svg_2d, unsafe_allow_html=True)
 
-                with vis_tab2:
-                    bldg_height_px = 65 + (extra_floors_cnt * 45)
-                    layout_3d = f"""
-                    <div style="background: linear-gradient(135deg, #e2e8f0 0%, #edf2f7 100%); border: 2px solid #cbd5e0; border-radius: 8px; padding: 15px; text-align: center; height: 235px; overflow: hidden;">
-                        <div style="font-size: 12px; font-weight: bold; color: #4a5568; margin-bottom: 5px;">
-                            [3D Isometric 입체 조감도 - {building_floors}]
-                        </div>
-                        <div style="display: inline-block; transform: rotateX(55deg) rotateZ(-40deg); transform-style: preserve-3d; margin-top: 15px;">
-                            <div style="width: 170px; height: 130px; background-color: #cbd5e0; border: 2px solid #718096; position: relative; box-shadow: 10px 10px 20px rgba(0,0,0,0.15);">
-                                <div style="position: absolute; right: 5px; top: 5px; width: 50px; height: 115px; background: repeating-linear-gradient(45deg, #e2e8f0, #e2e8f0 5px, #cbd5e0 5px, #cbd5e0 10px); border: 1px dashed #a0aec0; display:flex; align-items:center; justify-content:center;">
-                                    <span style="font-size: 10px; color: #4a5568; transform: rotateZ(40deg);">마당 {yard_area}평</span>
-                                </div>
-                                <div style="position: absolute; left: 10px; top: 10px; width: 95px; height: 105px; background-color: #3182ce; transform: translateZ({bldg_height_px}px); border: 2px solid #1a365d; box-shadow: -15px 15px 0px #2b6cb0, -30px 30px 0px #1a365d;">
-                                    <div style="color: white; font-weight: bold; font-size: 12px; padding-top: 25px;">
-                                        {building_floors}<br>
-                                        <span style="font-size: 9px; opacity: 0.9;">층고 7m 하이팩토리</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    """
-                    st.markdown(layout_3d, unsafe_allow_html=True)
+            # 4. 하단 동적 토지이용계획 분석 박스
+            st.markdown("---")
+            with st.expander("🌐 [공공데이터 분석] 입력 주소 기반 토지이용계획 및 인허가 가이드", expanded=True):
+                # 주소 키워드 분석
+                is_sandan = any(k in site_addr for k in ["산단", "산업단지", "오류동", "고잔동", "도화동"])
+                zoning_name = "일반공업지역 (산업단지 관리구역)" if is_sandan else "일반공업지역 / 준공업지역"
+                legal_bcr = "80% (산업단지 특례)" if is_sandan else "70% (지자체 조례)"
 
+                t_c1, t_c2, t_c3, t_c4 = st.columns(4)
+                with t_c1:
+                    st.markdown("**분양 대상지**")
+                    st.write(site_addr if site_addr.strip() else "주소 미입력")
+                with t_c2:
+                    st.markdown("**용도지역 분류**")
+                    st.write(zoning_name)
+                with t_c3:
+                    st.markdown("**법정 건폐율 / 용적률**")
+                    st.write(f"건폐율 {legal_bcr} / 용적률 350~400%")
+                with t_c4:
+                    st.markdown("**추천 입주업종**")
+                    st.write(cust_usage if cust_usage.strip() else "제조, 가공, 물류, 금형")
+
+                st.caption("※ 토지e음(eum.go.kr) 공공데이터 및 관할 지자체 산업단지 관리기본계획 기준이 실시간 적용됩니다.")
+
+            # 신축 전용 매물장부 저장 버튼
             st.markdown("---")
             if st.button("💾 이 신축 분양 견적을 '신축공장 분양 전용 매물장부'에 저장하기", type="secondary", use_container_width=True):
                 new_dev_row = {
                     "등록일자": datetime.today().strftime("%Y-%m-%d"),
-                    "사업지명": f"도화동 930-1 ({custom_land}평형)",
+                    "사업지명": site_name,
                     "소재지": site_addr,
                     "분양대지평수": f"{custom_land}평",
-                    "건폐율": f"{bcr_rate}%",
-                    "1층바닥평수": f"{floor1_area}평",
-                    "건물층수": building_floors,
-                    "총연면적": f"{total_building_area}평",
+                    "건폐율": f"{actual_bcr}%",
+                    "1층바닥평수": f"{f1_pyung}평",
+                    "건물층수": f"지상 {max_floor_cnt}층",
+                    "총연면적": f"{total_bldg_area}평",
                     "분양공급가": f"{total_dev_price:,}원",
-                    "층고제원": "처마 7m (유효 7.5m)",
-                    "인입동력": "30kW 기본 인입",
-                    "특징메모": f"마당 {yard_area}평 확보, 12m 도로 접, 1층 {base_cost:,}원 + 증축 {extra_cost:,}원"
+                    "도로여건": f"{road_width}m 도로 접",
+                    "층고제원": ceiling_spec,
+                    "인입동력": power_spec,
+                    "특징메모": f"마당 {yard_pyung}평 확보, 1층 {base_cost:,}원 + 증축 {extra_cost:,}원 ({site_features})"
                 }
                 save_new_dev(new_dev_row)
                 st.success("✅ 신축공장 분양 매물장부에 성공적으로 등록되었습니다!")
 
-            briefing_text = f"""[{cust_company} 신축공장 맞춤 분양 제안서]
+            briefing_text = f"""[{company_display} 신축공장 맞춤 분양 제안서]
 
 대표님 안녕하십니까,
-인천 산업단지 공장 전문 우리부동산 김태형 소장입니다.
+인천 공장·창고 맞춤 분양 전문 우리부동산 김태형 소장입니다.
 
-인천 미추홀구 도화동 930-1번지(총 915평 부지)에서 단독 사옥으로 신축 공급하는 알짜 공장의 맞춤 설계 및 분양 견적표를 안내드립니다.
+{site_name} 현장의 단독 사옥 신축 공급과 관련하여 기업체 맞춤 설계 및 분양 견적표를 안내드립니다.
 
 ━━━━━━━━━━━━━━━━━━━━
-📌 사업지 위치 및 입지 강점
+📌 사업지 개요 및 입지 특성
 ━━━━━━━━━━━━━━━━━━━━
-• 사업지 위치: {site_addr}
-• 입지 핵심: 경인고속도로 가좌IC/도화IC 3분 진입, 전면 12m 광폭 도로
-• 물류 여건: 40ft 트레일러 및 11톤 윙바디 동시 접안 및 단독 마당 확보
+• 사업지명: {site_name}
+• 소재지: {site_addr}
+• 도로 여건: 전면 {road_width}m 광폭 도로 접 ({truck_text})
 • 추천 용도: {cust_usage}
+• 입지 강점: {site_features}
 
 🏗️ 맞춤 건축 설계 제원
-• 분양 대지면적: {custom_land}평 (단독 전용 분할 필지)
-• 적용 건폐율: {bcr_rate}%
-• 1층 바닥면적: {floor1_area}평 (층고 7m 하이 층고 / 동력 30kW 기본 인입)
-• 단독 마당/주차장: 약 {yard_area}평 (대형 화물차 상하차 단독 공간)
-• 건물 층수 구성: {building_floors} (총 건물 연면적 {total_building_area}평)
+• 분양 대지면적: {custom_land}평 (단독 전용 필지)
+• 적용 건폐율: {actual_bcr}%
+• 건축 규모: 지상 {max_floor_cnt}층 공장 (총 연면적 {total_bldg_area}평)
+• 층별 구성: {floor_desc}
+• 단독 마당/주차장: 약 {yard_pyung}평 (대형 화물차 상하차 전용 공간)
+• 설비 스펙: {ceiling_spec} / {power_spec}
 
 💰 분양 공급 금액 산출 내역
 • 1층 기준 분양가: {base_cost:,}원 (대지 {custom_land}평 × 평당 {base_unit_price}만 원)
-• 상층부 증축 건축비: {extra_cost:,}원 (증축 {extra_area}평 × 평당 {add_unit_price}만 원)
+• 상층부 증축 건축비: {extra_cost:,}원 (증축 {extra_bldg_area}평 × 평당 {add_unit_price}만 원)
 🚩 최종 분양 공급가액: {total_dev_price:,}원
 
-🏦 시설자금 대출 및 실투자금
-• 저리 시설자금대출: 약 {loan_80:,}원 (분양가의 최대 80% 지원)
+🏦 금융 대출 및 실투자금 가이드
+• 시설자금 분양대출: 약 {loan_80:,}원 (분양가의 최대 80% 지원)
 • 실제 필요 순수 자기자본: 약 {pure_cash:,}원 (취득세 별도)
 
-현장 부지 답사 및 세부 분할 도면 미팅은 언제든 편하게 회신 주십시오.
+현장 부지 답사 및 세부 맞춤 도면 협의는 언제든 편하게 회신 주십시오.
 
 우리부동산 공인중개사사무소 대표 김태형
 ☎ 010-2660-8276
@@ -697,38 +697,42 @@ elif selected_menu == MENU_LIST[1]:
                     <div style="border-bottom: 2px solid #3182ce; padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: flex-end;">
                         <div>
                             <span style="font-size: 13px; color: #718096; font-weight: bold;">[신축공장 맞춤형 분양 제안 리포트]</span>
-                            <h2 style="margin: 0; color: #1a365d;">도화동 930-1 산업단지 신축공장 분양계획서</h2>
+                            <h2 style="margin: 0; color: #1a365d;">{site_name} 신축공장 분양계획서</h2>
                         </div>
                         <div style="text-align: right; font-size: 12px; color: #4a5568;">
                             우리부동산 공인중개사사무소<br>
                             대표 김태형 (010-2660-8276)
                         </div>
                     </div>
-                    <p style="font-size: 14px;"><b>수신</b>: {cust_company} 귀하 | <b>일자</b>: {datetime.today().strftime('%Y년 %m월 %d일')}</p>
+                    <p style="font-size: 14px;"><b>수신</b>: {company_display} 귀하 | <b>일자</b>: {datetime.today().strftime('%Y년 %m월 %d일')}</p>
                     <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13.5px;">
                         <tr style="background-color: #ebf8ff; border-top: 1px solid #cbd5e0; border-bottom: 1px solid #cbd5e0;">
                             <th style="padding: 8px; text-align: left; width: 25%;">사업지 위치</th>
-                            <td style="padding: 8px; text-align: left;">인천광역시 미추홀구 도화동 930-1 (인천지방산단 인근)</td>
+                            <td style="padding: 8px; text-align: left;">{site_addr} (전면 {road_width}m 도로 접)</td>
                         </tr>
                         <tr style="border-bottom: 1px solid #cbd5e0;">
-                            <th style="padding: 8px; text-align: left; background-color: #f7fafc;">용도지역 / 건폐율</th>
-                            <td style="padding: 8px; text-align: left;">일반공업지역 / 법정 건폐율 {bcr_rate}% 적용</td>
+                            <th style="padding: 8px; text-align: left; background-color: #f7fafc;">입지 특성</th>
+                            <td style="padding: 8px; text-align: left;">{site_features}</td>
                         </tr>
                         <tr style="border-bottom: 1px solid #cbd5e0;">
                             <th style="padding: 8px; text-align: left; background-color: #f7fafc;">분양 대지면적</th>
-                            <td style="padding: 8px; text-align: left;"><b>{custom_land}평</b> (단독 전용 마당 약 {yard_area}평 확보)</td>
+                            <td style="padding: 8px; text-align: left;"><b>{custom_land}평</b> (단독 전용 마당 약 {yard_pyung}평 확보)</td>
                         </tr>
                         <tr style="border-bottom: 1px solid #cbd5e0;">
                             <th style="padding: 8px; text-align: left; background-color: #f7fafc;">건축 층수 / 연면적</th>
-                            <td style="padding: 8px; text-align: left;"><b>{building_floors} (총 연면적 {total_building_area}평)</b> | 1F 바닥 {floor1_area}평 (층고 7m)</td>
+                            <td style="padding: 8px; text-align: left;"><b>지상 {max_floor_cnt}층 공장 (총 연면적 {total_bldg_area}평)</b> | {floor_desc}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #cbd5e0;">
+                            <th style="padding: 8px; text-align: left; background-color: #f7fafc;">설비 제원</th>
+                            <td style="padding: 8px; text-align: left;">{ceiling_spec} / {power_spec}</td>
                         </tr>
                         <tr style="border-bottom: 1px solid #cbd5e0; background-color: #fffaf0;">
                             <th style="padding: 8px; text-align: left; color: #c05621;">최종 분양 공급가액</th>
-                            <td style="padding: 8px; text-align: left; font-size: 16px; font-weight: bold; color: #c53030;">{total_dev_price:,}원 (대출 80% 가능)</td>
+                            <td style="padding: 8px; text-align: left; font-size: 16px; font-weight: bold; color: #c53030;">{total_dev_price:,}원 (시설자금 대출 80% 가능)</td>
                         </tr>
                     </table>
                     <div style="font-size: 12px; color: #718096; line-height: 1.5;">
-                        • 본 견적은 기본 층고 7m, 전력 30kW 기본 인입 기준이며, 기업체의 추가 요구(호이스트 설치, 전력 고압 증설)에 맞춰 턴키 설계가 가능합니다.<br>
+                        • 본 견적은 기본 층고와 인입 동력 기준이며, 기업체의 추가 요구(호이스트 설치, 전력 증설)에 맞춰 턴키 설계가 가능합니다.<br>
                         • 브라우저 인쇄 단축키(Ctrl+P / Cmd+P)를 눌러 PDF 파일로 즉시 저장하거나 컬러 출력하여 대면 미팅용으로 활용하실 수 있습니다.
                     </div>
                 </div>
@@ -736,7 +740,7 @@ elif selected_menu == MENU_LIST[1]:
 
     with dev_tab2:
         st.subheader("🏢 신축공장 분양 전용 매물장부")
-        st.caption("도화동 930-1 등 신축 분양으로 산출 및 저장된 매물 리스트를 별도로 보관·관리합니다.")
+        st.caption("인천 전지역 신축 분양으로 산출 및 저장된 매물 리스트를 독립적으로 보관·관리합니다.")
         df_devs = load_new_devs()
         if not df_devs.empty:
             st.dataframe(df_devs, use_container_width=True, height=350)
@@ -746,7 +750,7 @@ elif selected_menu == MENU_LIST[1]:
 # =============================================================
 # 3. 📋 [주업] 공장 손님 장부 (CRM & 리마인드)
 # =============================================================
-elif selected_menu == MENU_LIST[2]:
+elif menu_choice == MENU_DICT["CUSTOMER_CRM"]:
     st.title("📋 공장 손님 CRM 관리 장부")
     st.caption("손님별 누적 상담 일지, 보유 매물 양방향 역추천, 업종 인허가 요건, VIP 별표, 안부톡 자동 생성을 완벽 지원합니다.")
 
@@ -775,7 +779,7 @@ elif selected_menu == MENU_LIST[2]:
             st.markdown(f"""
             <div class="remind-card-red">
                 🚨 <b>{rt['고객명']}</b> ({rt['연락처']}) | <span style="color:#d69e2e;">{rt['중요도']}</span> | 마지막 연락 후 <b>{rt['경과일']}일 경과</b><br>
-                • 최근 메모: {rt['메모']} ➡ <i>"신규 매물 체크 및 안부 전화 권장"</i>
+                • 최근 메모: {rt['메모']} ➡️ <i>"신규 매물 체크 및 안부 전화 권장"</i>
             </div>
             """, unsafe_allow_html=True)
         st.markdown("---")
@@ -1020,7 +1024,7 @@ elif selected_menu == MENU_LIST[2]:
 # =============================================================
 # 4. 📁 [주업] 공장 보유 매물 장부 (드롭다운 필터 완비)
 # =============================================================
-elif selected_menu == MENU_LIST[3]:
+elif menu_choice == MENU_DICT["FACTORY_BOOK"]:
     st.title("📁 공장 보유 매물 장부")
     st.caption("손님 전화 상담 중 원하는 평수, 호이스트 유무, 츄레라 작업 여부를 드롭다운으로 즉시 필터링하여 매물을 확인합니다.")
 
@@ -1074,7 +1078,7 @@ elif selected_menu == MENU_LIST[3]:
 # =============================================================
 # 5. 🔍 [주업] 공장·창고 AI 시세 추정기
 # =============================================================
-elif selected_menu == MENU_LIST[4]:
+elif menu_choice == MENU_DICT["PRICE_AI"]:
     st.title("🔍 인천 공장·창고 AI 시세 추정기")
     st.caption("주소지(동), 대지·건물 평수, 준공연도, 설비 제원을 입력하면 인근 국토부 실거래가 및 네이버 매물 호가를 기반으로 적정 매매가와 임대료(보/월)를 자동 산출합니다.")
 
@@ -1131,7 +1135,7 @@ elif selected_menu == MENU_LIST[4]:
 # =============================================================
 # 6. 🍜 [부업] 맛집 & 🧢 일상 블로그 글쓰기
 # =============================================================
-elif selected_menu == MENU_LIST[5]:
+elif menu_choice == MENU_DICT["BLOG_TOOL"]:
     st.title("🍜 맛집 & 🧢 일상 핫플 블로그 글쓰기 허브")
     b_tab1, b_tab2 = st.tabs(["🍜 맛집 솔직 후기 글쓰기", "🧢 일상 핫플 탐방 글쓰기"])
 
@@ -1211,7 +1215,7 @@ elif selected_menu == MENU_LIST[5]:
 # =============================================================
 # 7. 🏢 [부업] 수도권 청약 알림 허브 & 수지분석
 # =============================================================
-elif selected_menu == MENU_LIST[6]:
+elif menu_choice == MENU_DICT["APPLY_HOME"]:
     st.title("🏢 수도권 실시간 청약 알림 & 분양 수지분석 허브")
     sub_list = fetch_subscription_data(APPLYHOME_API_KEY)
 
@@ -1278,7 +1282,7 @@ elif selected_menu == MENU_LIST[6]:
 # =============================================================
 # 8. ⚖️ [부업] 법원경매 허브 & 인천공장 시설분석
 # =============================================================
-elif selected_menu == MENU_LIST[7]:
+else:
     st.title("⚖️ 법원경매 허브 & 인천 서구 공장 시설 인프라 분석")
     factory_list, apt_list = get_auction_data()
     auction_tab1, auction_tab2 = st.tabs(["🏭 인천 전지역 공장·창고 경매 & 시설비 수지표", "🏢 수도권 광역 아파트 경매 (서울 25개 자치구 완비)"])
