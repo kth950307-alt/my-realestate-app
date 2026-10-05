@@ -15,7 +15,7 @@ except ImportError:
 
 st.set_page_config(page_title="우리부동산 통합 업무 시스템", page_icon="🏢", layout="wide")
 
-# 크롬/사파리 번역 방지 및 공통 스타일
+# 크롬/사파리 번역 방지 및 인쇄 전용 CSS
 st.markdown("""
 <script>
     document.documentElement.lang = 'ko';
@@ -100,6 +100,16 @@ st.markdown("""
         padding: 16px;
         margin: 12px 0;
     }
+    @media print {
+        [data-testid="stSidebar"], [data-testid="stHeader"], .stButton, header, footer {
+            display: none !important;
+        }
+        .print-container {
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+    }
 </style>
 </div>
 """, unsafe_allow_html=True)
@@ -118,7 +128,7 @@ def check_password():
     c1, c2, c3 = st.columns([1, 1.2, 1])
     with c2:
         st.markdown("### 🏢 우리부동산 통합 업무 시스템")
-        st.caption("인천 공장 중개 & 신축공장 맞춤 분양 시스템 - 사무실 보안 인증")
+        st.caption("인천 공장 중개 & 네이버 상위노출 블로그 AI 허브 - 사무실 보안 인증")
         pwd_input = st.text_input("사무실 전용 비밀번호", type="password", key="pwd_box")
         if st.button("🔓 시스템 접속하기", type="primary", use_container_width=True):
             if pwd_input == CORRECT_PASSWORD:
@@ -130,6 +140,25 @@ def check_password():
 
 if not check_password():
     st.stop()
+
+# =============================================================
+# 🤖 GEMINI AI 고품질 블로그 생성 엔진
+# =============================================================
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+
+def generate_ai_text(prompt: str) -> str:
+    if GENAI_AVAILABLE and GEMINI_API_KEY:
+        try:
+            client = genai.Client(api_key=GEMINI_API_KEY)
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
+            if response and response.text:
+                return response.text
+        except Exception:
+            pass
+    return None
 
 # =============================================================
 # ⚡ CSV 데이터베이스 관리 함수
@@ -386,19 +415,19 @@ def match_properties_for_customer(cust_row):
 # =============================================================
 MENU_DICT = {
     "FACTORY_REG": "🏭 [주업] 공장 매물 등록 & 손님 자동매칭",
-    "NEW_DEV": "🏗️️ [주업] 신축공장 맞춤 분양 설계 & 제안서",
+    "NEW_DEV": "🏗️ [주업] 신축공장 맞춤 분양 설계 & 제안서",
     "CUSTOMER_CRM": "📋 [주업] 공장 손님 장부 (CRM & 리마인드)",
     "FACTORY_BOOK": "📁 [주업] 공장 보유 매물 장부 (드롭다운 필터)",
     "PRICE_AI": "🔍 [주업] 공장·창고 AI 시세 추정기",
     "BLOG_TOOL": "🍜 [부업] 맛집 & 🧢 일상 블로그 글쓰기",
     "APPLY_HOME": "🏢 [부업] 수도권 청약 알림 허브 & 수지분석",
-    "AUCTION_HUB": "⚖️ [부업] 법원경매 허브 & 인천공장 시설분석"
+    "AUCTION_HUB": "⚖️️ [부업] 법원경매 허브 & 인천공장 시설분석"
 }
 
 menu_choice = st.sidebar.radio(
     "📌 업무 시스템 메뉴",
     list(MENU_DICT.values()),
-    index=1
+    index=0
 )
 
 st.sidebar.markdown("---")
@@ -406,14 +435,14 @@ if st.sidebar.button("🔒 로그아웃"):
     st.session_state["authenticated"] = False
     st.rerun()
 
-st.sidebar.caption("🏗️ **인천 전지역 신축공장 맞춤 분양 엔진 가동 중**")
+st.sidebar.caption("🏢 **인천 공장 중개 & 네이버 상위노출 AI 포스팅 가동 중**")
 
 # =============================================================
 # 1. 🏭 [주업] 공장 매물 등록 & 손님 자동매칭 & 블로그 포스팅
 # =============================================================
 if menu_choice == MENU_DICT["FACTORY_REG"]:
     st.title("🏭 공장 매물 등록 & 대기 손님 역매칭 & 블로그 포스팅")
-    st.caption("신규 매물을 등록하면 매물장부 저장, 대기 손님 실시간 역매칭, 그리고 네이버 블로그 실전 포스팅 본문이 한 번에 자동 생성됩니다.")
+    st.caption("신규 매물을 등록하면 매물장부 저장, 대기 손님 실시간 역매칭, 그리고 네이버 블로그 최상위 포스팅 본문이 한 번에 자동 생성됩니다.")
 
     with st.expander("🔒 [중개사 비밀 보관용] 상세 지번 및 건물주 직통 연락처", expanded=False):
         s1, s2, s3 = st.columns(3)
@@ -423,39 +452,39 @@ if menu_choice == MENU_DICT["FACTORY_REG"]:
 
     st.markdown("##### 📌 공장 기본 제원 및 거래 조건 입력")
     b1, b2, b3, b4 = st.columns(4)
-    with b1: loc = st.text_input("소재지 / 권역 *", value="인천 제물포구 송현동")
+    with b1: loc = st.text_input("소재지 / 권역 *", placeholder="예: 인천 제물포구 송현동")
     with b2: deal_type = st.selectbox("거래 형태 *", ["임대차(월세)", "매매", "임대/매매 겸용", "전대차(동의완료)"])
     with b3: vacancy_status = st.selectbox("입주 상태 *", ["현재 공실(즉시입주)", "협의 입주", "만기 후 입주", "신축 첫입주"])
-    with b4: expire_date = st.text_input("입주 가능일", value="즉시 협의 가능")
+    with b4: expire_date = st.text_input("입주 가능일", placeholder="예: 2027년 1월 15일 이후 / 즉시 협의")
 
     c1, c2, c3 = st.columns(3)
     with c1:
-        price = st.text_input("보증금 / 월세 (또는 매매가) *", value="보증금 3,000만 원 / 월세 230만 원")
-        area = st.text_input("실사용 면적/평수 *", value="1층 75평 + 2층 15평 사무실 (총 90평)")
+        price = st.text_input("보증금 / 월세 (또는 매매가) *", placeholder="예: 보증금 3,000만 원 / 월세 230만 원")
+        area = st.text_input("실사용 면적/평수 *", placeholder="예: 1층 75평 + 2층 15평 사무실 (총 90평)")
     with c2:
-        ceiling = st.text_input("처마 층고", value="처마 7.5m (호이스트 주행 넉넉한 하이 층고)")
-        power = st.text_input("인입 동력 (kW) *", value="30kW (가공 설비 구동 충분)")
+        ceiling = st.text_input("처마 층고", placeholder="예: 호이스트 주행 넉넉한 하이 층고 (처마 7.5m)")
+        power = st.text_input("인입 동력 (kW) *", placeholder="예: 30kW (가공 설비 구동 충분)")
         hoist = st.selectbox("호이스트 설비 *", ["호이스트 2.8톤 완비", "호이스트 5톤 완비", "호이스트 3톤 완비", "호이스트 없음", "직접 입력"])
         if hoist == "직접 입력": hoist = st.text_input("호이스트 스펙 직접 입력")
     with c3:
-        road = st.text_input("도로 조건", value="8m 도로 접 (문 앞 차량 접안 편리)")
+        road = st.text_input("도로 조건", placeholder="예: 8m 도로 접 (문 앞 차량 접안 편리)")
         parking = st.selectbox("주차 여건", ["문 앞 차량 작업 및 접안 편리", "단독 마당 5대 이상", "전면 2~3대 가능", "1~2대 가능"])
-        big_truck = st.selectbox("화물차 진입 여건 *", ["1톤~5톤 화물차 문 앞 접안 최적", "츄레라 / 트레일러 진출입 및 상하차 원활", "11T / 대형 윙바디 접안 원활"])
+        big_truck = st.selectbox("화물차 진입 여건 *", ["1톤 화물차 문 앞 접안 최적", "츄레라 / 트레일러 진출입 및 상하차 원활", "11T / 대형 윙바디 접안 원활"])
 
     st.markdown("##### 📝 블로그 포스팅 정밀 작성을 위한 추가 디테일")
     d1, d2, d3 = st.columns(3)
     with d1:
-        office_toilet = st.text_input("사무실 / 화장실 스펙", value="2층 15평 독립 사무실 완비 / 2층 내부 단독 화장실 구비")
-        use_approval_date = st.text_input("사용승인일 / 건축구조", value="1997.1.17 / 일반철골구조")
+        office_toilet = st.text_input("사무실 / 화장실 스펙", placeholder="예: 2층 15평 독립 사무실 완비 / 2층 전용 화장실 구비")
+        use_approval_date = st.text_input("사용승인일 / 건축구조", placeholder="예: 1997.1.17 / 철골조")
     with d2:
-        zoning_type = st.text_input("용도지역 / 층수 / 방향", value="일반공업지역 / 1층~2층 / 북서향")
-        door_type = st.text_input("출입문 형태 / 관리비", value="대형 슬라이딩 도어 / 실비 정산")
+        zoning_type = st.text_input("용도지역 / 층수 / 방향", placeholder="예: 일반공업지역 / 1층 / 북서향")
+        door_type = st.text_input("출입문 형태 / 관리비", placeholder="예: 대형 슬라이딩 도어 / 실비 정산")
     with d3:
-        target_recom = st.text_input("추천 업종", value="정밀 금형 가공, 기계 조립, 선반·밀링 임가공, 부품 유통")
+        target_recom = st.text_input("추천 업종", placeholder="예: 정밀 금형 가공, 중량물 기계 가공, 선반·밀링 임가공, 철구조물 제작")
 
     memo = st.text_area(
         "매물 핵심 특이사항 / 입지 강점 메모 (스토리텔링용)",
-        value="인천산업유통센터 및 송현 공구상가 초인접으로 볼트, 공구 수급 및 외주 가공 네트워크 최상. 호이스트 2.8T 완비로 크레인 설치비 수천만 원 굳히고 입주."
+        placeholder="예: 인천산업유통센터 및 송현 공구상가 초인접으로 볼트, 공구 수급 및 외주 가공 네트워크 최상. 호이스트 2.8T 완비로 크레인 설치비 수천만 원 굳히고 입주."
     )
 
     uploaded_factory_imgs = st.file_uploader("📷 공장 현장 사진 첨부", accept_multiple_files=True, type=['png', 'jpg', 'jpeg'], key="fac_reg_imgs")
@@ -493,74 +522,101 @@ if menu_choice == MENU_DICT["FACTORY_REG"]:
             loc_base = clean_loc_words[0] if clean_loc_words else "인천"
             loc_sub = clean_loc_words[1] if len(clean_loc_words) > 1 else loc_base
 
-            blog_full_text = f"""안녕하세요. 인천 공장·창고 전문 우리부동산입니다.
-{loc} 공장 {deal_type.split('(')[0]} 매물 중 산업 인프라 배후에서 {hoist}와 사무실을 갖추고 이 가격에 나오는 곳은 정말 귀합니다.
-요즘 인근 산업유통센터나 주요 공구상가 배후에서 이 정도 평형대 1층 공장을 찾아보시면 임대료가 만만치 않은 데다, 호이스트가 없거나 사무실이 마땅치 않아 시설 설치비로 수천만 원이 깨지는 경우가 허다합니다. 오늘 소개해 드리는 매물은 {loc} {area} 통임대 건으로, {price}라는 주변 시세 대비 아주 저렴한 금액으로 나와 강력 추천해 드립니다.
+            # 🚀 대표님 실전 양식 100% 동일 구현 공장 블로그 포스팅
+            fac_blog_text = f"""안녕하세요. 인천 공장·창고 전문 우리부동산입니다.
+{loc} 공장 {deal_type.split('(')[0]} 매물 중 공구상가 배후에서 {hoist}와 사무실을 갖추고 이 가격에 나오는 곳은 정말 귀합니다.
+요즘 송현동 산업유통센터나 주요 공구상가 인근에서 70~80평대 1층 공장을 찾아보시면 임대료가 만만치 않은 데다, 호이스트가 없거나 사무실이 마땅치 않아 시설 설치비로 수천만 원이 깨지는 경우가 허다합니다. 오늘 소개해 드리는 매물은 {loc} {area} 통임대 건으로, {price}라는 주변 시세 대비 아주 저렴한 임대료로 나와 강력 추천해 드립니다.
 
-(사진 1 - 공장 외관 및 대표 사진)
-인천 주요 공구상가 및 산업단지가 바로 인접해 있어 볼트, 공구, 철재 부품 수급 및 외주 가공 연계성이 인천에서 으뜸인 입지입니다. 공장 정면으로 진입 도로가 반듯하게 열려 있어 화물차가 문 앞까지 수월하게 접안해 상하차 작업을 진행하기에 최적화된 동선을 자랑합니다.
+대표사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+인천산업유통센터와 주요 공구상가가 바로 인접해 있어 볼트, 공구, 철재 부품 수급 및 외주 가공 연계성이 인천에서 으뜸인 입지입니다. 공장 정면으로 진입 도로가 반듯하게 열려 있어 화물차가 문 앞까지 수월하게 접안해 상하차 작업을 진행하기에 최적화된 동선을 자랑합니다.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📌 매물 제원표
+📌 {loc} 공장 임대 상세 제원표
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 항목 | 세부 제원
 ---|---
-매물 명칭 | {loc} 공장 {deal_type.split('(')[0]}
-소재지 | {loc} 공업지역
-가격 조건 | {price}
-매물 구분 / 주 용도 | {deal_type} / 공장 및 제조장
-입주 가능일 | {vacancy_status} ({expire_date})
+소재지 | {loc}
+보증금 / 월세 | {price}
+매물 구분 / 주 용도 | {deal_type} / 공장
+입주 날짜 | {expire_date}
 용도지역 / 건축구조 | {zoning_type} / {use_approval_date}
-실사용 면적 | {area}
-층고 제원 | {ceiling}
-인입 동력 | {power}
-호이스트 설비 | {hoist}
-도로 및 주차 | {road} / {parking}
-화물 접안 여건 | {big_truck}
-출입문 / 관리비 | {door_type}
-사무실 / 화장실 | {office_toilet}
+층 / 향 | 1층 / {zoning_type.split('/')[-1].strip()}
+사용승인일 | {use_approval_date.split('/')[0].strip()}
+특징 | ✅ {loc} 공장 {area}<br>층고: {ceiling}<br>동력: {power}<br>도로: {road}<br>주차: {parking}<br>관리비: {door_type.split('/')[-1].strip()}<br>출입문: {door_type.split('/')[0].strip()}<br>승강기/호이스트: {hoist}<br>화장실: {office_toilet.split('/')[-1].strip()}<br>사무실: {office_toilet.split('/')[0].strip()}<br><br>✅ {loc} 공장 임대 매물 중 {price}의 특급 시세 가성비<br>✅ {hoist} 기본 완비로 H빔 보강 및 크레인 설치비 수천만 원 굳히고 입주<br>✅ 동력 {power} 기본 인입으로 추가 승압 공사비 없이 선반·밀링 기계 즉시 연결<br>✅ {office_toilet.split('/')[0].strip()}로 1층 바닥 공간을 온전히 작업장으로 통활용<br>✅ 인천산업유통센터 및 공구상가 초인접으로 원부자재 수급 및 가공 네트워크 최상<br>✅ {target_recom} 강력 추천
 
-💡 김소장의 현장 체크포인트
-✅ {loc} 공장 매물 중 {price}의 특급 시세 가성비
-✅ {hoist} 기본 완비로 H빔 보강 및 크레인 신규 설치비 수천만 원 굳히고 입주
-✅ 동력 {power} 기본 인입으로 추가 승압 공사비 없이 공작기계·가공설비 즉시 연결 가동
-✅ {office_toilet.split('/')[0].strip()}로 1층 바닥 공간을 온전히 작업장으로 통활용
-✅ 주요 간선도로 및 산업유통센터 초인접으로 원부자재 수급 및 물류 네트워크 최상
-✅ {target_recom} 공장으로 강력 추천
+1층 내부 사진
+출처 입력
 
-(사진 2 - 공장 메인 진입로 및 화물차 접안 전경)
-공장 메인 진입로 및 화물차 문 앞 접안 전경입니다. 출입문 바로 앞으로 화물 트럭이 바짝 들어와 자재를 싣고 내리기에 최적화된 동선입니다. 출입구 폭과 높이가 널찍해 무거운 원자재를 내부로 직결 반입하기 수월합니다.
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+공장 메인 진입로 및 화물차 문 앞 접안 전경입니다. 출입문 바로 앞으로 포터 트럭이 바짝 들어와 자재를 싣고 내리기에 최적화된 동선입니다. 출입구 폭과 높이가 널찍해 무거운 원자재를 내부로 직결 반입하기 수월합니다.
 
-(사진 3 - 1층 메인 작업장 전체 전경 1)
-1층 메인 가공 작업장 전체 전경입니다. 기계 하중을 단단하게 버텨주는 바닥 기초 위에 선반, 밀링, 가공 설비가 안정적으로 안착될 수 있는 튼튼한 하중 구조를 자랑합니다. 신축 공장 눈치 볼 필요 없이 편하게 조업하실 '진짜 제조업' 사장님들께 최고의 사업장입니다.
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+1층 메인 가공 작업장 전체 전경 1입니다. 기계 하중을 단단하게 버텨주는 튼튼한 바닥 기초 위에 선반, 보링기, 가공 설비가 안정적으로 안착되어 있습니다. 외관에 세월의 흔적은 있지만 뼈대 하나는 무식할 정도로 튼튼해, 신축 공장 눈치 볼 필요 없이 거칠게 쇳가루 날리며 편하게 일하실 '진짜 제조업' 사장님들께 최고의 안식처입니다.
 
-(사진 4 - 호이스트 크레인 및 상부 골조 상세 뷰)
-상단 {hoist} 및 크레인 주행 구역입니다. 상부 골조를 따라 호이스트가 쌩쌩하게 가동되고 있어 무거운 중량 금속 자재와 완제품을 힘들이지 않고 전 구역으로 안전하게 인양할 수 있습니다.
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+{price}! {hoist}, {power} 및 {office_toilet.split('/')[0].strip()}을 갖춘 공구상가 인근 알짜배기 공장 임대 매물입니다.
 
-(사진 5 - 1층 작업장 중앙에서 사무실 방향 뷰)
-중앙 통로 폭이 넓어 지게차와 대차 이동이 자유로우며, 현장과 사무 공간이 완벽하게 분리되어 쾌적한 업무 환경을 제공합니다.
+사진 삭제
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+상단 {hoist} 및 대형 유압 프레스 구역입니다. 상부 골조를 따라 호이스트가 쌩쌩하게 가동되고 있어 무거운 중량 금속 자재와 완제품을 힘들이지 않고 전 구역으로 안전하게 인양할 수 있습니다.
 
-(사진 6 - 2층 독립 사무실 내부 및 집무 공간)
-{office_toilet.split('/')[0].strip()} 공간입니다. 책상, 도면 검토대, 상담용 소파를 여유롭게 두고 쓸 수 있는 아늑한 오피스 공간으로, 현장 소음 간섭 없이 바이어 미팅과 수주 관리를 보기에 안성맞춤입니다.
+사진 삭제
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+1층 작업장 중앙에서 2층 사무실 방향을 바라본 레이아웃입니다. 중앙 통로 폭이 넓어 대차 이동이 자유로우며, 후면 복층 상부에 사무실이 안착되어 있어 현장과 사무 공간이 완벽하게 분리되어 있습니다.
 
-(사진 7 - 전용 단독 화장실 및 편의시설)
-{office_toilet.split('/')[-1].strip()}입니다. 쾌적하게 관리되어 외부 공용 화장실을 이용하는 불편함이 전혀 없습니다.
+사진 삭제
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+천장 트러스 골조 및 {hoist} 크레인 상세 뷰입니다. 빈 공장에 H빔 보강하고 호이스트 레일 새로 까시려면 최소 수천만 원 깨지는 거 대표님들이 더 잘 아실 텐데요.
 
-{loc} 공업지역에서 물류와 부품 수급이 가장 빠르고, {area} 작업장에 {hoist}, {power}, 사무실까지 다 갖춘 공장을 {price} 조건에 얻을 수 있는 기회는 흔치 않습니다.
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+사무실 난간에서 내려다본 1층 메인 공장 전체 뷰입니다. 하이 층고 체적과 호이스트 반경이 한눈에 들어오는 시원한 개방감을 자랑합니다.
+
+2층 사무실
+출처 입력
+
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+{office_toilet.split('/')[0].strip()} 내부 집무 공간 전경입니다.
+
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+컴퓨터 데스크, 도면 검토대, 상담용 소파를 여유롭게 두고 쓸 수 있는 아늑한 오피스 공간입니다. 현장 소음 간섭 없이 바이어 미팅과 수주 관리를 보기에 안성맞춤입니다.
+
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+{office_toilet.split('/')[-1].strip()}입니다.
+
+{loc} 공업지역에서 인천산업유통센터와 공구상가가 바로 코앞이라 부품 수급이 가장 빠르고, 1층 작업장에 {hoist}, {power}, 사무실 및 전용 화장실까지 다 갖춘 공장을 {price}에 얻을 수 있는 기회는 흔치 않습니다.
 임대 고정비를 획기적으로 줄이면서 즉시 기계를 안착시켜 조업에 들어갈 알짜배기 공장을 찾으시는 사장님들께서는 서둘러 현장을 확인해 보시길 권해드립니다.
 
-(명함 이미지 - 명함을 누르시면 전화 연결이 됩니다)
+사진 삭제링크AI 활용 설정
+사진 설명을 입력하세요.
+명함을 누르시면 전화 연결이 됩니다.
 언제든 편하게 연락 주시기 바랍니다.
 
 매물 상담 문의, 접수 문의 언제든 환영합니다.
 우리부동산 공인중개사사무소 대표
 김태형 010-2660-8276
 
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
 정직하고 최선을 다하여 중개하겠습니다.
 
-#{loc_base}공장임대 #{loc_sub}공장임대 #{loc_sub}공장 #{loc_base}호이스트공장 #{loc_sub}호이스트공장 #인천공장임대 #인천창고임대 #인천호이스트공장 #가좌동공장임대 #석남동공장임대 #원창동공장임대 #송현동공장임대 #도화동공장임대 #인천산업단지공장 #인천공장전문 #우리부동산 #소형공장임대 #인천공장매매
+#{loc_base}공장임대 #{loc_sub}공장임대 #{loc_sub}공장 #{loc_base}호이스트공장 #{loc_sub}호이스트공장 #인천공장임대 #인천창고임대 #인천호이스트공장 #송림동공장임대 #가좌동공장임대 #석남동공장임대 #원창동공장임대 #인천공장전문 #우리부동산 #인천공장매매 #소형공장임대 #인천산업유통센터공장 #제물포구공장
 """
-            st.text_area("네이버 블로그 복사용 전체 본문", blog_full_text, height=400)
+            st.markdown("---")
+            st.subheader("📝 네이버 블로그 최상위 포스팅 본문")
+            st.text_area("네이버 블로그 복사용 전체 본문", fac_blog_text, height=450)
 
 # =============================================================
 # 2. 🏗️ [주업] 신축공장 맞춤 분양 설계 & 제안서 (인천 전지역 범용)
@@ -578,8 +634,8 @@ elif menu_choice == MENU_DICT["NEW_DEV"]:
             site_name = st.text_input("프로젝트/단지명 *", placeholder="예: 도화동 930-1 신축공장, 가좌 첨단제조단지 등")
             site_addr = st.text_input("사업지 상세 주소 *", placeholder="예: 인천 미추홀구 도화동 930-1 (지번/일대)")
         with p2:
-            custom_land = st.number_input("분양 대지면적 (평) *", min_value=10, max_value=5000, value=100, step=10, help="해당 호실의 전용 분양 대지 평수")
-            road_width = st.number_input("접면 도로 폭 (m) *", min_value=4, max_value=50, value=12, step=1, help="공장 진출입로 도로 폭(미터)")
+            custom_land = st.number_input("분양 대지면적 (평) *", min_value=10, max_value=5000, value=100, step=10)
+            road_width = st.number_input("접면 도로 폭 (m) *", min_value=4, max_value=50, value=12, step=1)
         with p3:
             cust_company = st.text_input("제안 대상 기업명/대표님", placeholder="예: (주)대한정밀 대표님")
             cust_usage = st.text_input("권장 조업 업종/용도", placeholder="예: 정밀기계제조 / 금형가공 / 물류유통")
@@ -601,9 +657,9 @@ elif menu_choice == MENU_DICT["NEW_DEV"]:
         st.markdown("##### 💰 3. 분양가 및 증축 단가 설정")
         pr1, pr2, pr3, pr4 = st.columns(4)
         with pr1:
-            base_unit_price = st.number_input("1층 분양단가 (대지 평당 만 원) *", value=1200, step=50, help="1층 기본 층고 7m, 동력 30kW 포함")
+            base_unit_price = st.number_input("1층 분양단가 (대지 평당 만 원) *", value=1200, step=50)
         with pr2:
-            add_unit_price = st.number_input("상층부 증축단가 (건축 평당 만 원) *", value=350, step=10, help="2층~5층 상층부 증축 시 평당 건축비")
+            add_unit_price = st.number_input("상층부 증축단가 (건축 평당 만 원) *", value=350, step=10)
         with pr3:
             ceiling_spec = st.text_input("층고 제원", value="처마 7m (유효 7.5m)")
         with pr4:
@@ -751,7 +807,7 @@ elif menu_choice == MENU_DICT["NEW_DEV"]:
 • 추천 용도: {cust_usage}
 • 입지 강점: {site_features}
 
-🏗️ 맞춤 건축 설계 제원
+🏗️️ 맞춤 건축 설계 제원
 • 분양 대지면적: {custom_land}평 (단독 전용 필지)
 • 적용 건폐율: {actual_bcr}%
 • 건축 규모: 지상 {max_floor_cnt}층 공장 (총 연면적 {total_bldg_area}평)
@@ -776,9 +832,7 @@ elif menu_choice == MENU_DICT["NEW_DEV"]:
             st.subheader("📱 대표님 전송용 카카오톡 완성형 분양 브리핑문")
             st.text_area("카톡 분양 브리핑 복사창", briefing_text, height=330)
 
-            # =====================================================
-            # 🖨️ [신규 핵심] 오직 분양 리포트만 A4 1장으로 단독 팝업 인쇄
-            # =====================================================
+            # 🖨️ A4 1장 단독 팝업 인쇄
             st.markdown("---")
             st.subheader("🖨️ 고객 미팅용 A4 공식 분양 제안서 리포트")
 
@@ -936,7 +990,6 @@ elif menu_choice == MENU_DICT["NEW_DEV"]:
             </html>
             """
 
-            # 새 창으로 오직 리포트만 분리 인쇄하는 원클릭 스크립트 버튼
             st.components.v1.html(f"""
             <button onclick="printReport()" style="
                 background-color: #2b6cb0;
@@ -965,49 +1018,6 @@ elif menu_choice == MENU_DICT["NEW_DEV"]:
             }}
             </script>
             """, height=65)
-
-            # 웹 화면 미리보기용 박스
-            st.markdown(f"""
-            <div style="background-color: white; border: 2px solid #2d3748; padding: 20px; border-radius: 6px; font-family: sans-serif; color: #1a202c; margin-top: 10px;">
-                <div style="border-bottom: 2px solid #3182ce; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-end;">
-                    <div>
-                        <span style="font-size: 12px; color: #718096; font-weight: bold;">[신축공장 맞춤형 분양 제안서]</span>
-                        <h3 style="margin: 0; color: #1a365d;">{site_name} 신축공장 분양계획서</h3>
-                    </div>
-                    <div style="text-align: right; font-size: 12px; color: #4a5568;">
-                        우리부동산 공인중개사사무소<br>
-                        <b>대표 김태형 (010-2660-8276)</b>
-                    </div>
-                </div>
-                <p style="font-size: 13px; margin: 4px 0 8px 0;"><b>수신</b>: {company_display} 귀하 | <b>발행일</b>: {datetime.today().strftime('%Y년 %m월 %d일')}</p>
-                <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
-                    <tr style="background-color: #ebf8ff; border-top: 1px solid #cbd5e0; border-bottom: 1px solid #cbd5e0;">
-                        <th style="padding: 6px; width: 25%; text-align: left;">사업지 위치</th>
-                        <td style="padding: 6px;">{site_addr} (전면 {road_width}m 도로 접)</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #cbd5e0;">
-                        <th style="padding: 6px; text-align: left; background-color: #f7fafc;">입지 특성</th>
-                        <td style="padding: 6px;">{site_features}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #cbd5e0;">
-                        <th style="padding: 6px; text-align: left; background-color: #f7fafc;">분양 대지면적</th>
-                        <td style="padding: 6px;"><b>{custom_land}평</b> (단독 전용 마당 약 {yard_pyung}평 확보)</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #cbd5e0;">
-                        <th style="padding: 6px; text-align: left; background-color: #f7fafc;">건축 층수 / 연면적</th>
-                        <td style="padding: 6px;"><b>지상 {max_floor_cnt}층 공장 (총 연면적 {total_bldg_area}평)</b> | {floor_desc}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #cbd5e0;">
-                        <th style="padding: 6px; text-align: left; background-color: #f7fafc;">설비 제원</th>
-                        <td style="padding: 6px;">{ceiling_spec} / {power_spec}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #cbd5e0; background-color: #fffaf0;">
-                        <th style="padding: 6px; text-align: left; color: #c05621;">최종 분양 공급가액</th>
-                        <td style="padding: 6px; font-size: 15px; font-weight: bold; color: #c53030;">{total_dev_price:,}원 (시설자금 대출 80% 가능)</td>
-                    </tr>
-                </table>
-            </div>
-            """, unsafe_allow_html=True)
 
     with dev_tab2:
         st.subheader("🏢 신축공장 분양 전용 매물장부")
@@ -1404,84 +1414,226 @@ elif menu_choice == MENU_DICT["PRICE_AI"]:
         """, unsafe_allow_html=True)
 
 # =============================================================
-# 6. 🍜 [부업] 맛집 & 🧢 일상 블로그 글쓰기
+# 6. 🍜 [부업] 맛집 & 🧢 일상 블로그 글쓰기 (대표님 실전 양식 100% 동일 구현)
 # =============================================================
 elif menu_choice == MENU_DICT["BLOG_TOOL"]:
-    st.title("🍜 맛집 & 🧢 일상 핫플 블로그 글쓰기 허브")
-    b_tab1, b_tab2 = st.tabs(["🍜 맛집 솔직 후기 글쓰기", "🧢 일상 핫플 탐방 글쓰기"])
+    st.title("🍜 맛집 & 🧢 일상 핫플 블로그 포스팅 허브")
+    st.caption("공장 포스팅과 동일한 고품격 네이버 상위노출 양식(스토리텔링 ➡️ 제원표 ➡️ ✅ 6대 체크포인트 ➡️ 사진별 상세 해설 ➡️ 명함/태그)으로 생성됩니다.")
+    b_tab1, b_tab2 = st.tabs(["🍜 맛집 솔직 후기 (대표님 전용 양식)", "🧢 일상 핫플 탐방 (대표님 전용 양식)"])
 
     with b_tab1:
         st.subheader("🍜 맛집 방문 정보 입력")
         m1, m2, m3 = st.columns(3)
         with m1:
             m_name = st.text_input("식당 상호명 *", placeholder="예: 메탄집 청라본점")
-            m_kw = st.text_input("공략 키워드 *", placeholder="예: 청라 맛집, 청라 고기집")
-            m_sub = st.text_input("타이틀 수식어", placeholder="예: 35년 전통 연탄불 직화구이")
+            m_loc = st.text_input("위치 / 권역 *", placeholder="예: 인천 서구 청라동")
+            m_kw = st.text_input("메인 공략 키워드 *", placeholder="예: 청라 맛집, 청라 삼겹살 맛집")
         with m2:
-            m_addr = st.text_input("위치/주소", placeholder="예: 인천 서구 청라동 190-3")
-            m_time = st.text_input("영업시간/주차", placeholder="예: 11:30~23:00 / 지하주차 무료")
-            m_menu = st.text_input("주문 메뉴/가격", placeholder="예: 점심특선 연탄불고기 2인 (25,000원)")
+            m_addr = st.text_input("상세 주소 및 주차 *", placeholder="예: 인천 서구 청라커낼로 123 (지하주차 2시간 무료)")
+            m_time = st.text_input("영업시간 및 정기휴무 *", placeholder="예: 11:30 ~ 23:00 (브레이크타임 없음, 연중무휴)")
+            m_menu = st.text_input("주문 메뉴 및 결제 가격 *", placeholder="예: 연탄 생삼겹살 2인분(32,000원), 차돌된장찌개(7,000원)")
         with m3:
-            m_eval = st.text_input("김소장의 한 줄 총평 *", placeholder="예: 불향 가득한 고기와 찌개 조합이 끝내주는 가성비 맛집!")
+            m_wait = st.text_input("방문 시간대 및 웨이팅 여부", placeholder="예: 주말 저녁 6시 30분 방문 / 현장 캐치테이블 20분 대기")
+            m_target = st.text_input("추천 방문 목적", placeholder="예: 가족 외식, 직장인 회식, 데이트 모임")
+            m_eval = st.text_input("솔직 한 줄 총평 *", placeholder="예: 은은한 연탄 불향과 육즙의 조화가 끝내주는 가성비 삼겹살 찐맛집")
 
-        food_imgs = st.file_uploader("맛집 사진 첨부", accept_multiple_files=True, type=['png', 'jpg', 'jpeg'], key="f_imgs")
-        m_taste = st.text_area("맛 평가 디테일", placeholder="예: 은은한 불향이 살아있고 파채와의 궁합이 일품이었습니다.")
+        food_imgs = st.file_uploader("📷 맛집 현장 사진 첨부", accept_multiple_files=True, type=['png', 'jpg', 'jpeg'], key="f_imgs")
+        m_taste = st.text_area(
+            "맛 평가 및 상차림 디테일 메모 (스토리텔링용)",
+            placeholder="예: 35년 전통 연탄불 직화구이로 첫 점부터 육즙 폭발. 파채와 묵은지 구이의 조합이 일품이며, 칼칼한 된장찌개가 밥도둑임."
+        )
 
-        if st.button("🚀 맛집 블로그 포스팅 생성하기", type="primary"):
-            c_name = m_name if m_name else "추천 맛집"
-            f_post = f"""[{c_name}] {m_kw} - {m_sub} 솔직 후기!
+        if st.button("🚀 맛집 블로그 실전 포스팅 생성하기", type="primary"):
+            if not m_name or not m_eval:
+                st.error("상호명과 솔직 총평은 필수입니다.")
+            else:
+                food_kw_list = [k.strip() for k in m_kw.split(",") if k.strip()]
+                main_tag = food_kw_list[0] if food_kw_list else m_name
 
-안녕하세요! 우리부동산 김소장입니다.
-오늘은 든든한 한 끼를 즐기기 좋은 {c_name}에 다녀왔습니다.
+                food_blog_text = f"""안녕하세요. 인천 맛집·일상 탐방 전문 우리부동산입니다.
+{m_loc} 맛집 중 제대로 된 불향과 가성비를 갖추고 이 가격과 퀄리티로 나오는 곳은 정말 귀합니다.
+요즘 외식 물가가 워낙 만만치 않은 데다, 소문만 요란하고 실제로는 고기 질이 떨어지거나 밑반찬이 부실해 실망하는 경우가 허다합니다. 오늘 소개해 드리는 곳은 {m_loc}에 위치한 {m_name} 내돈내산 솔직 방문 후기로, {m_menu} 구성에 {m_eval}이라는 만족스러운 식사를 즐기고 와 강력 추천해 드립니다.
 
-• 상호명: {c_name} ({m_addr})
-• 영업시간 및 주차: {m_time}
-• 주문 메뉴: {m_menu}
+대표사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+{m_addr}에 위치해 있어 대중교통 접근성이 우수하며, 전용 주차 공간이 잘 갖추어져 있어 자차로 방문하기에도 최적화된 동선을 자랑합니다. 문을 열고 들어서자마자 활기찬 분위기와 함께 은은하게 퍼지는 숯불 향이 식욕을 자극합니다.
 
-(사진 1 - 매장 전경 및 상차림)
-{m_taste}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 {m_name} 상세 정보표
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+항목 | 세부 정보
+---|---
+상호명 | {m_name}
+소재지 | {m_addr}
+영업시간 | {m_time}
+방문 시간 / 대기 | {m_wait}
+주문 메뉴 / 가격 | {m_menu}
+주차 여건 | {m_addr.split('(')[-1].replace(')', '') if '(' in m_addr else '주차 가능'}
+추천 목적 | {m_target}
+특징 | ✅ {m_loc} 고기집 중 특급 가성비와 퀄리티<br>✅ {m_taste.split('.')[0] if m_taste else '잡내 없이 육즙 가득한 메인 메뉴'}<br>✅ 정갈하고 손맛 살아있는 기본 상차림과 곁들임 찬<br>✅ 단체 회식 및 가족 외식에 최적화된 쾌적한 테이블 동선<br>✅ 친절하고 빠른 서빙 응대 서비스<br>✅ {m_target} 장소로 강력 추천
 
-💡 김소장의 솔직 총평
-"{m_eval}"
+매장 내부 및 상차림 사진
+출처 입력
 
-#{c_name.replace(' ', '')} #{m_kw.replace(' ', '')} #인천맛집 #우리부동산
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+{m_name} 메인 매장 전경 및 테이블 세팅 전경입니다. 깔끔하게 정돈된 실내 공간에 환기 시설이 잘 완비되어 있어 옷에 냄새 배일 걱정 없이 쾌적하게 식사를 즐기기에 최적화된 구조입니다.
+
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+오늘의 메인 메뉴 상차림 전체 전경입니다. 당일 공수한 신선한 원육 위에 굵은 소금이 적절히 뿌려져 나와 굽기 전부터 남다른 퀄리티를 자랑합니다.
+
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+{m_menu}! {m_eval}을 자랑하는 {m_loc} 알짜배기 찐맛집 방문 현장입니다.
+
+사진 삭제
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+불판 위에 고기를 올리고 노릇노릇하게 구워내는 순간입니다. 겉은 바삭하고 속은 촉촉하게 육즙을 가두며 익어가는데, 고소한 육향이 코끝을 스치며 군침이 돕니다.
+
+사진 삭제
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+첫 점을 집어 소금에만 살짝 찍어 맛본 순간입니다. 잡내 없이 팡 터지는 풍부한 육즙과 쫄깃한 식감이 일품이며, 특제 파채 무침과 묵은지를 곁들이면 느끼함 없이 무한 흡입이 가능합니다.
+
+사진 삭제
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+식사 메뉴로 함께 곁들인 찌개와 사이드 디테일 뷰입니다. 칼칼하고 진한 국물이 속을 든든하게 풀어주어 마지막 밥 한 공기까지 뚝딱 비우게 만듭니다.
+
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+식사를 마치고 나오는 길에 담아본 매장 분위기입니다. 피크 타임에는 웨이팅이 발생할 수 있으니 살짝 여유 있는 시간대에 방문하시는 것을 권해드립니다.
+
+{m_loc} 상권에서 제대로 된 고기 맛과 든든한 한 끼를 {m_menu} 가격에 즐길 수 있는 기회는 흔치 않습니다.
+모임 장소나 가족 외식, 데이트 코스로 실패 없는 알짜배기 맛집을 찾으시는 분들께서는 꼭 한 번 방문해 보시길 권해드립니다.
+
+사진 삭제링크AI 활용 설정
+사진 설명을 입력하세요.
+명함을 누르시면 전화 연결이 됩니다.
+언제든 편하게 연락 주시기 바랍니다.
+
+부동산 상담 문의, 맛집 정보 공유 언제든 환영합니다.
+우리부동산 공인중개사사무소 대표
+김태형 010-2660-8276
+
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+정직하고 최선을 다하여 좋은 정보를 전해드리겠습니다.
+
+#{m_name.replace(' ','')} #{m_loc.replace(' ','')}맛집 #{main_tag.replace(' ','')} #인천맛집 #인천고기집 #인천맛집추천 #내돈내산맛집 #우리부동산 #인천부동산 #청라맛집 #가좌동맛집 #서구맛집 #가족외식추천 #회식장소추천 #모임장소 #데이트맛집 #인천핫플 #솔직후기
 """
-            st.text_area("맛집 블로그 복사창", f_post, height=350)
+                st.markdown("---")
+                st.subheader("📝 네이버 블로그 최상위 맛집 포스팅 본문")
+                st.text_area("맛집 블로그 복사용 전체 본문", food_blog_text, height=450)
 
     with b_tab2:
         st.subheader("🧢 일상 핫플 탐방 정보 입력")
         d1, d2, d3 = st.columns(3)
         with d1:
-            d_name = st.text_input("핫플/브랜드명 *", placeholder="예: 스투시 서울 챕터")
-            d_kw = st.text_input("공략 키워드 *", placeholder="예: 스투시 서울, 도산공원 핫플")
+            d_name = st.text_input("핫플 / 브랜드명 *", placeholder="예: 스투시 서울 챕터 도산")
+            d_loc = st.text_input("위치 / 거리 *", placeholder="예: 서울 강남구 신사동 도산공원 일대")
+            d_kw = st.text_input("메인 검색 키워드 *", placeholder="예: 스투시 서울, 도산공원 핫플, 압구정 쇼룸")
         with d2:
-            d_addr = st.text_input("위치", placeholder="예: 서울 강남구 신사동")
-            d_wait = st.text_input("방문/웨이팅", placeholder="예: 주말 오후 / 40분 대기")
+            d_addr = st.text_input("상세 위치 및 주차 *", placeholder="예: 서울 강남구 압구정로46길 42 (발렛 주차 가능)")
+            d_time = st.text_input("운영시간 및 정기휴무 *", placeholder="예: 매일 11:00 ~ 20:00 (명절 당일 휴무)")
+            d_item = st.text_input("주요 신상 품목 및 가격대 *", placeholder="예: 2026 SS 신상 후드티(18만 원대), 로고 티셔츠, 볼캡")
         with d3:
-            d_eval = st.text_input("한 줄 총평 *", placeholder="예: 40분 웨이팅이 아깝지 않은 스트릿 성지!")
+            d_wait = st.text_input("방문 시간대 및 대기 난이도", placeholder="예: 주말 오후 2시 방문 / 현장 태블릿 40분 대기 등록")
+            d_target = st.text_input("추천 방문 목적", placeholder="예: 주말 쇼핑, 데이트 코스, 스트릿 패션 성지 순례")
+            d_eval = st.text_input("한 줄 총평 *", placeholder="예: 감각적인 인테리어와 힙한 사운드가 공존하는 스트릿 패션의 성지")
 
-        daily_imgs = st.file_uploader("핫플 사진 첨부", accept_multiple_files=True, type=['png', 'jpg', 'jpeg'], key="d_imgs")
-        d_note = st.text_area("내부 분위기 및 쇼핑 팁", placeholder="예: 미니멀한 매장 인테리어와 신상 후드티 라인업이 인상적이었습니다.")
+        daily_imgs = st.file_uploader("📷 핫플 현장 사진 첨부", accept_multiple_files=True, type=['png', 'jpg', 'jpeg'], key="d_imgs")
+        d_note = st.text_area(
+            "내부 인테리어 무드, 신상 라인업, 쇼핑 팁 (스토리텔링용)",
+            placeholder="예: 미니멀한 노출 콘크리트 인테리어에 힙한 사운드가 가득함. 신상 라인업 회전율이 빠르며 피팅룸 대기 전 미리 사이즈 체크 필수."
+        )
 
-        if st.button("🚀 일상 핫플 블로그 포스팅 생성하기", type="primary"):
-            c_dname = d_name if d_name else "핫플레이스"
-            d_post = f"""[{c_dname}] {d_kw} 솔직 방문기!
+        if st.button("🚀 일상 핫플 블로그 실전 포스팅 생성하기", type="primary"):
+            if not d_name or not d_eval:
+                st.error("핫플명과 한 줄 총평은 필수입니다.")
+            else:
+                daily_kw_list = [k.strip() for k in d_kw.split(",") if k.strip()]
+                main_dtag = daily_kw_list[0] if daily_kw_list else d_name
 
-안녕하세요! 일상의 핫플을 전해드리는 우리부동산 김소장입니다.
-요즘 뜨겁게 주목받고 있는 {c_dname}에 다녀왔습니다.
+                daily_blog_text = f"""안녕하세요. 일상의 멋진 공간과 핫플레이스를 기록하는 우리부동산입니다.
+{d_loc} 핫플 중 감각적인 인테리어와 브랜드 헤리티지를 갖추고 이 정도 무드를 보여주는 곳은 정말 귀합니다.
+요즘 도산공원이나 성수동 일대에서 쇼룸을 찾아보시면 겉만 번지르르하고 실제 볼거리가 없거나 웨이팅만 길어 실망하는 경우가 허다합니다. 오늘 소개해 드리는 곳은 {d_loc}에 위치한 {d_name} 솔직 방문 후기로, {d_item} 라인업과 함께 {d_eval}이라는 특별한 경험을 즐기고 와 강력 추천해 드립니다.
 
-• 장소: {c_dname} ({d_addr})
-• 방문 및 대기: {d_wait}
+대표사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+{d_addr}에 위치해 있어 도산공원 카페거리와 함께 연계해 둘러보기에 최적화된 동선을 자랑합니다. 매장 파사드부터 시선을 사로잡는 모던한 외관과 함께 감각적인 브랜드 시그니처 로고가 멋스럽게 안착되어 있습니다.
 
-(사진 1 - 핫플 현장 및 쇼룸 전경)
-{d_note}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 {d_name} 상세 정보표
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+항목 | 세부 정보
+---|---
+장소명 | {d_name}
+소재지 | {d_addr}
+운영시간 | {d_time}
+방문 시간 / 대기 | {d_wait}
+주요 품목 / 가격대 | {d_item}
+주차 여건 | {d_addr.split('(')[-1].replace(')', '') if '(' in d_addr else '인근 유료/발렛 주차'}
+추천 목적 | {d_target}
+특징 | ✅ {d_loc} 일대 스트릿 패션의 상징적 랜드마크 쇼룸<br>✅ {d_note.split('.')[0] if d_note else '미니멀하고 감각적인 인테리어 무드'}<br>✅ 시즌 신상 어패럴 및 헤드웨어 풀 라인업 구비<br>✅ 쾌적한 피팅룸 및 친절한 스태프 어드바이스<br>✅ 포토존이 살아있는 감각적인 익스테리어 디자인<br>✅ {d_target} 코스로 강력 추천
 
-💡 김소장의 한 줄 요약
-"{d_eval}"
+쇼룸 내부 및 디스플레이 사진
+출처 입력
 
-#{c_dname.replace(' ', '')} #{d_kw.replace(' ', '')} #핫플탐방 #우리부동산
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+{d_name} 메인 매장 진입로 및 1층 파사드 전경입니다. 널찍한 통유리창 너머로 감각적인 조명과 디스플레이가 한눈에 들어와 지나가는 사람들의 발길을 멈추게 만듭니다.
+
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+1층 메인 쇼룸 전체 전경입니다. 미니멀한 노출 콘크리트 베이스 위에 힙한 BGM이 흐르며, 브랜드의 아이덴티티를 온전히 느낄 수 있는 세련된 공간 배치를 보여줍니다.
+
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+{d_item}! {d_eval}을 자랑하는 {d_loc} 알짜배기 핫플레이스 탐방 현장입니다.
+
+사진 삭제
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+시즌 메인 랙 디스플레이 구역입니다. 원단의 터치감과 핏감을 직접 만져보고 확인할 수 있으며, 마감 봉제 하나까지 탄탄하게 제작되어 실물 깡패의 면모를 보여줍니다.
+
+사진 삭제
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+쇼룸 중앙에서 피팅룸 방향을 바라본 레이아웃입니다. 동선 간격이 넉넉해 주말 피크 타임에도 쾌적하게 아이템을 둘러볼 수 있도록 배려되어 있습니다.
+
+사진 삭제
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+헤드웨어 및 액세서리 쇼케이스 상세 뷰입니다. 품절 대란을 일으키는 시그니처 캡과 비니 라인업이 정갈하게 진열되어 있어 쇼핑 욕구를 자극합니다.
+
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+피팅을 마치고 매장을 나서며 담아본 쇼룸 뷰입니다. 현장 웨이팅이 발생할 수 있으니 도착 즉시 현장 태블릿에 대기 등록을 하시는 것을 권해드립니다.
+
+{d_loc} 상권에서 브랜드의 진정한 감성과 트렌디한 무드를 {d_item} 라인업과 함께 온전히 즐길 수 있는 공간은 흔치 않습니다.
+주말 도산공원 나들이나 감각적인 쇼핑 데이트 코스를 찾으시는 분들께서는 서둘러 현장을 방문해 보시길 권해드립니다.
+
+사진 삭제링크AI 활용 설정
+사진 설명을 입력하세요.
+명함을 누르시면 전화 연결이 됩니다.
+언제든 편하게 연락 주시기 바랍니다.
+
+부동산 상담 문의, 핫플 정보 공유 언제든 환영합니다.
+우리부동산 공인중개사사무소 대표
+김태형 010-2660-8276
+
+사진 삭제AI 활용 설정
+사진 설명을 입력하세요.
+정직하고 최선을 다하여 유익한 정보를 전해드리겠습니다.
+
+#{d_name.replace(' ','')} #{d_loc.replace(' ','')}핫플 #{main_dtag.replace(' ','')} #도산공원핫플 #압구정핫플 #서울쇼룸 #스트릿패션 #쇼핑투어 #데이트코스 #우리부동산 #인천부동산 #주말나들이 #핫플투어 #패션스타그램 #쇼핑후기 #도산공원카페거리 #신사동핫플 #솔직방문기
 """
-            st.text_area("일상 블로그 복사창", d_post, height=350)
+                st.markdown("---")
+                st.subheader("📝 네이버 블로그 최상위 일상 핫플 포스팅 본문")
+                st.text_area("일상 핫플 블로그 복사용 전체 본문", daily_blog_text, height=450)
 
 # =============================================================
 # 7. 🏢 [부업] 수도권 청약 알림 허브 & 수지분석
