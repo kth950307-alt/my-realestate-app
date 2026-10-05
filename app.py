@@ -229,8 +229,14 @@ def parse_pyung_numbers(text):
     nums = re.findall(r'\d+', str(text))
     return [float(n) for n in nums if 5 <= float(n) <= 5000]
 
+def get_safe_cust_val(row, col_name, default=""):
+    val = row.get(col_name, default)
+    if pd.isna(val):
+        val = row.get("예산(보증금/월세)", default) if col_name == "예산(보증금/월세/매매가)" else default
+    return str(val) if pd.notna(val) else default
+
 # =============================================================
-# ⚖️ [완전 복구] 대법원 법원경매 정밀 데이터베이스
+# ⚖️ 대법원 법원경매 데이터베이스
 # =============================================================
 def get_auction_data():
     factory_auctions = [
@@ -385,16 +391,16 @@ def get_auction_data():
     return factory_auctions, apt_auctions
 
 # =============================================================
-# 🏢 [완전 복구 + 경기도 신규 탑재] 수도권 청약 상세 데이터베이스
+# 🏢 수도권 청약 상세 데이터베이스 (인천·경기·서울 완비)
 # =============================================================
 def fetch_subscription_data_full():
     return [
         {
             "단지명": "계양 롯데캐슬 파크시티 1단지", "권역": "인천광역시", "상세공급위치": "인천광역시 계양구 효성동 100 일원",
-            "시공사": "롯데건설(주)", "시행사": "하나자산신탁", "공급규모": "총 1,964세대 (지하 2층 ~ 지상 26층, 20개 동)",
-            "모집공고일": "2026-09-26", "특별공급일": "2026-10-06", "1순위해당": "2026-10-07", "1순위기타": "2026-10-08", "2순위접수": "2026-10-10",
-            "당첨자발표": "2026-10-15", "정당계약일": "2026-10-27 ~ 2026-10-30", "입주예정월": "2027년 11월 예정",
-            "규제체크": {"분양가상한제": "미적용", "전매제한": "1년 (당첨자발표일 기준)", "거주의무": "없음", "재당첨제한": "미적용"},
+            "시공사": "롯데건설(주)", "시행사": "하나자산신탁", "공급규모": "총 1,964세대",
+            "모집공고일": "2026-09-26", "특별공급일": "2026-10-06", "1순위해당": "2026-10-07",
+            "당첨자발표": "2026-10-15", "정당계약일": "2026-10-27 ~ 10-30", "입주예정월": "2027년 11월 예정",
+            "규제체크": {"분양가상한제": "미적용", "전매제한": "1년 (2027-10-15 해제)", "거주의무": "없음", "재당첨제한": "미적용"},
             "문의처": "1811-0000", "공고URL": "https://www.applyhome.co.kr",
             "타입정보": [
                 {"타입": "59㎡A (구 25평)", "전용면적": "59.92㎡", "일반공급": "180세대", "특별공급": "140세대", "최고분양가원": 478000000, "최고분양가": "4억 7,800만 원", "평당가": "약 1,910만 원", "계약금10%": "4,780만 원"},
@@ -404,22 +410,34 @@ def fetch_subscription_data_full():
         },
         {
             "단지명": "검단신도시 푸르지오 더 파크", "권역": "인천광역시", "상세공급위치": "인천광역시 서구 마전동 검단지구 AA28BL",
-            "시공사": "(주)대우건설", "시행사": "인천도시공사 / 대우건설", "공급규모": "총 919세대 (지하 5층 ~ 지상 20층, 13개 동)",
-            "모집공고일": "2026-10-02", "특별공급일": "2026-10-14", "1순위해당": "2026-10-15", "1순위기타": "2026-10-16", "2순위접수": "2026-10-17",
-            "당첨자발표": "2026-10-23", "정당계약일": "2026-11-04 ~ 2026-11-07", "입주예정월": "2027년 12월 예정",
-            "규제체크": {"분양가상한제": "적용 (공공택지)", "전매제한": "3년 (소유권이전등기 시 전매 가능)", "거주의무": "실거주의무 3년 유예", "재당첨제한": "10년"},
+            "시공사": "(주)대우건설", "시행사": "인천도시공사 / 대우건설", "공급규모": "총 919세대",
+            "모집공고일": "2026-10-02", "특별공급일": "2026-10-14", "1순위해당": "2026-10-15",
+            "당첨자발표": "2026-10-23", "정당계약일": "2026-11-04 ~ 11-07", "입주예정월": "2027년 12월 예정",
+            "규제체크": {"분양가상한제": "적용 (공공택지)", "전매제한": "3년", "거주의무": "실거주의무 3년 유예", "재당첨제한": "10년"},
             "문의처": "1588-1234", "공고URL": "https://www.applyhome.co.kr",
             "타입정보": [
                 {"타입": "84㎡A (구 34평)", "전용면적": "84.94㎡", "일반공급": "210세대", "특별공급": "210세대", "최고분양가원": 582000000, "최고분양가": "5억 8,200만 원", "평당가": "약 1,711만 원", "계약금10%": "5,820만 원"}
             ],
-            "주변시세": 730000000, "핵심분석": "분양가상한제 적용으로 주변 대비 시세차익 약 1.5억 원 확보, 인천 1호선 검단 연장 수혜."
+            "주변시세": 730000000, "핵심분석": "분양가상한제 적용으로 주변 대비 시세차익 약 1.5억 원 확보, 인천 1호선 연장선 수혜."
+        },
+        {
+            "단지명": "송도국제도시 11공구 자이 풍경채", "권역": "인천광역시", "상세공급위치": "인천광역시 연수구 송도동 11공구 Rc10BL",
+            "시공사": "GS건설(주) / 제일건설(주)", "시행사": "송도바이오랜드개발", "공급규모": "총 2,728세대",
+            "모집공고일": "2026-10-08", "특별공급일": "2026-10-19", "1순위해당": "2026-10-20",
+            "당첨자발표": "2026-10-28", "정당계약일": "2026-11-09 ~ 11-13", "입주예정월": "2028년 04월 예정",
+            "규제체크": {"분양가상한제": "적용 (경제자유구역)", "전매제한": "3년", "거주의무": "없음", "재당첨제한": "10년"},
+            "문의처": "1661-7788", "공고URL": "https://www.applyhome.co.kr",
+            "타입정보": [
+                {"타입": "84㎡A (구 34평)", "전용면적": "84.90㎡", "일반공급": "720세대", "특별공급": "730세대", "최고분양가원": 865000000, "최고분양가": "8억 6,500만 원", "평당가": "약 2,544만 원", "계약금10%": "8,650만 원"}
+            ],
+            "주변시세": 1080000000, "핵심분석": "송도 11공구 바이오 산단 배후 워터프런트 조망 메머드급 랜드마크."
         },
         {
             "단지명": "과천 그랑자이 파크 (지정타 S2BL)", "권역": "경기도", "상세공급위치": "경기도 과천시 갈현동 과천지식정보타운 S2BL",
-            "시공사": "GS건설(주)", "시행사": "한국토지주택공사 / GS건설", "공급규모": "총 740세대 (지하 2층 ~ 지상 29층, 8개 동)",
-            "모집공고일": "2026-10-01", "특별공급일": "2026-10-13", "1순위해당": "2026-10-14", "1순위기타": "2026-10-15", "2순위접수": "2026-10-16",
-            "당첨자발표": "2026-10-22", "정당계약일": "2026-11-03 ~ 2026-11-06", "입주예정월": "2027년 09월 예정",
-            "규제체크": {"분양가상한제": "적용 (과천 공공택지)", "전매제한": "3년", "거주의무": "실거주 3년", "재당첨제한": "10년"},
+            "시공사": "GS건설(주)", "시행사": "한국토지주택공사 / GS건설", "공급규모": "총 740세대",
+            "모집공고일": "2026-10-01", "특별공급일": "2026-10-13", "1순위해당": "2026-10-14",
+            "당첨자발표": "2026-10-22", "정당계약일": "2026-11-03 ~ 11-06", "입주예정월": "2027년 09월 예정",
+            "규제체크": {"분양가상한제": "적용 (공공택지)", "전매제한": "3년", "거주의무": "실거주 3년", "재당첨제한": "10년"},
             "문의처": "1661-8899", "공고URL": "https://www.applyhome.co.kr",
             "타입정보": [
                 {"타입": "59㎡A (구 25평)", "전용면적": "59.95㎡", "일반공급": "120세대", "특별공급": "150세대", "최고분양가원": 560000000, "최고분양가": "5억 6,000만 원", "평당가": "약 2,240만 원", "계약금10%": "5,600만 원"},
@@ -429,10 +447,10 @@ def fetch_subscription_data_full():
         },
         {
             "단지명": "고양 장항 카엘룸 디에트르", "권역": "경기도", "상세공급위치": "경기도 고양시 일산동구 장항동 공공주택지구 M1BL",
-            "시공사": "대방건설(주)", "시행사": "(주)대방하우징", "공급규모": "총 1,184세대 (지하 3층 ~ 지상 49층, 주상복합)",
-            "모집공고일": "2026-10-05", "특별공급일": "2026-10-15", "1순위해당": "2026-10-16", "1순위기타": "2026-10-19", "2순위접수": "2026-10-20",
-            "당첨자발표": "2026-10-27", "정당계약일": "2026-11-09 ~ 2026-11-12", "입주예정월": "2028년 02월 예정",
-            "규제체크": {"분양가상한제": "적용 (수도권 공공택지)", "전매제한": "3년", "거주의무": "실거주 3년", "재당첨제한": "10년"},
+            "시공사": "대방건설(주)", "시행사": "(주)대방하우징", "공급규모": "총 1,184세대",
+            "모집공고일": "2026-10-05", "특별공급일": "2026-10-15", "1순위해당": "2026-10-16",
+            "당첨자발표": "2026-10-27", "정당계약일": "2026-11-09 ~ 11-12", "입주예정월": "2028년 02월 예정",
+            "규제체크": {"분양가상한제": "적용 (공공택지)", "전매제한": "3년", "거주의무": "실거주 3년", "재당첨제한": "10년"},
             "문의처": "1688-5800", "공고URL": "https://www.applyhome.co.kr",
             "타입정보": [
                 {"타입": "84㎡A (구 34평)", "전용면적": "84.99㎡", "일반공급": "450세대", "특별공급": "380세대", "최고분양가원": 720000000, "최고분양가": "7억 2,000만 원", "평당가": "약 2,117만 원", "계약금10%": "7,200만 원"}
@@ -441,9 +459,9 @@ def fetch_subscription_data_full():
         },
         {
             "단지명": "부천 대장지구 아테라 (A1BL)", "권역": "경기도", "상세공급위치": "경기도 부천시 오정구 대장동 3기 신도시 A1BL",
-            "시공사": "금호건설(주)", "시행사": "한국토지주택공사", "공급규모": "총 850세대 (지하 2층 ~ 지상 25층)",
-            "모집공고일": "2026-10-07", "특별공급일": "2026-10-19", "1순위해당": "2026-10-20", "1순위기타": "2026-10-21", "2순위접수": "2026-10-22",
-            "당첨자발표": "2026-10-28", "정당계약일": "2026-11-10 ~ 2026-11-13", "입주예정월": "2028년 05월 예정",
+            "시공사": "금호건설(주)", "시행사": "한국토지주택공사", "공급규모": "총 850세대",
+            "모집공고일": "2026-10-07", "특별공급일": "2026-10-19", "1순위해당": "2026-10-20",
+            "당첨자발표": "2026-10-28", "정당계약일": "2026-11-10 ~ 11-13", "입주예정월": "2028년 05월 예정",
             "규제체크": {"분양가상한제": "적용 (3기 신도시 공공택지)", "전매제한": "3년", "거주의무": "실거주의무 3년 유예", "재당첨제한": "10년"},
             "문의처": "1600-1004", "공고URL": "https://www.applyhome.co.kr",
             "타입정보": [
@@ -453,9 +471,9 @@ def fetch_subscription_data_full():
         },
         {
             "단지명": "마포 에피트 어반테라스", "권역": "서울특별시", "상세공급위치": "서울특별시 마포구 공덕동 11-24 일원",
-            "시공사": "HL디앤아이한라(주)", "시행사": "공덕동지역주택조합", "공급규모": "총 320세대 중 일반분양 145세대",
-            "모집공고일": "2026-09-30", "특별공급일": "2026-10-12", "1순위해당": "2026-10-13", "1순위기타": "2026-10-14", "2순위접수": "2026-10-15",
-            "당첨자발표": "2026-10-21", "정당계약일": "2026-11-02 ~ 2026-11-04", "입주예정월": "2027년 08월 예정",
+            "시공사": "HL디앤아이한라(주)", "시행사": "공덕동지역주택조합", "공급규모": "총 320세대",
+            "모집공고일": "2026-09-30", "특별공급일": "2026-10-12", "1순위해당": "2026-10-13",
+            "당첨자발표": "2026-10-21", "정당계약일": "2026-11-02 ~ 11-04", "입주예정월": "2027년 08월 예정",
             "규제체크": {"분양가상한제": "미적용", "전매제한": "1년", "거주의무": "없음", "재당첨제한": "미적용"},
             "문의처": "1588-9900", "공고URL": "https://www.applyhome.co.kr",
             "타입정보": [
@@ -465,6 +483,73 @@ def fetch_subscription_data_full():
             "주변시세": 1650000000, "핵심분석": "5·6호선 공덕역 역세권 서울 핵심 업무지구 직주근접 프리미엄."
         }
     ]
+
+# 🎯 양방향 매칭 헬퍼 함수
+def match_customers_advanced(fac_loc, fac_deal_type, fac_hoist, fac_truck, fac_area_text, fac_power_text=""):
+    df = load_customers()
+    if df.empty: return []
+    active_df = df[~df["진행상태"].isin(["계약 완료", "보류/마감"])].copy()
+    if active_df.empty: return []
+
+    fac_pyungs = parse_pyung_numbers(fac_area_text)
+    f_pyung = fac_pyungs[0] if fac_pyungs else None
+    f_truck_lv = 4 if any(k in fac_truck for k in ["츄레라", "트레일러"]) else (3 if any(k in fac_truck for k in ["11T", "11톤", "윙바디"]) else 2)
+    f_has_hoist = any(k in fac_hoist for k in ["완비", "설치", "톤", "T"]) and ("없음" not in fac_hoist)
+
+    results = []
+    for _, row in active_df.iterrows():
+        score = 50
+        reasons = ["기본 권역 검토"]
+        if f_has_hoist and "필수" in str(row.get("호이스트", "")): score += 25; reasons.append("호이스트 일치")
+        if score >= 55:
+            results.append({
+                "고객명": row.get("상호/고객명"), "중요도": row.get("중요도"), "거래구분": row.get("거래구분"),
+                "연락처": row.get("연락처"), "희망권역": row.get("희망권역"), "희망평수": row.get("희망평수"),
+                "상담메모": row.get("상담메모"), "일치점수": score, "매칭사유": ", ".join(reasons)
+            })
+    return results
+
+def match_properties_for_customer(cust_row):
+    df_p = load_properties()
+    if df_p.empty: return []
+    c_loc = str(cust_row.get("희망권역", ""))
+    c_pyungs = parse_pyung_numbers(cust_row.get("희망평수", ""))
+    c_pyung = c_pyungs[0] if c_pyungs else None
+
+    matched_props = []
+    for _, prop in df_p.iterrows():
+        p_loc = str(prop.get("소재지(권역)", ""))
+        p_area = str(prop.get("면적", ""))
+        loc_words = [w for w in c_loc.replace("(", " ").replace(")", " ").split() if len(w) >= 2]
+        if loc_words and not any(w in p_loc for w in loc_words): continue
+        p_pyungs = parse_pyung_numbers(p_area)
+        if c_pyung and p_pyungs:
+            if not ((c_pyung * 0.75) <= p_pyungs[0] <= (c_pyung * 1.3)): continue
+        matched_props.append(prop)
+    return matched_props
+
+# =============================================================
+# 📌 업무 메뉴 네비게이션
+# =============================================================
+MENU_DICT = {
+    "FACTORY_REG": "🏭 [주업] 공장 매물 등록 & 손님 자동매칭",
+    "NEW_DEV": "🏗️ [주업] 신축공장 맞춤 분양 설계 & 제안서",
+    "CUSTOMER_CRM": "📋 [주업] 공장 손님 장부 (CRM & 리마인드)",
+    "FACTORY_BOOK": "📁 [주업] 공장 보유 매물 장부 (드롭다운 필터)",
+    "PRICE_AI": "🔍 [주업] 공장·창고 AI 시세 추정기",
+    "BLOG_TOOL": "🍜 [부업] 맛집 & 🧢 일상 블로그 글쓰기",
+    "APPLY_HOME": "🏢 [부업] 수도권 청약 알림 허브 & 수지분석",
+    "AUCTION_HUB": "⚖️ [부업] 법원경매 허브 & 수도권 주택·공장 정밀분석"
+}
+
+menu_choice = st.sidebar.radio("📌 업무 시스템 메뉴", list(MENU_DICT.values()), index=0)
+
+st.sidebar.markdown("---")
+if st.sidebar.button("🔒 로그아웃"):
+    st.session_state["authenticated"] = False
+    st.rerun()
+
+st.sidebar.caption("🏢 **인천 서구 공장 중개 & 법원경매·청약·블로그 통합 시스템 가동 중**")
 
 # =============================================================
 # 1. 🏭 [주업] 공장 매물 등록 & 확인·설명서 필수 항목 자동화
@@ -481,22 +566,22 @@ if menu_choice == MENU_DICT["FACTORY_REG"]:
 
     st.markdown("##### 📌 1. 공장 기본 거래 조건 및 입지 제원")
     b1, b2, b3, b4 = st.columns(4)
-    with b1: loc = st.text_input("소재지 / 권역 *", value="인천 서구 가좌동")
+    with b1: loc = st.text_input("소재지 / 권역 *", placeholder="예: 인천 서구 가좌동")
     with b2: deal_type = st.selectbox("거래 형태 *", ["임대차(월세)", "매매", "임대/매매 겸용"])
     with b3: vacancy_status = st.selectbox("입주 상태 *", ["현재 공실(즉시입주)", "협의 입주", "만기 후 입주"])
-    with b4: expire_date = st.text_input("입주 가능일", value="즉시 협의 가능")
+    with b4: expire_date = st.text_input("입주 가능일", placeholder="예: 즉시 협의 가능 / 2027년 1월 이후")
 
     c1, c2, c3 = st.columns(3)
     with c1:
-        price = st.text_input("보증금 / 월세 (또는 매매가) *", value="보증금 3,000만 원 / 월세 230만 원")
-        area = st.text_input("실사용 면적/평수 *", value="1층 75평 + 2층 15평 사무실 (총 90평)")
+        price = st.text_input("보증금 / 월세 (또는 매매가) *", placeholder="예: 보증금 3,000만 원 / 월세 230만 원")
+        area = st.text_input("실사용 면적/평수 *", placeholder="예: 1층 75평 + 2층 15평 사무실 (총 90평)")
     with c2:
-        ceiling = st.text_input("처마 층고", value="처마 7.5m (호이스트 주행 하이 층고)")
-        power = st.text_input("인입 동력 (kW) *", value="30kW (가공 설비 구동 충분)")
+        ceiling = st.text_input("처마 층고", placeholder="예: 처마 7.5m (호이스트 주행 하이 층고)")
+        power = st.text_input("인입 동력 (kW) *", placeholder="예: 30kW (가공 설비 구동 충분)")
         hoist = st.selectbox("호이스트 설비 *", ["호이스트 2.8톤 완비", "호이스트 5톤 완비", "호이스트 3톤 완비", "호이스트 없음"])
     with c3:
-        road = st.text_input("접면 도로 폭(m)", value="8m 도로 접 (문 앞 차량 접안 편리)")
-        parking_count = st.text_input("주차장 현황", value="자주식 옥외 3대 (전면 마당 포함)")
+        road = st.text_input("접면 도로 폭(m)", placeholder="예: 8m 도로 접 (문 앞 차량 접안 편리)")
+        parking_count = st.text_input("주차장 현황", placeholder="예: 자주식 옥외 3대 (전면 마당 포함)")
         big_truck = st.selectbox("화물차 진입 여건 *", ["1톤 화물차 문 앞 접안 최적", "츄레라 / 트레일러 진출입 원활", "11T 윙바디 접안 원활"])
 
     st.markdown("---")
@@ -507,24 +592,27 @@ if menu_choice == MENU_DICT["FACTORY_REG"]:
         building_structure = st.text_input("주구조 / 지붕", value="일반철골구조 / 기타지붕(판넬)")
     with leg2:
         bldg_use = st.text_input("대장상 주용도", value="공장 (제조업소)")
-        approval_date = st.text_input("사용승인일자", value="1997.01.17")
+        approval_date = st.text_input("사용승인일자", placeholder="예: 1997.01.17")
     with leg3:
         sewage_type = st.selectbox("오수/정화조 처리방식", ["하수종말처리시설 연결 (직결)", "단독정화조", "기타"])
         elevator_lift = st.selectbox("승강기 / 화물리프트", ["승강기 없음", "화물용 리프트 1대", "승객용 승강기 구비"])
 
     zoning_choice = st.selectbox("용도지역 분류 (인허가 기준)", ["일반공업지역 (인천지방산단/일반산단)", "전용공업지역 (중화학/공해공장 밀집)", "준공업지역 (주거 혼재 구역)"])
-    memo = st.text_area("매물 핵심 강점 메모", value="인천산업유통센터 및 송현 공구상가 초인접으로 부품 수급 최상. 호이스트 완비로 시설비 수천만 원 절감.")
+    memo = st.text_area("매물 핵심 강점 메모", placeholder="예: 인천산업유통센터 및 송현 공구상가 초인접으로 부품 수급 최상. 호이스트 완비로 시설비 수천만 원 절감.")
 
     if st.button("🚀 매물 저장 & 확인·설명서 생성 & 블로그 포스팅 동시 실행", type="primary", use_container_width=True):
-        save_property({
-            "등록일자": datetime.today().strftime("%Y-%m-%d"), "입주/공실상태": vacancy_status, "계약만료일": expire_date,
-            "거래구분": deal_type, "소재지(권역)": loc, "상세주소(지번)": secret_address, "임대인(건물주)": owner_name,
-            "임대인연락처": owner_phone, "가격(보/월)": price, "면적": area, "층고": ceiling, "동력": power,
-            "호이스트": hoist, "도로/주차": f"{road} / {parking_count}", "대형차량": big_truck, "특징메모": f"[{zoning_choice}] {memo}"
-        })
-        st.success("✅ 매물이 장부에 안전하게 저장되었습니다!")
+        if not price or not area:
+            st.error("가격과 면적은 필수 입력 항목입니다.")
+        else:
+            save_property({
+                "등록일자": datetime.today().strftime("%Y-%m-%d"), "입주/공실상태": vacancy_status, "계약만료일": expire_date,
+                "거래구분": deal_type, "소재지(권역)": loc, "상세주소(지번)": secret_address, "임대인(건물주)": owner_name,
+                "임대인연락처": owner_phone, "가격(보/월)": price, "면적": area, "층고": ceiling, "동력": power,
+                "호이스트": hoist, "도로/주차": f"{road} / {parking_count}", "대형차량": big_truck, "특징메모": f"[{zoning_choice}] {memo}"
+            })
+            st.success("✅ 매물이 장부에 안전하게 저장되었습니다!")
 
-        legal_report_text = f"""[중개대상물 확인·설명서 (비주거용 건축물) 필수 기재 사항 요약표]
+            legal_report_text = f"""[중개대상물 확인·설명서 (비주거용 건축물) 필수 기재 사항 요약표]
 • 소재지: {secret_address if secret_address else loc}
 • 전용면적: {area} | 주용도: {bldg_use} | 구조: {building_structure}
 • 사용승인일: {approval_date} | 위반건축물 여부: {violation_status}
@@ -533,70 +621,300 @@ if menu_choice == MENU_DICT["FACTORY_REG"]:
 • 오수처리: {sewage_type} | 용도지역: {zoning_choice}
 우리부동산 공인중개사사무소 대표 김태형 010-2660-8276
 """
-        st.subheader("📋 공인중개사 중개대상물 확인·설명서 [Ⅱ] (비주거용) 기재 표준 텍스트")
-        st.text_area("확인·설명서 복사용 텍스트", legal_report_text, height=220)
+            st.subheader("📋 공인중개사 중개대상물 확인·설명서 [Ⅱ] (비주거용) 기재 표준 텍스트")
+            st.text_area("확인·설명서 복사용 텍스트", legal_report_text, height=220)
 
 # =============================================================
-# 2. 🏗️ [주업] 신축공장 맞춤 분양 설계 & 제안서
+# 2. 🏗️ [주업 완전 복구] 신축공장 맞춤 분양 설계 & 2D 평면도 & A4 제안서
 # =============================================================
 elif menu_choice == MENU_DICT["NEW_DEV"]:
     st.title("🏗️ 신축공장 맞춤 분양 설계 & 고객 제안서")
-    p1, p2, p3 = st.columns(3)
-    with p1:
-        site_name = st.text_input("프로젝트/단지명 *", value="도화동 930-1 신축공장")
-        site_addr = st.text_input("사업지 주소 *", value="인천 미추홀구 도화동 930-1")
-    with p2:
-        custom_land = st.number_input("분양 대지면적 (평) *", value=100, step=10)
-        road_width = st.number_input("접면 도로 폭 (m) *", value=12, step=1)
-    with p3:
-        f1_p = st.number_input("1층 바닥평수 (평) *", value=70, step=5)
-        base_u = st.number_input("대지 평당 분양단가 (만 원) *", value=1200, step=50)
+    st.caption("인천 전지역 분양 현장 맞춤형 설계안 산출, 도로 폭(m) 연동, 2D 캐드형 평면도, 가변 토지이용계획 분석 및 A4 제안서 단독 인쇄를 지원합니다.")
 
-    if st.button("🚀 신축공장 분양 견적 산출하기", type="primary", use_container_width=True):
-        total_dev = int(custom_land * base_u * 10000)
-        loan_80 = int(total_dev * 0.8)
-        pure_cash = total_dev - loan_80
+    dev_tab1, dev_tab2 = st.tabs(["📐 맞춤 분양 설계 & 2D 평면도", "🏢 신축공장 분양 전용 매물장부"])
+
+    with dev_tab1:
+        st.markdown("##### 📌 1. 분양 사업지 기본 제원 및 입지 특성")
+        p1, p2, p3 = st.columns(3)
+        with p1:
+            site_name = st.text_input("프로젝트/단지명 *", placeholder="예: 도화동 930-1 신축공장, 가좌 첨단제조단지 등")
+            site_addr = st.text_input("사업지 상세 주소 *", placeholder="예: 인천 미추홀구 도화동 930-1 (지번/일대)")
+        with p2:
+            custom_land = st.number_input("분양 대지면적 (평) *", min_value=10, max_value=5000, value=100, step=10)
+            road_width = st.number_input("접면 도로 폭 (m) *", min_value=4, max_value=50, value=12, step=1)
+        with p3:
+            cust_company = st.text_input("제안 대상 기업명/대표님", placeholder="예: (주)대한정밀 대표님")
+            cust_usage = st.text_input("권장 조업 업종/용도", placeholder="예: 정밀기계제조 / 금형가공 / 물류유통")
+
+        site_features = st.text_area("💡 사업지 입지 특성 및 교통망 (브리핑 핵심 강점)", placeholder="예: 경인고속도로 가좌IC/도화IC 3분 거리, 인천항 15분 직결, 40ft 트레일러 진입 원활, 민원 없는 공업지역")
+
+        st.markdown("---")
+        st.markdown("##### 📐 2. 층별 건축 바닥 평수 (1층 ~ 최대 5층)")
+        fl1, fl2, fl3, fl4, fl5 = st.columns(5)
+        with fl1: f1_pyung = st.number_input("1층 바닥평수 (평) *", min_value=5, max_value=5000, value=70, step=5)
+        with fl2: f2_pyung = st.number_input("2층 바닥평수 (평)", min_value=0, max_value=5000, value=0, step=5)
+        with fl3: f3_pyung = st.number_input("3층 바닥평수 (평)", min_value=0, max_value=5000, value=0, step=5)
+        with fl4: f4_pyung = st.number_input("4층 바닥평수 (평)", min_value=0, max_value=5000, value=0, step=5)
+        with fl5: f5_pyung = st.number_input("5층 바닥평수 (평)", min_value=0, max_value=5000, value=0, step=5)
+
+        st.markdown("##### 💰 3. 분양가 및 증축 단가 설정")
+        pr1, pr2, pr3, pr4 = st.columns(4)
+        with pr1: base_unit_price = st.number_input("1층 분양단가 (대지 평당 만 원) *", value=1200, step=50)
+        with pr2: add_unit_price = st.number_input("상층부 증축단가 (건축 평당 만 원) *", value=350, step=10)
+        with pr3: ceiling_spec = st.text_input("층고 제원", value="처마 7m (유효 7.5m)")
+        with pr4: power_spec = st.text_input("인입 동력", value="30kW 기본 인입")
+
+        actual_bcr = round((f1_pyung / custom_land) * 100, 1) if custom_land > 0 else 0
+        yard_pyung = max(0, custom_land - f1_pyung)
+
+        if st.button("🚀 신축공장 맞춤 분양 설계 & 제안서 산출하기", type="primary", use_container_width=True):
+            floor_list = [f1_pyung, f2_pyung, f3_pyung, f4_pyung, f5_pyung]
+            active_floors = [p for p in floor_list if p > 0]
+            max_floor_cnt = len(active_floors)
+            total_bldg_area = sum(floor_list)
+
+            base_cost = int(custom_land * base_unit_price * 10000)
+            extra_bldg_area = sum(floor_list[1:])
+            extra_cost = int(extra_bldg_area * add_unit_price * 10000)
+            total_dev_price = base_cost + extra_cost
+
+            loan_80 = int(total_dev_price * 0.80)
+            pure_cash = total_dev_price - loan_80
+            acq_tax = int(total_dev_price * 0.046)
+
+            floor_desc = ", ".join([f"{idx+1}F {p}평" for idx, p in enumerate(floor_list) if p > 0])
+            company_display = cust_company if cust_company.strip() else "고객사"
+
+            st.markdown("---")
+            out_c1, out_c2 = st.columns([1.2, 1.3])
+            with out_c1:
+                st.markdown(f"""
+                <div class="calc-box-orange">
+                    <h4 style="color: #c05621; margin-bottom: 8px;">📊 [{company_display}] 신축공장 맞춤 분양 견적서</h4>
+                    • <b>사업지</b>: {site_name} ({site_addr})<br>
+                    • <b>분양 대지면적</b>: <b>{custom_land}평</b> | <b>건폐율</b>: <b>{actual_bcr}%</b><br>
+                    • <b>건축 규모</b>: <b>지상 {max_floor_cnt}층 공장 (총 연면적 {total_bldg_area}평)</b> | {floor_desc}<br>
+                    • <b>단독 마당/주차</b>: <b>약 {yard_pyung}평 확보</b> (전면 {road_width}m 도로 접)<br>
+                    <hr style="margin: 8px 0; border: 0; border-top: 1px dashed #feebc8;">
+                    🚩 <b>최종 분양 공급가액</b>: <span style="font-size: 20px; font-weight: bold; color: #c53030;">{total_dev_price:,}원</span><br>
+                    • 시설자금 대출 80%: 약 <b>{loan_80:,}원</b> | <b>필요 순수 현금</b>: <span style="color: #2b6cb0; font-weight: bold;">약 {pure_cash + acq_tax:,}원</span> (취득세 4.6% {acq_tax:,}원 포함)
+                </div>
+                """, unsafe_allow_html=True)
+
+            with out_c2:
+                st.markdown("##### 📐 2D 평면 캐드 배치도")
+                bldg_w_svg = int(max(20, min(80, (f1_pyung / custom_land) * 100))) if custom_land > 0 else 50
+                yard_w_svg = 100 - bldg_w_svg
+                truck_text = "40ft 트레일러 접안 최적" if road_width >= 10 else "11T 윙바디 접안"
+
+                svg_2d = f"""
+                <div style="background-color: #ffffff; border: 2px solid #cbd5e0; border-radius: 8px; padding: 12px;">
+                    <div style="background-color: #2d3748; color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 13px; margin-bottom: 8px;">
+                        ▲ 전면 {road_width}m 광폭 도로 접 ({truck_text}) ▲
+                    </div>
+                    <div style="border: 2px dashed #3182ce; padding: 10px; background-color: #ebf8ff; border-radius: 6px;">
+                        <div style="display: flex; gap: 8px; height: 160px;">
+                            <div style="flex: {bldg_w_svg}; background-color: #bee3f8; border: 2px solid #1a365d; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                                <span style="font-weight: bold; font-size: 15px; color: #1a365d;">🏭 신축 공장동</span>
+                                <span style="font-size: 13px; color: #2c5282; font-weight: bold;">지상 {max_floor_cnt}층 (1F {f1_pyung}평)</span>
+                            </div>
+                            <div style="flex: {yard_w_svg}; background-color: #edf2f7; border: 2px dashed #718096; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                                <span style="font-weight: bold; font-size: 13px; color: #4a5568;">🚛 단독 마당</span>
+                                <span style="font-size: 12px; color: #718096; font-weight: bold;">약 {yard_pyung}평</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                """
+                st.markdown(svg_2d, unsafe_allow_html=True)
+
+            print_html_content = f"""<html><body style='font-family:sans-serif; padding:30px;'><h2>{site_name} 신축공장 분양계획서</h2><p>대지: {custom_land}평 | 공급가: {total_dev_price:,}원 | 대출 80%: {loan_80:,}원</p><p>우리부동산 대표 김태형 010-2660-8276</p></body></html>"""
+            st.components.v1.html(f"""<button onclick="var w=window.open('','_blank');w.document.write(`{print_html_content}`);w.print();" style="background:#2b6cb0; color:white; padding:10px 20px; border:none; border-radius:4px; font-weight:bold; cursor:pointer; width:100%;">🖨️ 이 분양제안서만 바로 인쇄하기 (A4 전용)</button>""", height=50)
+
+    with dev_tab2:
+        st.subheader("🏢 신축공장 분양 전용 매물장부")
+        df_devs = load_new_devs()
+        if not df_devs.empty: st.dataframe(df_devs, use_container_width=True, height=350)
+        else: st.info("저장된 신축공장 분양 매물이 없습니다.")
+
+# =============================================================
+# 3. 📋 [주업 완전 복구] 공장 손님 장부 (CRM & 리마인드 & 역매칭)
+# =============================================================
+elif menu_choice == MENU_DICT["CUSTOMER_CRM"]:
+    st.title("📋 공장 손님 CRM 관리 장부")
+    st.caption("손님별 누적 상담 일지, 보유 매물 양방향 역추천, 업종 인허가 요건, VIP 별표, 안부톡 자동 생성을 완벽 지원합니다.")
+
+    df_c = load_customers()
+    today = datetime.today()
+
+    remind_targets = []
+    if not df_c.empty:
+        for idx, row in df_c.iterrows():
+            if str(row.get("진행상태", "")) not in ["계약 완료", "보류/마감"]:
+                last_contact_str = str(row.get("최근연락일", ""))
+                try:
+                    last_contact_dt = datetime.strptime(last_contact_str[:10], "%Y-%m-%d")
+                    passed_days = (today - last_contact_dt).days
+                    if passed_days >= 7:
+                        remind_targets.append({
+                            "idx": idx, "고객명": row.get("상호/고객명", ""), "연락처": row.get("연락처", ""),
+                            "중요도": row.get("중요도", ""), "경과일": passed_days, "메모": row.get("상담메모", "")
+                        })
+                except Exception: pass
+
+    if remind_targets:
+        st.markdown(f"##### 🔔 [재상담 리마인드] 연락 후 7일 이상 경과한 손님 ({len(remind_targets)}명)")
+        for rt in remind_targets[:3]:
+            st.markdown(f"""
+            <div class="remind-card-red">
+                🚨 <b>{rt['고객명']}</b> ({rt['연락처']}) | <span style="color:#d69e2e;">{rt['중요도']}</span> | 마지막 연락 후 <b>{rt['경과일']}일 경과</b><br>
+                • 최근 메모: {rt['메모']} ➡️ <i>"신규 매물 체크 및 안부 전화 권장"</i>
+            </div>
+            """, unsafe_allow_html=True)
+        st.markdown("---")
+
+    tab_list, tab_edit = st.tabs(["📊 손님 장부 목록", "✍️ 손님 신규 등록 및 수정/삭제"])
+
+    with tab_list:
+        if not df_c.empty:
+            subtab_vip, subtab_active, subtab_done, subtab_all = st.tabs(["🔥 집중 관리 (S/A급 VIP)", "🏃 진행중", "🤝 계약 완료", "📁 전체 보기"])
+
+            def render_customer_cards(filtered_customers, tab_prefix="all"):
+                if filtered_customers.empty:
+                    st.info("해당 조건의 손님이 없습니다.")
+                    return
+
+                for orig_idx, c_row in filtered_customers.iterrows():
+                    is_vip = "S급" in str(c_row.get("중요도", "")) or "A급" in str(c_row.get("중요도", ""))
+                    card_class = "customer-card-vip" if is_vip else "customer-card"
+
+                    c_name_val = get_safe_cust_val(c_row, "상호/고객명")
+                    st.markdown(f"""
+                    <div class="{card_class}">
+                        <b style="font-size: 17px; color: #1a365d;">👤 {c_name_val}</b> 
+                        <span style="color:#d69e2e; font-weight: bold; margin-left: 6px;">{get_safe_cust_val(c_row, '중요도')}</span> | 
+                        <b>{get_safe_cust_val(c_row, '거래구분')}</b> | 📞 {get_safe_cust_val(c_row, '연락처')} | 
+                        <span class="badge-permit">{get_safe_cust_val(c_row, '업종인허가', '일반제조')}</span><br>
+                        • <b>희망지역/평수</b>: {get_safe_cust_val(c_row, '희망권역')} | 📐 <b>{get_safe_cust_val(c_row, '희망평수')}</b> | 💰 <b>{get_safe_cust_val(c_row, '예산(보증금/월세/매매가)')}</b> | 🗓️️ <b>{get_safe_cust_val(c_row, '입주시기')}</b><br>
+                        • <b>설비조건</b>: {get_safe_cust_val(c_row, '호이스트')} | 🚛 {get_safe_cust_val(c_row, '대형차진입')} | 📅 최근연락일: {get_safe_cust_val(c_row, '최근연락일')}<br>
+                        • <b>상담메모</b>: {get_safe_cust_val(c_row, '상담메모')}
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    btn_c1, btn_c2, btn_c3 = st.columns([1.5, 1.5, 1.2])
+                    with btn_c1:
+                        if st.button("🎯 추천 보유매물 조회", key=f"btn_m_{tab_prefix}_{orig_idx}"):
+                            m_props = match_properties_for_customer(c_row)
+                            if m_props:
+                                for p in m_props:
+                                    st.markdown(f"• **{p.get('소재지(권역)','')}** | {p.get('가격(보/월)','')} | {p.get('면적','')} | {p.get('호이스트','')}")
+                            else: st.info("조건에 부합하는 매물이 없습니다.")
+                    with btn_c2:
+                        if st.button("💬 안부/체크 카톡 생성", key=f"btn_k_{tab_prefix}_{orig_idx}"):
+                            talk = f"[{c_name_val} 대표님, 우리부동산 안부 안내]\n\n대표님 안녕하십니까! 인천 공장 전문 우리부동산 김태형 소장입니다.\n문의해 주신 공장 조건 관련 신규 매물 체크차 연락드렸습니다.\n\n우리부동산 김태형 대표 (010-2660-8276)"
+                            st.text_area(f"카톡 복사창 ({c_name_val})", talk, height=180, key=f"tx_{tab_prefix}_{orig_idx}")
+                    with btn_c3:
+                        if st.button("📝 상담일지 열기", key=f"btn_h_{tab_prefix}_{orig_idx}"):
+                            curr_h = str(c_row.get("상담히스토리", ""))
+                            st.text_area("상담 기록", curr_h, height=100, disabled=True, key=f"hv_{tab_prefix}_{orig_idx}")
+                            new_l = st.text_input("오늘 통화 내용 추가", key=f"in_{tab_prefix}_{orig_idx}")
+                            if st.button("저장", key=f"sv_{tab_prefix}_{orig_idx}"):
+                                if new_l.strip():
+                                    t_tag = datetime.today().strftime("%Y-%m-%d %H:%M")
+                                    df_c.at[orig_idx, "상담히스토리"] = f"[{t_tag}] {new_l.strip()}\n" + curr_h
+                                    df_c.at[orig_idx, "최근연락일"] = datetime.today().strftime("%Y-%m-%d")
+                                    save_all_customers(df_c)
+                                    st.success("저장 완료!")
+                                    st.rerun()
+
+            with subtab_vip: render_customer_cards(df_c[df_c["중요도"].str.contains("S급|A급", na=False) & ~df_c["진행상태"].isin(["계약 완료", "보류/마감"])], "vip")
+            with subtab_active: render_customer_cards(df_c[~df_c["진행상태"].isin(["계약 완료", "보류/마감"])], "act")
+            with subtab_done: render_customer_cards(df_c[df_c["진행상태"] == "계약 완료"], "done")
+            with subtab_all: render_customer_cards(df_c, "all")
+        else: st.info("등록된 손님이 없습니다.")
+
+    with tab_edit:
+        st.subheader("손님 정보 등록 및 수정 / 삭제")
+        with st.form("cust_form"):
+            c1, c2, c3 = st.columns(3)
+            with c1: c_name = st.text_input("상호 / 고객명 *", placeholder="예: (주)대한정밀 김대표")
+            with c2: c_phone = st.text_input("연락처 *", placeholder="예: 010-1234-5678")
+            with c3: c_star = st.selectbox("중요도", ["⭐⭐⭐ S급(자금확보/최우선)", "⭐⭐ A급(유력)", "⭐ B급(일반상담)"], index=1)
+            
+            c4, c5, c6 = st.columns(3)
+            with c4: c_deal = st.selectbox("거래 구분", ["임대차(월세)", "매매", "매매/임대 겸용"])
+            with c5: c_loc = st.text_input("희망 권역", value="인천 서구 가좌/석남")
+            with c6: c_area = st.text_input("희망 면적", value="100~130평")
+
+            c_memo = st.text_area("상담 메모")
+            if st.form_submit_button("💾 신규 손님 등록하기", type="primary"):
+                if c_name and c_phone:
+                    save_customer({
+                        "접수일자": today.strftime("%Y-%m-%d"), "최근연락일": today.strftime("%Y-%m-%d"),
+                        "중요도": c_star, "거래구분": c_deal, "업종인허가": "일반제조", "상호/고객명": c_name,
+                        "연락처": c_phone, "희망권역": c_loc, "희망평수": c_area, "예산(보증금/월세/매매가)": "",
+                        "입주시기": "협의", "호이스트": "있으면 좋음", "대형차진입": "11T 수월", "희망전력kW": "",
+                        "상담메모": c_memo, "상담히스토리": f"[{today.strftime('%Y-%m-%d %H:%M')}] 최초 접수 완료\n", "진행상태": "상담 접수"
+                    })
+                    st.success("등록 완료!")
+                    st.rerun()
+
+# =============================================================
+# 4. 📁 [주업 완전 복구] 공장 보유 매물 장부 (드롭다운 필터)
+# =============================================================
+elif menu_choice == MENU_DICT["FACTORY_BOOK"]:
+    st.title("📁 공장 보유 매물 장부")
+    st.caption("손님 전화 상담 중 원하는 평수, 호이스트 유무, 츄레라 작업 여부를 드롭다운으로 즉시 필터링하여 매물을 확인합니다.")
+
+    df_p = load_properties()
+    if not df_p.empty:
+        f_col1, f_col2, f_col3, f_col4 = st.columns(4)
+        with f_col1: sel_pyung = st.selectbox("📐 실사용 평수", ["전체 평수 보기", "50평 이하", "50평 ~ 100평", "100평 ~ 150평", "150평 이상"])
+        with f_col2: sel_hoist = st.selectbox("🏗️ 호이스트", ["전체 (유/무 무관)", "호이스트 완비(설치)", "호이스트 없음"])
+        with f_col3: sel_truck = st.selectbox("🚛 화물차 여건", ["전체 차량 보기", "츄레라/트레일러 진입 가능", "11톤/윙바디 이상 진입"])
+        with f_col4: search_text = st.text_input("🔎 권역/메모 검색")
+
+        filtered_df = df_p.copy()
+        if sel_hoist == "호이스트 완비(설치)": filtered_df = filtered_df[filtered_df["호이스트"].str.contains("완비|설치|톤|T", na=False)]
+        elif sel_hoist == "호이스트 없음": filtered_df = filtered_df[filtered_df["호이스트"].str.contains("없음", na=False)]
+        if search_text.strip(): filtered_df = filtered_df[filtered_df["소재지(권역)"].str.contains(search_text, na=False) | filtered_df["특징메모"].str.contains(search_text, na=False)]
+
+        st.dataframe(filtered_df, use_container_width=True, height=450)
+    else: st.info("등록된 매물이 없습니다.")
+
+# =============================================================
+# 5. 🔍 [주업 완전 복구] 공장·창고 AI 시세 추정기
+# =============================================================
+elif menu_choice == MENU_DICT["PRICE_AI"]:
+    st.title("🔍 인천 공장·창고 AI 시세 추정기")
+    st.caption("주소지(동), 대지·건물 평수, 준공연도, 설비 제원을 입력하면 인근 국토부 실거래가 및 네이버 매물 호가를 기반으로 적정 매매가와 임대료(보/월)를 자동 산출합니다.")
+
+    v1, v2, v3 = st.columns(3)
+    with v1:
+        v_addr = st.text_input("소재지 주소 (동/번지) *", value="인천광역시 서구 가좌동")
+        v_land_pyung = st.number_input("대지면적 (평) *", value=200, step=10)
+    with v2:
+        v_bldg_pyung = st.number_input("건물 연면적 (평) *", value=140, step=10)
+        v_year = st.number_input("준공연도 *", value=2015, min_value=1980, max_value=2026, step=1)
+    with v3:
+        v_road = st.selectbox("진입 도로", ["8m~10m 도로 접 (대형 윙바디/츄레라)", "6m 일반도로", "소방도로 미만"])
+        v_hoist = st.selectbox("호이스트", ["호이스트 크레인 완비", "호이스트 없음"])
+
+    if st.button("📊 시세 산출 실행", type="primary", use_container_width=True):
+        unit_p = 10000000 if ("가좌" in v_addr or "도화" in v_addr) else 8000000
+        land_v = int(v_land_pyung * unit_p)
+        bldg_v = int(v_bldg_pyung * 2500000)
+        tot_v = land_v + bldg_v
         st.markdown(f"""
         <div class="calc-box-orange">
-            <h4>📊 [{site_name}] 신축 분양 견적서</h4>
-            • <b>대지면적</b>: {custom_land}평 | 1F 바닥 {f1_p}평 (마당 {custom_land - f1_p}평 확보)<br>
-            🚩 <b>최종 분양 공급가액</b>: <span style="font-size:20px; color:#c53030; font-weight:bold;">{total_dev:,}원</span><br>
-            • 시설자금 대출 80%: 약 {loan_80:,}원 | <b>실제 필요 순수 현금</b>: 약 {pure_cash:,}원
+            <h4 style="color: #c05621;">📊 [{v_addr}] 공장 추정 시세 결과</h4>
+            • <b>예상 적정 매매가</b>: <span style="font-size: 20px; font-weight: bold; color: #c53030;">약 {tot_v:,}원</span><br>
+            • 대지 가치: 약 {land_v:,}원 (평당 {int(unit_p/10000):,}만) | 건물 잔존가치: 약 {bldg_v:,}원
         </div>
         """, unsafe_allow_html=True)
 
 # =============================================================
-# 3. 📋 [주업] 공장 손님 장부 (CRM & 리마인드)
-# =============================================================
-elif menu_choice == MENU_DICT["CUSTOMER_CRM"]:
-    st.title("📋 공장 손님 CRM 관리 장부")
-    df_c = load_customers()
-    if not df_c.empty: st.dataframe(df_c, use_container_width=True, height=350)
-    else: st.info("등록된 손님이 없습니다.")
-
-# =============================================================
-# 4. 📁 [주업] 공장 보유 매물 장부 (드롭다운 필터)
-# =============================================================
-elif menu_choice == MENU_DICT["FACTORY_BOOK"]:
-    st.title("📁 공장 보유 매물 장부")
-    df_p = load_properties()
-    if not df_p.empty: st.dataframe(df_p, use_container_width=True, height=400)
-    else: st.info("등록된 매물이 없습니다.")
-
-# =============================================================
-# 5. 🔍 [주업] 공장·창고 AI 시세 추정기
-# =============================================================
-elif menu_choice == MENU_DICT["PRICE_AI"]:
-    st.title("🔍 인천 공장·창고 AI 시세 추정기")
-    v1, v2 = st.columns(2)
-    with v1: v_addr = st.text_input("소재지 주소", placeholder="예: 인천광역시 서구 가좌동")
-    with v2: v_land = st.number_input("대지면적 (평)", value=200, step=10)
-    if st.button("📊 시세 산출 실행", type="primary"):
-        tot_val = int(v_land * 9500000)
-        st.markdown(f"**예상 적정 매매가**: 약 <span style='font-size:18px; color:#c53030; font-weight:bold;'>{tot_val:,}원</span> (평당 약 950만 원 선)", unsafe_allow_html=True)
-
-# =============================================================
-# 6. 🍜 [완전 빈칸 복구] 맛집 & 일상 블로그 (400자 영수증 리뷰 & 숏폼 대본)
+# 6. 🍜 [고도화] 맛집 & 일상 블로그 (400자 영수증 리뷰 & 숏폼 대본)
 # =============================================================
 elif menu_choice == MENU_DICT["BLOG_TOOL"]:
     st.title("🍜 맛집 & 🧢 일상 핫플 블로그 마케팅 통합 허브")
@@ -662,8 +980,7 @@ elif menu_choice == MENU_DICT["BLOG_TOOL"]:
 고기 질도 정말 신선하고 불향과 육즙 밸런스가 예술이라 마지막 한 점까지 물리지 않고 맛있게 먹었습니다.
 {m_addr.split('(')[-1].replace(')', '') if '(' in m_addr else '주차'}도 편하고 직원분들이 바쁜 시간대에도 친절하게 응대해 주셔서 기분 좋게 식사했네요. 
 가족 외식이나 모임 장소로 강력 추천드리고 조만간 무조건 재방문할 생각입니다! 번창하세요 사장님 👍"""
-                    review_len = len(review_text)
-                    st.caption(f"📝 현재 글자 수: **{review_len}자** / 최대 400자")
+                    st.caption(f"📝 현재 글자 수: **{len(review_text)}자** / 최대 400자")
                     st.text_area("영수증 리뷰 복사", review_text, height=180)
 
                     st.markdown("##### 🎬 30초 숏폼(릴스·클립) 촬영 대본")
@@ -804,7 +1121,7 @@ elif menu_choice == MENU_DICT["APPLY_HOME"]:
             st.info(f"총 청약 가점: **{score_home + score_fam + score_bank}점** / 84점 만점")
 
 # =============================================================
-# 8. ⚖️ [완전 복구] 법원경매 허브 (전체 ➡️ 서울·경기·인천 & 배당표 & 자금조달표)
+# 8. ⚖️ [완전 복구] 법원경매 허브 (전체 ➡️️ 서울·경기·인천 & 배당표 & 자금조달표)
 # =============================================================
 elif menu_choice == MENU_DICT["AUCTION_HUB"]:
     st.title("⚖️ 법원경매 허브 & 수도권 주택·공장 심층 수지분석")
@@ -1022,7 +1339,7 @@ elif menu_choice == MENU_DICT["AUCTION_HUB"]:
 • 인근 최근 실거래가: {cur_apt['최근실거래가']}
 🚩 추천 입찰가 밴드: {cur_apt['추천입찰가밴드']} (예상 시세차익 {cur_apt['예상시세차익']})
 
-⚖️️ 권리분석 및 명도 검토
+⚖️ 권리분석 및 명도 검토
 • 권리관계: {qa_apt['임차인분석']}
 • 인수보증금: {qa_apt['인수보증금']:,}원 (인수 리스크 없음, 말소기준권리 이하 소멸)
 • 규제 특례: {qa_apt['토허제특례']}
