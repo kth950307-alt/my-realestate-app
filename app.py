@@ -97,16 +97,6 @@ st.markdown("""
         margin-right: 5px;
         display: inline-block;
     }
-    .tag-purple {
-        background-color: #faf5ff;
-        color: #6b46c1;
-        padding: 3px 8px;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: 700;
-        margin-right: 5px;
-        display: inline-block;
-    }
     .remind-card-red {
         background-color: #fff5f5;
         border-left: 5px solid #e53e3e;
@@ -158,14 +148,6 @@ st.markdown("""
     }
     .sub-badge-hot {
         background-color: #e53e3e;
-        color: white;
-        padding: 3px 8px;
-        border-radius: 4px;
-        font-size: 11.5px;
-        font-weight: bold;
-    }
-    .sub-badge-rent {
-        background-color: #6b46c1;
         color: white;
         padding: 3px 8px;
         border-radius: 4px;
@@ -364,22 +346,22 @@ def get_auction_data():
     return factory_auctions, apt_auctions
 
 # =============================================================
-# 🏢 [확장 데이터베이스] 분양/줍줍 DB & LH·SH 공공임대/청년주택 DB
+# 🏢 [전수 복구] 분양/무순위 줍줍 DB & LH·SH 공공임대 DB (누락 제로)
 # =============================================================
 def fetch_subscription_data_sale():
-    """1. 분양 / 무순위 줍줍 전용 데이터"""
+    """1. 서울·경기·인천·세종 분양 & 로또 줍줍 전수 데이터"""
     return [
         {
             "단지명": "강변역 센트럴 아이파크", "권역": "서울특별시", "유형": "🔥 무순위/취소후재공급 (줍줍)",
             "상세공급위치": "서울특별시 광진구 자양동 680-63 일원",
-            "시공사": "HDC현대산업개발(주)", "공급규모": "총 215세대 중 잔여 2세대",
+            "시공사": "HDC현대산업개발(주)", "공급규모": "총 215세대 중 계약취소/잔여 2세대",
             "모집공고일": "2026-10-02", "특별공급일": "2026-10-07", "1순위해당": "2026-10-08",
             "당첨자발표": "2026-10-15", "정당계약일": "2026-10-26 ~ 10-28", "입주예정월": "2026년 12월 예정",
             "규제체크": {"분양가상한제": "미적용", "전매제한": "1년", "거주의무": "없음", "재당첨제한": "미적용"},
             "공고URL": "https://www.applyhome.co.kr",
             "교통망분석": "지하철 2호선 강변역 및 구의역 더블역세권. 잠실대교를 통한 강남·잠실 10분대 진입.",
             "학군인프라": "성동초(사립), 광진중, 광양고 도보 통학권.",
-            "자격요건요약": "국내 거주 만 19세 이상 성년자 (청약통장 가입여부 무관, 100% 추첨제)",
+            "자격요건요약": "국내 거주 만 19세 이상 성년자 (청약통장 무관, 100% 추첨제)",
             "타입정보": [{"타입": "전용 84㎡A", "세대수": "잔여 2세대", "최고분양가원": 1270000000, "최고분양가": "12억 7,000만 원", "평당가": "약 3,735만"}],
             "인근대장단지": "자양 하늘채 / 구의 롯데캐슬 (84㎡ 16억 8,000만 원)", "예상안전마진": "약 4억 1,000만 원",
             "타입전략": "전국 유주택자 청약 가능. 계약금 20% 현금 조달 계획 필수."
@@ -400,9 +382,24 @@ def fetch_subscription_data_sale():
             "타입전략": "서울 무주택 세대주만 신청 가능. 자금 준비된 3040 실수요자 집중 공략 권장."
         },
         {
+            "단지명": "신림스카이아파트 (20차)", "권역": "서울특별시", "유형": "🔥 임의공급 잔여세대 (줍줍)",
+            "상세공급위치": "서울특별시 관악구 신림동 1433-55",
+            "시공사": "스카이종합건설(주)", "공급규모": "총 43세대 중 잔여 5세대",
+            "모집공고일": "2026-10-05", "특별공급일": "2026-10-12", "1순위해당": "2026-10-13",
+            "당첨자발표": "2026-10-18", "정당계약일": "2026-10-25", "입주예정월": "즉시 입주 가능",
+            "규제체크": {"분양가상한제": "미적용", "전매제한": "등기완료 시", "거주의무": "없음", "재당첨제한": "미적용"},
+            "공고URL": "https://www.applyhome.co.kr",
+            "교통망분석": "신림선 당곡역 및 2호선 신림역 도보 이용 가능. 강남순환도시고속도로 인접.",
+            "학군인프라": "당곡초, 당곡중, 당곡고 인접.",
+            "자격요건요약": "국내 거주 만 19세 이상 (청약통장 무관, 다주택자 가능)",
+            "타입정보": [{"타입": "전용 56㎡", "세대수": "잔여 5세대", "최고분양가원": 580000000, "최고분양가": "5억 8,000만 원", "평당가": "약 2,521만"}],
+            "인근대장단지": "신림 현대아파트 (59㎡ 6억 8,000만 원)", "예상안전마진": "약 1억 원",
+            "타입전략": "서울 진입 희망 1~2인 가구 즉시 입주 틈새 추천."
+        },
+        {
             "단지명": "부천대장 A2블록 부천대장 하우스토리 디센트", "권역": "경기도", "유형": "공공분양",
             "상세공급위치": "경기도 부천시 부천대장 공공주택지구 A2블록",
-            "시공사": "남광토건(주) / 하우스토리", "공급규모": "총 548세대",
+            "시공사": "남광토건(주) / 하우스토리", "공급규모": "지하 2층 ~ 지상 15층, 8개동, 총 548세대",
             "모집공고일": "2026-09-30", "특별공급일": "2026-10-12", "1순위해당": "2026-10-13",
             "당첨자발표": "2026-10-20", "정당계약일": "2026-12-07 ~ 12-11", "입주예정월": "2029년 06월 예정",
             "규제체크": {"분양가상한제": "적용 (공공택지)", "전매제한": "3년", "거주의무": "3년 유예", "재당첨제한": "10년"},
@@ -416,11 +413,77 @@ def fetch_subscription_data_sale():
             ],
             "인근대장단지": "계양 롯데캐슬 파크시티 (84㎡ 7억 2,000만 원)", "예상안전마진": "약 1억 3,200만 원",
             "타입전략": "59A는 판상형 인기 타입, 가점이 낮다면 타워형 틈새 공략 추천."
+        },
+        {
+            "단지명": "과천 그랑자이 파크 (지정타 S2BL)", "권역": "경기도", "유형": "일반분양",
+            "상세공급위치": "경기도 과천시 갈현동 과천지식정보타운 S2BL",
+            "시공사": "GS건설(주)", "공급규모": "총 740세대",
+            "모집공고일": "2026-10-01", "특별공급일": "2026-10-13", "1순위해당": "2026-10-14",
+            "당첨자발표": "2026-10-22", "정당계약일": "2026-11-03 ~ 11-06", "입주예정월": "2027년 09월 예정",
+            "규제체크": {"분양가상한제": "적용 (공공택지)", "전매제한": "3년", "거주의무": "실거주 3년", "재당첨제한": "10년"},
+            "공고URL": "https://www.applyhome.co.kr",
+            "교통망분석": "4호선 과천정보타운역(예정) 역세권, GTX-C 연계, 과천대로·제2경인고속도로 직결.",
+            "학군인프라": "과천율목초·중 통합학교 도보 5분 통학로.",
+            "자격요건요약": "과천시 및 수도권 거주 무주택세대구성원",
+            "타입정보": [
+                {"타입": "전용 59㎡A", "세대수": "120세대", "최고분양가원": 560000000, "최고분양가": "5억 6,000만 원", "평당가": "약 2,240만"},
+                {"타입": "전용 84㎡A", "세대수": "210세대", "최고분양가원": 870000000, "최고분양가": "8억 7,000만 원", "평당가": "약 2,558만"}
+            ],
+            "인근대장단지": "과천 푸르지오 오르투스 (84㎡ 14억 5,000만 원)", "예상안전마진": "약 5억 8,000만 원",
+            "타입전략": "84A는 고가점 경쟁 예상, 59A 특별공급 적극 활용 추천."
+        },
+        {
+            "단지명": "오남역 서희스타힐스 여의재 1단지", "권역": "경기도", "유형": "🔥 임의공급 잔여세대 (줍줍)",
+            "상세공급위치": "경기도 남양주시 오남읍 양지리 704 일원",
+            "시공사": "(주)서희건설", "공급규모": "총 1,308세대 중 잔여 임의공급 8세대",
+            "모집공고일": "2026-10-06", "특별공급일": "2026-10-12", "1순위해당": "2026-10-13",
+            "당첨자발표": "2026-10-18", "정당계약일": "2026-10-26", "입주예정월": "2027년 03월 예정",
+            "규제체크": {"분양가상한제": "미적용", "전매제한": "6개월", "거주의무": "없음", "재당첨제한": "미적용"},
+            "공고URL": "https://www.applyhome.co.kr",
+            "교통망분석": "지하철 4호선 오남역 인접으로 당고개·노원 20분대 진입.",
+            "학군인프라": "양지초, 오남중, 오남고 도보 10분 통학권.",
+            "자격요건요약": "국내 거주 만 19세 이상 (다주택자 신청 가능, 청약통장 무관)",
+            "타입정보": [{"타입": "전용 59㎡A", "세대수": "잔여 8세대", "최고분양가원": 385000000, "최고분양가": "3억 8,500만 원", "평당가": "약 1,540만"}],
+            "인근대장단지": "오남 신우아이딜 (59㎡ 4억 9,000만 원)", "예상안전마진": "약 1억 500만 원",
+            "타입전략": "수도권 3억 대 진입 가능한 4호선 역세권 소액 투자 추천."
+        },
+        {
+            "단지명": "계양 롯데캐슬 파크시티 1단지", "권역": "인천광역시", "유형": "일반분양",
+            "상세공급위치": "인천광역시 계양구 효성동 100 일원",
+            "시공사": "롯데건설(주)", "공급규모": "총 1,964세대",
+            "모집공고일": "2026-09-26", "특별공급일": "2026-10-06", "1순위해당": "2026-10-07",
+            "당첨자발표": "2026-10-15", "정당계약일": "2026-10-27 ~ 10-30", "입주예정월": "2027년 11월 예정",
+            "규제체크": {"분양가상한제": "미적용", "전매제한": "1년", "거주의무": "없음", "재당첨제한": "미적용"},
+            "공고URL": "https://www.applyhome.co.kr",
+            "교통망분석": "서울 2호선 청라 연장선 기대감 및 BRT 정류장 인접, 서인천IC 초근접.",
+            "학군인프라": "효성서초, 북인천여중, 명현중·고 도보 통학권.",
+            "자격요건요약": "인천 및 수도권 거주자 (청약통장 가입 12개월 이상)",
+            "타입정보": [
+                {"타입": "전용 59㎡A", "세대수": "180세대", "최고분양가원": 478000000, "최고분양가": "4억 7,800만 원", "평당가": "약 1,910만"},
+                {"타입": "전용 84㎡A", "세대수": "520세대", "최고분양가원": 659000000, "최고분양가": "6억 5,900만 원", "평당가": "약 1,938만"}
+            ],
+            "인근대장단지": "힐스테이트 자이 계양 (84㎡ 7억 5,000만 원)", "예상안전마진": "약 9,100만 원",
+            "타입전략": "1년 후 입주 전 전매 가능하여 단기 투자 및 갈아타기 최적."
+        },
+        {
+            "단지명": "세종 우미 린 센터파크 (5-2생활권 S1BL)", "권역": "세종/기타", "유형": "🔥 무순위 사후접수 (전국 줍줍)",
+            "상세공급위치": "세종특별자치시 다솜동 5-2생활권 S1블록",
+            "시공사": "우미건설(주)", "공급규모": "총 680세대 중 잔여 3세대",
+            "모집공고일": "2026-10-05", "특별공급일": "2026-10-13", "1순위해당": "2026-10-14",
+            "당첨자발표": "2026-10-19", "정당계약일": "2026-10-28", "입주예정월": "2027년 08월 예정",
+            "규제체크": {"분양가상한제": "적용 (공공택지)", "전매제한": "3년", "거주의무": "없음", "재당첨제한": "10년"},
+            "공고URL": "https://www.applyhome.co.kr",
+            "교통망분석": "세종 BRT 정류장 인접으로 정부세종청사 및 오송역 15분 연결.",
+            "학군인프라": "단지 바로 앞 유치원 및 초·중·고 부지 신설 에듀타운.",
+            "자격요건요약": "전국 거주 만 19세 이상 성년자 (거주지 무관, 청약통장 무관)",
+            "타입정보": [{"타입": "전용 84㎡A", "세대수": "잔여 3세대", "최고분양가원": 485000000, "최고분양가": "4억 8,500만 원", "평당가": "약 1,426만"}],
+            "인근대장단지": "세종 마스터힐스 (84㎡ 6억 8,000만 원)", "예상안전마진": "약 1억 9,500만 원",
+            "타입전략": "전국 청약 가능 줍줍. 거주의무 없어 입주 시 전세로 잔금 충당 가능."
         }
     ]
 
 def fetch_subscription_data_rent():
-    """2. LH / SH / iH 공공임대 & 청년주택 전용 데이터"""
+    """2. LH / SH / iH 공공임대 & 청년주택 전수 데이터"""
     return [
         {
             "단지명": "[SH] 자양동 청년안심주택 (역세권)", "기관": "SH 서울주택도시공사", "권역": "서울특별시", "유형": "청년안심주택 (공공임대)",
@@ -434,7 +497,7 @@ def fetch_subscription_data_rent():
             },
             "신청자격": "만 19세~39세 무주택 청년 (소득 100% 이하: 월 약 360만 원 / 총자산 2억 7,300만 원 이하)",
             "차량기준": "차량 미소유자 우선 (생업용/장애인 차량 외 원칙적 주차 불가)",
-            "청약통장혜택": "청약통장 유무 상관없이 신청 가능 (당첨되어도 청약통장 미사용 유지!)",
+            "청약통장혜택": "청약통장 유무 상관없이 신청 가능 (당첨되어도 청약통장 효력 100% 유지!)",
             "교통및환경": "2호선 구의역 150m 초역세권, 냉장고·세탁기·에어컨 풀퍼니시드 시스템 빌트인 제공."
         },
         {
@@ -449,7 +512,7 @@ def fetch_subscription_data_rent():
             },
             "신청자격": "혼인 7년 이내 신혼부부 또는 예비신혼부부 (소득 130% 이하 / 총자산 3억 4,500만 원 이하)",
             "차량기준": "차량가액 3,708만 원 이하",
-            "청약통장혜택": "행복주택 거주 중에도 청약통장 효력 100% 유지 (향후 본청약 계속 도전 가능)",
+            "청약통장혜택": "행복주택 거주 중에도 청약통장 효력 유지 (향후 일반분양 계속 도전 가능)",
             "교통및환경": "인천 1호선 박촌역 연계, 3기 신도시 계양 테크노밸리 배후 신축 단지, 어린이집 완비."
         },
         {
@@ -607,33 +670,112 @@ if menu_choice == MENU_DICT["FACTORY_REG"]:
             st.text_area("확인·설명서 복사용 텍스트", legal_report_text, height=220)
 
 # =============================================================
-# 2. 🏗️ [주업] 신축공장 맞춤 분양 설계 & 제안서
+# 2. 🏗️ [주업] 신축공장 맞춤 분양 설계 & 2D 평면도 & A4 제안서
 # =============================================================
 elif menu_choice == MENU_DICT["NEW_DEV"]:
     st.title("🏗️ 신축공장 맞춤 분양 설계 & 고객 제안서")
-    p1, p2, p3 = st.columns(3)
-    with p1:
-        site_name = st.text_input("프로젝트/단지명 *", placeholder="예: 도화동 930-1 신축공장")
-        site_addr = st.text_input("사업지 주소 *", placeholder="예: 인천 미추홀구 도화동 930-1")
-    with p2:
-        custom_land = st.number_input("분양 대지면적 (평) *", value=100, step=10)
-        road_width = st.number_input("접면 도로 폭 (m) *", value=12, step=1)
-    with p3:
-        f1_p = st.number_input("1층 바닥평수 (평) *", value=70, step=5)
-        base_u = st.number_input("대지 평당 분양단가 (만 원) *", value=1200, step=50)
+    st.caption("인천 전지역 분양 현장 맞춤형 설계안 산출, 도로 폭(m) 연동, 2D 캐드형 평면도, 가변 토지이용계획 분석 및 A4 제안서 단독 인쇄를 지원합니다.")
 
-    if st.button("🚀 신축공장 분양 견적 산출하기", type="primary", use_container_width=True):
-        total_dev = int(custom_land * base_u * 10000)
-        loan_80 = int(total_dev * 0.8)
-        pure_cash = total_dev - loan_80
-        st.markdown(f"""
-        <div class="calc-box-orange">
-            <h4>📊 [{site_name}] 신축 분양 견적서</h4>
-            • <b>대지면적</b>: {custom_land}평 | 1F 바닥 {f1_p}평 (마당 {custom_land - f1_p}평 확보)<br>
-            🚩 <b>최종 분양 공급가액</b>: <span style="font-size:20px; color:#c53030; font-weight:bold;">{total_dev:,}원</span><br>
-            • 시설자금 대출 80%: 약 {loan_80:,}원 | <b>실제 필요 순수 현금</b>: 약 {pure_cash:,}원
-        </div>
-        """, unsafe_allow_html=True)
+    dev_tab1, dev_tab2 = st.tabs(["📐 맞춤 분양 설계 & 2D 평면도", "🏢 신축공장 분양 전용 매물장부"])
+
+    with dev_tab1:
+        p1, p2, p3 = st.columns(3)
+        with p1:
+            site_name = st.text_input("프로젝트/단지명 *", placeholder="예: 도화동 930-1 신축공장, 가좌 첨단제조단지 등")
+            site_addr = st.text_input("사업지 상세 주소 *", placeholder="예: 인천 미추홀구 도화동 930-1 (지번/일대)")
+        with p2:
+            custom_land = st.number_input("분양 대지면적 (평) *", min_value=10, max_value=5000, value=100, step=10)
+            road_width = st.number_input("접면 도로 폭 (m) *", min_value=4, max_value=50, value=12, step=1)
+        with p3:
+            cust_company = st.text_input("제안 대상 기업명/대표님", placeholder="예: (주)대한정밀 대표님")
+            cust_usage = st.text_input("권장 조업 업종/용도", placeholder="예: 정밀기계제조 / 금형가공 / 물류유통")
+
+        st.markdown("---")
+        fl1, fl2, fl3, fl4, fl5 = st.columns(5)
+        with fl1: f1_pyung = st.number_input("1층 바닥평수 (평) *", min_value=5, max_value=5000, value=70, step=5)
+        with fl2: f2_pyung = st.number_input("2층 바닥평수 (평)", min_value=0, max_value=5000, value=0, step=5)
+        with fl3: f3_pyung = st.number_input("3층 바닥평수 (평)", min_value=0, max_value=5000, value=0, step=5)
+        with fl4: f4_pyung = st.number_input("4층 바닥평수 (평)", min_value=0, max_value=5000, value=0, step=5)
+        with fl5: f5_pyung = st.number_input("5층 바닥평수 (평)", min_value=0, max_value=5000, value=0, step=5)
+
+        pr1, pr2, pr3, pr4 = st.columns(4)
+        with pr1: base_unit_price = st.number_input("1층 분양단가 (대지 평당 만 원) *", value=1200, step=50)
+        with pr2: add_unit_price = st.number_input("상층부 증축단가 (건축 평당 만 원) *", value=350, step=10)
+        with pr3: ceiling_spec = st.text_input("층고 제원", value="처마 7m (유효 7.5m)")
+        with pr4: power_spec = st.text_input("인입 동력", value="30kW 기본 인입")
+
+        actual_bcr = round((f1_pyung / custom_land) * 100, 1) if custom_land > 0 else 0
+        yard_pyung = max(0, custom_land - f1_pyung)
+
+        if st.button("🚀 신축공장 맞춤 분양 설계 & 제안서 산출하기", type="primary", use_container_width=True):
+            floor_list = [f1_pyung, f2_pyung, f3_pyung, f4_pyung, f5_pyung]
+            active_floors = [p for p in floor_list if p > 0]
+            max_floor_cnt = len(active_floors)
+            total_bldg_area = sum(floor_list)
+
+            base_cost = int(custom_land * base_unit_price * 10000)
+            extra_bldg_area = sum(floor_list[1:])
+            extra_cost = int(extra_bldg_area * add_unit_price * 10000)
+            total_dev_price = base_cost + extra_cost
+
+            loan_80 = int(total_dev_price * 0.80)
+            pure_cash = total_dev_price - loan_80
+            acq_tax = int(total_dev_price * 0.046)
+
+            floor_desc = ", ".join([f"{idx+1}F {p}평" for idx, p in enumerate(floor_list) if p > 0])
+            company_display = cust_company if cust_company.strip() else "고객사"
+
+            st.markdown("---")
+            out_c1, out_c2 = st.columns([1.2, 1.3])
+            with out_c1:
+                st.markdown(f"""
+                <div class="calc-box-orange">
+                    <h4 style="color: #c05621; margin-bottom: 8px;">📊 [{company_display}] 신축공장 맞춤 분양 견적서</h4>
+                    • <b>사업지</b>: {site_name} ({site_addr})<br>
+                    • <b>분양 대지면적</b>: <b>{custom_land}평</b> | <b>건폐율</b>: <b>{actual_bcr}%</b><br>
+                    • <b>건축 규모</b>: <b>지상 {max_floor_cnt}층 공장 (총 연면적 {total_bldg_area}평)</b> | {floor_desc}<br>
+                    • <b>단독 마당/주차</b>: <b>약 {yard_pyung}평 확보</b> (전면 {road_width}m 도로 접)<br>
+                    <hr style="margin: 8px 0; border: 0; border-top: 1px dashed #feebc8;">
+                    🚩 <b>최종 분양 공급가액</b>: <span style="font-size: 20px; font-weight: bold; color: #c53030;">{total_dev_price:,}원</span><br>
+                    • 시설자금 대출 80%: 약 <b>{loan_80:,}원</b> | <b>필요 순수 현금</b>: <span style="color: #2b6cb0; font-weight: bold;">약 {pure_cash + acq_tax:,}원</span> (취득세 4.6% {acq_tax:,}원 포함)
+                </div>
+                """, unsafe_allow_html=True)
+
+            with out_c2:
+                st.markdown("##### 📐 2D 평면 캐드 배치도")
+                bldg_w_svg = int(max(20, min(80, (f1_pyung / custom_land) * 100))) if custom_land > 0 else 50
+                yard_w_svg = 100 - bldg_w_svg
+                truck_text = "40ft 트레일러 접안 최적" if road_width >= 10 else "11T 윙바디 접안"
+
+                svg_2d = f"""
+                <div style="background-color: #ffffff; border: 2px solid #cbd5e0; border-radius: 8px; padding: 12px;">
+                    <div style="background-color: #2d3748; color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 13px; margin-bottom: 8px;">
+                        ▲ 전면 {road_width}m 광폭 도로 접 ({truck_text}) ▲
+                    </div>
+                    <div style="border: 2px dashed #3182ce; padding: 10px; background-color: #ebf8ff; border-radius: 6px;">
+                        <div style="display: flex; gap: 8px; height: 160px;">
+                            <div style="flex: {bldg_w_svg}; background-color: #bee3f8; border: 2px solid #1a365d; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                                <span style="font-weight: bold; font-size: 15px; color: #1a365d;">🏭 신축 공장동</span>
+                                <span style="font-size: 13px; color: #2c5282; font-weight: bold;">지상 {max_floor_cnt}층 (1F {f1_pyung}평)</span>
+                            </div>
+                            <div style="flex: {yard_w_svg}; background-color: #edf2f7; border: 2px dashed #718096; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                                <span style="font-weight: bold; font-size: 13px; color: #4a5568;">🚛 단독 마당</span>
+                                <span style="font-size: 12px; color: #718096; font-weight: bold;">약 {yard_pyung}평</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                """
+                st.markdown(svg_2d, unsafe_allow_html=True)
+
+            print_html_content = f"""<html><body style='font-family:sans-serif; padding:30px;'><h2>{site_name} 신축공장 분양계획서</h2><p>대지: {custom_land}평 | 공급가: {total_dev_price:,}원 | 대출 80%: {loan_80:,}원</p><p>우리부동산 대표 김태형 010-2660-8276</p></body></html>"""
+            st.components.v1.html(f"""<button onclick="var w=window.open('','_blank');w.document.write(`{print_html_content}`);w.print();" style="background:#2b6cb0; color:white; padding:10px 20px; border:none; border-radius:4px; font-weight:bold; cursor:pointer; width:100%;">🖨️ 이 분양제안서만 바로 인쇄하기 (A4 전용)</button>""", height=50)
+
+    with dev_tab2:
+        st.subheader("🏢 신축공장 분양 전용 매물장부")
+        df_devs = load_new_devs()
+        if not df_devs.empty: st.dataframe(df_devs, use_container_width=True, height=350)
+        else: st.info("저장된 신축공장 분양 매물이 없습니다.")
 
 # =============================================================
 # 3. 📋 [주업] 공장 손님 CRM (기간별·월별 필터 완비)
@@ -754,8 +896,8 @@ elif menu_choice == MENU_DICT["CUSTOMER_CRM"]:
                             <span class="tag-orange">📐 희망 {c_area_val}</span>
                             <span class="tag-orange">📍 {c_loc_val}</span>
                             <span class="tag-orange">💰 {c_budget_val if c_budget_val else '예산 협의'}</span>
-                            <span class="tag-gray">🗓️ {c_movein_val}</span>
-                            <span class="tag-gray">🏗️️ {c_hoist_val}</span>
+                            <span class="tag-gray">🗓️️ {c_movein_val}</span>
+                            <span class="tag-gray">🏗️ {c_hoist_val}</span>
                             <span class="tag-gray">🚛 {c_truck_val}</span>
                             <span class="tag-gray">⚡ {c_pwr_val}</span>
                         </div>
@@ -854,7 +996,7 @@ elif menu_choice == MENU_DICT["CUSTOMER_CRM"]:
             with r11:
                 movein_opts = ["즉시 입주", "1개월 이내", "2~3개월 이내", "협의 입주"]
                 movein_def = str(target_row.get("입주시기", "협의 입주")) if target_row is not None else "협의 입주"
-                c_movein = st.selectbox("🗓 입주 희망 시기 *", movein_opts, index=movein_opts.index(movein_def) if movein_def in movein_opts else 3)
+                c_movein = st.selectbox("🗓️ 입주 희망 시기 *", movein_opts, index=movein_opts.index(movein_def) if movein_def in movein_opts else 3)
 
             r12, r13 = st.columns(2)
             with r12:
@@ -1047,13 +1189,12 @@ elif menu_choice == MENU_DICT["BLOG_TOOL"]:
                 st.text_area("핫플 릴스 대본", f"[오프닝] 도산공원 가면 무조건 들러야 할 {d_name}!\n[본론] 신상 {d_item} 라인업 실물 깡패네요.\n[클로징] 주말엔 웨이팅 {d_wait} 있으니 서두르세요!", height=150)
 
 # =============================================================
-# 7. 🏢 [완전 분리 & 고도화] 분양/줍줍 & LH·SH 공공임대 통합 허브
+# 7. 🏢 [전수 통합 복구] 분양/줍줍 & LH·SH 공공임대 통합 포스팅 허브
 # =============================================================
 elif menu_choice == MENU_DICT["APPLY_HOME"]:
     st.title("🏢 수도권 청약·줍줍 & LH·SH 공공임대 통합 포스팅 허브")
     st.caption("성격이 완전히 다른 '분양/로또줍줍(소유권 취득)'과 '공공임대/청년주택(저렴한 주거복지)'을 명확히 분리하여 전문 브리핑 및 블로그 본문을 완성합니다.")
 
-    # 🌟 대분류 모드 스위처 (분양/줍줍 vs 공공임대 완전 분리)
     hub_mode = st.radio(
         "📌 정보 유형 선택 (청약 분양과 공공임대는 자격 요건 및 비용 구조가 완전히 다릅니다)",
         ["🏢 [분양/줍줍] 민영·공공분양 & 로또 줍줍 허브", "🏠 [공공임대] LH·SH·iH 청년안심·행복주택 허브"],
@@ -1063,20 +1204,24 @@ elif menu_choice == MENU_DICT["APPLY_HOME"]:
     today_dt = datetime.today()
 
     # -------------------------------------------------------------
-    # MODE 1: 민영/공공분양 & 로또 줍줍 허브
+    # MODE 1: 민영/공공분양 & 로또 줍줍 허브 (전수 복구 완료)
     # -------------------------------------------------------------
     if hub_mode == "🏢 [분양/줍줍] 민영·공공분양 & 로또 줍줍 허브":
         sub_list = fetch_subscription_data_sale()
         
         c1, c2 = st.columns([1.5, 2.5])
         with c1:
-            sel_region = st.selectbox("📍 권역 필터", ["수도권 전체 모아보기", "서울특별시", "경기도", "인천광역시"], key="sale_reg")
+            sel_region = st.selectbox("📍 권역 필터", ["수도권 전체 모아보기", "서울특별시", "경기도", "인천광역시", "세종/기타"], key="sale_reg")
         with c2:
-            search_kw = st.text_input("🔎 단지명 / 시공사 검색", placeholder="예: 강변역, 충정로, 부천대장 등...", key="sale_kw")
+            search_kw = st.text_input("🔎 단지명 / 시공사 검색", placeholder="예: 강변역, 충정로, 신림, 세종, 오남, 부천대장, 과천 등...", key="sale_kw")
 
         filtered_subs = []
         for s in sub_list:
-            if sel_region != "수도권 전체 모아보기" and s["권역"] != sel_region: continue
+            if sel_region == "서울특별시" and s["권역"] != "서울특별시": continue
+            elif sel_region == "경기도" and s["권역"] != "경기도": continue
+            elif sel_region == "인천광역시" and s["권역"] != "인천광역시": continue
+            elif sel_region == "세종/기타" and s["권역"] != "세종/기타": continue
+
             if search_kw.strip() and (search_kw.strip() not in s["단지명"]) and (search_kw.strip() not in s["시공사"]): continue
             filtered_subs.append(s)
 
@@ -1094,7 +1239,7 @@ elif menu_choice == MENU_DICT["APPLY_HOME"]:
                 "1순위/무순위": item["1순위해당"], "당첨발표": item["당첨자발표"]
             })
 
-        st.dataframe(pd.DataFrame(summary_rows), use_container_width=True, height=200)
+        st.dataframe(pd.DataFrame(summary_rows), use_container_width=True, height=220)
 
         if filtered_subs:
             st.markdown("---")
@@ -1118,7 +1263,7 @@ elif menu_choice == MENU_DICT["APPLY_HOME"]:
                 <h4 style="color:#c05621; margin:0;">🏢 [{cur_sub['유형']}] {cur_sub['단지명']}</h4>
                 • 위치: {cur_sub['상세공급위치']} | 시공사: {cur_sub['시공사']}<br>
                 • <b>예상 안전마진(시세차익)</b>: <span style="font-size:18px; font-weight:bold; color:#c53030;">{cur_sub.get('예상안전마진', '검토중')}</span> (비교대장: {cur_sub.get('인근대장단지', '')})<br>
-                • 자격요건: <b>{cur_sub.get('자격요건요약', '')}</b>
+                • 자격요건: <b>{cur_sub.get('자격요건요약', '')}</b> | 학군: {cur_sub.get('학군인프라', '도보권 통학')}
             </div>
             """, unsafe_allow_html=True)
 
@@ -1161,7 +1306,7 @@ elif menu_choice == MENU_DICT["APPLY_HOME"]:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💸 4. 당첨 시 단계별 필요 자금 타임라인 (예시: {first_t['타입']})
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. 계약 체결 시 (계약금 10%): 약 {down_pay:,}원 ➡️️ 당첨 즉시 본인 통장에 순수 현금으로 준비되어 있어야 합니다.
+1. 계약 체결 시 (계약금 10%): 약 {down_pay:,}원 ➡ 당첨 즉시 본인 통장에 순수 현금으로 준비되어 있어야 합니다.
 2. 공사 기간 중 (중도금 60%): 약 {mid_pay:,}원 ➡️ 집단대출(이자후불제) 지원 여부 확인 필요.
 3. 입주 지정 기간 (잔금 30%): 약 {bal_pay:,}원 ➡️ 주택담보대출(LTV 70~80%) 전환 또는 전세 보증금으로 상환 계획 수립.
 
@@ -1270,7 +1415,7 @@ elif menu_choice == MENU_DICT["APPLY_HOME"]:
             r_tab1, r_tab2 = st.tabs(["📝 [원클릭] 공공임대/청년주택 전용 블로그 포스팅", "📑 신청 자격 & 보증금 전환 계산기"])
 
             with r_tab1:
-                rent_blog_post = f"""안녕하세요! 청년·신혼 주거비 부담을 덜어드리는 부동산 팩트체커 공인중개사 김태형입니다. 🙋‍♂️️
+                rent_blog_post = f"""안녕하세요! 청년·신혼 주거비 부담을 덜어드리는 부동산 팩트체커 공인중개사 김태형입니다. 🙋‍♂️
 
 역세권 입지와 시세 대비 반값 이하 임대료로 청년들의 뜨거운 관심을 받고 있는 '{cur_r['단지명']}'의 입주자 모집공고가 발표되었습니다.
 
@@ -1545,14 +1690,14 @@ elif menu_choice == MENU_DICT["AUCTION_HUB"]:
 • 인근 최근 실거래가: {cur_apt['최근실거래가']}
 🚩 추천 입찰가 밴드: {cur_apt['추천입찰가밴드']} (예상 시세차익 {cur_apt['예상시세차익']})
 
-⚖️️ 권리분석 및 명도 검토
+⚖️ 권리분석 및 명도 검토
 • 권리관계: {qa_apt['임차인분석']}
 • 인수보증금: {qa_apt['인수보증금']:,}원 (인수 리스크 없음, 말소기준권리 이하 소멸)
 • 규제 특례: {qa_apt['토허제특례']}
 
 🏦 대출 및 필요 현금 안내
 • 경락대출 한도: 낙찰가의 최대 70~80% 지원 (약 {apt_max_loan:,}원 수준)
-• 취득세 및 부대비용 포함 실투자금: 약 {apt_pure_cash:,}원 내외
+• 취득세 및 부대비용 포함 실투자금: 약 {pure_cash:,}원 내외
 
 현장 임장 및 입찰 대리 진행 상담은 편하게 회신 주십시오.
 
