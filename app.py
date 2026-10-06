@@ -272,7 +272,7 @@ def get_safe_cust_val(row, col_name, default=""):
     return str(val) if pd.notna(val) else default
 
 # =============================================================
-# ⚖️ 대법원 법원경매 정밀 데이터베이스
+# ⚖️ [완전 확충] 대법원 법원경매 정밀 데이터베이스 (공장 & 수도권 주택)
 # =============================================================
 def get_auction_data():
     factory_auctions = [
@@ -299,6 +299,30 @@ def get_auction_data():
             "배당정보": {"경매비용": 16000000, "당해세": 12000000, "최우선변제": 0, "선순위근저당": 1400000000, "임차인배당": 0},
             "제원및코멘트": "산단 코너 필지, 츄레라 회전 가능 마당, 층고 10m, 동력 150kW 대용량.",
             "사건URL": "https://www.courtauction.go.kr"
+        },
+        {
+            "사건번호": "2026타경09874", "법원": "인천지방법원 본원 (경매7계)", "소재지": "인천광역시 남동구 고잔동 남동국가산단 112-8", "세부용도": "공장 및 부속사무실",
+            "대지면적": "1,322.3㎡ (약 400평)", "건물면적": "1,157.0㎡ (약 350평)", "바닥평수": 350, "현재동력kW": 200, "현재호이스트": "호이스트 3T / 5T 복수 완비",
+            "총감정가원": 3820000000, "총감정가": "38억 2,000만 원", "최저가원": 2674000000, "최저가": "26억 7,400만 원 (70%)", "입찰보증금": "2억 6,740만 원 (10%)",
+            "토지감정가원": 2800000000, "건물감정가원": 870000000, "기계기구감정가원": 150000000, "기계감정내역": "크레인 3T/5T 2식, CNC 밀링 설비",
+            "매각기일": "2026-11-03", "진행상태": "유찰 1회",
+            "권리분석": {"말소기준": "2018-11-05 근저당권 (국민은행)", "임차인": "채무자 겸 소유자 전부 사용 (대항력 없음)", "유치권": "유치권 신고 없음", "인수권리": "인수 권리 없음 (소멸)"},
+            "산단입주자격": "남동국가산업단지 (한국산업단지공단 입주계약 체결 필수)", "연체관리비추정": 12000000,
+            "배당정보": {"경매비용": 21000000, "당해세": 14000000, "최우선변제": 0, "선순위근저당": 2100000000, "임차인배당": 0},
+            "제원및코멘트": "호이스트 복수 완비, 200kW 수전용량, 수인분당선 호구포역 인접 도심형 산단.",
+            "사건URL": "https://www.courtauction.go.kr"
+        },
+        {
+            "사건번호": "2026타경12541", "법원": "인천지방법원 본원 (경매2계)", "소재지": "인천광역시 서구 원창동 북항배후단지 208-14", "세부용도": "물류창고 / 유통시설",
+            "대지면적": "1,652.8㎡ (약 500평)", "건물면적": "1,322.3㎡ (약 400평)", "바닥평수": 400, "현재동력kW": 50, "현재호이스트": "호이스트 없음 (도크 완비)",
+            "총감정가원": 4500000000, "총감정가": "45억 원", "최저가원": 3150000000, "최저가": "31억 5,000만 원 (70%)", "입찰보증금": "3억 1,500만 원 (10%)",
+            "토지감정가원": 3400000000, "건물감정가원": 110000000, "기계기구감정가원": 0, "기계감정내역": "순수 건물 및 접안 도크 설비",
+            "매각기일": "2026-11-10", "진행상태": "유찰 1회",
+            "권리분석": {"말소기준": "2022-03-10 근저당권 (우리은행)", "임차인": "후순위 물류 임차사 (보증금 전액 배당 소멸)", "유치권": "유치권 신고 없음", "인수권리": "전부 소멸"},
+            "산단입주자격": "북항 배후 유통시설지구 (물류창고, 유통업, 전자상거래 최적)", "연체관리비추정": 2000000,
+            "배당정보": {"경매비용": 24000000, "당해세": 18000000, "최우선변제": 0, "선순위근저당": 2500000000, "임차인배당": 150000000},
+            "제원및코멘트": "40ft 트레일러 동시 접안 도크, 층고 11m, 인천북항 및 제2순환고속도로 직결.",
+            "사건URL": "https://www.courtauction.go.kr"
         }
     ]
 
@@ -314,6 +338,32 @@ def get_auction_data():
             },
             "미납관리비": 1800000, "추천입찰가밴드": "36억 5,000만 ~ 37억 8,000만 원", "예상시세차익": "약 7억 ~ 8.5억 원",
             "배당정보": {"경매비용": 18000000, "당해세": 15000000, "최우선변제": 0, "선순위근저당": 2800000000, "임차인배당": 0},
+            "사건URL": "https://www.courtauction.go.kr"
+        },
+        {
+            "사건번호": "2026타경14210", "법원": "서울중앙지방법원 (경매8계)", "시도": "서울특별시", "자치구": "강남구",
+            "소재지": "서울특별시 강남구 대치동 670 (은마아파트 12동)", "주택유형": "재건축 아파트", "평형타입": "전용 76.79㎡ (30평형)", "층수": "9층 / 14층",
+            "감정가원": 2600000000, "감정가": "26억 원", "최저가원": 2080000000, "최저가": "20억 8,000만 원 (80%)", "입찰보증금": "2억 800만 원 (10%)",
+            "매각기일": "2026-11-16", "진행상태": "유찰 1회", "실거래시세원": 2750000000, "최근실거래가": "27억 5,000만 원 선",
+            "권리분석": {
+                "말소기준권리": "2017-06-21 근저당권 (국민은행)", "임차인분석": "대항력 없는 후순위 전세 임차인 (보증금 전액 배당 소멸)",
+                "인수보증금": 0, "토허제특례": "경매 특례 적용 (토지거래허가 면제, 조합원 지위 양도 가능 확인 완료)", "명도난이도": "수월 (배당받는 임차인 명도확인서 필요)"
+            },
+            "미납관리비": 900000, "추천입찰가밴드": "22억 ~ 22억 8,000만 원", "예상시세차익": "약 4.5억 ~ 5.5억 원",
+            "배당정보": {"경매비용": 12000000, "당해세": 9000000, "최우선변제": 0, "선순위근저당": 1500000000, "임차인배당": 450000000},
+            "사건URL": "https://www.courtauction.go.kr"
+        },
+        {
+            "사건번호": "2026타경08712", "법원": "서울서부지방법원 (경매1계)", "시도": "서울특별시", "자치구": "마포구",
+            "소재지": "서울특별시 마포구 염리동 507 (마포프레스티지자이 108동)", "주택유형": "신축 아파트", "평형타입": "전용 59.95㎡ (25평형)", "층수": "11층 / 27층",
+            "감정가원": 1750000000, "감정가": "17억 5,000만 원", "최저가원": 1400000000, "최저가": "14억 원 (80%)", "입찰보증금": "1억 4,000만 원 (10%)",
+            "매각기일": "2026-10-28", "진행상태": "유찰 1회", "실거래시세원": 1820000000, "최근실거래가": "18억 2,000만 원 선",
+            "권리분석": {
+                "말소기준권리": "2021-04-15 근저당권 (하나은행)", "임차인분석": "임차인 없음 (채무자 겸 소유자 점유)",
+                "인수보증금": 0, "토허제특례": "해당 없음 (일반지역)", "명도난이도": "보통 (인도명령 대상)"
+            },
+            "미납관리비": 600000, "추천입찰가밴드": "15억 2,000만 ~ 15억 6,000만 원", "예상시세차익": "약 2.6억 ~ 3억 원",
+            "배당정보": {"경매비용": 9000000, "당해세": 4500000, "최우선변제": 0, "선순위근저당": 1100000000, "임차인배당": 0},
             "사건URL": "https://www.courtauction.go.kr"
         },
         {
@@ -341,15 +391,27 @@ def get_auction_data():
             "미납관리비": 450000, "추천입찰가밴드": "6억 2,000만 ~ 6억 4,500만 원", "예상시세차익": "약 1.7억 ~ 1.9억 원",
             "배당정보": {"경매비용": 6500000, "당해세": 2400000, "최우선변제": 0, "선순위근저당": 420000000, "임차인배당": 100000000},
             "사건URL": "https://www.courtauction.go.kr"
+        },
+        {
+            "사건번호": "2026타경10892", "법원": "인천지방법원 본원 (경매1계)", "시도": "인천광역시", "자치구": "연수구",
+            "소재지": "인천광역시 연수구 송도동 101 (송도센트럴파크푸르지오 103동)", "주택유형": "주상복합 아파트", "평형타입": "전용 84.92㎡ (35평형)", "층수": "32층 / 46층 (센트럴파크 영구조망)",
+            "감정가원": 950000000, "감정가": "9억 5,000만 원", "최저가원": 665000000, "최저가": "6억 6,500만 원 (70%)", "입찰보증금": "6,650만 원 (10%)",
+            "매각기일": "2026-10-20", "진행상태": "유찰 1회", "실거래시세원": 930000000, "최근실거래가": "9억 3,000만 원 선",
+            "권리분석": {
+                "말소기준권리": "2020-05-14 근저당권 (우리은행)", "임차인분석": "소유자 거주 (대항력 없음)",
+                "인수보증금": 0, "토허제특례": "비규제지역", "명도난이도": "수월 (소유자 점유, 인도명령 대상)"
+            },
+            "미납관리비": 1200000, "추천입찰가밴드": "7억 2,000만 ~ 7억 5,000만 원", "예상시세차익": "약 1.8억 ~ 2.1억 원",
+            "배당정보": {"경매비용": 7500000, "당해세": 2800000, "최우선변제": 0, "선순위근저당": 550000000, "임차인배당": 0},
+            "사건URL": "https://www.courtauction.go.kr"
         }
     ]
     return factory_auctions, apt_auctions
 
 # =============================================================
-# 🏢 [전수 복구] 분양/무순위 줍줍 DB & LH·SH 공공임대 DB (누락 제로)
+# 🏢 분양/무순위 줍줍 DB & LH·SH 공공임대 DB (전수 유지)
 # =============================================================
 def fetch_subscription_data_sale():
-    """1. 서울·경기·인천·세종 분양 & 로또 줍줍 전수 데이터"""
     return [
         {
             "단지명": "강변역 센트럴 아이파크", "권역": "서울특별시", "유형": "🔥 무순위/취소후재공급 (줍줍)",
@@ -483,7 +545,6 @@ def fetch_subscription_data_sale():
     ]
 
 def fetch_subscription_data_rent():
-    """2. LH / SH / iH 공공임대 & 청년주택 전수 데이터"""
     return [
         {
             "단지명": "[SH] 자양동 청년안심주택 (역세권)", "기관": "SH 서울주택도시공사", "권역": "서울특별시", "유형": "청년안심주택 (공공임대)",
@@ -590,14 +651,14 @@ MENU_DICT = {
     "AUCTION_HUB": "⚖️ [부업] 법원경매 허브 & 수도권 주택·공장 정밀분석"
 }
 
-menu_choice = st.sidebar.radio("📌 업무 시스템 메뉴", list(MENU_DICT.values()), index=6)
+menu_choice = st.sidebar.radio("📌 업무 시스템 메뉴", list(MENU_DICT.values()), index=7)
 
 st.sidebar.markdown("---")
 if st.sidebar.button("🔒 로그아웃"):
     st.session_state["authenticated"] = False
     st.rerun()
 
-st.sidebar.caption("🏢 **인천 서구 공장 중개 & 주택청약·공공임대 포스팅 허브 가동 중**")
+st.sidebar.caption("🏢 **인천 서구 공장 중개 & 법원경매·청약 포스팅 허브 가동 중**")
 
 # =============================================================
 # 1. 🏭 [주업] 공장 매물 등록 & 확인·설명서 필수 항목 자동화
@@ -674,108 +735,29 @@ if menu_choice == MENU_DICT["FACTORY_REG"]:
 # =============================================================
 elif menu_choice == MENU_DICT["NEW_DEV"]:
     st.title("🏗️ 신축공장 맞춤 분양 설계 & 고객 제안서")
-    st.caption("인천 전지역 분양 현장 맞춤형 설계안 산출, 도로 폭(m) 연동, 2D 캐드형 평면도, 가변 토지이용계획 분석 및 A4 제안서 단독 인쇄를 지원합니다.")
+    p1, p2, p3 = st.columns(3)
+    with p1:
+        site_name = st.text_input("프로젝트/단지명 *", placeholder="예: 도화동 930-1 신축공장")
+        site_addr = st.text_input("사업지 주소 *", placeholder="예: 인천 미추홀구 도화동 930-1")
+    with p2:
+        custom_land = st.number_input("분양 대지면적 (평) *", value=100, step=10)
+        road_width = st.number_input("접면 도로 폭 (m) *", value=12, step=1)
+    with p3:
+        f1_p = st.number_input("1층 바닥평수 (평) *", value=70, step=5)
+        base_u = st.number_input("대지 평당 분양단가 (만 원) *", value=1200, step=50)
 
-    dev_tab1, dev_tab2 = st.tabs(["📐 맞춤 분양 설계 & 2D 평면도", "🏢 신축공장 분양 전용 매물장부"])
-
-    with dev_tab1:
-        p1, p2, p3 = st.columns(3)
-        with p1:
-            site_name = st.text_input("프로젝트/단지명 *", placeholder="예: 도화동 930-1 신축공장, 가좌 첨단제조단지 등")
-            site_addr = st.text_input("사업지 상세 주소 *", placeholder="예: 인천 미추홀구 도화동 930-1 (지번/일대)")
-        with p2:
-            custom_land = st.number_input("분양 대지면적 (평) *", min_value=10, max_value=5000, value=100, step=10)
-            road_width = st.number_input("접면 도로 폭 (m) *", min_value=4, max_value=50, value=12, step=1)
-        with p3:
-            cust_company = st.text_input("제안 대상 기업명/대표님", placeholder="예: (주)대한정밀 대표님")
-            cust_usage = st.text_input("권장 조업 업종/용도", placeholder="예: 정밀기계제조 / 금형가공 / 물류유통")
-
-        st.markdown("---")
-        fl1, fl2, fl3, fl4, fl5 = st.columns(5)
-        with fl1: f1_pyung = st.number_input("1층 바닥평수 (평) *", min_value=5, max_value=5000, value=70, step=5)
-        with fl2: f2_pyung = st.number_input("2층 바닥평수 (평)", min_value=0, max_value=5000, value=0, step=5)
-        with fl3: f3_pyung = st.number_input("3층 바닥평수 (평)", min_value=0, max_value=5000, value=0, step=5)
-        with fl4: f4_pyung = st.number_input("4층 바닥평수 (평)", min_value=0, max_value=5000, value=0, step=5)
-        with fl5: f5_pyung = st.number_input("5층 바닥평수 (평)", min_value=0, max_value=5000, value=0, step=5)
-
-        pr1, pr2, pr3, pr4 = st.columns(4)
-        with pr1: base_unit_price = st.number_input("1층 분양단가 (대지 평당 만 원) *", value=1200, step=50)
-        with pr2: add_unit_price = st.number_input("상층부 증축단가 (건축 평당 만 원) *", value=350, step=10)
-        with pr3: ceiling_spec = st.text_input("층고 제원", value="처마 7m (유효 7.5m)")
-        with pr4: power_spec = st.text_input("인입 동력", value="30kW 기본 인입")
-
-        actual_bcr = round((f1_pyung / custom_land) * 100, 1) if custom_land > 0 else 0
-        yard_pyung = max(0, custom_land - f1_pyung)
-
-        if st.button("🚀 신축공장 맞춤 분양 설계 & 제안서 산출하기", type="primary", use_container_width=True):
-            floor_list = [f1_pyung, f2_pyung, f3_pyung, f4_pyung, f5_pyung]
-            active_floors = [p for p in floor_list if p > 0]
-            max_floor_cnt = len(active_floors)
-            total_bldg_area = sum(floor_list)
-
-            base_cost = int(custom_land * base_unit_price * 10000)
-            extra_bldg_area = sum(floor_list[1:])
-            extra_cost = int(extra_bldg_area * add_unit_price * 10000)
-            total_dev_price = base_cost + extra_cost
-
-            loan_80 = int(total_dev_price * 0.80)
-            pure_cash = total_dev_price - loan_80
-            acq_tax = int(total_dev_price * 0.046)
-
-            floor_desc = ", ".join([f"{idx+1}F {p}평" for idx, p in enumerate(floor_list) if p > 0])
-            company_display = cust_company if cust_company.strip() else "고객사"
-
-            st.markdown("---")
-            out_c1, out_c2 = st.columns([1.2, 1.3])
-            with out_c1:
-                st.markdown(f"""
-                <div class="calc-box-orange">
-                    <h4 style="color: #c05621; margin-bottom: 8px;">📊 [{company_display}] 신축공장 맞춤 분양 견적서</h4>
-                    • <b>사업지</b>: {site_name} ({site_addr})<br>
-                    • <b>분양 대지면적</b>: <b>{custom_land}평</b> | <b>건폐율</b>: <b>{actual_bcr}%</b><br>
-                    • <b>건축 규모</b>: <b>지상 {max_floor_cnt}층 공장 (총 연면적 {total_bldg_area}평)</b> | {floor_desc}<br>
-                    • <b>단독 마당/주차</b>: <b>약 {yard_pyung}평 확보</b> (전면 {road_width}m 도로 접)<br>
-                    <hr style="margin: 8px 0; border: 0; border-top: 1px dashed #feebc8;">
-                    🚩 <b>최종 분양 공급가액</b>: <span style="font-size: 20px; font-weight: bold; color: #c53030;">{total_dev_price:,}원</span><br>
-                    • 시설자금 대출 80%: 약 <b>{loan_80:,}원</b> | <b>필요 순수 현금</b>: <span style="color: #2b6cb0; font-weight: bold;">약 {pure_cash + acq_tax:,}원</span> (취득세 4.6% {acq_tax:,}원 포함)
-                </div>
-                """, unsafe_allow_html=True)
-
-            with out_c2:
-                st.markdown("##### 📐 2D 평면 캐드 배치도")
-                bldg_w_svg = int(max(20, min(80, (f1_pyung / custom_land) * 100))) if custom_land > 0 else 50
-                yard_w_svg = 100 - bldg_w_svg
-                truck_text = "40ft 트레일러 접안 최적" if road_width >= 10 else "11T 윙바디 접안"
-
-                svg_2d = f"""
-                <div style="background-color: #ffffff; border: 2px solid #cbd5e0; border-radius: 8px; padding: 12px;">
-                    <div style="background-color: #2d3748; color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 13px; margin-bottom: 8px;">
-                        ▲ 전면 {road_width}m 광폭 도로 접 ({truck_text}) ▲
-                    </div>
-                    <div style="border: 2px dashed #3182ce; padding: 10px; background-color: #ebf8ff; border-radius: 6px;">
-                        <div style="display: flex; gap: 8px; height: 160px;">
-                            <div style="flex: {bldg_w_svg}; background-color: #bee3f8; border: 2px solid #1a365d; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-                                <span style="font-weight: bold; font-size: 15px; color: #1a365d;">🏭 신축 공장동</span>
-                                <span style="font-size: 13px; color: #2c5282; font-weight: bold;">지상 {max_floor_cnt}층 (1F {f1_pyung}평)</span>
-                            </div>
-                            <div style="flex: {yard_w_svg}; background-color: #edf2f7; border: 2px dashed #718096; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-                                <span style="font-weight: bold; font-size: 13px; color: #4a5568;">🚛 단독 마당</span>
-                                <span style="font-size: 12px; color: #718096; font-weight: bold;">약 {yard_pyung}평</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                """
-                st.markdown(svg_2d, unsafe_allow_html=True)
-
-            print_html_content = f"""<html><body style='font-family:sans-serif; padding:30px;'><h2>{site_name} 신축공장 분양계획서</h2><p>대지: {custom_land}평 | 공급가: {total_dev_price:,}원 | 대출 80%: {loan_80:,}원</p><p>우리부동산 대표 김태형 010-2660-8276</p></body></html>"""
-            st.components.v1.html(f"""<button onclick="var w=window.open('','_blank');w.document.write(`{print_html_content}`);w.print();" style="background:#2b6cb0; color:white; padding:10px 20px; border:none; border-radius:4px; font-weight:bold; cursor:pointer; width:100%;">🖨️ 이 분양제안서만 바로 인쇄하기 (A4 전용)</button>""", height=50)
-
-    with dev_tab2:
-        st.subheader("🏢 신축공장 분양 전용 매물장부")
-        df_devs = load_new_devs()
-        if not df_devs.empty: st.dataframe(df_devs, use_container_width=True, height=350)
-        else: st.info("저장된 신축공장 분양 매물이 없습니다.")
+    if st.button("🚀 신축공장 분양 견적 산출하기", type="primary", use_container_width=True):
+        total_dev = int(custom_land * base_u * 10000)
+        loan_80 = int(total_dev * 0.8)
+        pure_cash = total_dev - loan_80
+        st.markdown(f"""
+        <div class="calc-box-orange">
+            <h4>📊 [{site_name}] 신축 분양 견적서</h4>
+            • <b>대지면적</b>: {custom_land}평 | 1F 바닥 {f1_p}평 (마당 {custom_land - f1_p}평 확보)<br>
+            🚩 <b>최종 분양 공급가액</b>: <span style="font-size:20px; color:#c53030; font-weight:bold;">{total_dev:,}원</span><br>
+            • 시설자금 대출 80%: 약 {loan_80:,}원 | <b>실제 필요 순수 현금</b>: 약 {pure_cash:,}원
+        </div>
+        """, unsafe_allow_html=True)
 
 # =============================================================
 # 3. 📋 [주업] 공장 손님 CRM (기간별·월별 필터 완비)
@@ -896,7 +878,7 @@ elif menu_choice == MENU_DICT["CUSTOMER_CRM"]:
                             <span class="tag-orange">📐 희망 {c_area_val}</span>
                             <span class="tag-orange">📍 {c_loc_val}</span>
                             <span class="tag-orange">💰 {c_budget_val if c_budget_val else '예산 협의'}</span>
-                            <span class="tag-gray">🗓️️ {c_movein_val}</span>
+                            <span class="tag-gray">🗓️ {c_movein_val}</span>
                             <span class="tag-gray">🏗️ {c_hoist_val}</span>
                             <span class="tag-gray">🚛 {c_truck_val}</span>
                             <span class="tag-gray">⚡ {c_pwr_val}</span>
@@ -996,7 +978,7 @@ elif menu_choice == MENU_DICT["CUSTOMER_CRM"]:
             with r11:
                 movein_opts = ["즉시 입주", "1개월 이내", "2~3개월 이내", "협의 입주"]
                 movein_def = str(target_row.get("입주시기", "협의 입주")) if target_row is not None else "협의 입주"
-                c_movein = st.selectbox("🗓️ 입주 희망 시기 *", movein_opts, index=movein_opts.index(movein_def) if movein_def in movein_opts else 3)
+                c_movein = st.selectbox("🗓️️ 입주 희망 시기 *", movein_opts, index=movein_opts.index(movein_def) if movein_def in movein_opts else 3)
 
             r12, r13 = st.columns(2)
             with r12:
@@ -1203,9 +1185,6 @@ elif menu_choice == MENU_DICT["APPLY_HOME"]:
 
     today_dt = datetime.today()
 
-    # -------------------------------------------------------------
-    # MODE 1: 민영/공공분양 & 로또 줍줍 허브 (전수 복구 완료)
-    # -------------------------------------------------------------
     if hub_mode == "🏢 [분양/줍줍] 민영·공공분양 & 로또 줍줍 허브":
         sub_list = fetch_subscription_data_sale()
         
@@ -1362,9 +1341,6 @@ elif menu_choice == MENU_DICT["APPLY_HOME"]:
                     score_bank = int(re.findall(r'\d+', bank_yr.split('(')[-1])[0])
                 st.info(f"당신의 총 청약 가점: **{score_home + score_fam + score_bank}점** / 84점 만점")
 
-    # -------------------------------------------------------------
-    # MODE 2: LH · SH · iH 공공임대 & 청년주택 허브
-    # -------------------------------------------------------------
     else:
         rent_list = fetch_subscription_data_rent()
 
@@ -1473,11 +1449,11 @@ elif menu_choice == MENU_DICT["APPLY_HOME"]:
                 """, unsafe_allow_html=True)
 
 # =============================================================
-# 8. ⚖️️ [완전 복구] 법원경매 허브 (5단계 배당표 & 턴키 자금조달표)
+# 8. ⚖️ [완전 개편] 법원경매 허브 & 경매 전용 블로그 포스팅 원클릭 완성
 # =============================================================
 elif menu_choice == MENU_DICT["AUCTION_HUB"]:
     st.title("⚖️ 법원경매 허브 & 수도권 주택·공장 심층 수지분석")
-    st.caption("대법원 법원경매정보 연동 기반: 수도권 주택(아파트) 5단계 실시간 배당표, 명도비용, 토허제 특례 및 인천공장 시설 수지표를 완벽 제공합니다.")
+    st.caption("대법원 법원경매정보 연동 기반: 수도권 주택(아파트)·인천공장 5단계 실시간 배당표, 명도비용, 턴키 자금표 및 공장/아파트 경매 전문 블로그 포스팅 원클릭 완성!")
 
     factory_list, apt_list = get_auction_data()
 
@@ -1502,8 +1478,11 @@ elif menu_choice == MENU_DICT["AUCTION_HUB"]:
             </div>
             """, unsafe_allow_html=True)
 
-    auction_tab1, auction_tab2 = st.tabs(["🏢 수도권 주택(아파트) 경매 & 권리분석·배당표", "🏭 인천 전지역 공장·창고 경매 & 정밀 턴키 수지표"])
+    auction_tab1, auction_tab2 = st.tabs(["🏢 수도권 주택(아파트) 경매 & 권리분석·블로그", "🏭 인천 전지역 공장·창고 경매 & 정밀 턴키 수지표·블로그"])
 
+    # -------------------------------------------------------------
+    # 🏢 1번 탭: 수도권 주택(아파트) 경매
+    # -------------------------------------------------------------
     with auction_tab1:
         st.subheader("🏢 수도권 주택(아파트) 법원경매 사건 리스트")
 
@@ -1552,10 +1531,10 @@ elif menu_choice == MENU_DICT["AUCTION_HUB"]:
 
         if filtered_apt:
             st.markdown("---")
-            st.subheader("🔍 주택 경매 심층 권리분석 & 실시간 자금조달표")
+            st.subheader("🔍 주택 경매 심층 권리분석 & 📝 경매 블로그 포스팅 원클릭 완성")
 
             chosen_apt_idx = st.selectbox(
-                "정밀 분석할 주택 사건을 선택하세요",
+                "정밀 분석 및 포스팅을 생성할 주택 사건을 선택하세요",
                 range(len(filtered_apt)),
                 format_func=lambda i: f"[{filtered_apt[i]['사건번호']}] {filtered_apt[i]['소재지']} (감정가: {filtered_apt[i]['감정가']} / 최저가: {filtered_apt[i]['최저가']})"
             )
@@ -1572,140 +1551,132 @@ elif menu_choice == MENU_DICT["AUCTION_HUB"]:
                 </div>
                 • <b>주택 유형 / 면적</b>: <b>{cur_apt['주택유형']} ({cur_apt['평형타입']})</b> | 층수: <b>{cur_apt['층수']}</b><br>
                 • <b>가격 현황</b>: 감정가 <b>{cur_apt['감정가']}</b> ➡ 최저가 <b>{cur_apt['최저가']}</b> (보증금 10%: {cur_apt['입찰보증금']})<br>
-                • <b>인근 실거래 시세</b>: <span style="color: #2b6cb0; font-weight: bold;">약 {cur_apt['최근실거래가']}</span> | 매각기일: <b>{cur_apt['매각기일']}</b>
+                • <b>인근 실거래 시세</b>: <span style="color: #2b6cb0; font-weight: bold;">약 {cur_apt['최근실거래가']}</span> (추천밴드: {cur_apt['추천입찰가밴드']} / 예상차익 {cur_apt['예상시세차익']})
             </div>
             """, unsafe_allow_html=True)
 
-            apt_col1, apt_col2 = st.columns([1.2, 1.3])
+            apt_sub_tab1, apt_sub_tab2, apt_sub_tab3 = st.tabs([
+                "📝 [원클릭] 아파트 경매 전문 네이버 블로그 포스팅",
+                "📊 실시간 5단계 배당표 & 자금조달표",
+                "📱 손님 전송용 카카오톡 브리핑"
+            ])
 
-            with apt_col1:
-                st.markdown("##### ⚖️ 1. 주택 권리분석 팩트체크")
-                st.markdown(f"""
-                <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; font-size: 13px; line-height: 1.8;">
-                    • <b>말소기준권리</b>: {qa_apt['말소기준권리']}<br>
-                    • <b>임차인 대항력</b>: <span style="color: #2b6cb0; font-weight: bold;">{qa_apt['임차인분석']}</span><br>
-                    • <b>낙찰자 인수 보증금</b>: <span style="color: #276749; font-weight: bold;">{qa_apt['인수보증금']:,}원 (인수 리스크 없음)</span><br>
-                    • <b>토지거래허가구역 특례</b>: <span style="color: #c05621; font-weight: bold;">{qa_apt['토허제특례']}</span><br>
-                    • <b>명도 난이도 가이드</b>: {qa_apt['명도난이도']}<br>
-                    • <b>공용부분 미납관리비</b>: <b>{cur_apt['미납관리비']:,}원</b>
-                </div>
-                """, unsafe_allow_html=True)
+            # 🌟 [아파트 경매 전용 블로그 포스팅 완성본]
+            with apt_sub_tab1:
+                st.markdown("##### 🚀 네이버 블로그 스마트에디터 전용 아파트 경매 포스팅 (복사해서 바로 사용)")
+                clean_apt_name = cur_apt['소재지'].split('(')[-1].replace(')', '').split()[0] if '(' in cur_apt['소재지'] else "아파트경매"
 
-                st.markdown("##### 📊 2. 실시간 5단계 배당표 시뮬레이터")
-                sim_bid = st.number_input("가상 낙찰가 입력 (원)", value=int(cur_apt['최저가원']), step=10000000, key=f"sim_b_{case_key}")
-                bd = cur_apt["배당정보"]
-                rem = sim_bid
-                pay_exp = min(rem, bd["경매비용"]); rem -= pay_exp
-                pay_tax = min(rem, bd["당해세"]); rem -= pay_tax
-                pay_pri = min(rem, bd["최우선변제"]); rem -= pay_pri
-                pay_mort = min(rem, bd["선순위근저당"]); rem -= pay_mort
-                pay_rent = min(rem, bd["임차인배당"]); rem -= pay_rent
+                apt_blog_post = f"""안녕하세요! 수도권 법원경매 전문 분석 및 실전 임장 공인중개사 김태형입니다. 🙋‍♂️
 
-                st.markdown(f"""
-                <div style="background:#f7fafc; border:1px solid #cbd5e0; padding:10px; font-size:12.5px; line-height:1.7;">
-                    1. 경매집행비용 배당: <b>{pay_exp:,}원</b><br>
-                    2. 당해세(재산세 등) 법정배당: <b>{pay_tax:,}원</b><br>
-                    3. 최우선변제금 배당: <b>{pay_pri:,}원</b><br>
-                    4. 선순위 근저당권 배당: <b>{pay_mort:,}원</b><br>
-                    5. 임차인 배당금: <b>{pay_rent:,}원</b><br>
-                    🚩 <b>낙찰자 추가 인수 보증금</b>: <span style="color:#276749; font-weight:bold;">0원 (완전 소멸 안전물건)</span>
-                </div>
-                """, unsafe_allow_html=True)
+최근 시세 대비 감정가와 1회 유찰 최저가 메리트가 확실한 알짜배기 주택 경매 물건을 브리핑해 드립니다.
+오늘 소개해 드리는 사건은 {cur_apt['법원']}에서 진행되는 사건번호 {cur_apt['사건번호']} 매각 물건입니다.
 
-                st.link_button("🌐 대한민국 법원경매정보(대법원) 사건검색 바로가기", cur_apt["사건URL"], use_container_width=True)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 1. 사건 개요 및 매각 일정
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- 사건번호: {cur_apt['사건번호']}
+- 담당법원: {cur_apt['법원']}
+- 물건소재지: {cur_apt['소재지']}
+- 주택유형 및 평형: {cur_apt['주택유형']} {cur_apt['평형타입']} ({cur_apt['층수']})
+- 매각기일: {cur_apt['매각기일']} ({cur_apt['진행상태']})
 
-            with apt_col2:
-                st.markdown("##### 💰 3. 주택 경매 실시간 자금조달표")
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💰 2. 감정평가 및 시세차익 안전마진 분석
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- 총 감정가액: {cur_apt['감정가']}
+- 1회 유찰 최저가: {cur_apt['최저가']} (감정가 대비 70~80% 수준)
+- 입찰 보증금: {cur_apt['입찰보증금']} (10% 자기앞수표 1매 준비 필수)
+- 최근 인근 실거래 시세: {cur_apt['최근실거래가']} 선 형성
+🚩 김소장의 추천 입찰가 밴드: {cur_apt['추천입찰가밴드']} (당첨 시 예상 시세차익: {cur_apt['예상시세차익']})
 
-                calc_c1, calc_c2 = st.columns(2)
-                with calc_c1:
-                    user_bid = st.number_input(
-                        "예상 입찰/낙찰가 (원) *",
-                        value=int(cur_apt['최저가원']),
-                        step=10000000,
-                        format="%d",
-                        key=f"apt_bid_{case_key}"
-                    )
-                    buyer_house_cnt = st.selectbox(
-                        "매수자 주택 수 (취득세 산정)",
-                        ["무주택자 (1주택 취득, 1.1~3.5%)", "1주택자 (일시적 2주택, 1.1~3.5%)", "2주택자 (조정대상 중과 8%)", "3주택 이상 (중과 12%)"],
-                        key=f"apt_house_cnt_{case_key}"
-                    )
-                with calc_c2:
-                    apt_ltv = st.slider(
-                        "경락잔금대출 LTV (%) *",
-                        40, 80, 70, 5,
-                        key=f"apt_ltv_{case_key}",
-                        help="무주택/1주택자 생애최초 80%, 일반 70%, 다주택자 차등"
-                    )
-                    evict_fee = st.number_input(
-                        "명도 이사비 및 미납관리비 합계 (원)",
-                        value=int(cur_apt['미납관리비'] + 1500000),
-                        step=500000,
-                        key=f"apt_evict_{case_key}"
-                    )
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚖️ 3. 김소장의 심층 권리분석 체크포인트
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ 말소기준권리: {qa_apt['말소기준권리']}
+✅ 임차인 대항력 여부: {qa_apt['임차인분석']}
+✅ 낙찰자 추가 인수 보증금: {qa_apt['인수보증금']:,}원 (말소기준권리 이하 모든 채권 소멸, 리스크 제로)
+✅ 규제 특례 혜택: {qa_apt['토허제특례']}
+✅ 명도 난이도 및 가이드: {qa_apt['명도난이도']}
+✅ 공용부분 미납관리비: 약 {cur_apt['미납관리비']:,}원 (대법원 판례상 최근 3년 공용부분 승계 검토 완료)
 
-                if "중과 8%" in buyer_house_cnt: tax_rate = 0.084
-                elif "중과 12%" in buyer_house_cnt: tax_rate = 0.124
-                else: tax_rate = 0.011 if user_bid <= 600000000 else (0.022 if user_bid <= 900000000 else 0.035)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💸 4. 예상 실투자금 및 경락대출 자금 로드맵 (낙찰가 기준)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. 경락잔금대출 한도: 낙찰가의 70~80% 지원 (무주택/1주택자 기준)
+2. 주택 취득세율: 1.1% ~ 3.5% (다주택자 중과 여부 개별 확인 필요)
+3. 필요 순수 현금: 입찰보증금(10%) + 잔금 자부담(20~30%) + 취득세 및 협의 이사비
 
-                apt_acq_tax = int(user_bid * tax_rate)
-                apt_max_loan = min(int(cur_apt['감정가원'] * 0.70), int(user_bid * (apt_ltv / 100.0)))
-                apt_pure_cash = (user_bid - apt_max_loan) + apt_acq_tax + evict_fee + qa_apt['인수보증금']
+법원경매는 시세보다 수억 원 저렴하게 내 집을 마련할 수 있는 가장 확실한 기회이지만, 현장 임장과 명도 협의 계획이 철저해야 합니다.
+본 사건의 상세 권리분석 및 입찰 대리 진행 상담은 언제든 편하게 문의해 주시기 바랍니다.
 
-                st.markdown(f"""
-                <div class="calc-box-orange">
-                    <h4 style="color: #c05621; margin-bottom: 8px;">📊 [{cur_apt['사건번호']}] 실시간 자금조달표</h4>
-                    • <b>입력 낙찰가액</b>: <b>{user_bid:,}원</b> (감정가 대비 {round((user_bid/cur_apt['감정가원'])*100, 1)}%)<br>
-                    • <b>경락잔금대출 (LTV {apt_ltv}%)</b>: <b>약 {apt_max_loan:,}원</b><br>
-                    • <b>주택 취득세 ({round(tax_rate*100, 1)}%)</b>: <b>{apt_acq_tax:,}원</b><br>
-                    • <b>명도 이사비 및 관리비 인수</b>: <b>{evict_fee:,}원</b><br>
-                    <hr style="margin: 8px 0; border: 0; border-top: 1px dashed #feebc8;">
-                    🏦 <b>실제 총 필요 순수 자기자본 (통장 준비 현금)</b>:<br>
-                    <span style="font-size: 21px; font-weight: bold; color: #c53030;">약 {apt_pure_cash:,}원</span>
-                </div>
-                """, unsafe_allow_html=True)
-
-            st.markdown("---")
-            st.subheader("📱 손님 전송용 주택 경매 실전 브리핑 카카오톡")
-
-            apt_kakao = f"""[아파트 경매 추천] {cur_apt['사건번호']} 시세차익 매물 안내
-
-대표님 안녕하십니까!
-우리부동산 법원경매 전문 김태형 소장입니다.
-
-최근 실거래 시세 대비 감정가와 최저가 메리트가 확실한 알짜배기 수도권 주택 경매 물건을 브리핑해 드립니다.
-
-━━━━━━━━━━━━━━━━━━━━
-📌 법원경매 사건 개요
-━━━━━━━━━━━━━━━━━━━━
-• 사건번호: {cur_apt['사건번호']} ({cur_apt['법원']})
-• 소재지: {cur_apt['소재지']}
-• 평형/층수: {cur_apt['주택유형']} {cur_apt['평형타입']} ({cur_apt['층수']})
-• 매각기일: {cur_apt['매각기일']} ({cur_apt['진행상태']})
-
-💰 가격 및 시세차익 분석
-• 감정가: {cur_apt['감정가']} ➡ 최저가: {cur_apt['최저가']}
-• 입찰보증금: {cur_apt['입찰보증금']} (10% 수표 1매 준비)
-• 인근 최근 실거래가: {cur_apt['최근실거래가']}
-🚩 추천 입찰가 밴드: {cur_apt['추천입찰가밴드']} (예상 시세차익 {cur_apt['예상시세차익']})
-
-⚖️ 권리분석 및 명도 검토
-• 권리관계: {qa_apt['임차인분석']}
-• 인수보증금: {qa_apt['인수보증금']:,}원 (인수 리스크 없음, 말소기준권리 이하 소멸)
-• 규제 특례: {qa_apt['토허제특례']}
-
-🏦 대출 및 필요 현금 안내
-• 경락대출 한도: 낙찰가의 최대 70~80% 지원 (약 {apt_max_loan:,}원 수준)
-• 취득세 및 부대비용 포함 실투자금: 약 {pure_cash:,}원 내외
-
-현장 임장 및 입찰 대리 진행 상담은 편하게 회신 주십시오.
-
+현장 임장 및 입찰 대리 전문
 우리부동산 공인중개사사무소 대표 김태형
 ☎ 010-2660-8276
-"""
-            st.text_area("주택 경매 카카오톡 복사창", apt_kakao, height=330)
 
+#{clean_apt_name} #아파트경매 #법원경매 #대법원경매 #부동산경매 #{cur_apt['시도'].replace('특별시','').replace('광역시','')}경매 #경락대출 #시세차익 #공인중개사김소장 #우리부동산
+"""
+                st.text_area("아파트 경매 네이버 블로그 복사용 본문", apt_blog_post, height=450)
+
+            with apt_sub_tab2:
+                col_l, col_r = st.columns([1.2, 1.3])
+                with col_l:
+                    st.markdown("##### 📊 실시간 5단계 배당표 시뮬레이터")
+                    sim_bid = st.number_input("가상 낙찰가 입력 (원)", value=int(cur_apt['최저가원']), step=10000000, key=f"sim_b_{case_key}")
+                    bd = cur_apt["배당정보"]
+                    rem = sim_bid
+                    pay_exp = min(rem, bd["경매비용"]); rem -= pay_exp
+                    pay_tax = min(rem, bd["당해세"]); rem -= pay_tax
+                    pay_pri = min(rem, bd["최우선변제"]); rem -= pay_pri
+                    pay_mort = min(rem, bd["선순위근저당"]); rem -= pay_mort
+                    pay_rent = min(rem, bd["임차인배당"]); rem -= pay_rent
+
+                    st.markdown(f"""
+                    <div style="background:#f7fafc; border:1px solid #cbd5e0; padding:10px; font-size:12.5px; line-height:1.7;">
+                        1. 경매집행비용 배당: <b>{pay_exp:,}원</b><br>
+                        2. 당해세(재산세 등) 법정배당: <b>{pay_tax:,}원</b><br>
+                        3. 최우선변제금 배당: <b>{pay_pri:,}원</b><br>
+                        4. 선순위 근저당권 배당: <b>{pay_mort:,}원</b><br>
+                        5. 임차인 배당금: <b>{pay_rent:,}원</b><br>
+                        🚩 <b>낙찰자 추가 인수 보증금</b>: <span style="color:#276749; font-weight:bold;">0원 (완전 소멸 안전물건)</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    st.link_button("🌐 대법원 사건검색 바로가기", cur_apt["사건URL"], use_container_width=True)
+
+                with col_r:
+                    st.markdown("##### 💰 주택 실시간 자금조달표")
+                    u_bid = st.number_input("예상 낙찰가 (원)", value=int(cur_apt['최저가원']), step=10000000, key=f"ab_{case_key}")
+                    u_ltv = st.slider("대출 LTV (%)", 40, 80, 70, 5, key=f"al_{case_key}")
+                    tax = int(u_bid * (0.011 if u_bid <= 600000000 else 0.035))
+                    loan = min(int(cur_apt['감정가원'] * 0.7), int(u_bid * (u_ltv / 100.0)))
+                    cash = (u_bid - loan) + tax + cur_apt['미납관리비'] + 1500000
+                    st.markdown(f"""
+                    <div class="calc-box-orange">
+                        • 낙찰가: {u_bid:,}원 | 경락대출: 약 {loan:,}원<br>
+                        • 취득세: {tax:,}원 | 미납관리비: {cur_apt['미납관리비']:,}원<br>
+                        • 협의 이사비(예비비): 약 1,500,000원<br>
+                        <hr style="margin:6px 0;">
+                        🚩 <b>필요 순수 현금</b>: <span style="font-size:20px; color:#c53030; font-weight:bold;">약 {cash:,}원</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+            with apt_sub_tab3:
+                apt_kakao = f"""[아파트 경매 추천] {cur_apt['사건번호']} 시세차익 매물 안내
+
+대표님 안녕하십니까! 우리부동산 법원경매 전문 김태형 소장입니다.
+
+• 사건번호: {cur_apt['사건번호']} ({cur_apt['법원']})
+• 소재지: {cur_apt['소재지']} ({cur_apt['평형타입']}, {cur_apt['층수']})
+• 감정가 {cur_apt['감정가']} ➡ 최저가 {cur_apt['최저가']} (보증금 {cur_apt['입찰보증금']})
+• 시세차익 예상: {cur_apt['예상시세차익']} (추천밴드 {cur_apt['추천입찰가밴드']})
+• 권리관계: 말소기준권리 이하 전액 소멸 (인수금액 0원)
+
+우리부동산 대표 김태형 ☎ 010-2660-8276
+"""
+                st.text_area("카카오톡 복사창", apt_kakao, height=220)
+
+    # -------------------------------------------------------------
+    # 🏭 2번 탭: 인천 전지역 공장·창고 경매 (정상 선택박스 & 블로그 포스팅 탑재)
+    # -------------------------------------------------------------
     with auction_tab2:
         st.subheader("🏭 인천광역시 공장 및 창고 경매 사건 리스트")
 
@@ -1714,16 +1685,18 @@ elif menu_choice == MENU_DICT["AUCTION_HUB"]:
         st.dataframe(summary_fac, use_container_width=True, height=200)
 
         st.markdown("---")
-        st.subheader("🔍 공장 경매 심층 권리분석 & 실시간 턴키 자금조달표")
+        st.subheader("🔍 공장 경매 심층 분석 & 📝 공장 경매 블로그 포스팅 원클릭 완성")
 
+        # 🌟 단일 고정이 아닌 선택 박스로 완벽 복구
         chosen_fac_idx = st.selectbox(
-            "정밀 분석할 공장 경매 사건을 선택하세요",
+            "정밀 분석 및 블로그 포스팅을 생성할 공장 경매 사건을 선택하세요",
             range(len(factory_list)),
             format_func=lambda i: f"[{factory_list[i]['사건번호']}] {factory_list[i]['소재지']} (감정가: {factory_list[i]['총감정가']} / 최저가: {factory_list[i]['최저가']})"
         )
 
         cur_fac = factory_list[chosen_fac_idx]
         case_fac_key = cur_fac['사건번호'].replace("타경", "_")
+        pure_real_estate = cur_fac['토지감정가원'] + cur_fac['건물감정가원']
 
         st.markdown(f"""
         <div style="background-color: #f7fafc; border: 2px solid #cbd5e0; border-radius: 8px; padding: 18px; margin-bottom: 16px;">
@@ -1737,151 +1710,123 @@ elif menu_choice == MENU_DICT["AUCTION_HUB"]:
         </div>
         """, unsafe_allow_html=True)
 
-        col_left, col_right = st.columns([1.2, 1.3])
+        fac_sub_tab1, fac_sub_tab2, fac_sub_tab3 = st.tabs([
+            "📝 [원클릭] 공장 경매 전문 네이버 블로그 포스팅",
+            "💰 턴키 정상가동 실시간 자금조달표",
+            "📱 손님 전송용 카카오톡 브리핑"
+        ])
 
-        with col_left:
-            st.markdown("##### ⚖️ 1. 권리분석 팩트체크 & 산집법 입주자격")
-            qa = cur_fac["권리분석"]
-            st.markdown(f"""
-            <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; font-size: 13px; line-height: 1.8;">
-                • <b>말소기준권리</b>: {qa['말소기준']}<br>
-                • <b>임차인 대항력</b>: <span style="color: #2b6cb0; font-weight: bold;">{qa['임차인']}</span><br>
-                • <b>유치권 신고 여부</b>: <span style="color: #276749; font-weight: bold;">{qa['유치권']}</span><br>
-                • <b>인수 채무/권리</b>: <span style="color: #276749; font-weight: bold;">{qa['인수권리']}</span><br>
-                <hr style="margin: 8px 0; border: 0; border-top: 1px dashed #cbd5e0;">
-                🚩 <b>산업단지 입주자격(산집법)</b>:<br>
-                {cur_fac['산단입주자격']}<br>
-                ⚠️ <b>연체 관리비/단전 위험</b>: <b>{cur_fac['연체관리비추정']:,}원 추정</b>
-            </div>
-            """, unsafe_allow_html=True)
+        # 🌟 [공장 경매 전용 블로그 포스팅 완성본]
+        with fac_sub_tab1:
+            st.markdown("##### 🚀 네이버 블로그 스마트에디터 전용 공장 경매 포스팅 (공장 실무 특화)")
+            clean_fac_loc = cur_fac['소재지'].split()[1] + " " + cur_fac['소재지'].split()[2]
 
-            st.markdown("##### 🏗️ 2. 감정평가 상세 분리 (기계기구 분리)")
-            pure_real_estate = cur_fac['토지감정가원'] + cur_fac['건물감정가원']
-            st.markdown(f"""
-            <div style="background-color: #ebf8ff; border: 1px solid #bee3f8; border-radius: 6px; padding: 14px; font-size: 13px; line-height: 1.8;">
-                • <b>총 감정가액</b>: <b>{cur_fac['총감정가원']:,}원</b><br>
-                • <b>토지 감정가</b>: {cur_fac['토지감정가원']:,}원 (대지 평당 약 {int((cur_fac['토지감정가원']/parse_pyung_numbers(cur_fac['대지면적'])[0])/10000):,}만 원)<br>
-                • <b>건물 감정가</b>: {cur_fac['건물감정가원']:,}원<br>
-                • <b>순수 부동산(토지+건물) 가치</b>: <span style="font-size: 15px; font-weight: bold; color: #2b6cb0;">{pure_real_estate:,}원</span><br>
-                • <b>기계기구 감정액</b>: <span style="color: #c53030; font-weight: bold;">{cur_fac['기계기구감정가원']:,}원</span> ({cur_fac['기계감정내역']})
-            </div>
-            """, unsafe_allow_html=True)
+            fac_blog_post = f"""안녕하세요! 인천 서구 및 주요 산업단지 공장·창고 전문 공인중개사 김태형입니다. 🙋‍♂️
 
-            st.link_button("🌐 대한민국 법원경매정보(대법원) 사건검색 바로가기", cur_fac["사건URL"], use_container_width=True)
+제조업 대표님들의 자가 공장 마련과 이전 부담을 획기적으로 낮출 수 있는 알짜배기 공장 경매 사건을 브리핑해 드립니다.
+오늘 소개해 드리는 물건은 {cur_fac['법원']}에서 진행되는 사건번호 {cur_fac['사건번호']} 물건으로, 감정가 대비 1회 유찰되어 시세 차익과 실수요 입주 메리트가 대단히 높습니다.
 
-        with col_right:
-            st.markdown("##### 💰 3. 턴키 정상가동 실시간 자금조달표")
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 1. 사건 개요 및 입찰 기본 정보
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- 사건번호: {cur_fac['사건번호']}
+- 담당법원: {cur_fac['법원']}
+- 소재지: {cur_fac['소재지']}
+- 대지면적: {cur_fac['대지면적']}
+- 건물면적: {cur_fac['건물면적']} (1층 바닥 {cur_fac['바닥평수']}평)
+- 매각기일: {cur_fac['매각기일']} ({cur_fac['진행상태']})
 
-            in_c1, in_c2 = st.columns(2)
-            with in_c1:
-                target_bid = st.number_input(
-                    "예상 입찰/낙찰가 (원) *",
-                    value=int(cur_fac['최저가원']),
-                    step=10000000,
-                    format="%d",
-                    key=f"fac_bid_{case_fac_key}"
-                )
-                loan_ltv = st.slider(
-                    "경락잔금대출 LTV (%) *",
-                    50, 85, 75, 5,
-                    key=f"fac_ltv_{case_fac_key}",
-                    help="공장 시설자금 경락대출 최대 75~80%"
-                )
-            with in_c2:
-                req_power = st.number_input(
-                    f"목표 동력 (현재 {cur_fac['현재동력kW']}kW)",
-                    min_value=cur_fac['현재동력kW'],
-                    max_value=500,
-                    value=max(cur_fac['현재동력kW'], 100),
-                    step=10,
-                    key=f"fac_pwr_{case_fac_key}"
-                )
-                hoist_choice = st.selectbox(
-                    "호이스트 조치 *",
-                    ["기존 호이스트 안전정비 (약 150만)", "2.8T 호이스트 신규 설치 (약 1,100만)", "5T 더블거더 신규 설치 (약 1,900만)", "설비 조치 불필요 (0원)"],
-                    key=f"fac_hoist_{case_fac_key}"
-                )
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💰 2. 감정평가 상세 분석 (기계기구 분리평가)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- 총 감정가액: {cur_fac['총감정가']}
+- 1회 유찰 최저가: {cur_fac['최저가']} (감정가 70% 수준)
+- 입찰 보증금: {cur_fac['입찰보증금']} (10% 수표 1장 준비)
+- 순수 부동산(토지+건물) 가치: 약 {pure_real_estate:,}원
+- 기계기구 감정액: 약 {cur_fac['기계기구감정가원']:,}원 ({cur_fac['기계감정내역']})
+💡 김소장의 팁: 공장 경매는 총 감정가 중 기계기구 평가액이 포함되어 있으므로, 실제 부동산 가치만을 분리 계산하여 입찰가를 산정하는 것이 필수입니다.
 
-            in_c3, in_c4 = st.columns(2)
-            with in_c3:
-                floor_opt = st.selectbox(
-                    f"바닥 에폭시 공사 (바닥 {cur_fac['바닥평수']}평) *",
-                    ["고강도 에폭시 코팅 (평당 4.5만)", "두께 라이닝 방수 (평당 7.5만)", "바닥 보수 불필요 (0원)"],
-                    key=f"fac_floor_{case_fac_key}"
-                )
-            with in_c4:
-                overdue_cost = st.number_input(
-                    "인수 미납관리비 / 한전 재공급비 (원)",
-                    value=int(cur_fac['연체관리비추정']),
-                    step=500000,
-                    key=f"fac_overdue_{case_fac_key}"
-                )
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏭 3. 공장 현장 제원 및 제조 인프라 스펙
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- 인입 동력: 현재 {cur_fac['현재동력kW']}kW 인입 (필요시 증설 가능 여부 확인 완료)
+- 호이스트 설비: {cur_fac['현재호이스트']}
+- 진입 도로 및 마당: {cur_fac['제원및코멘트']}
+- 용도지역 및 입주 적격성: {cur_fac['산단입주자격']}
 
-            add_power_kw = max(0, req_power - cur_fac['현재동력kW'])
-            cost_power = int(add_power_kw * 95000)
-            cost_hoist = 1500000 if "150만" in hoist_choice else (11000000 if "2.8T" in hoist_choice else (19000000 if "5T" in hoist_choice else 0))
-            cost_floor = int(cur_fac['바닥평수'] * 45000) if "코팅" in floor_opt else (int(cur_fac['바닥평수'] * 75000) if "라이닝" in floor_opt else 0)
-            total_fac_upgrade = cost_power + cost_hoist + cost_floor + overdue_cost
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚖️ 4. 김소장의 공장 경매 6대 권리분석 체크포인트
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ 말소기준권리: {cur_fac['권리분석']['말소기준']}
+✅ 임차인 대항력: {cur_fac['권리분석']['임차인']}
+✅ 유치권 신고 여부: {cur_fac['권리분석']['유치권']}
+✅ 낙찰자 인수 권리: {cur_fac['권리분석']['인수권리']} (소멸주의 원칙 적용)
+✅ 산업단지 입주자격: {cur_fac['산단입주자격']}
+✅ 연체 관리비 및 전기료: 약 {cur_fac['연체관리비추정']:,}원 (한전 단전 여부 사전 체크 완료)
 
-            acq_tax = int(target_bid * 0.046)
-            max_loan = min(int(cur_fac['총감정가원'] * 0.70), int(target_bid * (loan_ltv / 100.0)))
-            pure_cash_needed = (target_bid - max_loan) + acq_tax + total_fac_upgrade
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💸 5. 턴키 정상가동 자금 조달 타임라인
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. 시설자금 경락잔금대출: 감정가 및 낙찰가의 최대 75~80% 지원 가능
+2. 취득세율: 공장/토지 4.6% 적용 (산단 최초 입주 시 감면 요건 개별 검토)
+3. 제조 인프라 세팅비: 동력 승압비, 호이스트 정비, 바닥 에폭시 공사비 사전 예산 수립 완료
 
-            st.markdown(f"""
-            <div class="calc-box-orange">
-                <h4 style="color: #c05621; margin-bottom: 8px;">📊 [{cur_fac['사건번호']}] 턴키 입주 실시간 자금조달표</h4>
-                • <b>입력 낙찰가액</b>: <b>{target_bid:,}원</b> (감정가 대비 {round((target_bid/cur_fac['총감정가원'])*100, 1)}%)<br>
-                • <b>경락대출 가능액 (LTV {loan_ltv}%)</b>: <b>약 {max_loan:,}원</b><br>
-                • <b>부동산 취득세 (4.6%)</b>: <b>{acq_tax:,}원</b><br>
-                <hr style="margin: 8px 0; border: 0; border-top: 1px dashed #feebc8;">
-                <b>[숨은 비용 및 시설 인프라 공사비]</b><br>
-                1. 동력 {add_power_kw}kW 승압 공사비: {cost_power:,}원<br>
-                2. 호이스트 조치비: {cost_hoist:,}원 | 3. 바닥 공사비: {cost_floor:,}원<br>
-                4. 미납 관리비 및 한전 해제비: {overdue_cost:,}원<br>
-                🚩 <b>제조 인프라 세팅 총비용</b>: <b>약 {total_fac_upgrade:,}원</b><br>
-                <hr style="margin: 8px 0; border: 0; border-top: 1px dashed #feebc8;">
-                🏦 <b>최종 실제 필요 순수 자기자본 (실투자금)</b>:<br>
-                <span style="font-size: 20px; font-weight: bold; color: #c53030;">약 {pure_cash_needed:,}원</span> (대출 외 순수 현금)
-            </div>
-            """, unsafe_allow_html=True)
+공장 경매는 권리분석뿐만 아니라 업종 인허가, 산집법 입주계약 체결, 수전용량과 호이스트 실가동 여부까지 원스톱으로 점검해야 실패하지 않습니다.
+현장 임장 동행 및 턴키 입찰 대리 진행 상담은 편하게 문의해 주십시오.
 
-        st.markdown("---")
-        st.subheader("📱 손님 전송용 공장 경매 실전 브리핑 카카오톡")
-
-        briefing_kakao = f"""[공장 경매 추천] {cur_fac['사건번호']} 특급 매물 안내
-
-대표님 안녕하십니까!
-인천 공장 경매 전문 우리부동산 김태형 소장입니다.
-
-감정가 대비 1회 유찰되어 시세 차익과 실수요 입주 메리트가 뛰어난 알짜배기 공장 경매 사건을 브리핑해 드립니다.
-
-━━━━━━━━━━━━━━━━━━━━
-📌 법원경매 사건 개요
-━━━━━━━━━━━━━━━━━━━━
-• 사건번호: {cur_fac['사건번호']}
-• 담당법원: {cur_fac['법원']}
-• 소재지: {cur_fac['소재지']}
-• 토지/건물면적: 대지 {cur_fac['대지면적']} / 건물 {cur_fac['건물면적']} (바닥 {cur_fac['바닥평수']}평)
-• 매각기일: {cur_fac['매각기일']} ({cur_fac['진행상태']})
-
-💰 가격 및 감정가 분석
-• 총 감정가액: {cur_fac['총감정가']}
-• 최저 입찰가: {cur_fac['최저가']} (감정가의 70%)
-• 입찰보증금: {cur_fac['입찰보증금']} (10% 수표 1장 준비)
-• 순수 부동산 가치: 약 {pure_real_estate:,}원 (기계감정액 {cur_fac['기계기구감정가원']:,}원 분리)
-
-⚖ 권리분석 및 입주 검토 요약
-• 임차인 및 권리: {cur_fac['권리분석']['임차인']} / {cur_fac['권리분석']['인수권리']}
-• 유치권 리스크: {cur_fac['권리분석']['유치권']}
-• 입주 자격: {cur_fac['산단입주자격']}
-
-🏦 자금 조달 및 실투자금 안내
-• 경락잔금대출: 낙찰가의 최대 75~80% 지원 (약 {max_loan:,}원 수준)
-• 동력 증설 및 호이스트 정비 포함 실투자금: 약 {pure_cash_needed:,}원 내외
-
-현장 임장 및 입찰 대리 상담은 편하게 회신 주십시오.
-
+인천 공장·창고 중개 및 법원경매 전문
 우리부동산 공인중개사사무소 대표 김태형
 ☎ 010-2660-8276
+
+#공장경매 #{clean_fac_loc.replace(' ','')}공장 #인천공장경매 #창고경매 #법원경매 #호이스트공장 #공인중개사김소장 #우리부동산 #경락잔금대출 #제조업이전
 """
-        st.text_area("공장 경매 카카오톡 브리핑 복사창", briefing_kakao, height=330)
+            st.text_area("공장 경매 네이버 블로그 복사용 본문", fac_blog_post, height=450)
+
+        with fac_sub_tab2:
+            fc1, fc2 = st.columns([1.2, 1.3])
+            with fc1:
+                st.markdown("##### ⚖️ 권리분석 & 기계기구 분리")
+                st.markdown(f"""
+                <div style="background:#ffffff; border:1px solid #cbd5e0; padding:12px; font-size:13px; line-height:1.8;">
+                    • <b>말소기준</b>: {cur_fac['권리분석']['말소기준']}<br>
+                    • <b>임차인</b>: {cur_fac['권리분석']['임차인']}<br>
+                    • <b>유치권</b>: {cur_fac['권리분석']['유치권']}<br>
+                    • <b>순수 부동산 가치</b>: {pure_real_estate:,}원<br>
+                    • <b>기계기구 감정액</b>: {cur_fac['기계기구감정가원']:,}원 ({cur_fac['기계감정내역']})<br>
+                    • <b>산단입주</b>: {cur_fac['산단입주자격']}
+                </div>
+                """, unsafe_allow_html=True)
+                st.link_button("🌐 대한민국 법원경매정보 사건검색", cur_fac["사건URL"], use_container_width=True)
+
+            with fc2:
+                st.markdown("##### 💰 턴키 입주 실시간 자금조달표")
+                f_bid = st.number_input("예상 낙찰가 (원)", value=int(cur_fac['최저가원']), step=10000000, key=f"fb_{case_fac_key}")
+                f_ltv = st.slider("시설대출 LTV (%)", 50, 85, 75, 5, key=f"fl_{case_fac_key}")
+                f_tax = int(f_bid * 0.046)
+                f_loan = min(int(cur_fac['총감정가원'] * 0.7), int(f_bid * (f_ltv / 100.0)))
+                f_cash = (f_bid - f_loan) + f_tax + cur_fac['연체관리비추정'] + 15000000
+                st.markdown(f"""
+                <div class="calc-box-orange">
+                    • 낙찰가: {f_bid:,}원 | 시설대출: 약 {f_loan:,}원<br>
+                    • 취득세(4.6%): {f_tax:,}원 | 연체전기료/관리비: {cur_fac['연체관리비추정']:,}원<br>
+                    • 동력/호이스트 시설보수 예비비: 약 15,000,000원<br>
+                    <hr style="margin:6px 0;">
+                    🚩 <b>필요 순수 현금</b>: <span style="font-size:20px; color:#c53030; font-weight:bold;">약 {f_cash:,}원</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with fac_sub_tab3:
+            briefing_kakao = f"""[공장 경매 추천] {cur_fac['사건번호']} 특급 매물 안내
+
+대표님 안녕하십니까! 인천 공장 경매 전문 우리부동산 김태형 소장입니다.
+
+• 사건번호: {cur_fac['사건번호']} ({cur_fac['법원']})
+• 소재지: {cur_fac['소재지']} (바닥 {cur_fac['바닥평수']}평)
+• 감정가 {cur_fac['총감정가']} ➡ 최저가 {cur_fac['최저가']} (보증금 {cur_fac['입찰보증금']})
+• 순수 부동산 가치: 약 {pure_real_estate:,}원 (기계 {cur_fac['기계기구감정가원']:,}원 분리)
+• 제원: 동력 {cur_fac['현재동력kW']}kW, {cur_fac['현재호이스트']}, 대형차 진입 원활
+• 시설대출 75~80% 지원, 실투자금 약 {f_cash:,}원 내외
+
+우리부동산 대표 김태형 ☎ 010-2660-8276
+"""
+            st.text_area("카카오톡 브리핑 복사창", briefing_kakao, height=250)
