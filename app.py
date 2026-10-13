@@ -28,16 +28,31 @@ st.markdown("""
     html, body, [data-testid="stAppViewContainer"], .notranslate {
         translate: no !important;
     }
-    .match-card-gold {
-        background-color: #fffdf5;
-        border-left: 5px solid #d69e2e;
-        border-top: 1px solid #fefcbf;
-        border-right: 1px solid #fefcbf;
-        border-bottom: 1px solid #fefcbf;
-        border-radius: 8px;
-        padding: 12px 16px;
-        margin-bottom: 10px;
-        line-height: 1.6;
+    .hunting-card {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 6px solid #48bb78;
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    }
+    .hunting-card-target {
+        background-color: #fffaf0;
+        border: 1px solid #feebc8;
+        border-left: 6px solid #dd6b20;
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 5px rgba(221,107,32,0.08);
+    }
+    .hunting-card-done {
+        background-color: #f0fff4;
+        border: 1px solid #c6f6d5;
+        border-left: 6px solid #38a169;
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-bottom: 12px;
     }
     .customer-card-pro {
         background-color: #ffffff;
@@ -161,7 +176,7 @@ def check_password():
     c1, c2, c3 = st.columns([1, 1.2, 1])
     with c2:
         st.markdown("### 🏢 우리부동산 통합 업무 시스템")
-        st.caption("인천 공장 중개 & 법원경매·청약/공공임대 팩트체크 허브 - 보안 인증")
+        st.caption("인천 공장 중개 & 현장 물건따기·청약/공공임대 팩트체크 허브 - 보안 인증")
         pwd_input = st.text_input("사무실 전용 비밀번호", type="password", key="pwd_box")
         if st.button("🔓 시스템 접속하기", type="primary", use_container_width=True):
             if pwd_input == CORRECT_PASSWORD:
@@ -180,6 +195,7 @@ if not check_password():
 CUSTOMERS_CSV = "customers.csv"
 PROPERTIES_CSV = "properties.csv"
 NEW_DEV_CSV = "new_developments.csv"
+HUNTING_CSV = "hunting_properties.csv"
 
 def load_customers():
     if os.path.exists(CUSTOMERS_CSV):
@@ -234,103 +250,42 @@ def save_new_dev(new_data):
     updated.to_csv(NEW_DEV_CSV, index=False, encoding="utf-8-sig")
     return updated
 
-def parse_pyung_numbers(text):
-    if not text or pd.isna(text): return []
-    nums = re.findall(r'\d+', str(text))
-    return [float(n) for n in nums if 5 <= float(n) <= 5000]
-
-def get_safe_cust_val(row, col_name, default=""):
-    val = row.get(col_name, default)
-    if pd.isna(val) or str(val).strip() == "" or str(val).strip() == "nan":
-        if col_name == "예산(보증금/월세/매매가)": val = row.get("예산(보증금/월세)", default)
-        else: val = default
-    return str(val) if pd.notna(val) else default
-
-# 🎯 손님-매물 양방향 매칭 헬퍼
-def match_properties_for_customer(cust_row):
-    df_p = load_properties()
-    if df_p.empty: return []
-    c_loc = str(cust_row.get("희망권역", ""))
-    c_pyungs = parse_pyung_numbers(cust_row.get("희망평수", ""))
-    c_pyung = c_pyungs[0] if c_pyungs else None
-
-    matched_props = []
-    for _, prop in df_p.iterrows():
-        p_loc = str(prop.get("소재지(권역)", ""))
-        p_area = str(prop.get("면적", ""))
-        loc_words = [w for w in c_loc.replace("(", " ").replace(")", " ").split() if len(w) >= 2]
-        if loc_words and not any(w in p_loc for w in loc_words): continue
-        p_pyungs = parse_pyung_numbers(p_area)
-        if c_pyung and p_pyungs:
-            if not ((c_pyung * 0.75) <= p_pyungs[0] <= (c_pyung * 1.3)): continue
-        matched_props.append(prop)
-    return matched_props
-
-# =============================================================
-# ⚖ 대법원 법원경매 정밀 데이터베이스
-# =============================================================
-def get_auction_data():
-    factory_auctions = [
-        {
-            "사건번호": "2026타경10452", "법원": "인천지방법원 본원 (경매5계)", "소재지": "인천광역시 서구 가좌동 556-12", "세부용도": "일반공장 / 제조장",
-            "대지면적": "661.1㎡ (약 200평)", "건물면적": "528.9㎡ (약 160평)", "바닥평수": 160, "현재동력kW": 75, "현재호이스트": "호이스트 5T 완비",
-            "총감정가원": 1850000000, "총감정가": "18억 5,000만 원", "최저가원": 1295000000, "최저가": "12억 9,500만 원 (70%)", "입찰보증금": "1억 2,950만 원 (10%)",
-            "토지감정가원": 1350000000, "건물감정가원": 420000000, "기계기구감정가원": 80000000, "기계감정내역": "천장주행 크레인 5T 1식, 수전설비 75kW",
-            "매각기일": "2026-10-22", "진행상태": "유찰 1회",
-            "권리분석": {"말소기준": "2019-04-12 근저당권 (신한은행)", "임차인": "대항력 없는 후순위 임차인 1명 (보증금 3,000만 원)", "유치권": "유치권 신고 없음 (깨끗)", "인수권리": "인수 권리 없음 (소멸주의)"},
-            "산단입주자격": "일반공업지역 (산집법 입주계약 불필요, 모든 제조업 입주 가능)", "연체관리비추정": 3500000,
-            "배당정보": {"경매비용": 12000000, "당해세": 8000000, "최우선변제": 0, "선순위근저당": 950000000, "임차인배당": 30000000},
-            "제원및코멘트": "처마 8m, 호이스트 5T 완비, 동력 75kW 인입, 11톤 윙바디 진입 원활. 가좌IC 3분 거리.",
-            "사건URL": "https://www.courtauction.go.kr"
-        },
-        {
-            "사건번호": "2026타경11208", "법원": "인천지방법원 본원 (경매3계)", "소재지": "인천광역시 서구 오류동 검단일반산단 42-5", "세부용도": "신축급 공장",
-            "대지면적": "991.7㎡ (약 300평)", "건물면적": "793.3㎡ (약 240평)", "바닥평수": 240, "현재동력kW": 150, "현재호이스트": "호이스트 레일 완비 (본체 철거)",
-            "총감정가원": 2680000000, "총감정가": "26억 8,000만 원", "최저가원": 1876000000, "최저가": "18억 7,600만 원 (70%)", "입찰보증금": "1억 8,760만 원 (10%)",
-            "토지감정가원": 1900000000, "건물감정가원": 750000000, "기계기구감정가원": 30000000, "기계감정내역": "수전설비 150kW",
-            "매각기일": "2026-10-27", "진행상태": "유찰 1회",
-            "권리분석": {"말소기준": "2021-08-19 근저당권 (기업은행)", "임차인": "소유자 점유 (대항력 없음)", "유치권": "유치권 신고 없음", "인수권리": "소멸주의"},
-            "산단입주자격": "검단일반산단 관리구역 (산집법상 제조업 입주적격업체 사전 확인 필수)", "연체관리비추정": 8000000,
-            "배당정보": {"경매비용": 16000000, "당해세": 12000000, "최우선변제": 0, "선순위근저당": 1400000000, "임차인배당": 0},
-            "제원및코멘트": "산단 코너 필지, 츄레라 회전 가능 마당, 층고 10m, 동력 150kW 대용량.",
-            "사건URL": "https://www.courtauction.go.kr"
-        }
+# 🏃 현장 물건따기 전용 장부 데이터 로드/저장
+def load_hunting_properties():
+    if os.path.exists(HUNTING_CSV):
+        return pd.read_csv(HUNTING_CSV)
+    # 대표님이 주신 석남동 11개 실전 물건 기본 데이터
+    init_data = [
+        {"등록일": "2026-10-13", "동": "석남동", "지번": "223-822", "건물유형": "집합공장", "소재지전체": "인천 서구 석남동 223-822", "소유자/법인명": "관리사무소/집합", "상호": "", "연락처": "", "진행상태": "🚗 현장 방문 필요", "현장메모": "집합공장. 관리사무소 방문하여 임대/매매 나온 호실 확인"},
+        {"등록일": "2026-10-13", "동": "석남동", "지번": "223-932", "건물유형": "일반공장", "소재지전체": "인천 서구 석남동 223-932", "소유자/법인명": "홍정미", "상호": "", "연락처": "", "진행상태": "🚗 현장 방문 필요", "현장메모": "개인소유. 방문 필요. 현장 점유자/관리인 만나서 건물주 직통 확인"},
+        {"등록일": "2026-10-13", "동": "석남동", "지번": "223-651", "건물유형": "일반공장", "소재지전체": "인천 서구 석남동 223-651", "소유자/법인명": "소유자 확인중", "상호": "", "연락처": "", "진행상태": "📞 유선 확인 필요", "현장메모": "건축물대장 열람 후 소유자 번호 유선 확인"},
+        {"등록일": "2026-10-13", "동": "석남동", "지번": "223-360", "건물유형": "일반공장", "소재지전체": "인천 서구 석남동 223-360", "소유자/법인명": "이해영, 최완규", "상호": "신창코팅", "연락처": "032-577-0104", "진행상태": "📞 유선 확인 필요", "현장메모": "신창코팅 유선 통화 후 임대 만기/매각 의사 체크"},
+        {"등록일": "2026-10-13", "동": "석남동", "지번": "223-559", "건물유형": "운수/차고지", "소재지전체": "인천 서구 석남동 223-559", "소유자/법인명": "한미교통주식회사", "상호": "한미교통", "연락처": "032-571-1032", "진행상태": "📞 유선 확인 필요", "현장메모": "한미교통 자산관리 담당자 유선 통화"},
+        {"등록일": "2026-10-13", "동": "석남동", "지번": "223-557", "건물유형": "제조공장", "소재지전체": "인천 서구 석남동 223-557", "소유자/법인명": "김용주", "상호": "명인기공", "연락처": "032-579-3171", "진행상태": "🚗 현장 방문 필요", "현장메모": "명인기공 대표실 방문 또는 032-579-3171 유선 컨택"},
+        {"등록일": "2026-10-13", "동": "석남동", "지번": "223-835", "건물유형": "일반공장", "소재지전체": "인천 서구 석남동 223-835", "소유자/법인명": "박용욱", "상호": "", "연락처": "", "진행상태": "🚗 현장 방문 필요", "현장메모": "개인소유. 현장 방문하여 명함 전달 및 건물주 연락처 탐문"},
+        {"등록일": "2026-10-13", "동": "석남동", "지번": "223-786", "건물유형": "제조공장", "소재지전체": "인천 서구 석남동 223-786", "소유자/법인명": "진우조명", "상호": "진우조명", "연락처": "", "진행상태": "🚗 현장 방문 필요", "현장메모": "진우조명 공장 현장 방문하여 이전/임대 여부 체크"},
+        {"등록일": "2026-10-13", "동": "석남동", "지번": "223-886", "건물유형": "일반공장", "소재지전체": "인천 서구 석남동 223-886", "소유자/법인명": "안민영", "상호": "", "연락처": "", "진행상태": "🚗 현장 방문 필요", "현장메모": "현장 방문 조사 필요"},
+        {"등록일": "2026-10-13", "동": "석남동", "지번": "223-881", "건물유형": "일반공장", "소재지전체": "인천 서구 석남동 223-881", "소유자/법인명": "권진주", "상호": "", "연락처": "", "진행상태": "🚗 현장 방문 필요", "현장메모": "현장 방문 조사 필요"},
+        {"등록일": "2026-10-13", "동": "석남동", "지번": "223-855", "건물유형": "일반공장", "소재지전체": "인천 서구 석남동 223-855", "소유자/법인명": "성용욱", "상호": "", "연락처": "", "진행상태": "🚗 현장 방문 필요", "현장메모": "현장 방문 조사 필요"}
     ]
+    df = pd.DataFrame(init_data)
+    df.to_csv(HUNTING_CSV, index=False, encoding="utf-8-sig")
+    return df
 
-    apt_auctions = [
-        {
-            "사건번호": "2026타경10550", "법원": "서울중앙지방법원 (경매4계)", "시도": "서울특별시", "자치구": "서초구",
-            "소재지": "서울특별시 서초구 반포동 2-1 (아크로리버파크 104동)", "주택유형": "아파트", "평형타입": "전용 84.97㎡ (34평형)", "층수": "22층 / 38층 (로열층 한강뷰)",
-            "감정가원": 4300000000, "감정가": "43억 원", "최저가원": 3440000000, "최저가": "34억 4,000만 원 (80%)", "입찰보증금": "3억 4,400만 원 (10%)",
-            "매각기일": "2026-11-12", "진행상태": "유찰 1회", "실거래시세원": 4500000000, "최근실거래가": "45억 원 선",
-            "권리분석": {
-                "말소기준권리": "2019-12-10 근저당권 (신한은행)", "임차인분석": "소유자 세대 점유 (대항력 있는 임차인 없음)",
-                "인수보증금": 0, "토허제특례": "경매 취득 시 토지거래허가구역 실거주의무 면제 (전세 갭투자 가능)", "명도난이도": "보통 (소유자 거주, 협의 수월)"
-            },
-            "미납관리비": 1800000, "추천입찰가밴드": "36억 5,000만 ~ 37억 8,000만 원", "예상시세차익": "약 7억 ~ 8.5억 원",
-            "배당정보": {"경매비용": 18000000, "당해세": 15000000, "최우선변제": 0, "선순위근저당": 2800000000, "임차인배당": 0},
-            "사건URL": "https://www.courtauction.go.kr"
-        },
-        {
-            "사건번호": "2026타경07819", "법원": "인천지방법원 부천지원 (경매2계)", "시도": "경기도", "자치구": "부천시",
-            "소재지": "경기도 부천시 원미구 중동 1162 (중동 센트럴파크 푸르지오 102동)", "주택유형": "주상복합 아파트", "평형타입": "전용 84.99㎡ (35평형)", "층수": "28층 / 49층 (고층 공원뷰)",
-            "감정가원": 1180000000, "감정가": "11억 8,000만 원", "최저가원": 826000000, "최저가": "8억 2,600만 원 (70%)", "입찰보증금": "8,260만 원 (10%)",
-            "매각기일": "2026-10-26", "진행상태": "유찰 1회", "실거래시세원": 1200000000, "최근실거래가": "12억 원 선",
-            "권리분석": {
-                "말소기준권리": "2020-09-03 근저당권 (농협은행)", "임차인분석": "소유자 세대 점유 (선순위 임차인 없음)",
-                "인수보증금": 0, "토허제특례": "비규제지역 (대출 수월)", "명도난이도": "수월 (인도명령 인용)"
-            },
-            "미납관리비": 1100000, "추천입찰가밴드": "9억 1,000만 ~ 9억 4,000만 원", "예상시세차익": "약 2.6억 ~ 2.9억 원",
-            "배당정보": {"경매비용": 8500000, "당해세": 3200000, "최우선변제": 0, "선순위근저당": 650000000, "임차인배당": 0},
-            "사건URL": "https://www.courtauction.go.kr"
-        }
-    ]
-    return factory_auctions, apt_auctions
+def save_all_hunting(df):
+    df.to_csv(HUNTING_CSV, index=False, encoding="utf-8-sig")
+
+def save_hunting_item(new_data):
+    df = load_hunting_properties()
+    updated = pd.concat([pd.DataFrame([new_data]), df], ignore_index=True)
+    save_all_hunting(updated)
+    return updated
 
 # =============================================================
-# 📌 업무 메뉴 네비게이션
+# 📌 업무 메뉴 네비게이션 (9개 메뉴 체계)
 # =============================================================
 MENU_DICT = {
+    "FACTORY_HUNT": "🏃 [임장/작업] 현장 공장 물건따기 파이프라인",
     "FACTORY_REG": "🏭 [주업] 공장 매물 등록 & 손님 자동매칭",
     "NEW_DEV": "🏗️ [주업] 신축공장 맞춤 분양 설계 & 제안서",
     "CUSTOMER_CRM": "📋 [주업] 공장 손님 장부 (CRM & 리마인드)",
@@ -341,19 +296,177 @@ MENU_DICT = {
     "AUCTION_HUB": "⚖️ [부업] 법원경매 허브 & 수도권 주택·공장 정밀분석"
 }
 
-menu_choice = st.sidebar.radio("📌 업무 시스템 메뉴", list(MENU_DICT.values()), index=6)
+menu_choice = st.sidebar.radio("📌 업무 시스템 메뉴", list(MENU_DICT.values()), index=0)
 
 st.sidebar.markdown("---")
 if st.sidebar.button("🔒 로그아웃"):
     st.session_state["authenticated"] = False
     st.rerun()
 
-st.sidebar.caption("🏢 **인천 서구 공장 중개 & 법원경매·청약 팩트체크 허브 가동 중**")
+st.sidebar.caption("🏢 **인천 서구 공장 중개 & 현장 물건따기·청약·경매 허브 가동 중**")
+
+# =============================================================
+# 0. 🏃 [신규 탑재] 현장 공장 물건따기 파이프라인 (작업용 장부)
+# =============================================================
+if menu_choice == MENU_DICT["FACTORY_HUNT"]:
+    st.title("🏃 현장 공장 물건따기 파이프라인 (임장 & 건물주 컨택)")
+    st.caption("네이버 부동산·현장 임장 지번 등록 ➡️ 건축물대장 소유자/법인 특정 ➡️ 현장 방문/유선 컨택 ➡️ 물건 확보까지 원스톱 관리!")
+
+    df_h = load_hunting_properties()
+
+    # 현황 요약 카운터
+    cnt_total = len(df_h)
+    cnt_visit = len(df_h[df_h["진행상태"] == "🚗 현장 방문 필요"])
+    cnt_call = len(df_h[df_h["진행상태"] == "📞 유선 확인 필요"])
+    cnt_retry = len(df_h[df_h["진행상태"] == "🔄 재방문/재트라이"])
+    cnt_done = len(df_h[df_h["진행상태"] == "🎉 물건 확보 성공!"])
+
+    s_c1, s_c2, s_c3, s_c4, s_c5 = st.columns(5)
+    s_c1.metric("📌 전체 작업 지번", f"{cnt_total}건")
+    s_c2.metric("🚗 현장 방문 대상", f"{cnt_visit}건")
+    s_c3.metric("📞 유선 컨택 대상", f"{cnt_call}건")
+    s_c4.metric("🔄 재트라이 대상", f"{cnt_retry}건")
+    s_c5.metric("🎉 물건 확보 성공", f"{cnt_done}건")
+
+    st.markdown("---")
+    h_tab1, h_tab2 = st.tabs(["🚗 [현장 임장 모드] 동별 작업 장부 & 상태 변경", "➕ [신규 지번 등록] 대장 열람 후 타깃 추가"])
+
+    with h_tab1:
+        f1, f2, f3 = st.columns([1.5, 1.5, 2])
+        
+        all_dongs = ["전체 동 모아보기"] + sorted(list(df_h["동"].dropna().unique()))
+        with f1:
+            sel_dong = st.selectbox("📍 법정동 필터", all_dongs, key="hunt_dong_filter")
+        
+        all_status = ["전체 진행상태 보기", "🚗 현장 방문 필요", "📞 유선 확인 필요", "🔄 재방문/재트라이", "🎉 물건 확보 성공!", "보류/거절"]
+        with f2:
+            sel_stat = st.selectbox("🚦 진행 상태 필터", all_status, key="hunt_stat_filter")
+            
+        with f3:
+            kw_hunt = st.text_input("🔎 지번 / 상호 / 소유자명 / 메모 검색", placeholder="예: 223-360, 신창코팅, 홍정미 등...", key="hunt_search_kw")
+
+        f_df = df_h.copy()
+        if sel_dong != "전체 동 모아보기":
+            f_df = f_df[f_df["동"] == sel_dong]
+        if sel_stat != "전체 진행상태 보기":
+            f_df = f_df[f_df["진행상태"] == sel_stat]
+        if kw_hunt.strip():
+            kw = kw_hunt.strip()
+            f_df = f_df[
+                f_df["지번"].astype(str).str.contains(kw, na=False) |
+                f_df["소유자/법인명"].astype(str).str.contains(kw, na=False) |
+                f_df["상호"].astype(str).str.contains(kw, na=False) |
+                f_df["현장메모"].astype(str).str.contains(kw, na=False)
+            ]
+
+        st.caption(f"조회된 물건: **총 {len(f_df)}건** (동: {sel_dong} | 상태: {sel_stat})")
+
+        if f_df.empty:
+            st.info("조건에 부합하는 작업 대상 물건이 없습니다.")
+        else:
+            for idx, r in f_df.iterrows():
+                is_done = r["진행상태"] == "🎉 물건 확보 성공!"
+                is_visit = "방문" in r["진행상태"]
+                card_style = "hunting-card-done" if is_done else ("hunting-card-target" if is_visit else "hunting-card")
+
+                full_addr = f"인천 서구 {r['동']} {r['지번']}"
+                map_url = f"https://map.naver.com/p/search/{full_addr.replace(' ', '%20')}"
+
+                st.markdown(f"""
+                <div class="{card_style}">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <div>
+                            <span style="font-size: 19px; font-weight: bold; color: #1a365d;">📍 {r['동']} {r['지번']}</span>
+                            <span class="tag-blue" style="margin-left: 8px;">{r['건물유형']}</span>
+                            <span class="tag-orange">👤 {r['소유자/법인명']}</span>
+                            {f'<span class="tag-green">🏭 {r["상호"]}</span>' if str(r.get("상호","")).strip() else ''}
+                        </div>
+                        <div>
+                            <span style="font-size: 13px; font-weight: bold; color: {'#38a169' if is_done else '#dd6b20'};">
+                                {r['진행상태']}
+                            </span>
+                        </div>
+                    </div>
+                    <div style="font-size: 14px; color: #2d3748; margin-bottom: 6px;">
+                        📞 연락처: <b>{r['연락처'] if str(r.get('연락처','')).strip() else '현장 방문하여 탐문 필요'}</b>
+                    </div>
+                    <div style="background-color: #f8fafc; border-radius: 6px; padding: 8px 12px; font-size: 13px; color: #4a5568;">
+                        💡 <b>임장/작업 메모</b>: {r['현장메모']}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+                b_col1, b_col2, b_col3, b_col4 = st.columns([1.5, 2.0, 1.2, 1.0])
+                with b_col1:
+                    st.link_button(f"🗺️ {r['지번']} 네이버 지도/로드뷰", map_url, use_container_width=True)
+                with b_col2:
+                    status_options = ["🚗 현장 방문 필요", "📞 유선 확인 필요", "🔄 재방문/재트라이", "🎉 물건 확보 성공!", "보류/거절"]
+                    curr_idx = status_options.index(r["진행상태"]) if r["진행상태"] in status_options else 0
+                    new_status = st.selectbox(
+                        "진행상태 갱신",
+                        status_options,
+                        index=curr_idx,
+                        key=f"st_sel_{idx}"
+                    )
+                with b_col3:
+                    if st.button("💾 상태 저장", key=f"btn_st_save_{idx}", use_container_width=True):
+                        df_h.at[idx, "진행상태"] = new_status
+                        save_all_hunting(df_h)
+                        st.success(f"{r['지번']} 상태 변경 완료!")
+                        st.rerun()
+                with b_col4:
+                    if st.button("🗑️ 삭제", key=f"btn_h_del_{idx}", use_container_width=True):
+                        df_h = df_h.drop(df_h.index[idx]).reset_index(drop=True)
+                        save_all_hunting(df_h)
+                        st.warning(f"{r['지번']} 삭제 완료")
+                        st.rerun()
+
+    with h_tab2:
+        st.subheader("➕ 네이버 부동산 보고 딸 공장 지번 추가하기")
+        st.caption("건축물대장을 떼서 확인한 소유자명이나, 현장에서 알아낸 상호/전화번호를 입력해 두세요.")
+
+        with st.form("new_hunt_form"):
+            in_c1, in_c2, in_c3 = st.columns(3)
+            with in_c1:
+                dong_opts = ["석남동", "가좌동", "원창동", "경서동", "도화동", "송림동", "기타"]
+                new_dong = st.selectbox("법정동 선택 *", dong_opts)
+                new_jibun = st.text_input("지번 (번지-호) *", placeholder="예: 223-999")
+            with in_c2:
+                new_type = st.selectbox("건물 유형", ["일반공장", "집합공장", "제조업소", "물류창고", "차고지/나대지"])
+                new_owner = st.text_input("소유자명 (대장상 명의)", placeholder="예: 홍길동 또는 (주)대한국제")
+            with in_c3:
+                new_biz = st.text_input("상호 / 현장 간판명", placeholder="예: 대한정밀, 한미교통 등")
+                new_phone = st.text_input("확인된 전화번호", placeholder="예: 032-570-0000 또는 010-0000-0000")
+
+            new_stat_sel = st.selectbox("초기 진행 상태", ["🚗 현장 방문 필요", "📞 유선 확인 필요", "🔄 재방문/재트라이"])
+            new_memo = st.text_area("임장/공략 메모", placeholder="예: 네이버 매물 보고 지번 특정. 현장 관리인 만나서 건물주 번호 따거나 우편함 체크 필요.")
+
+            submit_hunt = st.form_submit_button("🚀 작업 지번 목록에 등록하기", type="primary", use_container_width=True)
+
+            if submit_hunt:
+                if not new_jibun.strip():
+                    st.error("지번은 필수 입력 항목입니다.")
+                else:
+                    new_item = {
+                        "등록일": datetime.today().strftime("%Y-%m-%d"),
+                        "동": new_dong,
+                        "지번": new_jibun.strip(),
+                        "건물유형": new_type,
+                        "소재지전체": f"인천 서구 {new_dong} {new_jibun.strip()}",
+                        "소유자/법인명": new_owner if new_owner.strip() else "확인중",
+                        "상호": new_biz.strip(),
+                        "연락처": new_phone.strip(),
+                        "진행상태": new_stat_sel,
+                        "현장메모": new_memo.strip()
+                    }
+                    save_hunting_item(new_item)
+                    st.success(f"✅ 인천 서구 {new_dong} {new_jibun} 물건이 작업 목록에 추가되었습니다!")
+                    st.rerun()
 
 # =============================================================
 # 1. 🏭 [주업] 공장 매물 등록 & 확인·설명서 필수 항목 자동화
 # =============================================================
-if menu_choice == MENU_DICT["FACTORY_REG"]:
+elif menu_choice == MENU_DICT["FACTORY_REG"]:
     st.title("🏭 공장 매물 등록 & 중개대상물 확인·설명서 필수 항목 자동화")
     st.caption("건축물대장 공적장부 연동 규격화, 용도지역별 민원 리스크 필터 및 확인·설명서[비주거용] 텍스트가 자동 생성됩니다.")
 
@@ -960,9 +1073,6 @@ elif menu_choice == MENU_DICT["APPLY_HOME"]:
         horizontal=True
     )
 
-    # -------------------------------------------------------------
-    # 1. 분양 / 줍줍 파이프라인 (청약홈 달력 기반)
-    # -------------------------------------------------------------
     if hub_mode == "🏢 [민영·공공분양/줍줍] 청약Home 팩트 주입 포스팅":
         base_sale_list = [
             {
