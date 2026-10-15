@@ -756,183 +756,384 @@ elif menu_choice == MENU_DICT["BLOG_TOOL"]:
                 st.text_area("숏폼 대본 복사", short_script, height=120)
 
 # =============================================================
-# 7. 🏢 [타이핑 제로] 청약·줍줍 & 공공임대 1초 스마트 파서 & 블로그 완성기
+# 7. 🏢 [실시간 API 완전 자동화] 청약홈 분양·줍줍 & LH 공공임대 허브
 # =============================================================
 elif menu_choice == MENU_DICT["APPLY_HOME"]:
-    st.title("🏢 청약·줍줍 & 공공임대 1초 팩트체크 허브")
-    st.caption("청약홈/LH 공고 화면을 마우스로 긁어 복사한 뒤 붙여넣기만 하세요. AI/정규식 엔진이 일정, 금액, 자격, 안전마진을 기계적으로 자동 분석해 포스팅을 완성합니다.")
+    st.title("🏢 실시간 청약·줍줍 & LH 공공임대 자동 업데이트 허브")
+    st.caption("공공데이터포털 정식 인증키 내장 완료! 한국부동산원 청약Home 및 LH 실시간 공고 자동 수집 ➡️ 단지 선택 즉시 블로그 원고 1초 자동 완성!")
 
-    APPLYHOME_CAL_URL = "https://www.applyhome.co.kr/ai/aib/selectSubscrptCalenderView.do#a"
-    LH_APPLY_URL = "https://apply.lh.or.kr"
+    # 대표님 전용 공식 API 인증키 기본 내장
+    DEFAULT_API_KEY = "d1a0585bef6ed7240317271c754ad4be4f9ba74cdf342e6b714bbb85d3196f69"
+    API_KEY_FILE = "data_go_kr_key.txt"
 
-    top1, top2 = st.columns(2)
-    with top1: st.link_button("📅 [청약Home] 실시간 청약캘린더 바로가기", APPLYHOME_CAL_URL, type="primary", use_container_width=True)
-    with top2: st.link_button("🏢 [LH청약플러스] 실시간 분양·임대센터 바로가기", LH_APPLY_URL, use_container_width=True)
+    def get_active_api_key():
+        if os.path.exists(API_KEY_FILE):
+            with open(API_KEY_FILE, "r", encoding="utf-8") as f:
+                k = f.read().strip()
+                if k: return k
+        return DEFAULT_API_KEY
 
-    st.markdown("---")
-    
-    # 상단 텍스트 붙여넣기 박스 (원클릭 엔진)
-    raw_sub_text = st.text_area(
-        "📥 청약홈 또는 LH 공고문 화면 텍스트를 그대로 붙여넣으세요 (Ctrl+V):",
-        height=140,
-        placeholder="예시: [계양 롯데캐슬 파크시티 1단지] 공급위치: 인천광역시 계양구 효성동 100 일원 특별공급: 2026.10.06 1순위: 2026.10.07 당첨자발표: 2026.10.15 정당계약: 2026.10.27~10.30 공급규모: 1,964세대 공급금액: 659,000,000원 신청자격: 인천 및 수도권 거주 만 19세 이상 무주택세대주, 청약통장 12개월 이상..."
-    )
+    active_key = get_active_api_key()
 
-    # 1. 기계적 정규식 파싱 엔진 (수동 입력 필요 없음)
-    p_name = "단지명 미확인"
-    p_loc = "소재지 확인 필요"
-    p_dates_all = []
-    p_rcv = "접수일정 확인"
-    p_win = "발표일정 확인"
-    p_cnt = "계약일정 확인"
-    p_sup = "공급규모 확인"
-    p_price_str = "분양가 확인"
-    p_price_num = 0
-    p_type = "일반분양"
-    p_qual = "입주자모집공고일 현재 해당지역 거주자 요건 확인"
-    p_real_price = 0
+    # 1. 한국부동산원 청약홈 실시간 API 호출 엔진 (주택형별 분양가 상세 API까지 이중 연동)
+    @st.cache_data(ttl=1800)
+    def fetch_realtime_applyhome(api_key, sido_filter="전체"):
+        results = []
+        today_dt = datetime.today().date()
+        start_date_cond = (datetime.today() - timedelta(days=60)).strftime("%Y-%m-%d")
 
-    if raw_sub_text.strip():
-        txt = raw_sub_text.strip()
-        lines = [l.strip() for l in txt.split("\n") if l.strip()]
-        
-        # 단지명 추출
-        first_line = lines[0]
-        if "[" in first_line and "]" in first_line:
-            p_name = re.findall(r'\[(.*?)\]', first_line)[0]
+        endpoints = [
+            ("🏢 APT 일반/공공분양", "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail"),
+            ("🔥 무순위/취소 (줍줍)", "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getRemndrLttotPblancDetail"),
+            ("🏙️ 오피스텔/도시형/생숙", "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getUrbtyOfctlLttotPblancDetail")
+        ]
+
+        api_error_msg = None
+
+        for label_type, url in endpoints:
+            params = {
+                "serviceKey": api_key,
+                "page": 1,
+                "perPage": 80,
+                "returnType": "JSON",
+                "cond[RCRIT_PBLANC_DE::GTE]": start_date_cond
+            }
+            if sido_filter != "전체":
+                params["cond[SUBSCRPT_AREA_CODE_NM::EQ]"] = sido_filter
+
+            try:
+                res = requests.get(url, params=params, timeout=8)
+                if res.status_code == 200:
+                    js_data = res.json()
+                    data = js_data.get("data", [])
+                    for row in data:
+                        r_bgnde = str(row.get("RCEPT_BGNDE") or row.get("SUBSCRPT_RCEPT_BGNDE") or "")
+                        r_endde = str(row.get("RCEPT_ENDDE") or row.get("SUBSCRPT_RCEPT_ENDDE") or "")
+
+                        status_badge = "📌 공고중"
+                        try:
+                            if r_bgnde and r_endde:
+                                s_d = datetime.strptime(r_bgnde[:10], "%Y-%m-%d").date()
+                                e_d = datetime.strptime(r_endde[:10], "%Y-%m-%d").date()
+                                if s_d <= today_dt <= e_d:
+                                    status_badge = "🔴 오늘 접수중!"
+                                elif today_dt < s_d:
+                                    status_badge = f"⏳ 접수예정 (D-{(s_d - today_dt).days})"
+                                else:
+                                    status_badge = "🏁 접수마감"
+                        except Exception:
+                            pass
+
+                        results.append({
+                            "주택관리번호": str(row.get("HOUSE_MANAGE_NO") or ""),
+                            "공고번호": str(row.get("PBLANC_NO") or ""),
+                            "진행상태": status_badge,
+                            "구분": label_type,
+                            "지역": str(row.get("SUBSCRPT_AREA_CODE_NM") or "전국"),
+                            "단지명": str(row.get("HOUSE_NM") or ""),
+                            "공급위치": str(row.get("HSSPLY_ADRES") or ""),
+                            "공급세대수": f"{row.get('TOT_SUPLY_HSHLDCO', 0)}세대",
+                            "모집공고일": str(row.get("RCRIT_PBLANC_DE") or ""),
+                            "청약접수기간": f"{r_bgnde} ~ {r_endde}" if r_bgnde else "공고문 확인",
+                            "특별공급일": f"{row.get('SPSPLY_RCEPT_BGNDE', '')} ~ {row.get('SPSPLY_RCEPT_ENDDE', '')}".strip(" ~") or "해당없음",
+                            "1순위접수일": f"{row.get('GNRL_RNK1_CRSPAREA_RCPTDE', '')}".strip() or r_bgnde,
+                            "당첨자발표일": str(row.get("PRZWNER_PRESNATN_DE") or ""),
+                            "계약기간": f"{row.get('CNTRCT_CNCLS_BGNDE', '')} ~ {row.get('CNTRCT_CNCLS_ENDDE', '')}".strip(" ~"),
+                            "입주예정월": str(row.get("MVN_PREARNGE_YM") or "공고문 참조"),
+                            "시공사": str(row.get("BSNS_MBY_NM") or row.get("CNSTRCT_ENTRPS_NM") or "시공사 확인"),
+                            "문의처": str(row.get("MDHS_TELNO") or ""),
+                            "공고URL": str(row.get("PBLANC_URL") or "https://www.applyhome.co.kr")
+                        })
+                else:
+                    api_error_msg = f"API 응답 코드: {res.status_code} (활용신청 직후라면 서버 동기화에 30분~1시간 소요될 수 있습니다)"
+            except Exception as e:
+                api_error_msg = str(e)
+                continue
+
+        return results, api_error_msg
+
+    # 2. 선택한 단지의 평형별 확정 분양가 자동 조회 API
+    @st.cache_data(ttl=1800)
+    def fetch_apt_price_detail(api_key, house_manage_no, pblanc_no, is_remndr=False):
+        if not house_manage_no or not pblanc_no:
+            return []
+        url = (
+            "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getRemndrLttotPblancMdl"
+            if is_remndr else
+            "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancMdl"
+        )
+        params = {
+            "serviceKey": api_key,
+            "page": 1,
+            "perPage": 30,
+            "returnType": "JSON",
+            "cond[HOUSE_MANAGE_NO::EQ]": house_manage_no,
+            "cond[PBLANC_NO::EQ]": pblanc_no
+        }
+        models = []
+        try:
+            res = requests.get(url, params=params, timeout=6)
+            if res.status_code == 200:
+                for m in res.json().get("data", []):
+                    h_ty = str(m.get("HOUSE_TY") or m.get("MODEL_NO") or "")
+                    top_amt = str(m.get("LTTOT_TOP_AMOUNT") or m.get("SUPLY_AMOUNT") or "")
+                    sup_cnt = str(m.get("SUPLY_HSHLDCO") or "")
+                    if top_amt and top_amt != "0":
+                        models.append(f"• {h_ty}타입 ({sup_cnt}세대): 최고가 {top_amt}만 원")
+        except Exception:
+            pass
+        return models
+
+    # 3. LH 실시간 분양·임대 공고 조회 API
+    @st.cache_data(ttl=1800)
+    def fetch_realtime_lh(api_key):
+        url = "https://apis.data.go.kr/B552555/lhLeaseNoticeInfo1/lhLeaseNoticeInfo1"
+        params = {
+            "serviceKey": api_key,
+            "PG_SZ": 60,
+            "PAGE": 1
+        }
+        lh_results = []
+        try:
+            res = requests.get(url, params=params, timeout=8)
+            if res.status_code == 200:
+                js = res.json()
+                if isinstance(js, list) and len(js) > 1 and "dsList" in js[1]:
+                    for item in js[1]["dsList"]:
+                        pan_ss = str(item.get("PAN_SS") or "")
+                        lh_results.append({
+                            "진행상태": f"🟢 {pan_ss}" if ("접수" in pan_ss or "공고" in pan_ss) else f"⚪ {pan_ss}",
+                            "구분": f"🏠 LH {item.get('AIS_TP_CD_NM', '공공임대')}",
+                            "지역": str(item.get("CNP_CD_NM") or "전국"),
+                            "단지명": str(item.get("PAN_NM") or ""),
+                            "공고게시일": str(item.get("PAN_NT_ST_DT") or ""),
+                            "접수마감일": str(item.get("CLSG_DT") or ""),
+                            "공고URL": str(item.get("DTL_URL") or "https://apply.lh.or.kr")
+                        })
+        except Exception:
+            pass
+        return lh_results
+
+    sub_tab1, sub_tab2 = st.tabs([
+        "🏢 [청약Home 실시간 자동수집] 아파트 분양 & 무순위 줍줍",
+        "🏠 [LH 실시간 자동수집] 공공임대·행복주택·청년주택"
+    ])
+
+    # -------------------------------------------------------------
+    # 탭 1: 청약홈 실시간 API 목록 & 원클릭 블로그 생성
+    # -------------------------------------------------------------
+    with sub_tab1:
+        f_col1, f_col2, f_col3, f_col4 = st.columns([1.3, 1.6, 1.8, 1.0])
+        with f_col1:
+            sel_sido = st.selectbox("📍 지역 선택", ["전체", "서울", "인천", "경기", "부산", "대구", "대전", "광주", "세종"], index=0)
+        with f_col2:
+            sel_status_filter = st.selectbox("🚦 상태 필터", ["접수중/예정만 보기 (마감 제외)", "전체 보기 (마감 포함)", "🔥 무순위/줍줍만 보기"])
+        with f_col3:
+            kw_search = st.text_input("🔎 단지명/지역 검색", placeholder="예: 계양, 당산, 반포, 자이...")
+        with f_col4:
+            st.write("")
+            if st.button("🔄 실시간 새로고침", type="primary", use_container_width=True):
+                st.cache_data.clear()
+                st.rerun()
+
+        with st.spinner("한국부동산원 청약홈 서버에서 실시간 공고 데이터를 불러오는 중입니다..."):
+            live_list, err_msg = fetch_realtime_applyhome(active_key, sel_sido)
+
+        if not live_list:
+            st.warning(f"⚠️ 현재 청약홈 API 서버 응답 대기 중입니다. ({err_msg if err_msg else '공공데이터포털에서 방금 활용신청을 하셨다면 약 30분 뒤부터 실시간 표가 자동으로 열립니다!'})")
         else:
-            p_name = first_line.split("공급")[0].split("입주자")[0].strip()
+            df_live = pd.DataFrame(live_list)
 
-        # 유형 자동 판별
-        if "무순위" in txt or "임의공급" in txt or "줍줍" in txt:
-            p_type = "🔥 무순위/임의공급 (줍줍)"
-        elif "취소" in txt:
-            p_type = "🔥 계약취소주택 재공급"
-        elif "행복주택" in txt or "청년" in txt or "임대" in txt:
-            p_type = "🏠 공공임대 / 청년행복주택"
-        elif "공공분양" in txt or "LH" in txt or "SH" in txt:
-            p_type = "🏢 공공분양"
-        else:
-            p_type = "🏢 민영 일반분양"
+            if sel_status_filter == "접수중/예정만 보기 (마감 제외)":
+                df_live = df_live[~df_live["진행상태"].str.contains("마감", na=False)]
+            elif sel_status_filter == "🔥 무순위/줍줍만 보기":
+                df_live = df_live[df_live["구분"].str.contains("줍줍", na=False)]
 
-        # 위치 추출
-        loc_m = re.search(r'(위치|소재지)[:\s]*([^\n,]+)', txt)
-        if loc_m:
-            p_loc = loc_m.group(2).strip()
-        else:
-            loc_guess = re.search(r'(서울특별시|인천광역시|경기도)\s+([^\s]+구|[^\s]+시|[^\s]+군)\s+([^\s]+동|[^\s]+읍|[^\s]+면)', txt)
-            if loc_guess: p_loc = loc_guess.group(0)
+            if kw_search.strip():
+                k = kw_search.strip()
+                df_live = df_live[df_live["단지명"].str.contains(k, na=False) | df_live["공급위치"].str.contains(k, na=False)]
 
-        # 날짜 전체 추출 (YYYY.MM.DD 형태)
-        all_found_dates = re.findall(r'\d{4}[.\-\/]\d{2}[.\-\/]\d{2}', txt)
-        if len(all_found_dates) >= 1:
-            p_rcv = all_found_dates[0]
-        if len(all_found_dates) >= 2:
-            p_win = all_found_dates[1]
-        if len(all_found_dates) >= 3:
-            p_cnt = all_found_dates[2]
+            st.caption(f"✅ 한국부동산원 실시간 조회 결과: **총 {len(df_live)}건** (표를 클릭하여 정렬할 수 있습니다)")
+            st.dataframe(
+                df_live[["진행상태", "구분", "지역", "단지명", "공급세대수", "청약접수기간", "당첨자발표일", "시공사"]],
+                use_container_width=True,
+                height=260
+            )
 
-        # 공급규모
-        sup_m = re.search(r'(\d{1,3}(,\d{3})*|\d+)\s*(세대|호)', txt)
-        if sup_m: p_sup = sup_m.group(0)
+            if not df_live.empty:
+                st.markdown("---")
+                st.subheader("✍️ 목록에서 단지 선택 ➡️ 평형별 분양가 & 블로그 원고 1초 자동 완성")
 
-        # 공급금액 (억/만원 또는 원단위)
-        pr_m = re.search(r'(\d+억\s*[\d,]*만*원|\d{1,3}(,\d{3}){2,}원|\d{5,}원)', txt)
-        if pr_m:
-            p_price_str = pr_m.group(0)
-            raw_nums = re.findall(r'\d+', p_price_str)
-            if "억" in p_price_str:
-                p_price_num = int(raw_nums[0]) * 100000000 + (int(raw_nums[1]) * 10000 if len(raw_nums) > 1 else 0)
-            elif "," in p_price_str:
-                p_price_num = int("".join(raw_nums))
-        
-        # 자격요건 문장 자동 포착
-        qual_candidates = [l for l in lines if any(k in l for k in ["자격", "무주택", "세대주", "거주", "청약통장", "소득"])]
-        if qual_candidates:
-            p_qual = " | ".join(qual_candidates[:2])
+                records = df_live.to_dict("records")
+                sel_idx = st.selectbox(
+                    "📌 블로그 글을 작성할 단지를 선택하세요 (선택 즉시 아래 원고가 자동 생성됩니다):",
+                    range(len(records)),
+                    format_func=lambda i: f"[{records[i]['진행상태']}] [{records[i]['지역']}] {records[i]['단지명']} ({records[i]['구분']} / {records[i]['공급세대수']})"
+                )
+                target = records[sel_idx]
 
-    # 2. 스마트 분석 파라미터 확인/보정 (3분할 콤팩트 카드)
-    st.markdown("##### ⚙️ 1초 자동 추출 결과 검토")
-    chk_c1, chk_c2, chk_c3 = st.columns([1.3, 1.2, 1.5])
-    with chk_c1:
-        fin_name = st.text_input("단지명", value=p_name)
-        fin_rcv = st.text_input("접수일정", value=p_rcv)
-        fin_win = st.text_input("당첨자발표일", value=p_win)
-    with chk_c2:
-        fin_type = st.text_input("공급유형", value=p_type)
-        fin_sup = st.text_input("공급규모", value=p_sup)
-        fin_price = st.text_input("확정 공급금액", value=p_price_str)
-    with chk_c3:
-        fin_loc = st.text_input("소재지", value=p_loc)
-        fin_real = st.text_input("주변 동일평형 실거래 기준가", placeholder="예: 8억 5,000만 원 (안전마진 자동연산)")
-        fin_qual = st.text_input("신청 자격 핵심", value=p_qual)
+                # 평형별 분양가 상세 API 자동 호출
+                is_jupjup = "줍줍" in target["구분"]
+                model_prices = fetch_apt_price_detail(
+                    active_key,
+                    target.get("주택관리번호", ""),
+                    target.get("공고번호", ""),
+                    is_remndr=is_jupjup
+                )
+                auto_price_text = "\n".join(model_prices) if model_prices else "• 상세 평형별 공급금액은 아래 공식 모집공고문 원문 표 참조"
 
-    # 안전마진 및 자금계획 자동 연산
-    calc_margin_text = "주변 실거래 시세 대조 분석 완료"
-    if fin_real.strip():
-        calc_margin_text = f"인근 실거래 시세({fin_real}) 대비 확실한 시세차익 안전마진 확보"
+                st.markdown(f"""
+                <div class="calc-box-orange">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; color:#c05621;">🏢 [{target['지역']}] {target['단지명']} ({target['구분']})</h4>
+                        <span class="tag-blue">{target['진행상태']}</span>
+                    </div>
+                    • <b>공급위치</b>: {target['공급위치']} | <b>공급규모</b>: {target['공급세대수']} | <b>시공사</b>: {target['시공사']}<br>
+                    • <b>청약접수</b>: <b style="color:#c53030;">{target['청약접수기간']}</b> (특공: {target['특별공급일']} / 1순위: {target['1순위접수일']})<br>
+                    • <b>당첨자발표</b>: <b>{target['당첨자발표일']}</b> | <b>계약기간</b>: {target['계약기간']} | <b>입주예정</b>: {target['입주예정월']}
+                </div>
+                """, unsafe_allow_html=True)
 
-    # 계약금/잔금 10% 자동 계산
-    deposit_guide = "계약금 10% / 중도금 60% / 잔금 30% 표준 구조"
-    if p_price_num > 0:
-        dep_10 = int(p_price_num * 0.1)
-        deposit_guide = f"계약금 10% (약 {dep_10:,}원 즉시 자납 필요) / 잔금 시 대출 전환 가능"
+                st.link_button(f"📄 [{target['단지명']}] 청약홈 원본 모집공고문 새 창으로 열기", target["공고URL"], use_container_width=True)
 
-    # 3. 네이버 블로그 완성형 포스팅 즉시 렌더링
-    st.markdown("---")
-    st.markdown("##### 📝 팩트 기반 네이버 블로그 완성본 (복사해서 바로 발행)")
-    
-    clean_tag = fin_name.split()[0].replace("[","").replace("]","") if fin_name else "청약"
+                # 주변 시세 한 줄 보강 (선택사항)
+                add_c1, add_c2 = st.columns(2)
+                with add_c1:
+                    opt_real = st.text_input("📊 주변 실거래 시세 코멘트 (선택 입력)", placeholder="예: 인근 신축 84㎡ 실거래 8억 5,000만 원 선", key=f"or_{sel_idx}")
+                with add_c2:
+                    opt_margin = st.text_input("📈 핵심 입지/안전마진 한 줄 평 (선택)", placeholder="예: 안전마진 약 1.5억 원 예상, 초역세권 대단지", key=f"om_{sel_idx}")
 
-    blog_final = f"""안녕하세요! 부동산 팩트체크와 핵심 청약 정보를 전해드리는 공인중개사 김태형입니다. 🙋‍♂️
+                real_line = opt_real.strip() if opt_real.strip() else "국토교통부 실거래가 공개시스템 기준 인근 동일 생활권 신축 시세 대조 권장"
+                margin_line = opt_margin.strip() if opt_margin.strip() else "주변 시세 대비 합리적인 분양가로 실거주 및 중장기 가치 우수"
 
-공식 입주자모집공고 기준 '{fin_name}' 핵심 공급 정보 및 청약 팩트체크 안내입니다.
-이번 공급은 전산 공고 기준 {fin_sup} 규모로 진행되는 {fin_type} 물량입니다.
+                qual_guide = (
+                    "무순위/취소후재공급 물량으로 청약통장 가입 여부와 무관하게 신청 가능하며, 모집공고문상 거주지 요건(해당지역 거주 또는 전국) 및 무주택 세대주/세대원 요건을 충족해야 합니다."
+                    if is_jupjup else
+                    f"입주자모집공고일({target['모집공고일']}) 현재 {target['지역']} 및 수도권 거주 만 19세 이상 세대주/세대원 중 청약통장 가입기간 및 지역·면적별 예치금을 충족하신 분"
+                )
 
-공식 청약 접수처 및 공고문 확인:
-- 한국부동산원 청약Home: {APPLYHOME_CAL_URL}
-- LH청약플러스: {LH_APPLY_URL}
+                clean_tag = re.sub(r'[^가-힣a-zA-Z0-9]', '', target["단지명"].split()[0]) if target["단지명"] else "청약정보"
 
-청약 접수일정과 신청 자격 요건을 꼼꼼히 확인하시어 부적격 탈락 없이 소중한 기회를 잡으시길 바랍니다!
+                auto_blog_text = f"""안녕하세요! 정확한 부동산 팩트체크와 핵심 청약 정보를 전해드리는 공인중개사 김태형입니다. 🙋‍♂️
+
+한국부동산원 청약홈에 공식 공고된 '{target['단지명']}'의 분양 일정과 타입별 분양가, 신청 자격 팩트체크를 정리해 드립니다.
+이번 공급은 {target['공급위치']} 일원에 총 {target['공급세대수']} 규모로 공급되는 {target['구분'].split()[-1]} 물량입니다.
+
+📄 공식 입주자모집공고문 원문 및 인터넷 청약 접수처:
+{target['공고URL']}
+
+청약 접수일과 당첨자 발표일 등 핵심 일정을 꼼꼼히 확인하시어 부적격 탈락 없이 소중한 내 집 마련의 기회를 잡으시길 바랍니다!
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📅 1. 핵심 공급 일정 팩트체크 (날짜 필수 확인!)
+📅 1. 핵심 청약 일정 팩트체크 (날짜 필수 확인!)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- 청약 접수일: {fin_rcv}
-- 당첨자 발표일: {fin_win}
-- 계약 체결일: {p_cnt}
-- 접수 시간: 인터넷 청약Home (09:00 ~ 17:30)
+- 입주자 모집공고일: {target['모집공고일']}
+- 전체 청약 접수기간: {target['청약접수기간']}
+- 특별공급 접수일: {target['특별공급일']}
+- 1순위/일반 접수일: {target['1순위접수일']}
+- 당첨자 발표일: {target['당첨자발표일']}
+- 정당 계약기간: {target['계약기간']}
+- 인터넷 접수처: 한국부동산원 청약Home (09:00 ~ 17:30)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🏢 2. 단지 개요 및 공급 스펙
+🏢 2. 단지 개요 및 공급 내역
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- 단지명: {fin_name}
-- 공급 위치: {fin_loc}
-- 공급 대상 및 규모: {fin_sup}
-- 확정 공급금액: {fin_price}
-- 자금 조달 가이드: {deposit_guide}
+- 단지명: {target['단지명']}
+- 공급 위치: {target['공급위치']} ({target['지역']})
+- 공급 규모: 총 {target['공급세대수']} (입주예정: {target['입주예정월']})
+- 시공사 / 시행사: {target['시공사']}
+- 분양 문의처: {target['문의처'] if target['문의처'] else '공고문 내 견본주택 문의처 참조'}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💰 3. 분양가 vs 실거래 시세 대조 (안전마진 분석)
+💰 3. 주택형별 확정 공급금액 및 시세 분석
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- 시세 대조 기준: {fin_real if fin_real.strip() else '인근 준공 대장단지 실거래가 기준 대조'}
-- 안전마진 평가: {calc_margin_text}
-💡 김소장의 팁: 단순 호가가 아닌 국토교통부 실거래가 기준 실제 거래 완료된 동일 생활권 단지 시세를 바탕으로 자금 수지를 점검하셔야 합니다.
+[주택형별 최고 공급금액 (공식 API 기준)]
+{auto_price_text}
+
+- 주변 실거래 시세 기준: {real_line}
+- 입지 및 안전마진 평가: {margin_line}
+💡 김소장의 분석 팁: 청약 전 인근 준공 신축 단지의 최근 실거래가와 전세가율을 비교해 보시고, 계약금(통상 10~20%) 및 중도금·잔금 대출 자금 조달 계획을 사전에 철저히 수립하셔야 합니다.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ 4. 필수 청약 자격 팩트체크 (부적격 방지)
+⚠️ 4. 신청 자격 및 부적격 예방 체크리스트
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- 신청 자격 요건: {fin_qual}
-- 주의사항: 당첨 후 계약 체결일까지 기간이 짧으므로 계약금(통상 10~20%)을 즉시 현금 조달할 수 있는지 사전에 철저히 점검하셔야 합니다.
+- 신청 자격 핵심: {qual_guide}
+- 주의사항: 모집공고일({target['모집공고일']})을 기준으로 무주택 여부, 거주지역 우선공급 요건, 가점 산정 및 재당첨 제한 여부를 판정하므로 접수 전 공고문 원문을 반드시 확인하시기 바랍니다.
 
-상세한 평면도와 옵션별 조건은 공식 입주자모집공고문을 반드시 확인하신 후 신중하게 신청하시기 바랍니다.
+내 집 마련과 주거 안정을 준비하시는 모든 분들의 당첨을 진심으로 응원합니다! 궁금하신 점이나 부동산 상담은 언제든 편하게 연락 주세요. 😊
 
-내 집 마련과 주거 안정을 준비하시는 모든 분들의 당첨을 진심으로 응원합니다! 😊
+우리부동산 공인중개사사무소 대표 김태형
+☎ 010-2660-8276
 
-#{clean_tag} #청약정보 #무순위청약 #줍줍 #{fin_type.replace(' ','').replace('🔥','').replace('🏢','')} #안전마진 #청약일정 #내집마련 #공인중개사김소장 #청약홈
+#{clean_tag} #{target['지역']}청약 #청약정보 #아파트청약 #{'무순위청약 #줍줍' if is_jupjup else '일반분양 #내집마련'} #청약홈 #공인중개사김소장 #우리부동산
 """
-    st.text_area("블로그 복사용 전체 본문", blog_final, height=450)
+                st.text_area("📋 네이버 블로그 자동 완성 원고 (전체 복사하여 바로 발행하세요)", auto_blog_text, height=480)
 
+    # -------------------------------------------------------------
+    # 탭 2: LH 공공임대 실시간 API 목록 & 원클릭 블로그 생성
+    # -------------------------------------------------------------
+    with sub_tab2:
+        lh_list = fetch_realtime_lh(active_key)
+        if not lh_list:
+            st.info("⏳ 현재 LH API 서버 동기화 대기 중입니다. (공공데이터포털에서 방금 활용신청을 하셨다면 약 30분~1시간 뒤부터 실시간 LH 목록이 자동으로 표시됩니다.)")
+        else:
+            df_lh = pd.DataFrame(lh_list)
+            lh_c1, lh_c2 = st.columns([1.5, 2.5])
+            with lh_c1:
+                lh_region = st.selectbox("📍 LH 지역 필터", ["전체", "서울", "인천", "경기", "전국"], key="lh_reg_sel")
+            with lh_c2:
+                lh_kw = st.text_input("🔎 LH 공고명 검색", placeholder="예: 행복주택, 매입임대, 신혼, 계양, 검단...", key="lh_kw_sel")
+
+            if lh_region != "전체":
+                df_lh = df_lh[df_lh["지역"].str.contains(lh_region, na=False)]
+            if lh_kw.strip():
+                df_lh = df_lh[df_lh["단지명"].str.contains(lh_kw.strip(), na=False)]
+
+            st.caption(f"✅ LH청약플러스 실시간 조회 결과: **총 {len(df_lh)}건**")
+            st.dataframe(df_lh, use_container_width=True, height=250)
+
+            if not df_lh.empty:
+                lh_records = df_lh.to_dict("records")
+                sel_lh_idx = st.selectbox(
+                    "📌 블로그 글을 생성할 LH 공고를 선택하세요:",
+                    range(len(lh_records)),
+                    format_func=lambda i: f"[{lh_records[i]['진행상태']}] [{lh_records[i]['지역']}] {lh_records[i]['단지명']}"
+                )
+                t_lh = lh_records[sel_lh_idx]
+                st.link_button(f"🌐 [{t_lh['단지명']}] LH청약플러스 공식 공고문 열기", t_lh["공고URL"], use_container_width=True)
+
+                lh_blog = f"""안녕하세요! 청년·신혼부부 및 무주택 서민의 주거 안정을 돕는 공인중개사 김태형입니다. 🙋‍♂️
+
+한국토지주택공사(LH) 청약플러스에 공식 게시된 '{t_lh['단지명']}' 모집공고 소식을 전해드립니다.
+
+🌐 LH청약플러스 공식 공고문 확인 및 인터넷 접수 링크:
+{t_lh['공고URL']}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📅 1. 공고 개요 및 핵심 일정
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- 공고명: {t_lh['단지명']}
+- 공급 유형: {t_lh['구분']}
+- 관할 지역: {t_lh['지역']}
+- 공고 게시일: {t_lh['공고게시일']}
+- 접수 마감일: {t_lh['접수마감일']} (현재 상태: {t_lh['진행상태']})
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💡 2. 공공임대·행복주택 핵심 혜택 및 체크포인트
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- 주변 시세 대비 30~80% 수준의 저렴한 임대보증금과 월 임대료로 안정적인 장기 거주 가능
+- 보증금-월세 상호전환 제도를 활용하면 버팀목 전세대출 등을 통해 월 고정 주거비를 대폭 낮출 수 있습니다.
+- 행복주택·청년매입임대 등 공공임대주택은 당첨되어 입주하더라도 기존 청약통장의 효력이 그대로 100% 유지되어 향후 아파트 일반분양 청약에 계속 도전할 수 있습니다!
+- 신청 전 공고문 원문에 기재된 가구원수별 소득 기준, 총자산 기준, 자동차 가액 기준을 반드시 확인하시기 바랍니다.
+
+주거비 부담을 덜어주는 든든한 징검다리가 되기를 바라며, 신청하시는 모든 분들의 당첨을 응원합니다! 😊
+
+우리부동산 공인중개사사무소 대표 김태형
+☎ 010-2660-8276
+
+#LH청약플러스 #공공임대 #행복주택 #청년매입임대 #{t_lh['지역'].replace(' ','')}임대주택 #주거안정 #공인중개사김소장 #우리부동산
+"""
+                st.text_area("📋 LH 공공임대 블로그 자동 완성 원고", lh_blog, height=420)
 # =============================================================
 # 8. ⚖️ 법원경매 허브 & 수도권 주택·공장 수지분석 (에러 완전 복구)
 # =============================================================
