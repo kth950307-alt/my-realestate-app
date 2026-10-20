@@ -1,14 +1,21 @@
 import streamlit as st
 import pandas as pd
-import gspread
-from google.oauth2.service_account import Credentials
 import json
 import os
 import base64
 from io import BytesIO
 from datetime import datetime
 
-# 이미지 자동 압축용 (Pillow)
+# ==========================================
+# 0. 외부 라이브러리 안전 로드 (없어도 앱이 절대 죽지 않음)
+# ==========================================
+try:
+    import gspread
+    from google.oauth2.service_account import Credentials
+    GSPREAD_AVAILABLE = True
+except ImportError:
+    GSPREAD_AVAILABLE = False
+
 try:
     from PIL import Image
     PIL_AVAILABLE = True
@@ -30,7 +37,7 @@ st.markdown("""
     .main-banner {
         background: linear-gradient(90deg, #004ea2 0%, #003775 100%);
         color: white; padding: 18px 24px; border-radius: 12px; margin-bottom: 20px;
-        display: flex; justify-content: space-between; align-items: center;
+        display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
     }
     .main-banner h1 { font-size: 24px; font-weight: 900; margin: 0; color: #ffffff; }
     .main-banner p { font-size: 13.5px; color: #e0f2fe; margin: 4px 0 0 0; }
@@ -68,8 +75,9 @@ CUST_COLUMNS = [
     "등록일자", "구분", "고객명(업체명)", "연락처", "희망지역", "희망평수", "예산(보/월/매매가)", "필수조건(호이스트/전력)", "진행상태", "상세메모"
 ]
 
-@st.cache_resource(ttl=300)
 def get_gspread_client():
+    if not GSPREAD_AVAILABLE:
+        return None
     try:
         scopes = [
             "https://www.googleapis.com/auth/spreadsheets",
@@ -90,6 +98,14 @@ def get_gspread_client():
         pass
     return None
 
+def normalize_dataframe(df, default_cols):
+    # 중복 컬럼이나 빈 컬럼 이름이 있어도 절대 에러가 나지 않게 보정
+    df = df.loc[:, ~df.columns.duplicated()]
+    for c in default_cols:
+        if c not in df.columns:
+            df[c] = ""
+    return df[default_cols].fillna("")
+
 def load_sheet_data(sheet_name, default_cols, local_csv):
     client = get_gspread_client()
     if client:
@@ -97,17 +113,15 @@ def load_sheet_data(sheet_name, default_cols, local_csv):
             sh = client.open_by_key(SPREADSHEET_ID)
             try:
                 ws = sh.worksheet(sheet_name)
-            except gspread.WorksheetNotFound:
+            except Exception:
                 ws = sh.add_worksheet(title=sheet_name, rows="500", cols="25")
                 ws.append_row(default_cols)
             records = ws.get_all_values()
             if len(records) > 1:
-                headers = records[0]
+                raw_headers = records[0]
+                headers = [h if h.strip() != "" else f"빈열_{i}" for i, h in enumerate(raw_headers)]
                 df = pd.DataFrame(records[1:], columns=headers)
-                for c in default_cols:
-                    if c not in df.columns:
-                        df[c] = ""
-                df = df[default_cols]
+                df = normalize_dataframe(df, default_cols)
                 df.to_csv(local_csv, index=False, encoding="utf-8-sig")
                 return df, True
             else:
@@ -115,46 +129,48 @@ def load_sheet_data(sheet_name, default_cols, local_csv):
         except Exception:
             pass
 
-    # 읽기 전용 공개 URL 폴백 (Secrets 미설정 시에도 구글 시트 데이터를 읽어옴)
+    # 공개 시트 URL로 읽기 시도
     try:
         pub_url = f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
-        df = pd.read_csv(pub_url).fillna("")
-        for c in default_cols:
-            if c not in df.columns:
-                df[c] = ""
-        return df[default_cols], False
+        df = pd.read_csv(pub_url)
+        df = normalize_dataframe(df, default_cols)
+        return df, False
     except Exception:
         pass
 
+    # 로컬 백업 파일 읽기
     if os.path.exists(local_csv):
-        df = pd.read_csv(local_csv).fillna("")
-        for c in default_cols:
-            if c not in df.columns:
-                df[c] = ""
-        return df[default_cols], False
+        try:
+            df = pd.read_csv(local_csv)
+            df = normalize_dataframe(df, default_cols)
+            return df, False
+        except Exception:
+            pass
 
     return pd.DataFrame(columns=default_cols), False
 
 def save_sheet_data(df, sheet_name, local_csv):
-    df = df.fillna("")
-    df.to_csv(local_csv, index=False, encoding="utf-8-sig")
+    df = normalize_dataframe(df, df.columns.tolist())
+    try:
+        df.to_csv(local_csv, index=False, encoding="utf-8-sig")
+    except Exception:
+        pass
     client = get_gspread_client()
     if client:
         try:
             sh = client.open_by_key(SPREADSHEET_ID)
             try:
                 ws = sh.worksheet(sheet_name)
-            except gspread.WorksheetNotFound:
+            except Exception:
                 ws = sh.add_worksheet(title=sheet_name, rows="500", cols="25")
             ws.clear()
             data_to_write = [df.columns.values.tolist()] + df.astype(str).values.tolist()
             ws.update(data_to_write)
             return True
         except Exception as e:
-            st.warning(f"구글 시트 자동 쓰기 권한 확인 필요 (로컬 백업 완료): {e}")
+            st.warning(f"구글 시트 자동 쓰기 확인 필요 (로컬 저장은 완료됨): {e}")
     return False
 
-# 사진 파일을 홈페이지 호환 초경량 데이터 URL로 변환하는 함수
 def compress_uploaded_image(uploaded_file):
     if not uploaded_file:
         return ""
@@ -163,9 +179,9 @@ def compress_uploaded_image(uploaded_file):
             img = Image.open(uploaded_file)
             if img.mode in ("RGBA", "P"):
                 img = img.convert("RGB")
-            img.thumbnail((640, 440))
+            img.thumbnail((600, 420))
             buf = BytesIO()
-            img.save(buf, format="JPEG", quality=68)
+            img.save(buf, format="JPEG", quality=65)
             b64_str = base64.b64encode(buf.getvalue()).decode("utf-8")
             return f"data:image/jpeg;base64,{b64_str}"
         else:
@@ -178,25 +194,28 @@ def compress_uploaded_image(uploaded_file):
 # 3. 김소장 스타일 네이버 블로그 원고 자동 생성기
 # ==========================================
 def generate_naver_blog_post(row):
-    region = row.get("소재지(권역)", "송현동")
-    deal = row.get("거래구분", "공장임대")
-    price = row.get("가격(보/월)", "보증금 3,000만 / 월세 230만")
-    area_str = str(row.get("면적", "75")).replace("평", "").strip()
-    area_num = int(''.join(filter(str.isdigit, area_str)) or 75)
-    office_str = str(row.get("사무실평수", "15")).replace("평", "").strip()
-    office_num = int(''.join(filter(str.isdigit, office_str)) or 0)
+    region = str(row.get("소재지(권역)", "송현동") or "송현동")
+    deal = str(row.get("거래구분", "공장임대") or "공장임대")
+    price = str(row.get("가격(보/월)", "보증금 3,000만 / 월세 230만") or "보증금 3,000만 / 월세 230만")
+    
+    area_digits = ''.join(filter(str.isdigit, str(row.get("면적", "75"))))
+    area_num = int(area_digits) if area_digits else 75
+    
+    off_digits = ''.join(filter(str.isdigit, str(row.get("사무실평수", "15"))))
+    office_num = int(off_digits) if off_digits else 0
+    
     total_py = area_num + office_num
     total_m2 = round(total_py * 3.3058)
 
-    height = row.get("층고", "호이스트 주행 넉넉한 하이 층고")
-    power = row.get("동력", "30kW")
-    hoist = row.get("호이스트", "호이스트 2.8톤 완비")
-    road = row.get("대형차량", "8m 도로 화물차 및 윙바디 접안 수월")
-    move_in = row.get("입주가능일", "즉시 입주 / 협의 가능")
-    zoning = row.get("용도지역/구조", "일반공업지역 / 철골조")
-    approval_date = row.get("사용승인일", "건축물대장 확인 완료")
-    biz_tag = row.get("추천업종", "금속·기계가공")
-    memo = row.get("특징메모", "공구상가 및 주요 간선도로 인접, 가성비 최상 매물")
+    height = str(row.get("층고", "호이스트 주행 넉넉한 하이 층고") or "호이스트 주행 넉넉한 하이 층고")
+    power = str(row.get("동력", "30kW") or "30kW")
+    hoist = str(row.get("호이스트", "호이스트 2.8톤 완비") or "호이스트 2.8톤 완비")
+    road = str(row.get("대형차량", "8m 도로 화물차 및 윙바디 접안 수월") or "8m 도로 화물차 접안 수월")
+    move_in = str(row.get("입주가능일", "즉시 입주 / 협의 가능") or "즉시 입주 / 협의 가능")
+    zoning = str(row.get("용도지역/구조", "일반공업지역 / 철골조") or "일반공업지역 / 철골조")
+    approval_date = str(row.get("사용승인일", "건축물대장 확인 완료") or "건축물대장 확인 완료")
+    biz_tag = str(row.get("추천업종", "금속·기계가공") or "금속·기계가공")
+    memo = str(row.get("특징메모", "공구상가 및 주요 간선도로 인접, 가성비 최상 매물") or "가성비 최상 매물")
 
     office_line = f" + 2층 {office_num}평 전용 사무실" if office_num > 0 else " (단독 작업장 구조)"
 
@@ -284,13 +303,14 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 좌측 사이드바: 연동 상태 점검 및 엑셀 백업
 with st.sidebar:
     st.subheader("🔗 시스템 연동 상태")
     if gs_connected:
         st.success("✅ 구글 스프레드시트 실시간 양방향 연동 중")
+    elif not GSPREAD_AVAILABLE:
+        st.warning("⚠️ requirements.txt에 gspread 패키지를 추가하면 구글시트 자동 저장이 활성화됩니다.")
     else:
-        st.info("ℹ️ 로컬/읽기 모드 (구글시트 쓰기 권한은 Secrets 설정 확인)")
+        st.info("ℹ️ 구글시트 읽기 연동 중 (자동 저장은 Secrets 키 확인)")
     
     st.markdown(f"📊 **[구글 스프레드시트 원본 열기 ↗](https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/edit)**")
     st.markdown("🟢 **[우리부동산 네이버 공식 블로그 ↗](https://blog.naver.com/woorirealestate__)**")
@@ -311,9 +331,6 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "👥 4. 찾는 손님 (구해요) CRM 장부"
 ])
 
-# ------------------------------------------
-# [탭 1] 새 매물 등록 + 사진 업로드 + 블로그 즉시 생성
-# ------------------------------------------
 with tab1:
     st.subheader("➕ 신규 공장·창고·신축공장분양 매물 등록")
     st.caption("여기서 등록하시면 구글 스프레드시트(`properties` 탭)에 저장되며, **손님용 홈페이지(`index.html`)에 자동으로 매물이 뜹니다!**")
@@ -405,16 +422,12 @@ with tab1:
 
             st.session_state["last_created_row"] = new_row
 
-    # 방금 등록한 매물의 블로그 원고 즉시 표시
     if "last_created_row" in st.session_state:
         st.divider()
         st.subheader("📝 방금 등록한 매물 — 네이버 블로그 포스팅 원고 (우측 상단 복사 아이콘 클릭!)")
         blog_draft = generate_naver_blog_post(st.session_state["last_created_row"])
         st.code(blog_draft, language="markdown")
 
-# ------------------------------------------
-# [탭 2] 전체 매물 장부 조회 및 실시간 편집
-# ------------------------------------------
 with tab2:
     st.subheader(f"📋 전체 보유 매물 통합장부 (총 {len(df_props)}건)")
     f_col1, f_col2, f_col3 = st.columns([1, 1, 2])
@@ -431,7 +444,6 @@ with tab2:
         mask = filtered_df.astype(str).apply(lambda x: x.str.contains(search_kw.strip(), case=False, na=False)).any(axis=1)
         filtered_df = filtered_df[mask]
 
-    st.caption("💡 표의 셀을 더블클릭하여 직접 수정하거나 행을 선택한 뒤 Delete 키로 삭제하고 **[변경사항 구글시트 저장]** 버튼을 누르세요.")
     edited_df = st.data_editor(
         filtered_df,
         num_rows="dynamic",
@@ -442,12 +454,9 @@ with tab2:
 
     if st.button("💾 장부 수정사항 구글시트 & 홈페이지 즉시 반영", type="primary"):
         save_sheet_data(edited_df, "properties", "properties.csv")
-        st.success("✅ 수정하신 장부 내용이 구글 스프레드시트와 홈페이지에 즉시 반영되었습니다!")
+        st.success("✅ 수정하신 장부 내용이 저장되었습니다!")
         st.rerun()
 
-# ------------------------------------------
-# [탭 3] 기존 매물 선택 ➔ 블로그 원고 & 카톡 브리핑 1초 생성기
-# ------------------------------------------
 with tab3:
     st.subheader("📝 네이버 블로그 원고 & 카카오톡 브리핑 1초 생성기")
     if len(df_props) == 0:
@@ -477,9 +486,6 @@ with tab3:
 👤 우리부동산 대표 김태형 : 010-2660-8276"""
             st.code(kakao_txt, language="text")
 
-# ------------------------------------------
-# [탭 4] 찾는 손님 (구해요) CRM 장부
-# ------------------------------------------
 with tab4:
     st.subheader("👥 찾는 손님 (구해요) 및 콜백 관리 장부")
     with st.expander("➕ 새 손님(구해요 문의) 등록하기", expanded=False):
