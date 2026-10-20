@@ -337,19 +337,19 @@ with st.sidebar:
 
 
 # ==============================================================================
-# 🔥 [파트 1] 상단 주업무 4대 시스템 (홈페이지 & 구글시트 실시간 연동)
+# 🔥 [파트 1] 상단 주업무 3대 시스템 (새매물등록 + 전체통합장부 + 공장블로그/카톡 + 손님CRM)
 # ==============================================================================
-st.markdown('<div class="section-divider">🔥 [상단 주업무 4대 시스템] 1. 새 매물 등록(+사진) · 2. 전체 매물 장부 · 3. 공장 블로그/카톡 생성 · 4. 찾는 손님 CRM</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-divider">🔥 [상단 주업무 시스템] 1. 새 매물 등록(+사진) · 2. 전체 매물 장부 · 3. 공장 블로그 & 카톡 브리핑 · 4. 찾는 손님 CRM</div>', unsafe_allow_html=True)
 
 tab1, tab2, tab3, tab4 = st.tabs([
     "➕ 1. 새 매물 등록 (+사진/홈페이지 연동)",
     "📋 2. 전체 매물 통합장부 (수정/역매칭)",
-    "📝 3. 공장 블로그(송현동 양식) & 카톡 생성",
+    "📝 3. 공장 블로그(송현동 양식) & 카톡 브리핑",
     "👥 4. 찾는 손님 (구해요) CRM & 매물매칭"
 ])
 
 # ------------------------------------------
-# [1번 시스템] 새 매물 등록 (+사진 업로드 및 구글시트/홈페이지 자동 연동)
+# [1번 시스템] 새 매물 등록 (+사진 업로드 + 호이스트 선택형 + 홈페이지 자동 연동)
 # ------------------------------------------
 with tab1:
     st.subheader("➕ 신규 공장·창고·신축공장분양 매물 등록")
@@ -375,14 +375,15 @@ with tab1:
         p_power = c11.text_input("계약 전력(동력)", value="30kW")
 
         c12, c13, c14, c15 = st.columns(4)
-        p_hoist = c12.text_input("호이스트 설비", value="호이스트 2.8톤 완비")
-        p_truck = c13.selectbox("차량 진입 / 도로 조건", [
+        # ★ 요청하신 호이스트 선택형 구현
+        p_has_hoist = c12.selectbox("호이스트 유무", ["호이스트 있음", "호이스트 없음"])
+        p_hoist_detail = c13.text_input("호이스트 상세", value="호이스트 2.8톤 완비")
+        p_truck = c14.selectbox("차량 진입 / 도로 조건", [
             "40ft 츄레라 진입 가능 (광폭도로)",
             "5t~11t 윙바디 작업 수월 (8m~10m 도로)",
             "1t~2.5t 화물차 문앞 접안 (6m 도로)"
         ])
-        p_movein = c14.text_input("입주 가능 시기", value="즉시 입주 / 협의")
-        p_zoning = c15.text_input("용도지역 / 건축구조", value="일반공업지역 / 철골조")
+        p_movein = c15.text_input("입주 가능 시기", value="즉시 입주 / 협의")
 
         st.markdown("##### 🔒 중개사 전용 비밀장부 (손님용 홈페이지에는 절대 노출되지 않습니다)")
         s1, s2, s3, s4 = st.columns([1.5, 1, 1.2, 1])
@@ -408,6 +409,8 @@ with tab1:
             elif photo_url_input.strip():
                 final_photo = photo_url_input.strip()
 
+            hoist_final = p_hoist_detail if "있음" in p_has_hoist else "호이스트 없음"
+
             new_row = {
                 "매물번호": p_id,
                 "등록일자": datetime.now().strftime("%Y-%m-%d"),
@@ -421,11 +424,11 @@ with tab1:
                 "사무실평수": f"{p_office}평",
                 "층고": p_height,
                 "동력": p_power,
-                "호이스트": p_hoist,
+                "호이스트": hoist_final,
                 "대형차량": p_truck,
                 "추천업종": p_biz,
                 "입주가능일": p_movein,
-                "용도지역/구조": p_zoning,
+                "용도지역/구조": "일반공업지역 / 철골조",
                 "사용승인일": p_approval,
                 "임대인(건물주)": p_owner_name,
                 "임대인연락처": p_owner_tel,
@@ -473,24 +476,30 @@ with tab2:
         st.rerun()
 
 # ------------------------------------------
-# [3번 시스템] 공장 블로그(송현동 양식) & 카톡 브리핑 생성기
+# [3번 시스템] 공장 블로그(송현동 양식) & 손님 전송용 카카오톡 1초 브리핑
 # ------------------------------------------
 with tab3:
-    st.subheader("📝 네이버 블로그 원고(송현동 양식) & 카카오톡 브리핑 1초 생성기")
+    st.subheader("📝 네이버 블로그 원고(송현동 양식) & 카카오톡 브리핑 생성기")
+    st.caption("등록된 매물을 선택하면 블로그 원고와 손님 전송용 카톡 브리핑을 여러 개 골라서 확인하고 복사할 수 있습니다.")
     if len(df_props) == 0:
         st.info("먼저 [1. 새 매물 등록] 탭에서 매물을 등록해 주세요.")
     else:
         prop_options = [f"[{r['매물번호']}] {r['소재지(권역)']} {r['면적']} {r['거래구분']} ({r['가격(보/월)']}) - {r['상세주소(지번)']}" for _, r in df_props.iterrows()]
-        selected_idx = st.selectbox("블로그 원고나 카톡 브리핑을 뽑을 매물을 선택하세요", range(len(prop_options)), format_func=lambda i: prop_options[i])
-        target_row = df_props.iloc[selected_idx].to_dict()
+        
+        # ★ 여러 매물을 선택할 수 있도록 multiselect 지원
+        selected_indices = st.multiselect("원고를 생성할 매물을 선택하세요 (여러 개 선택 가능)", range(len(prop_options)), default=[0] if len(prop_options)>0 else [], format_func=lambda i: prop_options[i])
 
-        col_b1, col_b2 = st.columns([1.4, 1])
-        with col_b1:
-            st.markdown("#### 🟢 네이버 블로그 가독성 최적화 원고 (우측 상단 복사 아이콘 클릭)")
-            st.code(generate_naver_blog_post(target_row), language="markdown")
-        with col_b2:
-            st.markdown("#### 💬 손님 전송용 카카오톡 1초 브리핑")
-            kakao_txt = f"""[🏭 우리공장부동산 추천 매물 브리핑]
+        for idx in selected_indices:
+            target_row = df_props.iloc[idx].to_dict()
+            st.markdown(f"---  \n### 📌 [매물번호 {target_row.get('매물번호','')}] {target_row.get('매물제목','')}")
+            
+            col_b1, col_b2 = st.columns([1.4, 1])
+            with col_b1:
+                st.markdown("#### 🟢 네이버 블로그 가독성 최적화 원고 (송현동 양식)")
+                st.code(generate_naver_blog_post(target_row), language="markdown")
+            with col_b2:
+                st.markdown("#### 💬 손님 전송용 카카오톡 1초 브리핑")
+                kakao_txt = f"""[🏭 우리공장부동산 추천 매물 브리핑]
 • 매물번호 : {target_row.get('매물번호','')} ({target_row.get('거래구분','')})
 • 소재지 : 인천 {target_row.get('소재지(권역)','')} (지번 안심보호)
 • 실사용면적 : 1층 {target_row.get('면적','')} (사무실 {target_row.get('사무실평수','0평')})
@@ -501,7 +510,7 @@ with tab3:
 
 ☎ 매매문의 : 032-582-6200 | 임대문의 : 032-576-2600
 👤 우리부동산 대표 김태형 : 010-2660-8276"""
-            st.code(kakao_txt, language="text")
+                st.code(kakao_txt, language="text")
 
 # ------------------------------------------
 # [4번 시스템] 찾는 손님 (구해요) CRM 장부 + 자동 매물 매칭
