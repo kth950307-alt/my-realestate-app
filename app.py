@@ -179,7 +179,7 @@ def save_sheet_data(df, sheet_name, local_csv):
             ws.update(data_to_write)
             return True
         except Exception as e:
-            st.warning(f"구글 시트 자동 쓰기 확인 필요 (로컬 저장 완료): {e}")
+            st.warning(f"구글 시트 자동 쓰기 확인 필요 (로컬 백업 완료): {e}")
     return False
 
 def compress_uploaded_image(uploaded_file):
@@ -317,7 +317,7 @@ st.markdown("""
 
 with st.sidebar:
     st.subheader("🔒 관리자 보안 및 연동 상태")
-    admin_pw = st.text_input("업무시스템 잠금해제 (기본 해제됨)", value="563011", type="password")
+    admin_pw = st.text_input("업무시스템 잠금해제", value="563011", type="password")
     if admin_pw != "563011":
         st.warning("비밀번호 `563011`을 입력해 주세요.")
         st.stop()
@@ -540,7 +540,6 @@ with tab4:
         save_sheet_data(edited_custs, "customers", "customers.csv")
         st.success("✅ 손님 장부가 저장되었습니다!")
 
-    # 손님 선택 시 보유 매물 자동 역매칭 기능
     if len(df_custs) > 0 and len(df_props) > 0:
         st.divider()
         st.markdown("##### 🎯 선택한 손님에게 딱 맞는 보유 매물 자동 추천 (역매칭)")
@@ -564,7 +563,7 @@ with tab4:
 
 
 # ==============================================================================
-# 🛠️ [파트 2] 하단 확장 업무 6대 시스템 (복붙 파서 · 경매 · 청약 · 일상블로그 · 영상 · 툴박스)
+# 🛠️ [파트 2] 하단 확장 업무 6대 시스템 (현장임장 복붙파서 · 공장/아파트 경매 · 수도권 청약 · 일상블로그 · 영상대본 · 툴박스)
 # ==============================================================================
 st.markdown('<div class="section-divider">🛠️ [하단 확장 업무 6대 시스템] 5. 현장 임장(복붙 자동추출) · 6. 공장/아파트 경매 · 7. 수도권 청약/분양 · 8. 일상 블로그 · 9. 드론 대본 · 10. 만능 툴박스</div>', unsafe_allow_html=True)
 
@@ -578,12 +577,11 @@ sub_tab5, sub_tab6, sub_tab7, sub_tab8, sub_tab9, sub_tab10 = st.tabs([
 ])
 
 # ------------------------------------------
-# [5번 시스템] 현장 임장 / 물건따기 장부 (복사·붙여넣기 파서 + 정식 매물 승격 완벽 복원!)
+# [5번 시스템] 현장 임장 / 물건따기 장부 (복붙 자동 파서 + 1번 정식 매물 1초 승격 완벽 복원!)
 # ------------------------------------------
 with sub_tab5:
-    st.subheader("🎯 [0번 비밀장부] 현장 임장 / 물건따기 장부 (`hunting` 시트 연동)")
+    st.subheader("🎯 [0번 비밀장부] 현장 임장 및 잠재 매물(물건따기) 발굴 관리 (`hunting` 시트 연동)")
     
-    # ★ 핵심 복원 1: 임장 메모 / 카톡 / 건축물대장 복사해서 붙여넣기 자동 추출기
     st.markdown("##### 📋 [고도화 기능 1] 현장 메모 / 카톡 / 건축물대장 텍스트 복사·붙여넣기 자동 추출기")
     paste_col1, paste_col2 = st.columns([2, 1])
     with paste_col1:
@@ -659,7 +657,6 @@ with sub_tab5:
             save_sheet_data(edited_hunts, "hunting", "hunting_properties.csv")
             st.success("✅ 물건따기 장부가 업데이트되었습니다!")
 
-    # ★ 핵심 복원 2: 임장 물건 내역 텍스트 복사 & 1번 정식 매물로 원클릭 승격 기능!
     if len(df_hunts) > 0:
         st.divider()
         st.markdown("##### 🚀 [고도화 기능 2] 임장 물건 내역 복사하기 & 1번 정식 매물(`properties`)로 1초 승격")
@@ -694,7 +691,7 @@ with sub_tab5:
                     "사용승인일": "",
                     "임대인(건물주)": h_row.get("소유자(건물주)", ""),
                     "임대인연락처": h_row.get("연락처", ""),
-                    "특징메모": h_row.get("추후일정/메모", ""),
+                    "특징메모": h_row.get("추천일정/메모", ""),
                     "대표사진": ""
                 }
                 df_props = pd.concat([pd.DataFrame([promoted_row]), df_props], ignore_index=True)
@@ -703,7 +700,7 @@ with sub_tab5:
                 st.rerun()
 
 # ------------------------------------------
-# [6번 시스템] 인천 공장·창고 및 수도권 아파트 경매 데이터 보드 & 수익률 시뮬레이터 (완벽 복원!)
+# [6번 시스템] 인천 공장·창고 및 수도권 아파트 경매 분석 & 수익률 시뮬레이터 (완벽 복원!)
 # ------------------------------------------
 with sub_tab6:
     st.subheader("⚖️ 인천 핵심 공장·창고 & 수도권 아파트 주요 경매 물건 보드 + 수익률 시뮬레이터")
@@ -721,7 +718,7 @@ with sub_tab6:
     st.dataframe(pd.DataFrame(AUCTION_PRESETS), use_container_width=True, hide_index=True)
 
     preset_names = [f"[{a['구분']}] {a['사건번호']} - {a['소재지']} (감정가 {a['감정가(만)']/10000:.1f}억 ➔ 최저가 {a['최저가(만)']/10000:.2f}억)" for a in AUCTION_PRESETS]
-    sel_auc_idx = st.selectbox("🔍 시뮬레이션할 경매 물건을 선택하세요 (직접 수정도 가능합니다)", range(len(preset_names)), format_func=lambda i: preset_names[i])
+    sel_auc_idx = st.selectbox("🔍 시뮬레이션할 경매 물건을 선택하세요", range(len(preset_names)), format_func=lambda i: preset_names[i])
     sel_auc = AUCTION_PRESETS[sel_auc_idx]
 
     ac1, ac2, ac3 = st.columns(3)
@@ -764,7 +761,7 @@ with sub_tab6:
     st.code(auc_report, language="text")
 
 # ------------------------------------------
-# [7번 시스템] 수도권 핵심 공공분양·특별공급 청약 정보 보드 & 신축공장분양 대출 계산기 (완벽 복원!)
+# [7번 시스템] 수도권 핵심 공공분양·특별공급 청약 보드 & 신축공장분양 대출 비교기 (완벽 복원!)
 # ------------------------------------------
 with sub_tab7:
     st.subheader("🏢 수도권 주요 공공분양·특별공급 청약 정보 보드 & 신축공장분양 대출 시뮬레이터")
