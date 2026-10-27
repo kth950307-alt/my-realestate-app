@@ -21,17 +21,8 @@ try:
 except ImportError:
     PIL_AVAILABLE = False
 
-# Streamlit 부분 렌더링(깜빡임 방지) 데코레이터 호환 처리
-if hasattr(st, "fragment"):
-    st_fragment = st.fragment
-elif hasattr(st, "experimental_fragment"):
-    st_fragment = st.experimental_fragment
-else:
-    def st_fragment(func):
-        return func
-
 # ==========================================
-# 0. 페이지 기본 설정 및 스타일링
+# 0. 페이지 기본 설정 및 프로페셔널 UI 스타일링
 # ==========================================
 st.set_page_config(
     page_title="우리부동산 통합업무시스템 Pro",
@@ -42,29 +33,37 @@ st.set_page_config(
 
 st.markdown("""
 <style>
+    /* 사이드바 네비게이션 버튼 가독성 극대화 */
+    section[data-testid="stSidebar"] .stRadio > div {
+        gap: 6px;
+    }
+    section[data-testid="stSidebar"] .stRadio label {
+        background-color: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-weight: 700;
+        width: 100%;
+        transition: all 0.15s ease-in-out;
+    }
+    section[data-testid="stSidebar"] .stRadio label:hover {
+        border-color: #2563eb;
+        background-color: #eff6ff;
+    }
     .main-header {
         background: linear-gradient(90deg, #0f172a 0%, #1e3a8a 100%);
         color: white;
-        padding: 1.25rem 1.6rem;
+        padding: 1.2rem 1.6rem;
         border-radius: 12px;
         margin-bottom: 0.8rem;
         box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    }
-    .status-ok {
-        background-color: #ecfdf5;
-        border-left: 5px solid #10b981;
-        color: #065f46;
-        padding: 0.65rem 1rem;
-        border-radius: 6px;
-        font-weight: 700;
-        margin-bottom: 0.7rem;
     }
     .alert-callback {
         background-color: #fef2f2;
         border: 2px solid #ef4444;
         border-left: 8px solid #dc2626;
         color: #991b1b;
-        padding: 1rem 1.25rem;
+        padding: 0.95rem 1.25rem;
         border-radius: 10px;
         margin-bottom: 1rem;
         box-shadow: 0 4px 10px rgba(220,38,38,0.08);
@@ -72,26 +71,38 @@ st.markdown("""
     .match-box {
         background-color: #eff6ff;
         border: 2px solid #3b82f6;
+        border-left: 8px solid #1d4ed8;
         border-radius: 10px;
-        padding: 1rem 1.2rem;
+        padding: 1rem 1.25rem;
+        margin-top: 1rem;
         margin-bottom: 1rem;
     }
     .kpi-card {
-        background-color: #f8fafc;
+        background-color: #ffffff;
         border: 1px solid #cbd5e1;
+        border-top: 4px solid #1e3a8a;
         border-radius: 10px;
-        padding: 0.8rem 1rem;
+        padding: 0.85rem 1rem;
         text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.03);
     }
-    .kpi-title { font-size: 0.8rem; color: #475569; font-weight: 700; margin-bottom: 3px; }
-    .kpi-val { font-size: 1.35rem; color: #0f172a; font-weight: 900; }
+    .kpi-title { font-size: 0.8rem; color: #475569; font-weight: 700; margin-bottom: 4px; }
+    .kpi-val { font-size: 1.4rem; color: #0f172a; font-weight: 900; }
     .card-box {
         background-color: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 1.15rem;
-        margin-bottom: 0.85rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .web-preview-card {
+        background-color: #ffffff;
+        border: 2px solid #2563eb;
+        border-radius: 12px;
+        padding: 1.1rem;
+        margin-bottom: 0.9rem;
+        box-shadow: 0 4px 10px rgba(37,99,235,0.08);
     }
     .sidebar-call-card {
         background-color: #fff1f2;
@@ -100,11 +111,13 @@ st.markdown("""
         border-radius: 8px;
         padding: 0.65rem 0.8rem;
         margin-bottom: 0.5rem;
-        font-size: 0.85rem;
+        font-size: 0.84rem;
+        line-height: 1.4;
     }
-    .badge-blue { background-color: #dbeafe; color: #1e40af; padding: 3px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 700; }
-    .badge-red { background-color: #fee2e2; color: #991b1b; padding: 3px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 700; }
-    .badge-green { background-color: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 700; }
+    .badge-blue { background-color: #dbeafe; color: #1e40af; padding: 3px 8px; border-radius: 5px; font-size: 0.78rem; font-weight: 800; }
+    .badge-red { background-color: #fee2e2; color: #991b1b; padding: 3px 8px; border-radius: 5px; font-size: 0.78rem; font-weight: 800; }
+    .badge-green { background-color: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 5px; font-size: 0.78rem; font-weight: 800; }
+    .badge-gold { background-color: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 5px; font-size: 0.78rem; font-weight: 800; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -121,7 +134,6 @@ PROP_COLUMNS = [
     "사용승인일", "핵심특징", "대표사진"
 ]
 
-# 고객 CRM 장부: 리마인드예정일, 최근통화일, 중요도 추가로 콜백 영업 완벽 지원
 CUST_COLUMNS = [
     "등록일자", "중요도", "고객명", "연락처", "희망거래", "선호권역", "희망층수",
     "최소평수", "최대예산_보증금", "최대월세", "필수전력", "호이스트필수",
@@ -134,13 +146,28 @@ HUNT_COLUMNS = [
     "접촉결과", "추후일정_메모"
 ]
 
-REGIONS = ["석남동", "가좌동", "원창동", "경서동", "도화동", "송림동", "송현동", "기타/인천전역"]
+REGIONS = ["석남동", "가좌동", "원창동", "경서동", "도화동", "송림동", "송현동", "오류동", "기타/인천전역"]
 DEAL_TYPES = ["공장임대", "공장매매", "창고임대", "창고매매", "신축공장분양", "토지매매", "지식산업센터"]
 FLOOR_OPTIONS = [
     "지상 1층", "지상 2층", "지상 3층", "지상 4층",
     "지상 5층 이상", "지하 1층", "건물 전체(통임대/통매매)", "기타(직접입력)"
 ]
-CUST_STATUS_OPTIONS = ["🔥 급구(집중케어)", "📞 콜백대기(리마인드)", "👀 매물브리핑완료", "🤝 현장미팅예정", "✅ 계약완료", "⏸️ 보류"]
+CUST_STATUS_OPTIONS = [
+    "🔥 급구(집중케어)", "📞 콜백대기(리마인드)", "👀 매물브리핑완료",
+    "🤝 현장미팅예정", "✅ 계약완료", "⏸️ 보류(장기추적)"
+]
+
+MENU_LIST = [
+    "👥 1. 손님 리마인드 & 매칭 영업소",
+    "➕ 2. 새 매물 등록 (+손님 자동 역매칭)",
+    "📋 3. 전체 매물 통합장부 & 홈페이지 관리",
+    "💬 4. 카톡 멀티 브리핑 & 블로그 원고",
+    "🎯 5. 현장 임장 / 물건따기 (복붙 파서)",
+    "⚖️ 6. 인천공장 & 수도권아파트 경매 분석",
+    "📅 7. 수도권 아파트 & 산단 청약 캘린더",
+    "🏗️ 8. 신축공장분양 대출/취득세 계산기",
+    "🍽️ 9. 김소장 맛집·일상·여행 블로그"
+]
 
 LOCAL_CACHE_FILE = "local_backup_cache.json"
 
@@ -166,15 +193,13 @@ def save_local_disk_cache(cache_data):
 @st.cache_resource(show_spinner=False)
 def get_gsheet_workbook():
     if not GSPREAD_AVAILABLE:
-        return None, "gspread 라이브러리 미설치"
+        return None, "gspread 미설치"
     try:
         if "gcp_service_account" not in st.secrets:
-            return None, "secrets.toml 내 [gcp_service_account] 없음"
-        
+            return None, "secrets.toml 미설정"
         sec = dict(st.secrets["gcp_service_account"])
         if "private_key" in sec:
             sec["private_key"] = sec["private_key"].replace("\\n", "\n").strip()
-
         scopes = [
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive"
@@ -316,7 +341,7 @@ def compress_image_to_base64(uploaded_file):
         return ""
 
 # ==========================================
-# 3. 스마트 매칭 점수 계산 엔진 (매물 <-> 손님 양방향)
+# 3. 스마트 매칭 점수 산출 및 리마인드 날짜 판별 엔진
 # ==========================================
 def parse_num(val, default=0.0):
     try:
@@ -326,7 +351,7 @@ def parse_num(val, default=0.0):
         return default
 
 def calculate_match_score(prop_row, cust_row):
-    """매물 1건과 고객 1명의 조건 적합도를 100점 만점으로 산출합니다."""
+    """매물 1건과 고객 1명의 조건 적합도를 100점 만점으로 정밀 산출합니다."""
     score = 0
     reasons = []
 
@@ -359,11 +384,11 @@ def calculate_match_score(prop_row, cust_row):
     if "임대" in p_deal:
         if c_max_rent <= 0 or p_rent <= c_max_rent * 1.15:
             score += 15
-            reasons.append("월세예산내")
+            reasons.append("월세예산충족")
     else:
         if c_max_dep <= 0 or p_price <= c_max_dep * 1.15:
             score += 15
-            reasons.append("매매예산내")
+            reasons.append("매매예산충족")
 
     p_hoist = str(prop_row.get("호이스트유무", "없음"))
     c_hoist = str(cust_row.get("호이스트필수", "무관"))
@@ -379,7 +404,6 @@ def calculate_match_score(prop_row, cust_row):
     return max(score, 0), ", ".join(reasons)
 
 def is_callback_due(remind_str, status_str):
-    """오늘 또는 이전 날짜로 리마인드 예정일이 도래했는지 판별합니다."""
     if "완료" in str(status_str) or "보류" in str(status_str):
         return False
     s = str(remind_str).strip()
@@ -399,7 +423,6 @@ df_p_global = get_fast_df("properties", PROP_COLUMNS)
 df_c_global = get_fast_df("customers", CUST_COLUMNS)
 df_h_global = get_fast_df("hunting", HUNT_COLUMNS)
 
-# 오늘 연락해야 할 콜백 손님 자동 추출
 due_customers = []
 if not df_c_global.empty:
     for idx, r in df_c_global.iterrows():
@@ -407,32 +430,43 @@ if not df_c_global.empty:
             due_customers.append(r)
 
 # ==========================================
-# 4. 왼쪽 사이드바: 상시 고정형 [오늘 연락할 손님 리마인드 보드]
+# 4. 왼쪽 사이드바: 9대 업무 전용 메뉴 네비게이션 + 상시 콜백 알림판
 # ==========================================
 with st.sidebar:
-    st.markdown("### 📞 오늘 연락할 손님 (콜백 알림)")
+    st.markdown("## 🏭 우리부동산 Pro")
+    st.caption("인천 서구 공장·창고 통합업무시스템")
+
+    # 핵심: 사이드바 전용 탭(메뉴) 선택기
+    selected_menu = st.radio(
+        "📌 업무 메뉴 바로가기 (클릭 시 즉시 전환)",
+        MENU_LIST,
+        index=0
+    )
+
+    st.divider()
+    st.markdown("### 🚨 오늘 연락할 손님 (콜백)")
     if due_customers:
-        st.error(f"🔥 오늘 챙겨야 할 손님 **{len(due_customers)}명**이 있습니다!")
-        for dc in due_customers[:8]:
+        st.error(f"🔥 오늘 연락할 손님 **{len(due_customers)}명**!")
+        for dc in due_customers[:6]:
             st.markdown(f"""
             <div class="sidebar-call-card">
                 <strong>{dc['중요도']} {dc['고객명']}</strong> ({dc['희망거래']})<br>
                 📞 <a href="tel:{dc['연락처']}" style="color:#be123c;font-weight:900;">{dc['연락처']}</a><br>
                 📍 {dc['선호권역']} | {dc['최소평수']}평↑ | 호이스트:{dc['호이스트필수']}<br>
-                📝 <span style="color:#334155;">{dc['상세메모'][:35] if dc['상세메모'] else '안부 및 신규매물 브리핑 요망'}</span>
+                📝 <span style="color:#334155;">{dc['상세메모'][:32] if dc['상세메모'] else '신규매물 브리핑 및 안부'}</span>
             </div>
             """, unsafe_allow_html=True)
     else:
-        st.success("✅ 오늘 예정된 미처리 콜백 손님이 없습니다.")
+        st.success("✅ 오늘 미처리 콜백 손님이 없습니다.")
 
     st.divider()
-    st.markdown("### ⚙️ 구글 시트 & 홈페이지 제어")
+    st.markdown("### ⚙️ 구글 시트 & 백업 제어")
     if sh_conn is not None and conn_msg == "OK":
-        st.caption("🟢 구글 시트 양방향 실시간 연결됨")
+        st.caption("🟢 구글 시트 실시간 양방향 연동됨")
     else:
-        st.caption(f"🟡 로컬 캐시 모드 ({conn_msg})")
+        st.caption(f"🟡 로컬 캐시 작동 중 ({conn_msg})")
 
-    if st.button("🔄 구글 시트 최신 데이터 강제 동기화", use_container_width=True):
+    if st.button("🔄 구글 시트 최신 데이터 강제 새로고침", use_container_width=True):
         with st.spinner("구글 시트 동기화 중..."):
             init_memory_db(force_reload=True)
         st.toast("최신 시트 데이터를 불러왔습니다!", icon="✅")
@@ -440,24 +474,22 @@ with st.sidebar:
 
     st.markdown(f"📊 [구글 스프레드시트 원본 열기 ↗]({SPREADSHEET_URL})")
     
-    st.divider()
-    st.markdown("#### 📥 3대 장부 엑셀(CSV) 즉시 백업")
     st.download_button(
-        f"👥 손님장부 ({len(df_c_global)}명) 다운로드",
+        f"👥 손님장부 ({len(df_c_global)}명) CSV 백업",
         data=df_c_global.to_csv(index=False).encode("utf-8-sig"),
         file_name=f"우리부동산_고객장부_{datetime.date.today()}.csv",
         mime="text/csv",
         use_container_width=True
     )
     st.download_button(
-        f"📋 매물장부 ({len(df_p_global)}건) 다운로드",
+        f"📋 매물장부 ({len(df_p_global)}건) CSV 백업",
         data=df_p_global.to_csv(index=False).encode("utf-8-sig"),
         file_name=f"우리부동산_매물장부_{datetime.date.today()}.csv",
         mime="text/csv",
         use_container_width=True
     )
     st.download_button(
-        f"🎯 임장장부 ({len(df_h_global)}건) 다운로드",
+        f"🎯 임장장부 ({len(df_h_global)}건) CSV 백업",
         data=df_h_global.to_csv(index=False).encode("utf-8-sig"),
         file_name=f"우리부동산_임장장부_{datetime.date.today()}.csv",
         mime="text/csv",
@@ -465,72 +497,64 @@ with st.sidebar:
     )
 
 # ==========================================
-# 5. 상단 헤더 & 오늘 연락할 손님 최우선 경고 배너
+# 5. 우측 상단 공통 헤더 및 실시간 4대 KPI 요약 바
 # ==========================================
-st.markdown("""
+st.markdown(f"""
 <div class="main-header">
-    <h2 style="margin:0; color:white;">🏭 우리부동산 영업·매칭 통합시스템 Pro (손님 리마인드 & 홈페이지 실시간 연동)</h2>
-    <p style="margin:5px 0 0 0; opacity:0.92; font-size:0.92rem;">
-        주력 권역: 석남동 · 가좌동 · 원창동 · 경서동 · 도화동 · 송림동 · 송현동 | 대표 공인중개사 김태형 (032-582-6200 / 010-2660-8276)
-    </p>
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+        <div>
+            <h2 style="margin:0; color:white;">{selected_menu}</h2>
+            <p style="margin:4px 0 0 0; opacity:0.9; font-size:0.9rem;">
+                우리부동산공인중개사사무소 (대표: 김태형) | 매매 032-582-6200 · 임대 032-576-2600 · 직통 010-2660-8276
+            </p>
+        </div>
+        <div style="background:rgba(255,255,255,0.15); padding:6px 14px; border-radius:8px; font-weight:800; font-size:0.88rem;">
+            ⚡ 초고속 인메모리 엔진 가동중 (화면전환 0.01초)
+        </div>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
-# 상단 콜백 리마인드 경고 배너 (손님 놓침 완벽 방지)
-if due_customers:
-    due_names = ", ".join([f"{c['고객명']}({c['선호권역']} {c['최소평수']}평↑)" for c in due_customers[:5]])
-    st.markdown(f"""
-    <div class="alert-callback">
-        <div style="font-size:1.05rem; font-weight:900; margin-bottom:4px;">
-            🚨 [오늘의 콜백 리마인드 알림] 지금 연락해야 할 손님이 총 <u>{len(due_customers)}명</u> 있습니다! (손님 안부 전화가 계약을 만듭니다)
-        </div>
-        <div style="font-size:0.92rem; color:#7f1d1d;">
-            • 우선 연락 대상: <b>{due_names}</b> {'외 다수' if len(due_customers) > 5 else ''} ➔ 아래 <b>[👥 1. 손님 리마인드 장부 & 자동 매칭]</b> 탭에서 바로 매칭 매물을 확인하고 카톡/전화를 걸어보세요.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# 상단 4대 업무 요약 KPI 바
 k1, k2, k3, k4 = st.columns(4)
 public_cnt = len(df_p_global[df_p_global["홈페이지노출"].str.contains("노출", na=False)]) if not df_p_global.empty else 0
 active_cust_cnt = len(df_c_global[~df_c_global["진행상태"].str.contains("완료|보류", na=False)]) if not df_c_global.empty else 0
+hoist_cnt = len(df_p_global[df_p_global["호이스트유무"] == "있음"]) if not df_p_global.empty else 0
 
 with k1:
-    st.markdown(f'<div class="kpi-card"><div class="kpi-title">📞 오늘 연락할 리마인드 손님</div><div class="kpi-val" style="color:#dc2626;">{len(due_customers)}명 <span style="font-size:0.85rem;color:#475569;">(전체 진성손님 {active_cust_cnt}명)</span></div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="kpi-card"><div class="kpi-title">🚨 오늘 연락할 리마인드 손님</div><div class="kpi-val" style="color:#dc2626;">{len(due_customers)}명 <span style="font-size:0.82rem;color:#475569;">(진행중 {active_cust_cnt}명)</span></div></div>', unsafe_allow_html=True)
 with k2:
-    st.markdown(f'<div class="kpi-card"><div class="kpi-title">📋 전체 보유 매물</div><div class="kpi-val">{len(df_p_global)}건</div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="kpi-card"><div class="kpi-title">📋 전체 보유 매물 (호이스트 보유)</div><div class="kpi-val">{len(df_p_global)}건 <span style="font-size:0.82rem;color:#2563eb;">({hoist_cnt}건)</span></div></div>', unsafe_allow_html=True)
 with k3:
-    st.markdown(f'<div class="kpi-card"><div class="kpi-title">🌐 홈페이지(index.html) 공개 매물</div><div class="kpi-val" style="color:#1d4ed8;">{public_cnt}건</div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="kpi-card"><div class="kpi-title">🌐 홈페이지(index.html) 실시간 노출</div><div class="kpi-val" style="color:#059669;">{public_cnt}건</div></div>', unsafe_allow_html=True)
 with k4:
     st.markdown(f'<div class="kpi-card"><div class="kpi-title">🎯 현장 임장 / 물건따기 타겟</div><div class="kpi-val">{len(df_h_global)}건</div></div>', unsafe_allow_html=True)
 
 st.write("")
 
-# ==========================================
-# 6. 주업무 시스템 (손님 리마인드 장부를 1번 메인 탭으로 전면 배치!)
-# ==========================================
-main_tabs = st.tabs([
-    "👥 1. 손님 리마인드 장부 & 자동 매칭 영업소 (메인)",
-    "➕ 2. 새 매물 등록 (+대기손님 즉시 역매칭)",
-    "📋 3. 전체 매물 통합장부 & 홈페이지 노출 관리",
-    "💬 4. 카톡 멀티 브리핑 & 네이버 블로그 자동생성"
-])
-
-# ------------------------------------------
-# [탭 1] 손님 리마인드 장부 & 양방향 스마트 매칭 영업소 (대폭 고도화)
-# ------------------------------------------
-@st_fragment
-def render_crm_command_center():
-    st.subheader("👥 찾는 손님(매수·임차) 리마인드 관리 & 보유 매물 원클릭 매칭")
-    st.caption("전화 온 손님을 등록해 두면 리마인드 날짜에 맞춰 알림을 띄워주며, 손님을 선택하는 즉시 우리 매물 중 조건이 맞는 공장을 찾아 카톡 브리핑 문구까지 자동으로 뽑아줍니다.")
+# ==============================================================================
+# [사이드 메뉴 1] 👥 손님 리마인드 & 매칭 영업소 (계약을 만드는 메인 컨트롤 타워)
+# ==============================================================================
+if selected_menu == MENU_LIST[0]:
+    if due_customers:
+        due_names = ", ".join([f"{c['고객명']}({c['선호권역']} {c['최소평수']}평↑)" for c in due_customers[:6]])
+        st.markdown(f"""
+        <div class="alert-callback">
+            <div style="font-size:1.05rem; font-weight:900; margin-bottom:4px;">
+                🚨 [오늘의 콜백 리마인드 알림] 지금 안부 전화 및 매물 브리핑을 해야 할 손님이 총 <u>{len(due_customers)}명</u> 있습니다!
+            </div>
+            <div style="font-size:0.92rem; color:#7f1d1d;">
+                • 우선 연락 대상: <b>{due_names}</b> ➔ 아래 <b>[🎯 손님 1:1 맞춤 매물 자동 매칭]</b>에서 손님을 선택하고 1클릭으로 카톡 브리핑을 보내보세요!
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
     df_custs = get_fast_df("customers", CUST_COLUMNS)
     df_props = get_fast_df("properties", PROP_COLUMNS)
 
-    # 1) 상단: 손님 빠른 등록 아코디언 (평소엔 깔끔하게 열려 있거나 바로 입력 가능)
+    # 1) 전화 온 신규 손님 빠른 등록 폼
     with st.expander("➕ 전화 온 신규 손님 빠른 등록 (클릭하여 열기/닫기)", expanded=df_custs.empty):
         with st.form("crm_new_customer_form", clear_on_submit=True):
-            c1, c2, c3, c4, c5 = st.columns([1, 1.2, 1.3, 1.1, 1.2])
+            c1, c2, c3, c4, c5 = st.columns([1, 1.3, 1.3, 1.1, 1.2])
             with c1:
                 c_imp = st.selectbox("중요도 *", ["🔥 A급(급구)", "⭐ 일반", "💎 VIP(매수/대형)"])
             with c2:
@@ -563,7 +587,7 @@ def render_crm_command_center():
                 default_remind = datetime.date.today() + datetime.timedelta(days=3)
                 c_remind = st.date_input("⏰ 다음 연락(리마인드) 날짜", value=default_remind)
             with c14:
-                c_memo = st.text_input("통화 핵심 메모 (리마인드 사항)", placeholder="예: 현재 가좌동 임차중, 12월 만기라 11월 초에 다시 물건 보내드리기로 함")
+                c_memo = st.text_input("통화 핵심 메모 (리마인드 사항)", placeholder="예: 현재 가좌동 임차중, 만기 임박하여 층고 높은 곳 찾으심")
 
             sub_c = st.form_submit_button("💾 손님 장부(customers)에 즉시 등록 및 매칭 시작", type="primary", use_container_width=True)
             if sub_c:
@@ -590,17 +614,17 @@ def render_crm_command_center():
                 st.toast(f"고객 등록 완료: {c_name}", icon="👥")
                 st.rerun()
 
-    # 2) 중단: 전체 손님 장부 필터 & 실시간 편집 테이블 (넓은 화면)
-    st.markdown("#### 📋 대기 손님 통합 장부 (셀을 더블클릭하여 통화내용·리마인드 날짜를 바로 수정하세요)")
-    cf1, cf2, cf3, cf4 = st.columns([1.2, 1.2, 1.2, 2])
+    # 2) 손님 통합 장부 검색 및 실시간 수정
+    st.markdown("### 📋 대기 손님 통합 장부 (셀을 더블클릭하여 통화메모·리마인드 날짜를 바로 수정하세요)")
+    cf1, cf2, cf3, cf4 = st.columns([1.3, 1.1, 1.1, 2])
     with cf1:
-        filter_call = st.selectbox("📞 연락 시기별 보기", ["전체 손님 보기", "🚨 오늘 연락할 손님만 (콜백도래)", "🔥 A급(급구) 손님만"])
+        filter_call = st.selectbox("📞 연락 시기별 필터", ["전체 손님 보기", "🚨 오늘 연락할 손님만 (콜백도래)", "🔥 A급(급구) 손님만"])
     with cf2:
         filter_c_deal = st.selectbox("희망 거래 필터", ["전체"] + DEAL_TYPES)
     with cf3:
         filter_c_reg = st.selectbox("선호 권역 필터", ["전체"] + REGIONS)
     with cf4:
-        filter_c_kw = st.text_input("손님 이름 / 연락처 / 메모 검색", "")
+        filter_c_kw = st.text_input("손님 이름 / 연락처 / 업종 / 메모 검색", "")
 
     view_cust = df_custs.copy()
     is_c_filtered = False
@@ -636,47 +660,42 @@ def render_crm_command_center():
         column_config=cust_col_cfg,
         num_rows="dynamic",
         use_container_width=True,
-        height=300,
+        height=340,
         key="crm_main_editor"
     )
 
-    btn_c1, btn_c2 = st.columns([1.5, 1])
-    with btn_c1:
-        if st.button("💾 손님 장부 수정사항(통화메모/리마인드날짜) 구글 시트에 즉시 저장", type="primary", use_container_width=True):
-            if is_c_filtered:
-                base_c = df_custs.copy()
-                base_c.loc[view_cust.index] = edited_cust
-                target_c = base_c
-            else:
-                target_c = edited_cust
-            ok, msg = overwrite_sheet_fast("customers", CUST_COLUMNS, target_c)
-            if ok:
-                st.toast("손님 장부 업데이트 완료!", icon="✅")
-                st.rerun()
-            else:
-                st.warning(msg)
-    with btn_c2:
-        st.caption("💡 팁: 손님과 통화한 후 [최근통화일]과 [리마인드예정일]만 바꿔 저장해도 영업 누수가 0%가 됩니다.")
+    if st.button("💾 손님 장부 수정사항(통화메모/리마인드날짜) 구글 시트에 즉시 저장", type="primary", use_container_width=True):
+        if is_c_filtered:
+            base_c = df_custs.copy()
+            base_c.loc[view_cust.index] = edited_cust
+            target_c = base_c
+        else:
+            target_c = edited_cust
+        ok, msg = overwrite_sheet_fast("customers", CUST_COLUMNS, target_c)
+        if ok:
+            st.toast("손님 장부 업데이트 완료!", icon="✅")
+            st.rerun()
+        else:
+            st.warning(msg)
 
     st.divider()
 
-    # 3) 하단: 선택한 손님 1:1 맞춤 매물 자동 매칭 & 원클릭 카톡 브리핑 생성기
-    st.markdown("#### 🎯 손님 1:1 맞춤 매물 자동 매칭 & 원클릭 리마인드 카톡 발송")
+    # 3) 손님 선택 시 보유 매물 1:1 자동 매칭 & 안부 카톡 원클릭 생성
+    st.markdown("### 🎯 손님 1:1 맞춤 매물 자동 매칭 & 원클릭 리마인드 카톡 발송")
     if df_custs.empty:
         st.info("위에서 손님을 1명 이상 등록하시면 보유 매물과의 자동 매칭이 시작됩니다.")
     else:
         cust_options = [
-            f"[{r['중요도']}] {r['고객명']} ({r['연락처']}) | 희망: {r['선호권역']} {r['희망거래']} {r['최소평수']}평↑ | 리마인드: {r['리마인드예정일']} | 메모: {r['상세메모'][:25]}"
+            f"[{r['중요도']}] {r['고객명']} ({r['연락처']}) | 희망: {r['선호권역']} {r['희망거래']} {r['최소평수']}평↑ | 리마인드: {r['리마인드예정일']} | 메모: {r['상세메모'][:30]}"
             for _, r in df_custs.iterrows()
         ]
         sel_c_label = st.selectbox("👇 지금 전화하거나 매물을 보내줄 손님을 선택하세요", cust_options)
         sel_c_idx = cust_options.index(sel_c_label)
         sel_c_row = df_custs.iloc[sel_c_idx]
 
-        # 통화 완료 후 리마인드 날짜 원클릭 연기 버튼
-        q_col1, q_col2, q_col3, q_col4 = st.columns([1.4, 1, 1, 1])
+        q_col1, q_col2, q_col3, q_col4 = st.columns([1.5, 1, 1, 1])
         with q_col1:
-            st.markdown(f"**📞 직통 전화:** [{sel_c_row['연락처']}](tel:{sel_c_row['연락처']}) | **진행상태:** `{sel_c_row['진행상태']}`")
+            st.markdown(f"**📞 직통 전화:** [{sel_c_row['연락처']}](tel:{sel_c_row['연락처']}) | **현재상태:** `{sel_c_row['진행상태']}`")
         with q_col2:
             if st.button("✅ 오늘 통화완료 (+3일 뒤 리마인드)", use_container_width=True):
                 df_custs.at[sel_c_row.name, "최근통화일"] = datetime.date.today().strftime("%Y-%m-%d")
@@ -698,9 +717,8 @@ def render_crm_command_center():
                 st.toast("축하합니다! 계약완료 처리되었습니다.", icon="🎉")
                 st.rerun()
 
-        # 보유 매물 중 조건 매칭 실행
         if df_props.empty:
-            st.warning("현재 등록된 매물(properties)이 없습니다. [2. 새 매물 등록] 탭에서 매물을 등록해 주세요.")
+            st.warning("현재 등록된 매물(properties)이 없습니다. 왼쪽 메뉴 [➕ 2. 새 매물 등록]에서 매물을 먼저 등록해 주세요.")
         else:
             matches = []
             for _, pr in df_props.iterrows():
@@ -725,19 +743,18 @@ def render_crm_command_center():
             if matches:
                 m_df = pd.DataFrame(matches).sort_values(by="매칭점수", ascending=False)
                 st.success(f"🔥 **{sel_c_row['고객명']}** 님 조건에 부합하는 추천 매물이 **{len(m_df)}건** 자동 매칭되었습니다!")
-                st.dataframe(m_df, use_container_width=True, height=210)
+                st.dataframe(m_df, use_container_width=True, height=220)
 
-                # 상위 매칭 매물로 즉시 손님 맞춤형 안부+추천 카톡 문구 생성
                 top_matches = m_df.head(3)
                 kakao_msg = [
                     f"안녕하세요 {sel_c_row['고객명']}님! 인천 서구 공장·창고 전문 우리부동산 김태형 대표공인중개사입니다.",
-                    f"지난번 말씀해주신 조건({sel_c_row['선호권역']} / {sel_c_row['최소평수']}평 이상 / {sel_c_row['희망거래']})에 딱 맞는 알짜 매물이 나와 가장 먼저 연락드립니다.\n"
+                    f"지난번 말씀해주신 조건({sel_c_row['선호권역']} / {sel_c_row['최소평수']}평 이상 / {sel_c_row['희망거래']})에 딱 맞는 실매물이 나와 가장 먼저 안내드립니다.\n"
                 ]
                 for i, (_, mr) in enumerate(top_matches.iterrows(), 1):
                     kakao_msg.append(f"■ 추천 #{i}. [{mr['권역']} {mr['해당층수']}] {mr['매물제목']}")
                     kakao_msg.append(f" • 면적/금액 : 전용 {mr['전용평수']}평 / {mr['가격설명']}")
                     kakao_msg.append(f" • 설비/도로 : 전력 {mr['전력']} / 호이스트 {mr['호이스트']} / {mr['도로조건']}\n")
-                kakao_msg.append("시간 괜찮으실 때 편하게 연락 주시면 현장 바로 안내해 드리겠습니다!")
+                kakao_msg.append("시간 괜찮으실 때 연락 주시면 현장 바로 안내해 드리겠습니다. 오늘도 좋은 하루 보내세요!")
                 kakao_msg.append("📞 우리부동산 김태형 대표 직통: 010-2660-8276 / 사무실: 032-582-6200")
 
                 st.markdown("##### 💬 손님에게 바로 보낼 맞춤형 안부 & 매물 추천 카톡 (우측 상단 복사 아이콘 클릭)")
@@ -745,16 +762,13 @@ def render_crm_command_center():
             else:
                 st.warning("현재 보유 매물 중 45점 이상 일치하는 매물이 없습니다.")
 
-with main_tabs[0]:
-    render_crm_command_center()
 
-# ------------------------------------------
-# [탭 2] 새 매물 등록 (+ 등록 즉시 대기 손님 자동 역매칭 알림)
-# ------------------------------------------
-@st_fragment
-def render_new_property_tab():
-    st.subheader("➕ 신규 공장 · 창고 · 신축공장분양 매물 등록 (+대기손님 자동 역매칭)")
-    st.caption("매물을 등록하면 구글 시트와 손님용 홈페이지(index.html)에 실시간 반영되며, 동시에 이 조건을 기다리던 손님 명단이 즉시 아래에 나타납니다.")
+# ==============================================================================
+# [사이드 메뉴 2] ➕ 새 매물 등록 (+ 등록 즉시 대기손님 자동 역매칭)
+# ==============================================================================
+elif selected_menu == MENU_LIST[1]:
+    st.subheader("➕ 신규 공장 · 창고 · 신축공장분양 매물 등록")
+    st.caption("새 매물을 등록하면 구글 시트와 손님용 홈페이지(index.html)에 실시간 반영되며, 동시에 이 물건을 기다리던 대기 손님이 자동으로 아래에 추출됩니다.")
 
     c_top1, c_top2, c_top3, c_top4 = st.columns(4)
     with c_top1:
@@ -763,11 +777,10 @@ def render_new_property_tab():
     with c_top2:
         p_deal = st.selectbox("거래구분 *", DEAL_TYPES)
     with c_top3:
-        p_region = st.selectbox("소재지 (주력 7대 권역) *", REGIONS)
+        p_region = st.selectbox("소재지 (주력 권역) *", REGIONS)
     with c_top4:
         p_show = st.selectbox("홈페이지 노출 설정 *", ["노출(공개)", "비공개(내부장부용)"])
 
-    # 층수 선택 세분화
     c_fl1, c_fl2, c_fl3, c_fl4 = st.columns(4)
     with c_fl1:
         p_floor_sel = st.selectbox("해당 층수 선택 *", FLOOR_OPTIONS, index=0)
@@ -783,7 +796,6 @@ def render_new_property_tab():
     with c_fl4:
         p_area2 = st.number_input("2층/부속 사무실 평수 (없으면 0)", min_value=0.0, value=0.0, step=5.0)
 
-    # 호이스트 유무('있음'/'없음') 및 빈 입력창
     c_ho1, c_ho2, c_ho3, c_ho4 = st.columns([1.1, 1.9, 1.5, 1.5])
     with c_ho1:
         p_hoist_ox = st.radio("호이스트 유무 *", ["없음", "있음"], horizontal=True)
@@ -838,7 +850,7 @@ def render_new_property_tab():
     with c_sec5:
         p_approval = st.text_input("사용승인일", value="")
 
-    p_feature = st.text_area("💡 핵심 특징 요약 (블로그 체크리스트 및 카톡 브리핑에 자동 삽입)", height=70, value="")
+    p_feature = st.text_area("💡 핵심 특징 요약 (블로그 체크리스트 및 카톡 브리핑에 자동 삽입)", height=75, value="")
 
     st.markdown("##### 📸 대표 현장 사진 등록 (업로드 또는 이미지 URL 입력 시 홈페이지 매물 카드에 즉시 반영)")
     c_img1, c_img2 = st.columns(2)
@@ -894,7 +906,6 @@ def render_new_property_tab():
         else:
             st.warning(f"📌 {msg}")
 
-    # 방금 등록한 매물이 있을 경우, 이 물건을 기다리던 대기 손님을 즉시 자동 추천!
     if "last_registered_prop" in st.session_state:
         lp = st.session_state["last_registered_prop"]
         df_c_now = get_fast_df("customers", CUST_COLUMNS)
@@ -911,26 +922,23 @@ def render_new_property_tab():
                         "고객명": cr["고객명"],
                         "연락처": cr["연락처"],
                         "희망조건": f"{cr['선호권역']} {cr['희망거래']} {cr['최소평수']}평↑",
-                        "매칭이유": rsn,
+                        "매칭사유": rsn,
                         "상세메모": cr["상세메모"]
                     })
             if waiting_list:
                 st.markdown(f"""
                 <div class="match-box">
-                    <h4 style="margin:0 0 6px 0; color:#1e40af;">🔔 잠깐! 방금 등록하신 [{lp['매물제목']}] 매물을 기다리던 손님이 <u>{len(waiting_list)}명</u> 있습니다! 지금 바로 전화해보세요!</h4>
+                    <h4 style="margin:0 0 6px 0; color:#1e40af;">🔔 잠깐! 방금 등록하신 [{lp['매물제목']}] 매물을 기다리던 대기 손님이 <u>{len(waiting_list)}명</u> 있습니다! 지금 바로 전화해보세요!</h4>
                 </div>
                 """, unsafe_allow_html=True)
                 st.dataframe(pd.DataFrame(waiting_list), use_container_width=True)
 
-with main_tabs[1]:
-    render_new_property_tab()
 
-# ------------------------------------------
-# [탭 3] 전체 매물 통합장부 & 홈페이지 노출 관리
-# ------------------------------------------
-@st_fragment
-def render_ledger_tab():
-    st.subheader("📋 전체 매물 통합장부 (초고속 검색 · 드롭다운 셀 수정 · 홈페이지 노출 관리)")
+# ==============================================================================
+# [사이드 메뉴 3] 📋 전체 매물 통합장부 & 손님용 홈페이지 노출 관리
+# ==============================================================================
+elif selected_menu == MENU_LIST[2]:
+    st.subheader("📋 전체 매물 통합장부 (초고속 검색 · 셀 직접 수정 · 홈페이지 노출 프리뷰)")
     df_props = get_fast_df("properties", PROP_COLUMNS)
 
     f_col1, f_col2, f_col3, f_col4, f_col5 = st.columns(5)
@@ -980,7 +988,7 @@ def render_ledger_tab():
         column_config=col_cfg,
         num_rows="dynamic",
         use_container_width=True,
-        height=420,
+        height=450,
         key="fast_prop_editor"
     )
 
@@ -996,29 +1004,52 @@ def render_ledger_tab():
         if ok:
             st.toast("구글 시트 동기화 완료!", icon="✅")
             st.success("✅ 구글 스프레드시트(properties) 및 홈페이지 노출 상태가 즉시 업데이트되었습니다!")
+            st.rerun()
         else:
             st.warning(msg)
 
-with main_tabs[2]:
-    render_ledger_tab()
+    st.divider()
+    st.markdown("#### 🌐 손님용 홈페이지(`index.html`) 실시간 노출 매물 카드 미리보기")
+    pub_df = df_props[df_props["홈페이지노출"].str.contains("노출", na=False)] if not df_props.empty else pd.DataFrame()
+    if pub_df.empty:
+        st.info("현재 홈페이지에 '노출(공개)'로 설정된 매물이 없습니다.")
+    else:
+        st.caption(f"현재 총 **{len(pub_df)}건**이 손님용 홈페이지에 공개 중입니다. (상세지번·건물주 연락처는 철저히 차단됩니다)")
+        cols_preview = st.columns(3)
+        for idx, (_, pr) in enumerate(pub_df.tail(6).iterrows()):
+            with cols_preview[idx % 3]:
+                hoist_badge = f"🏗️ 호이스트: {pr['호이스트제원']}" if pr["호이스트유무"] == "있음" else "호이스트 없음"
+                st.markdown(f"""
+                <div class="web-preview-card">
+                    <span class="badge-blue">{pr['권역']} · {pr['거래구분']}</span>
+                    <span class="badge-green">{pr['해당층수']}</span>
+                    <h4 style="margin:8px 0 4px 0; color:#0f172a;">{pr['매물제목']}</h4>
+                    <p style="margin:2px 0; color:#dc2626; font-weight:800; font-size:1.05rem;">{pr['가격설명']}</p>
+                    <p style="margin:4px 0; font-size:0.86rem; color:#334155;">
+                        📐 전용 <b>{pr['전용평수']}평</b> (사무실 {pr['사무실평수']}평)<br>
+                        ⚡ 전력 {pr['전력']} | 📏 층고 {pr['층고']}<br>
+                        {hoist_badge} | 🚛 {pr['도로조건']}
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
 
-# ------------------------------------------
-# [탭 4] 손님 전송용 카톡 멀티 브리핑 & 블로그 자동생성
-# ------------------------------------------
-@st_fragment
-def render_briefing_tab():
+
+# ==============================================================================
+# [사이드 메뉴 4] 💬 카톡 멀티 브리핑 & 네이버 블로그 원고 자동생성
+# ==============================================================================
+elif selected_menu == MENU_LIST[3]:
     st.subheader("💬 손님 전송용 카톡 멀티 브리핑 & 네이버 블로그 원고 1클릭 생성")
     df_props_b = get_fast_df("properties", PROP_COLUMNS)
 
     if df_props_b.empty:
-        st.info("등록된 매물이 없습니다. [2. 새 매물 등록] 탭에서 매물을 먼저 등록해 주세요.")
+        st.info("등록된 매물이 없습니다. 왼쪽 메뉴 [➕ 2. 새 매물 등록]에서 매물을 먼저 등록해 주세요.")
     else:
         options_list = [
             f"[{r['매물번호']}] ({r['권역']} {r['해당층수']}) {r['매물제목']} - {r['가격설명']}"
             for _, r in df_props_b.iterrows()
         ]
         selected_items = st.multiselect(
-            "손님에게 브리핑할 매물을 선택하세요 (여러 개 선택 시 카톡 멀티 브리핑 리스트로 자동 묶음)",
+            "손님에게 브리핑할 매물을 선택하세요 (여러 개 선택 시 카톡 멀티 브리핑 리스트로 한 번에 묶어줍니다)",
             options_list,
             default=[options_list[-1]]
         )
@@ -1083,39 +1114,25 @@ def render_briefing_tab():
 🏭 인천 서구 석남동·가좌동·원창동·경서동 공장 매매/임대 문의는 언제든 편하게 연락 주세요!
 • 상호 : 우리부동산 공인중개사사무소 (대표: 김태형)
 • 소재지 : 인천 서구 건지로 167 (석남역 인근)
-• 대표번호 : 매매 032-582-6200 / 임대 032-576-2600"""
+• 대표번호 : 매매 032-582-6200 / 임대 032-576-2600 / 직통 010-2660-8276
+#인천서구공장 #{r0['권역']}공장 #{r0['권역']}{r0['거래구분']} #인천공장전문 #우리부동산 #김소장"""
                 st.code(blog_text, language="markdown")
 
-with main_tabs[3]:
-    render_briefing_tab()
 
-# ==========================================
-# 7. 확장 업무 시스템 (탭 5 ~ 탭 9 : 임장 / 경매 / 청약 / 신축분양 / 김소장 블로그 100% 유지)
-# ==========================================
-st.divider()
-st.markdown("### 🛠️ [확장 업무 시스템] 5. 현장 임장(복붙 파서) · 6. 공장/아파트 경매 · 7. 수도권 청약 캘린더 · 8. 신축공장분양 대출계산기 · 9. 김소장 맛집/일상 블로그")
+# ==============================================================================
+# [사이드 메뉴 5] 🎯 현장 임장 / 물건따기 (복붙 정규식 파서 + 정식매물 승격)
+# ==============================================================================
+elif selected_menu == MENU_LIST[4]:
+    st.subheader("🎯 현장 임장 / 물건따기 장부 (복붙 자동추출 & 정식 매물 승격)")
+    st.caption("현장 메모나 카톡, 건축물대장 텍스트를 붙여넣으면 지번·평수·전력·호이스트·전화번호를 자동으로 분리해 주며, 물건 확보 시 1클릭으로 정식 매물장부(properties)로 넘길 수 있습니다.")
 
-ext_tabs = st.tabs([
-    "🎯 5. 현장 임장 / 물건따기 (복붙 자동추출)",
-    "⚖️ 6. 인천공장 & 수도권아파트 경매 (고도화)",
-    "📅 7. 수도권 아파트 & 산업단지 청약 캘린더",
-    "🏗️ 8. 신축공장분양 전용관 (80% 대출/취득세 계산기)",
-    "🍽️ 9. 김소장 맛집 · 일상 · 여행 블로그 생성기"
-])
-
-# ------------------------------------------
-# [탭 5] 현장 임장 / 물건따기 (복붙 정규식 자동 추출기)
-# ------------------------------------------
-@st_fragment
-def render_hunting_tab():
-    st.subheader("🎯 현장 임장 / 물건따기 장부 (hunting 시트 실시간 연동)")
     raw_paste = st.text_area(
-        "현장에서 적어둔 메모나 카톡, 건축물대장 텍스트를 그대로 붙여넣으세요 (자동으로 아래 입력칸에 채워집니다)",
-        height=80,
+        "📋 1) 현장 메모 / 카톡 / 건축물대장 텍스트 복사·붙여넣기",
+        height=90,
         placeholder="예: 석남동 223-12 대성정밀 2층 85평 보3000/월280 동력50kw 호이스트2.8톤 김철수 사장님 010-1234-5678"
     )
 
-    parsed_info = {"region": "석남동", "jibun": "", "floor": "지상 1층", "area": "", "price": "", "spec": "", "phone": ""}
+    parsed_info = {"region": "석남동", "jibun": "", "floor": "지상 1층", "area": "80", "price": "", "spec": "", "phone": ""}
     if raw_paste.strip():
         for rg in REGIONS:
             if rg[:2] in raw_paste:
@@ -1181,21 +1198,25 @@ def render_hunting_tab():
             }
             append_row_fast("hunting", HUNT_COLUMNS, hunt_row)
             st.toast("임장 기록 저장 완료!", icon="🎯")
-            st.success("✅ 현장 임장 기록이 hunting 시트에 즉시 저장되었습니다!")
+            st.rerun()
 
     df_hunt = get_fast_df("hunting", HUNT_COLUMNS)
     if not df_hunt.empty:
-        st.dataframe(df_hunt, use_container_width=True)
+        st.markdown("#### 📋 누적 임장 장부 (셀 직접 수정 가능)")
+        edited_hunt = st.data_editor(df_hunt, num_rows="dynamic", use_container_width=True, height=320)
+        if st.button("💾 임장 장부 수정사항 저장", use_container_width=True):
+            overwrite_sheet_fast("hunting", HUNT_COLUMNS, edited_hunt)
+            st.toast("임장 장부 업데이트 완료!", icon="✅")
+            st.rerun()
 
-with ext_tabs[0]:
-    render_hunting_tab()
 
-# ------------------------------------------
-# [탭 6] 인천공장 & 수도권아파트 법원 경매 분석
-# ------------------------------------------
-@st_fragment
-def render_auction_tab():
+# ==============================================================================
+# [사이드 메뉴 6] ⚖️ 인천공장 & 수도권아파트 법원 경매 분석 (수익률 시뮬레이터 포함)
+# ==============================================================================
+elif selected_menu == MENU_LIST[5]:
     st.subheader("⚖️ 인천지방법원 관할 공장·창고 및 수도권 핵심 아파트 경매 분석 시스템")
+    st.caption("감정가 대비 유찰률, 특수물건 권리분석(대항력/유치권/기계기구 목록), 경락잔금대출 한도 및 낙찰 시 총 필요자금을 정밀 계산합니다.")
+
     auc_data = [
         {
             "사건번호": "2025타경 51204",
@@ -1260,7 +1281,7 @@ def render_auction_tab():
     with ac1:
         auc_filter = st.radio("물건 구분 필터", ["전체 경매물건", "공장·창고 경매만", "수도권 아파트 경매만"], horizontal=True)
     with ac2:
-        bid_deposit_rate = st.slider("입찰보증금 비율 (%)", 10, 20, 10)
+        bid_deposit_rate = st.slider("입찰보증금 비율 (%)", 10, 20, 10, help="통상 최저입찰가의 10% (재매각 사건은 20%)")
 
     if auc_filter == "공장·창고 경매만":
         view_auc = auc_df[auc_df["물건종류"].str.contains("공장|창고")]
@@ -1282,36 +1303,55 @@ def render_auction_tab():
                 <div>
                     <span class="badge-blue">{row['관할법원']}</span>
                     <span class="badge-red">{row['최저비율']}</span>
-                    <strong style="font-size:1.1rem; margin-left:8px;">[{row['사건번호']}] {row['소재지']} ({row['물건종류']})</strong>
+                    <strong style="font-size:1.15rem; margin-left:8px;">[{row['사건번호']}] {row['소재지']} ({row['물건종류']})</strong>
                 </div>
-                <div style="font-weight:700; color:#1e40af;">매각기일: {row['매각기일']}</div>
+                <div style="font-weight:800; color:#1e40af;">매각기일: {row['매각기일']}</div>
             </div>
-            <hr style="margin:8px 0;">
+            <hr style="margin:10px 0;">
             <p style="margin:4px 0;">📐 <b>면적/스펙:</b> {row['토지/건물면적']} | ⚙️ <b>설비/특징:</b> {row['기계기구/설비']}</p>
             <p style="margin:4px 0;">💰 <b>감정가:</b> {app_p:,}만원 ➔ <b style="color:#dc2626;">최저입찰가: {min_p:,}만원</b> (입찰보증금 {bid_deposit_rate}%: <b>{bid_bond:,}만원</b>)</p>
-            <p style="margin:4px 0;">🏦 <b>경락잔금대출(80% 가정):</b> 약 {loan_est:,}만원 가능 | <b>예상 실투자금: 약 {real_equity:,}만원</b></p>
+            <p style="margin:4px 0;">🏦 <b>경락잔금대출(80% 가정):</b> 약 {loan_est:,}만원 가능 | <b>예상 실투자금: 약 {real_equity:,}만원</b> (취득세/명도비 별도)</p>
             <p style="margin:4px 0; color:#065f46;">🔍 <b>권리분석 요약:</b> {row['권리분석핵심']} (예상 낙찰가율: {row['예상낙찰가율']})</p>
         </div>
         """, unsafe_allow_html=True)
 
-with ext_tabs[1]:
-    render_auction_tab()
+    st.divider()
+    st.markdown("### 🧮 경매 입찰가 & 경락잔금대출 실투자금 정밀 계산기 (손님 브리핑용)")
+    ca1, ca2, ca3, ca4 = st.columns(4)
+    with ca1:
+        sim_app = st.number_input("감정가 (만원)", value=245000, step=5000)
+        sim_bid = st.number_input("목표 낙찰가 (만원)", value=155000, step=5000)
+    with ca2:
+        sim_loan_pct = st.slider("경락잔금대출 한도 (%)", 50, 85, 80)
+        sim_rate = st.number_input("대출 금리 (연 %)", value=4.5, step=0.1)
+    with ca3:
+        sim_tax_pct = st.selectbox("취득세율 (%)", [4.6, 1.1, 3.5, 12.4], index=0, help="공장/상가 기본 4.6%, 주택 1~3%대")
+        sim_evict = st.number_input("예상 명도비/수리비/미납공과금 (만원)", value=1000, step=200)
+    with ca4:
+        loan_res = int(sim_bid * (sim_loan_pct / 100.0))
+        tax_res = int(sim_bid * (sim_tax_pct / 100.0))
+        cash_needed = (sim_bid - loan_res) + tax_res + sim_evict
+        m_interest = int((loan_res * (sim_rate / 100.0)) / 12)
+        st.metric("총 필요 자기자본 (취득세/명도비 포함)", f"{cash_needed:,} 만원", f"감정가 대비 낙찰률 {(sim_bid/sim_app)*100:.1f}%")
+        st.metric("경락잔금대출 & 월 이자", f"{loan_res:,} 만원", f"월 이자 약 {m_interest:,}만원")
 
-# ------------------------------------------
-# [탭 7] 수도권 아파트 & 산업단지 청약 캘린더
-# ------------------------------------------
-@st_fragment
-def render_subscription_tab():
+
+# ==============================================================================
+# [사이드 메뉴 7] 📅 수도권 아파트 & 산업단지 청약 캘린더 (+신혼희망타운/가점 계산기)
+# ==============================================================================
+elif selected_menu == MENU_LIST[6]:
     st.subheader("📅 수도권 주요 아파트(LH/신혼희망타운/민영) 및 산업단지 분양 캘린더")
+    st.caption("부천대장 A5·A6 신혼희망타운, 검단·계양 3기 신도시 및 서구 신축 지식산업센터 분양 일정과 자금계획을 한눈에 점검합니다.")
+
     sub_data = [
         {
             "분양구분": "공공분양 / 신혼희망타운",
             "단지명": "부천대장 A5·A6블록 (e편한세상 대장 퍼스티움)",
             "지역": "경기도 부천시 대장신도시",
             "공급규모": "총 1,099세대 (전용 46㎡ · 55㎡)",
-            "청약일정": "2026년 하반기 본청약 / 당첨자 관리 중",
+            "청약일정": "2026년 본청약 및 당첨자 서류/계약 관리",
             "분양가(추정)": "3.3㎡당 약 1,850만~1,950만원 수준 (분양가상한제)",
-            "핵심체크": "신혼부부·예비신혼부부 특화, 연 1.3% 고정금리 수익공유형 모기지 지원"
+            "핵심체크": "신혼부부·예비신혼부부 특화, 연 1.3% 고정금리 수익공유형 모기지 최대 4억 한도 지원"
         },
         {
             "분양구분": "민영분양 (분양가상한제)",
@@ -1330,30 +1370,45 @@ def render_subscription_tab():
             "청약일정": "선착순 호실 지정 계약 중 (즉시 입주/분양)",
             "분양가(추정)": "평당 920만~1,050만원 (중도금 무이자, 잔금대출 80%)",
             "핵심체크": "1층~4층 5톤 화물차 도어투도어 진입, 층고 6.5m, 호이스트 설치 가능 구조"
+        },
+        {
+            "분양구분": "3기 신도시 공공분양",
+            "단지명": "인천계양 A2·A3블록 공공분양",
+            "지역": "인천광역시 계양구 테크노밸리",
+            "공급규모": "총 1,106세대 (전용 59㎡ · 74㎡ · 84㎡)",
+            "청약일정": "2026년 하반기 본청약 진행",
+            "분양가(추정)": "전용 59㎡ 약 3.9억 / 84㎡ 약 5.3억",
+            "핵심체크": "S-BRT 및 박촌역 연결, 수도권 무주택 세대구성원 청약 가능"
         }
     ]
-    st.dataframe(pd.DataFrame(sub_data), use_container_width=True, height=200)
+    st.dataframe(pd.DataFrame(sub_data), use_container_width=True, height=210)
 
-    sc1, sc2, sc3 = st.columns(3)
-    with sc1:
-        homeless_yrs = st.number_input("무주택 기간 (년, 만 30세 이후 기준)", 0, 20, 2)
-    with sc2:
-        dependents = st.number_input("부양가족 수 (본인 제외)", 0, 10, 1)
-    with sc3:
-        bank_yrs = st.number_input("청약통장 가입기간 (년)", 0, 20, 5)
+    col_sub1, col_sub2 = st.columns(2)
+    with col_sub1:
+        st.markdown("#### 💍 신혼희망타운 (부천대장 A5 등) 전용 1.3% 모기지 계산기")
+        sh_price = st.number_input("예상 분양가 (만원)", value=45000, step=1000)
+        sh_ltv = st.slider("모기지 대출 비율 (최대 70%, 4억 한도)", 30, 70, 70)
+        sh_loan = min(int(sh_price * (sh_ltv / 100.0)), 40000)
+        sh_self = sh_price - sh_loan
+        sh_monthly_int = int((sh_loan * 0.013) / 12)
+        st.success(f"💰 **필요 자기자본:** **{sh_self:,}만원** (계약금 10% 약 {int(sh_price*0.1):,}만원)\n\n🏦 **1.3% 대출액:** **{sh_loan:,}만원** ➔ **월 이자 약 {sh_monthly_int:,}만원**")
 
-    score_calc = min(homeless_yrs * 2 + 2, 32) + min((dependents + 1) * 5, 35) + min(bank_yrs + 2, 17)
-    st.info(f"📌 **민영주택 예상 청약 가점:** 약 **{score_calc}점** / 84점 만점")
+    with col_sub2:
+        st.markdown("#### 🧮 민영주택 청약 가점 계산기 (84점 만점)")
+        homeless_yrs = st.number_input("무주택 기간 (년, 만 30세 이후 또는 혼인신고일 기준)", 0, 15, 2)
+        dependents = st.number_input("부양가족 수 (본인 제외, 배우자/자녀 등)", 0, 6, 1)
+        bank_yrs = st.number_input("청약통장 가입기간 (년)", 0, 15, 5)
+        score_calc = min(homeless_yrs * 2 + 2, 32) + min((dependents + 1) * 5, 35) + min(bank_yrs + 2, 17)
+        st.info(f"📌 **예상 청약 가점:** **{score_calc}점** / 84점 만점\n\n*(공공분양/신혼희망타운은 가점이 아닌 무주택세대구성원 여부·소득/자산·청약통장 납입횟수로 선정합니다)*")
 
-with ext_tabs[2]:
-    render_subscription_tab()
 
-# ------------------------------------------
-# [탭 8] 신축공장분양 전용관 (80~90% 대출 & 취득세 감면 시뮬레이터)
-# ------------------------------------------
-@st_fragment
-def render_loan_sim_tab():
+# ==============================================================================
+# [사이드 메뉴 8] 🏗️ 신축공장분양 대출/취득세 계산기 (임차->자가 전환 영업용)
+# ==============================================================================
+elif selected_menu == MENU_LIST[7]:
     st.subheader("🏗️ 신축공장분양 · 자가공장 마련 자금계획 & 대출 시뮬레이터")
+    st.caption("월세 내던 임차 대표님께 '월세와 비슷한 이자로 내 공장을 소유하는 실투자금 비교표'를 즉석에서 뽑아드리는 영업 무기입니다.")
+
     sim1, sim2, sim3 = st.columns(3)
     with sim1:
         f_pyeong = st.number_input("분양/매입 평수 (평)", min_value=10.0, value=80.0, step=5.0)
@@ -1362,7 +1417,7 @@ def render_loan_sim_tab():
         f_loan_ratio = st.slider("시설자금 대출 비율 (%)", min_value=50, max_value=90, value=80, step=5)
         f_interest = st.number_input("예상 대출 금리 (연 %)", min_value=2.0, max_value=8.0, value=4.2, step=0.1)
     with sim3:
-        f_tax_discount = st.selectbox("취득세 감면 적용", ["기본 세율 (4.6%)", "지식산업센터/산단 감면 (35% 감면)", "창업중소기업 감면 (50~75% 감면)"])
+        f_tax_discount = st.selectbox("취득세 감면 적용 (최초분양/산업단지 등)", ["기본 세율 (4.6%)", "지식산업센터/산단 감면 (35% 감면 적용)", "창업중소기업 감면 (50~75% 감면)"])
         current_rent = st.number_input("현재 납부 중인 월세 (비교용, 만원)", min_value=0, value=280, step=10)
 
     total_price = int(f_pyeong * f_unit_price)
@@ -1382,38 +1437,71 @@ def render_loan_sim_tab():
     m2.metric(f"대출 가능액 ({f_loan_ratio}%)", f"{loan_amt:,} 만원")
     m3.metric("필요 실투자금 (자기자본)", f"{self_cash:,} 만원", f"취득세 약 {acq_tax:,}만 별도")
     diff_rent = current_rent - monthly_interest
-    m4.metric("월 예상 이자", f"월 {monthly_interest:,} 만원", f"현재 월세 대비 {diff_rent:+,}만 절감")
+    m4.metric("월 예상 이자", f"월 {monthly_interest:,} 만원", f"현재 월세 대비 월 {diff_rent:+,}만 절감")
 
-with ext_tabs[3]:
-    render_loan_sim_tab()
+    sim_report = f"""📊 [우리부동산 신축공장 분양 · 자가공장 매입 자금 시뮬레이션 리포트]
+• 검토 면적 : 전용/분양 {f_pyeong}평 (평당 {f_unit_price:,}만원)
+• 총 분양/매매가 : {total_price:,}만원 (건물분 부가세 조기환급 대상)
+• 기업 시설자금대출({f_loan_ratio}%) : 약 {loan_amt:,}만원
+• 필요 실투자 자기자본 : {self_cash:,}만원 (+ 예상 취득세 약 {acq_tax:,}만원 / {f_tax_discount})
+• 월 예상 이자(연 {f_interest}%) : 월 약 {monthly_interest:,}만원
+  👉 기존 월세({current_rent:,}만원)와 비교 시 매월 {diff_rent:+,}만원 차이로 내 자가공장 소유 가능!
 
-# ------------------------------------------
-# [탭 9] 김소장 맛집 · 일상 · 여행 블로그 생성기
-# ------------------------------------------
-@st_fragment
-def render_lifestyle_blog_tab():
+📞 맞춤 분양 및 기업시설자금 저리대출 상담 : 우리부동산 대표 김태형 (032-582-6200 / 010-2660-8276)"""
+    st.markdown("##### 📱 손님 전송용 자금계획 브리핑 리포트 (복사하여 카톡 전송)")
+    st.code(sim_report, language="markdown")
+
+
+# ==============================================================================
+# [사이드 메뉴 9] 🍽️ 김소장 & 청라 어니스트 아재 맛집·일상·여행 블로그 생성기
+# ==============================================================================
+elif selected_menu == MENU_LIST[8]:
     st.subheader("🍽️ 김소장 & 청라 어니스트 아재 맛집 · 일상 · 여행 블로그 원고 생성기")
+    st.caption("네이버 블로그 지수를 높이는 지역 맛집, 여행, 운동/일상 리뷰 원고와 SEO 해시태그를 1클릭으로 완성합니다.")
+
     b1, b2, b3 = st.columns(3)
     with b1:
-        blog_nick = st.selectbox("블로그 페르소나 선택", ["김소장 (친근한 동네 부동산 소장님)", "청라 어니스트 아재 (솔직담백 내돈내산 리뷰어)"])
+        blog_nick = st.selectbox("블로그 페르소나 선택", ["김소장 (친근하고 믿음직한 동네 부동산 소장님)", "청라 어니스트 아재 (솔직담백 내돈내산 리뷰어)"])
+        blog_cat = st.selectbox("포스팅 주제 카테고리", ["🍲 인천/청라/석남 맛집 내돈내산", "🚗 주말 여행·나들이·해루질 기록", "🏀 농구·운동·일상 이야기"])
     with b2:
-        place_name = st.text_input("방문 장소 / 식당 / 여행지 이름", placeholder="예: 석남동 뼈해장국 맛집 / 태안 해루질 펜션")
+        place_name = st.text_input("방문 장소 / 식당 / 여행지 이름 *", placeholder="예: 석남동 뼈해장국 맛집 / 태안 해루질 펜션")
+        loc_info = st.text_input("위치 / 주차 / 영업시간 팁", placeholder="예: 석남역 2번 출구 도보 5분, 매장 앞 주차 5대 가능")
     with b3:
-        menu_point = st.text_input("주문 메뉴 및 핵심 한줄평", placeholder="예: 묵은지 감자탕 대자, 고기가 정말 부드러움")
+        menu_point = st.text_input("주문 메뉴 / 핵심 경험 포인트 *", placeholder="예: 묵은지 감자탕 대자, 고기가 잡내 없이 부드러움")
+        honest_rate = st.select_slider("솔직 만족도 총평", options=["⭐⭐⭐ 무난함", "⭐⭐⭐⭐ 맛집인정", "⭐⭐⭐⭐⭐ 인생맛집/강력추천"], value="⭐⭐⭐⭐⭐ 인생맛집/강력추천")
 
-    if st.button("✍️ 블로그 포스팅 초안 즉시 생성", use_container_width=True):
-        p_name = place_name if place_name.strip() else "인천 서구 숨은 맛집"
+    extra_memo = st.text_area("추가로 넣고 싶은 에피소드 (선택)", height=70, placeholder="예: 현장 임장 마치고 저녁에 방문했는데 사장님도 친절하시고 볶음밥이 진짜 별미였음")
+
+    if st.button("✍️ 네이버 상위노출용 블로그 포스팅 원고 즉시 생성", type="primary", use_container_width=True):
+        p_name = place_name.strip() if place_name.strip() else "인천 서구 숨은 핫플레이스"
         nick_clean = blog_nick.split("(")[0].strip()
-        st.code(f"""[제목] {p_name} 내돈내산 솔직 방문 후기! ({nick_clean} 추천)
+        loc_txt = loc_info.strip() if loc_info.strip() else "인천 서구 인근 (접근성 및 주차 편리)"
+        menu_txt = menu_point.strip() if menu_point.strip() else "대표 시그니처 메뉴"
+        ep_txt = f"\n특히 {extra_memo.strip()}\n" if extra_memo.strip() else ""
 
-안녕하세요, {nick_clean}입니다!
-오늘도 인천 서구 석남동·가좌동 현장을 발로 뛰며 바쁜 하루를 보내고, 든든하게 한 끼 해결하러 다녀온 **{p_name}** 솔직 후기를 남겨봅니다.
+        blog_draft = f"""[제목] {p_name} 내돈내산 솔직 방문 후기! ({nick_clean}의 찐리뷰)
 
-📍 방문 포인트 및 메뉴 후기
-• 오늘의 픽 : {menu_point if menu_point.strip() else '대표 시그니처 메뉴'}
-• 분위기 및 주차 : 매장 깔끔하고 동료들이나 가족과 함께 방문하기 딱 좋은 곳입니다.
+안녕하세요! {nick_clean}입니다. 😊
+오늘도 인천 서구 석남동·가좌동·청라 현장을 발로 뛰며 알찬 하루를 보내고, 제대로 힐링하고 돌아온 **{p_name}** 솔직 후기를 남겨봅니다!
 
-자극적이지 않으면서도 깊은 맛이 일품이라 재방문 의사 100%입니다!""", language="markdown")
+---
+📍 [{p_name} 핵심 정보 요약]
+• 방문 장소 : {p_name}
+• 위치/주차 : {loc_txt}
+• 오늘의 픽 : {menu_txt}
+• 솔직 평점 : {honest_rate}
+---
 
-with ext_tabs[4]:
-    render_lifestyle_blog_tab()
+💡 [방문 배경 및 첫인상]
+평소 근처를 지날 때마다 눈여겨보던 곳이었는데, 드디어 시간을 내어 다녀왔습니다.
+매장 분위기나 첫인상이 깔끔해서 함께 간 일행 모두 시작부터 만족도가 높았습니다.
+
+🍽️ [본격 메뉴 & 경험 디테일 리뷰]
+이번에 경험한 핵심 포인트는 바로 **{menu_txt}**입니다!
+기대했던 것 이상으로 퀄리티가 훌륭했고, 기본에 충실하면서도 디테일이 살아있어 마지막까지 기분 좋게 즐길 수 있었습니다.{ep_txt}
+✅ [{nick_clean}의 총평]
+자극적이지 않으면서도 확실한 매력이 있는 곳이라 조만간 재방문 의사 100%입니다!
+인근에서 실패 없는 선택지를 찾으시는 분들께 **{p_name}** 강력 추천드립니다. 오늘도 활기차고 행복한 하루 보내세요! 🙌
+
+#{p_name.replace(' ', '')} #인천서구맛집 #청라맛집 #석남동맛집 #가좌동맛집 #내돈내산솔직후기 #{nick_clean.replace(' ', '')} #인천핫플"""
+        st.code(blog_draft, language="markdown")
