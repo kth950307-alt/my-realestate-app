@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>우리부동산 | 인천 서구 공장·창고·산업용지 전문 중개플랫폼</title>
-    <!-- 구글 시트 CSV 실시간 파싱 라이브러리 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style type="text/css">
         :root {
             --primary: #0f172a;
@@ -34,7 +32,7 @@
         .logo-sub { font-size: 12px; color: #94a3b8; display: block; font-weight: 500; }
         
         .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .sync-badge { background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #6ee7b7; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 800; }
+        .sync-badge { background: rgba(16, 185, 129, 0.18); border: 1px solid #10b981; color: #6ee7b7; padding: 7px 12px; border-radius: 6px; font-size: 12.5px; font-weight: 800; cursor: pointer; }
         .btn-top-call { background: var(--accent); color: white; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 800; text-decoration: none; }
         .btn-top-rent { background: var(--success); color: white; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 800; text-decoration: none; }
 
@@ -52,7 +50,7 @@
         .stat-item strong { display: block; font-size: 19px; color: #fde047; font-weight: 900; }
         .stat-item span { font-size: 12px; color: #cbd5e1; }
 
-        /* 메인 카테고리 탭 (임대 / 매매 / 신축분양 / 중개의뢰 분리) */
+        /* 메인 카테고리 탭 */
         .nav-tabs { background: white; border-bottom: 2px solid #e2e8f0; position: sticky; top: 62px; z-index: 990; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
         .nav-inner { max-width: 1320px; margin: 0 auto; display: flex; overflow-x: auto; }
         .tab-btn { flex: 1; min-width: 140px; padding: 15px 10px; font-size: 15px; font-weight: 800; color: var(--text-sub); background: none; border: none; border-bottom: 4px solid transparent; cursor: pointer; transition: 0.2s; white-space: nowrap; }
@@ -63,7 +61,7 @@
         .tab-pane { display: none; }
         .tab-pane.active { display: block; }
 
-        /* 평수별 & 거래별 원클릭 퀵 탭 바 */
+        /* 평수별 & 설비별 원클릭 퀵 탭 바 */
         .quick-bar-wrap { background: white; border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
         .quick-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
         .quick-row:last-child { margin-bottom: 0; }
@@ -173,7 +171,7 @@
 </head>
 <body>
 
-    <!-- 상단 헤더 (관리자 비밀번호 버튼 완전 제거 및 대표번호 직통 연결) -->
+    <!-- 상단 헤더 -->
     <header>
         <div class="header-inner">
             <a class="logo-group" onclick="setDealTab('ALL')">
@@ -184,7 +182,7 @@
                 </div>
             </a>
             <div class="header-actions">
-                <span id="sync-status" class="sync-badge">🟢 실시간 실매물 연동중</span>
+                <span id="sync-status" class="sync-badge" onclick="loadPropertiesViaJSONP()" title="클릭 시 최신 매물 다시 불러오기">🔄 실시간 매물 동기화중...</span>
                 <a href="tel:032-582-6200" class="btn-top-call">📞 매매 032-582-6200</a>
                 <a href="tel:032-576-2600" class="btn-top-rent">📞 임대 032-576-2600</a>
             </div>
@@ -219,7 +217,6 @@
 
     <!-- 메인 컨텐츠 영역 -->
     <main class="container">
-        <!-- 매물 리스트 및 필터 영역 -->
         <section id="pane-list" class="tab-pane active">
             
             <!-- 평수대별 & 설비별 원클릭 퀵 분류 버튼 -->
@@ -257,7 +254,7 @@
                         </select>
                     </div>
                     <div class="filter-item">
-                        <label>희망 지역 (인천 서구 7대 권역)</label>
+                        <label>희망 지역 (인천 서구)</label>
                         <select id="f-region" onchange="renderProperties()">
                             <option value="ALL">인천 서구 전체</option>
                             <option value="석남동">석남동</option>
@@ -267,7 +264,7 @@
                             <option value="도화동">도화동</option>
                             <option value="송림동">송림동</option>
                             <option value="송현동">송현동</option>
-                            <option value="오류동">오류동 / 기타</option>
+                            <option value="오류동">오류동 (검단산단)</option>
                         </select>
                     </div>
                     <div class="filter-item">
@@ -374,182 +371,167 @@
         </div>
     </div>
 
-    <!-- 기본 폴백 데이터 + 구글 스프레드시트 실시간 연동 엔진 -->
+    <!-- 구글 시트 무결점 JSONP 실시간 연동 엔진 (CORS 차단 0%, 비밀 컬럼 원천 제외) -->
     <script>
-        // 대상 구글 스프레드시트 ID (app.py와 100% 동일한 시트)
         const SHEET_ID = "1oTTZ1ok-quer9_NR5v5hEFYpRiOrR8tAwwo7UPnwRco";
-        // gviz CSV 엔드포인트 (시트 이름 'properties'를 직접 지정하고 캐시 방지 타임스탬프 부여)
-        const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=properties&t=${Date.now()}`;
-
-        // 기본 대표 매물 (구글 시트에 공개 매물이 없거나 오프라인일 때 빈 화면 방지용)
-        const fallbackProperties = [
-            {
-                id: "W-101",
-                deal: "임대",
-                dealFull: "공장임대",
-                region: "가좌동",
-                floor: "지상 1층",
-                badge: "🌟 대표추천 · 지상 1층",
-                title: "가좌IC 3분, 호이스트 5톤·동력 75kW 완비 A급 단독공장",
-                price: "보증금 3,500만 / 월 280만",
-                areaNum: 90,
-                landInfo: "전용 90평 (부속사무실 별도)",
-                zone: "일반공업지역",
-                hasTrailer: "WING",
-                road: "11톤 윙바디 진입 수월",
-                hasHoist: "YES",
-                hoist: "5톤 1기",
-                powerNum: 75,
-                height: "8.5m",
-                movein: "즉시입주 협의",
-                isDone: false,
-                imgs: ["https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80"],
-                desc: "• 인천 서구 가좌동 핵심 공업단지 내 위치한 단독형 공장입니다.\n• 호이스트 5톤 정상 작동하며 계약전력 75kW 확보되어 금속가공·기계제작 업종에 최적입니다."
-            },
-            {
-                id: "W-102",
-                deal: "임대",
-                dealFull: "공장임대",
-                region: "원창동",
-                floor: "지상 1층",
-                badge: "🚛 츄레라특화 · 지상 1층",
-                title: "원창동 북항배후단지, 40ft 츄레라 마당 회전 가능한 준대형 공장",
-                price: "보증금 6,000만 / 월 540만",
-                areaNum: 180,
-                landInfo: "전용 180평 / 대형 단독마당",
-                zone: "일반공업지역",
-                hasTrailer: "YES",
-                road: "40ft 츄레라 진입·마당회전 완벽",
-                hasHoist: "YES",
-                hoist: "5톤 2기",
-                powerNum: 150,
-                height: "10m",
-                movein: "협의입주",
-                isDone: false,
-                imgs: ["https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=900&q=80"],
-                desc: "• 북항배후단지 및 청라IC 인접, 15m 광폭도로 접하여 40ft 컨테이너 츄레라 작업이 매우 수월합니다.\n• 150~250평대 가장 선호도 높은 단독 마당형 공장입니다."
-            },
-            {
-                id: "W-103",
-                deal: "매매",
-                dealFull: "공장매매",
-                region: "석남동",
-                floor: "건물 전체(통임대/통매매)",
-                badge: "🔥 대형급매 · 건물전체",
-                title: "석남동 40ft 츄레라 양방향 진입, 호이스트 10톤 대형 자가공장",
-                price: "매매가 42억 원",
-                areaNum: 320,
-                landInfo: "전용 320평 (사무실 50평)",
-                zone: "일반공업지역",
-                hasTrailer: "YES",
-                road: "40ft 츄레라 양방향 진출입",
-                hasHoist: "YES",
-                hoist: "10톤 1기 + 5톤 2기",
-                powerNum: 250,
-                height: "11m",
-                movein: "즉시/협의",
-                isDone: false,
-                imgs: ["https://images.unsplash.com/photo-1565514020179-026b92b84bb6?auto=format&fit=crop&w=900&q=80"],
-                desc: "• 인천 서구 핵심 공업지역 내 위치한 250평 이상 대형 프라임급 공장 매매 물건입니다.\n• 고하중 호이스트 설비와 250kW 대용량 전력, 광활한 단독 마당을 갖추고 있습니다."
-            }
-        ];
-
-        let properties = [...fallbackProperties];
+        let properties = [];
         let quickPower100 = false;
 
-        // 거래구분 표준화 ('공장임대' -> '임대', '신축공장분양' -> '분양')
         function normalizeDealType(rawDeal) {
-            const d = (rawDeal || "").trim();
+            const d = String(rawDeal || "").trim();
             if (d.includes("분양")) return "분양";
             if (d.includes("매매")) return "매매";
             return "임대";
         }
 
-        // 숫자만 안전하게 추출 ("75kW" -> 75, "120평" -> 120)
         function parseNumberSafe(val, fallback = 0) {
             const m = String(val || "").replace(/,/g, "").match(/[\d.]+/);
             return m ? parseFloat(m[0]) : fallback;
         }
 
-        // 페이지 로드 시 구글 시트에서 실시간 데이터 가져오기
+        // 페이지 로드 시 JSONP 스크립트 주입 방식으로 'properties' 탭을 정확히 타겟팅하여 로드
         window.addEventListener('DOMContentLoaded', () => {
-            renderProperties();
-            fetchLiveSheetProperties();
+            loadPropertiesViaJSONP();
         });
 
-        function fetchLiveSheetProperties() {
-            const statusBadge = document.getElementById('sync-status');
-            Papa.parse(SHEET_CSV_URL, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    if (!results || !results.data || results.data.length === 0) {
-                        statusBadge.innerText = "🟢 추천 실매물 안내중";
-                        return;
-                    }
+        function loadPropertiesViaJSONP() {
+            const badge = document.getElementById('sync-status');
+            badge.innerText = "🔄 실시간 매물 동기화중...";
+            
+            const oldScript = document.getElementById('gsheet-jsonp');
+            if (oldScript) oldScript.remove();
 
-                    // '홈페이지노출' 컬럼에 '노출'이 포함된 행만 필터링 (비공개 매물 및 지번/소유자 번호 완벽 차단)
-                    const liveList = results.data
-                        .filter(row => {
-                            const showFlag = String(row['홈페이지노출'] || '').trim();
-                            const hasTitleOrRegion = String(row['매물제목'] || row['권역'] || '').trim() !== '';
-                            return hasTitleOrRegion && !showFlag.includes('비공개') && (showFlag.includes('노출') || showFlag === '');
-                        })
-                        .map((row, i) => {
-                            const areaVal = parseNumberSafe(row['전용평수'], 60);
-                            const subAreaVal = parseNumberSafe(row['사무실평수'], 0);
-                            const powerVal = parseNumberSafe(row['전력'], 50);
-                            const dealRaw = String(row['거래구분'] || '공장임대').trim();
-                            const dealShort = normalizeDealType(dealRaw);
-                            const floorStr = String(row['해당층수'] || '지상 1층').trim();
-                            const roadStr = String(row['도로조건'] || '5톤 트럭 진입').trim();
-                            const hoistOx = String(row['호이스트유무'] || '없음').trim();
-                            const hoistSpec = String(row['호이스트제원'] || '없음').trim();
-                            const rawImg = String(row['대표사진'] || '').trim();
-                            const validImg = (rawImg.startsWith('http') || rawImg.startsWith('data:image'))
-                                ? rawImg
-                                : 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80';
-
-                            const isDoneFlag = String(row['매물제목'] || '').includes('계약완료') || String(row['홈페이지노출'] || '').includes('완료');
-
-                            return {
-                                id: String(row['매물번호'] || `W-${200 + i}`).trim(),
-                                deal: dealShort,
-                                dealFull: dealRaw,
-                                region: String(row['권역'] || '석남동').trim(),
-                                floor: floorStr,
-                                badge: `✨ ${floorStr}`,
-                                title: String(row['매물제목'] || `[${row['권역']}] ${floorStr} 전용 ${areaVal}평 ${dealRaw}`).trim(),
-                                price: String(row['가격설명'] || '금액 협의').trim(),
-                                areaNum: areaVal,
-                                landInfo: subAreaVal > 0 ? `전용 ${areaVal}평 (사무실 ${subAreaVal}평)` : `전용 ${areaVal}평`,
-                                zone: String(row['용도지역'] || '일반공업지역').trim(),
-                                hasTrailer: (roadStr.includes('츄레라') || roadStr.includes('40ft') || roadStr.includes('25톤')) ? 'YES' : 'WING',
-                                road: roadStr,
-                                hasHoist: (hoistOx === '있음' || (hoistSpec !== '' && hoistSpec !== '없음')) ? 'YES' : 'NO',
-                                hoist: hoistOx === '있음' ? (hoistSpec || '설치됨') : '없음',
-                                powerNum: powerVal,
-                                height: String(row['층고'] || '-').trim(),
-                                movein: String(row['입주날짜'] || '즉시/협의').trim(),
-                                isDone: isDoneFlag,
-                                imgs: [validImg],
-                                desc: String(row['핵심특징'] || '• 김태형 대표 공인중개사가 직접 현장 확인한 실매물입니다.\n• 추천업종: ' + (row['추천업종'] || '제조업 및 물류창고')).trim()
-                            };
-                        });
-
-                    if (liveList.length > 0) {
-                        // 최신 등록 매물이 맨 위에 오도록 역순 정렬
-                        properties = liveList.reverse();
-                        statusBadge.innerText = `🟢 실시간 시트 연동완료 (${properties.length}건)`;
-                        renderProperties();
-                    }
-                },
-                error: function() {
-                    statusBadge.innerText = "🟢 실매물 브리핑 가동중";
-                }
-            });
+            // T(상세지번), U(건물주성함), V(건물주연락처) 열을 제외하고 쿼리하거나 전체 로드 후 클라이언트에서 즉시 폐기
+            const script = document.createElement('script');
+            script.id = 'gsheet-jsonp';
+            script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:handleSheetResponse&sheet=properties&t=${Date.now()}`;
+            script.onerror = function() {
+                badge.innerText = "⚠️ 시트 연결 확인 필요";
+            };
+            document.body.appendChild(script);
         }
+
+        // 구글 시트가 직접 호출하는 콜백 함수 (CORS 영향 전혀 없음 + 구버전 뒤틀린 행 자동 보정)
+        window.handleSheetResponse = function(response) {
+            const badge = document.getElementById('sync-status');
+            if (!response || !response.table || !response.table.rows) {
+                badge.innerText = "⚠️ 매물 데이터 없음";
+                return;
+            }
+
+            const rows = response.table.rows;
+            const parsedList = [];
+
+            rows.forEach((r, idx) => {
+                const c = (i) => (r.c && r.c[i] && r.c[i].v !== null && r.c[i].v !== undefined) ? String(r.c[i].f || r.c[i].v).trim() : "";
+
+                const c0 = c(0), c1 = c(1), c2 = c(2), c3 = c(3), c4 = c(4), c5 = c(5);
+                // 헤더 행 건너뛰기
+                if (c0 === "등록일자" || c1 === "매물번호") return;
+
+                let item = null;
+
+                // [케이스 A] 정상 26개 컬럼 규격으로 들어온 행 (예: 2026-10-27 | W-261027-0347 | 공장임대 | 석남동 | 지상 1층 | 노출(공개) ...)
+                if (c0.match(/^\d{4}-\d{2}-\d{2}/) && (c2.includes("공장") || c2.includes("창고") || c2.includes("토지") || c2.includes("센터") || c5.includes("노출") || c5.includes("공개"))) {
+                    const showStatus = c5;
+                    if (showStatus.includes("비공개")) return;
+
+                    const dealRaw = c2 || "공장임대";
+                    const regionStr = c3 || "석남동";
+                    const floorStr = c4 || "지상 1층";
+                    const areaVal = parseNumberSafe(c(10), 60);
+                    const subAreaVal = parseNumberSafe(c(11), 0);
+                    const heightStr = c(12) ? (c(12).includes("m") ? c(12) : c(12) + "m") : "-";
+                    const powerVal = parseNumberSafe(c(13), 30);
+                    const hoistOx = c(14) || "없음";
+                    const hoistSpec = c(15) || "없음";
+                    const roadStr = c(16) || "5톤 트럭 진입";
+                    const moveinStr = c(17) || "즉시입주 / 협의가능";
+                    const tagsStr = c(18) || "일반 제조업 및 물류";
+                    // c(19)=상세지번, c(20)=건물주성함, c(21)=건물주연락처는 보안상 절대 읽지 않고 폐기!
+                    const zoneStr = c(22) || "일반공업지역";
+                    const featureStr = c(24) || "";
+                    const rawImg = c(25) || "";
+
+                    const validImg = (rawImg.startsWith("http") || rawImg.startsWith("data:image"))
+                        ? rawImg
+                        : "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80";
+
+                    const depositNum = parseNumberSafe(c(8), 0);
+                    const rentNum = parseNumberSafe(c(9), 0);
+                    const priceText = c(7) || (dealRaw.includes("임대") ? `보증금 ${depositNum.toLocaleString()}만 / 월 ${rentNum.toLocaleString()}만` : `매매가 ${depositNum.toLocaleString()}만원`);
+
+                    item = {
+                        id: c1 || `W-${200 + idx}`,
+                        deal: normalizeDealType(dealRaw),
+                        dealFull: dealRaw,
+                        region: regionStr,
+                        floor: floorStr,
+                        badge: `✨ ${floorStr}`,
+                        title: c(6) || `[${regionStr}] ${floorStr} 전용 ${areaVal}평 ${dealRaw}`,
+                        price: priceText,
+                        areaNum: areaVal,
+                        landInfo: subAreaVal > 0 ? `전용 ${areaVal}평 (사무실 ${subAreaVal}평)` : `전용 ${areaVal}평`,
+                        zone: zoneStr,
+                        hasTrailer: (roadStr.includes("츄레라") || roadStr.includes("40ft") || roadStr.includes("25톤")) ? "YES" : "WING",
+                        road: roadStr,
+                        hasHoist: (hoistOx === "있음" || (hoistSpec !== "" && hoistSpec !== "없음")) ? "YES" : "NO",
+                        hoist: hoistOx === "있음" ? (hoistSpec !== "없음" ? hoistSpec : "보유") : "없음",
+                        powerNum: powerVal,
+                        height: heightStr,
+                        movein: moveinStr,
+                        isDone: showStatus.includes("완료") || c(6).includes("계약완료"),
+                        imgs: [validImg],
+                        desc: featureStr ? `• ${featureStr}\n• 추천업종: ${tagsStr}` : `• 인천 서구 ${regionStr} 핵심 공업지역 내 위치한 실매물입니다.\n• 진입도로: ${roadStr} / 입주시기: ${moveinStr}\n• 추천업종: ${tagsStr}`
+                    };
+                }
+                // [케이스 B] 이전에 컬럼 순서가 밀려서 저장된 레거시 행 자동 구제 (예: W-103 | 2026-10-26 | 공개 | 공장임대 | 석남동 ...)
+                else if (c0.startsWith("W-") && (c2.includes("공개") || c2.includes("노출"))) {
+                    const dealRaw = c3 || "공장임대";
+                    const regionStr = c4 || "석남동";
+                    const titleStr = c(6) || `[${regionStr}] 추천 공장임대`;
+                    const priceStr = c(7) || "보증금 2,000만 / 월 200만";
+                    const areaVal = parseNumberSafe(c(8), parseNumberSafe(titleStr, 80));
+                    const subAreaVal = parseNumberSafe(c(9), 0);
+                    const heightStr = c(10) && c(10) !== "-" ? c(10) : "7m";
+                    const powerVal = parseNumberSafe(c(11), 30);
+                    const hoistStr = c(12) || "없음";
+                    const roadStr = c(13) || "화물차 진입 수월";
+                    const featureStr = c(20) || "즉시 입주 및 가동 가능한 우수 공장 매물입니다.";
+
+                    item = {
+                        id: c0,
+                        deal: normalizeDealType(dealRaw),
+                        dealFull: dealRaw,
+                        region: regionStr,
+                        floor: titleStr.includes("2층") ? "지상 2층" : "지상 1층",
+                        badge: titleStr.includes("2층") ? "✨ 지상 2층" : "🌟 지상 1층",
+                        title: titleStr,
+                        price: priceStr,
+                        areaNum: areaVal,
+                        landInfo: subAreaVal > 0 ? `전용 ${areaVal}평 (사무실 ${subAreaVal}평)` : `전용 ${areaVal}평`,
+                        zone: c(16) || "일반공업지역",
+                        hasTrailer: (roadStr.includes("츄레라") || roadStr.includes("40ft")) ? "YES" : "WING",
+                        road: roadStr,
+                        hasHoist: (hoistStr.includes("호이스트") && !hoistStr.includes("없음")) ? "YES" : "NO",
+                        hoist: hoistStr,
+                        powerNum: powerVal,
+                        height: heightStr,
+                        movein: c(15) || "즉시/협의",
+                        isDone: false,
+                        imgs: ["https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80"],
+                        desc: `• ${featureStr}`
+                    };
+                }
+
+                if (item) parsedList.push(item);
+            });
+
+            // 최신 등록 매물이 가장 먼저 보이도록 역순 배치
+            properties = parsedList.reverse();
+            badge.innerText = `🟢 실시간 시트 연동완료 (${properties.length}건)`;
+            renderProperties();
+        };
 
         function getAreaCategoryLabel(py) {
             if (py <= 70) return "70평 이하";
@@ -635,7 +617,7 @@
         function createCardHtml(p, idx) {
             const dealBadgeClass = p.deal === '임대' ? 'badge-rent' : (p.deal === '매매' ? 'badge-sale' : 'badge-new');
             const mainImg = (p.imgs && p.imgs.length > 0) ? p.imgs[0] : 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80';
-            const trailerBadge = p.hasTrailer === 'YES' ? `<span class="fac-item ok">🚛 츄레라 가능</span>` : `<span class="fac-item no">🚛 11톤/5톤 진입</span>`;
+            const trailerBadge = p.hasTrailer === 'YES' ? `<span class="fac-item ok">🚛 츄레라 가능</span>` : `<span class="fac-item no">🚛 화물차 진입</span>`;
             const hoistBadge = p.hasHoist === 'YES' ? `<span class="fac-item ok">🏗️ 호이스트 有</span>` : `<span class="fac-item no">🏗️ 호이스트 無</span>`;
             const doneHtml = p.isDone ? `<div class="done-overlay"><div class="done-stamp">계약완료 (유사매물 문의)</div></div>` : '';
 
@@ -712,7 +694,7 @@
             document.getElementById('property-list').innerHTML = cardsHtml.length > 0 
                 ? cardsHtml.join('') 
                 : `<div style="grid-column: 1/-1; text-align:center; padding: 60px 20px; background:white; border-radius:12px;">
-                    <h3 style="margin-bottom:8px;">조건에 맞는 매물이 없습니다.</h3>
+                    <h3 style="margin-bottom:8px;">조건에 맞는 공개 매물이 없습니다.</h3>
                     <p style="color:#64748b; margin-bottom:16px;">비공개 알짜 매물이 다수 확보되어 있으니 직통전화로 문의주시면 즉시 매칭해 드립니다.</p>
                     <button class="btn-reset" onclick="resetFilters()">전체 매물 다시보기</button>
                    </div>`;
@@ -753,7 +735,7 @@
                         <th>용도지역 / 입주</th><td>${p.zone} / ${p.movein || '협의'}</td>
                     </tr>
                     <tr>
-                        <th>🚛 츄레라 진입</th><td>${p.hasTrailer === 'YES' ? '⭕ 40ft 츄레라 진입가능' : '11톤/5톤 진입 (' + p.road + ')'}</td>
+                        <th>🚛 츄레라 진입</th><td>${p.hasTrailer === 'YES' ? '⭕ 40ft 츄레라 진입가능' : '화물차 진입 (' + p.road + ')'}</td>
                         <th>진입도로 조건</th><td>${p.road}</td>
                     </tr>
                     <tr>

@@ -7,7 +7,6 @@ import os
 import base64
 from io import BytesIO
 
-# 외부 라이브러리 안전 임포트
 try:
     import gspread
     from google.oauth2.service_account import Credentials
@@ -33,10 +32,7 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-    /* 사이드바 네비게이션 버튼 가독성 극대화 */
-    section[data-testid="stSidebar"] .stRadio > div {
-        gap: 6px;
-    }
+    section[data-testid="stSidebar"] .stRadio > div { gap: 6px; }
     section[data-testid="stSidebar"] .stRadio label {
         background-color: #f8fafc;
         border: 1px solid #cbd5e1;
@@ -117,12 +113,11 @@ st.markdown("""
     .badge-blue { background-color: #dbeafe; color: #1e40af; padding: 3px 8px; border-radius: 5px; font-size: 0.78rem; font-weight: 800; }
     .badge-red { background-color: #fee2e2; color: #991b1b; padding: 3px 8px; border-radius: 5px; font-size: 0.78rem; font-weight: 800; }
     .badge-green { background-color: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 5px; font-size: 0.78rem; font-weight: 800; }
-    .badge-gold { background-color: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 5px; font-size: 0.78rem; font-weight: 800; }
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 1. 상수 및 표준 컬럼 규격 정의 (구글 시트 & index.html 완벽 호환)
+# 1. 상수 및 표준 컬럼 규격 정의
 # ==========================================
 SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/1oTTZ1ok-quer9_NR5v5hEFYpRiOrR8tAwwo7UPnwRco/edit"
 
@@ -172,8 +167,101 @@ MENU_LIST = [
 LOCAL_CACHE_FILE = "local_backup_cache.json"
 
 # ==========================================
-# 2. 초고속 인메모리 우선(In-Memory First) + 비동기 시트 동기화 엔진
+# 2. 레거시 뒤틀린 행 자동 복구 + 초고속 인메모리 엔진
 # ==========================================
+def repair_legacy_prop_rows(raw_rows):
+    """구글 시트에 옛날 컬럼 순서로 밀려 들어간 행(W-103 등)을 감지하여 26개 표준 컬럼으로 자동 교정합니다."""
+    if not raw_rows or len(raw_rows) <= 1:
+        return pd.DataFrame(columns=PROP_COLUMNS)
+
+    repaired_list = []
+    for r in raw_rows[1:]:
+        row_padded = list(r) + [""] * (26 - len(r))
+        c0 = str(row_padded[0]).strip()
+        c1 = str(row_padded[1]).strip()
+        c2 = str(row_padded[2]).strip()
+        c3 = str(row_padded[3]).strip()
+        c4 = str(row_padded[4]).strip()
+        c5 = str(row_padded[5]).strip()
+
+        if not any(str(x).strip() for x in row_padded):
+            continue
+
+        # 케이스 1: 첫 칸에 매물번호(W-...)가 들어가고 3번째 칸에 공개 여부가 들어간 구버전 밀림 행 자동 교정
+        if c0.startswith("W-") and (c2 in ("공개", "노출(공개)", "비공개") or c3 in DEAL_TYPES):
+            area_m = re.search(r"\d+", str(row_padded[8]))
+            area_val = area_m.group(0) if area_m else "80"
+            sub_m = re.search(r"\d+", str(row_padded[9]))
+            sub_val = sub_m.group(0) if sub_m else "0"
+            hoist_raw = str(row_padded[12]).strip()
+            has_h = "있음" if ("호이스트" in hoist_raw and "없음" not in hoist_raw) else "없음"
+            repaired_list.append({
+                "등록일자": c1 if re.match(r"^\d{4}-\d{2}-\d{2}", c1) else datetime.date.today().strftime("%Y-%m-%d"),
+                "매물번호": c0,
+                "거래구분": c3 if c3 else "공장임대",
+                "권역": c4 if c4 else "석남동",
+                "해당층수": "지상 2층" if "2층" in str(row_padded[6]) else "지상 1층",
+                "홈페이지노출": "노출(공개)" if ("공개" in c2 and "비공개" not in c2) else "비공개(내부장부용)",
+                "매물제목": str(row_padded[6]).strip() or f"[{c4 or '석남동'}] 추천 공장",
+                "가격설명": str(row_padded[7]).strip() or "보증금 2,000만 / 월 200만",
+                "보증금_매매가": "2000",
+                "월세": "200",
+                "전용평수": area_val,
+                "사무실평수": sub_val,
+                "층고": str(row_padded[10]).strip() or "7m",
+                "전력": str(row_padded[11]).strip() or "30kW",
+                "호이스트유무": has_h,
+                "호이스트제원": hoist_raw if has_h == "있음" else "없음",
+                "도로조건": str(row_padded[13]).strip() or "5톤 트럭 진입",
+                "입주날짜": str(row_padded[15]).strip() or "즉시입주 / 협의가능",
+                "추천업종": str(row_padded[14]).strip() or "",
+                "상세지번": "",
+                "건물주성함": "",
+                "건물주연락처": "",
+                "용도지역": str(row_padded[16]).strip() or "일반공업지역",
+                "사용승인일": "",
+                "핵심특징": str(row_padded[20]).strip() or "",
+                "대표사진": ""
+            })
+        # 케이스 2: 날짜는 첫 칸인데 거래구분이 비어있고 4번째 칸에 '공개'가 들어간 밀림 행 교정
+        elif c0.startswith("202") and c1.startswith("W-") and c3 in ("공개", "노출(공개)"):
+            repaired_list.append({
+                "등록일자": c0,
+                "매물번호": c1,
+                "거래구분": "공장임대",
+                "권역": "석남동",
+                "해당층수": "지상 2층" if "2층" in str(row_padded[6]) else "지상 1층",
+                "홈페이지노출": "노출(공개)",
+                "매물제목": str(row_padded[6]).strip() or "석남동 추천 공장",
+                "가격설명": "금액 협의",
+                "보증금_매매가": "0",
+                "월세": "0",
+                "전용평수": "100",
+                "사무실평수": "0",
+                "층고": "-",
+                "전력": str(row_padded[9]).strip() or "30kW",
+                "호이스트유무": "없음",
+                "호이스트제원": "없음",
+                "도로조건": "5톤 트럭 진입",
+                "입주날짜": "즉시입주 / 협의가능",
+                "추천업종": "",
+                "상세지번": "",
+                "건물주성함": "",
+                "건물주연락처": "",
+                "용도지역": "일반공업지역",
+                "사용승인일": "",
+                "핵심특징": "",
+                "대표사진": ""
+            })
+        else:
+            # 정상 26개 규격 행
+            row_dict = {PROP_COLUMNS[i]: str(row_padded[i]).strip() for i in range(len(PROP_COLUMNS))}
+            if not row_dict["홈페이지노출"]:
+                row_dict["홈페이지노출"] = "노출(공개)"
+            repaired_list.append(row_dict)
+
+    return pd.DataFrame(repaired_list, columns=PROP_COLUMNS)
+
 def load_local_disk_cache():
     if os.path.exists(LOCAL_CACHE_FILE):
         try:
@@ -239,6 +327,16 @@ def normalize_df(records_or_df, expected_cols):
                 df[col] = ""
     return df[expected_cols].fillna("").astype(str)
 
+def sync_legacy_first_tab(sh, clean_prop_df):
+    """만약 시트 1번 탭이 'properties (매물장부용)'일 경우, 혹시 모를 gid=0 호출에 대비해 해당 탭에도 똑같이 데이터를 복사해 줍니다."""
+    try:
+        ws_legacy = sh.worksheet("properties (매물장부용)")
+        ws_legacy.clear()
+        all_vals = [PROP_COLUMNS] + clean_prop_df.astype(str).values.tolist()
+        ws_legacy.update("A1", all_vals, value_input_option="USER_ENTERED")
+    except Exception:
+        pass
+
 def init_memory_db(force_reload=False):
     if "mem_db" not in st.session_state or force_reload:
         disk_cache = load_local_disk_cache()
@@ -249,12 +347,18 @@ def init_memory_db(force_reload=False):
         }
         sh, status = get_gsheet_workbook()
         if sh is not None and status == "OK":
-            sheet_specs = [
-                ("properties", PROP_COLUMNS),
-                ("customers", CUST_COLUMNS),
-                ("hunting", HUNT_COLUMNS)
-            ]
-            for s_name, cols in sheet_specs:
+            # 1. properties 시트 로드 및 뒤틀린 레거시 행 자동 교정
+            try:
+                ws_p = ensure_worksheet_fast(sh, "properties", PROP_COLUMNS)
+                rows_p = ws_p.get_all_values()
+                if len(rows_p) > 1:
+                    df_rep = repair_legacy_prop_rows(rows_p)
+                    st.session_state.mem_db["properties"] = normalize_df(df_rep, PROP_COLUMNS)
+            except Exception:
+                pass
+
+            # 2. customers 및 hunting 시트 로드
+            for s_name, cols in [("customers", CUST_COLUMNS), ("hunting", HUNT_COLUMNS)]:
                 try:
                     ws = ensure_worksheet_fast(sh, s_name, cols)
                     rows = ws.get_all_values()
@@ -262,10 +366,9 @@ def init_memory_db(force_reload=False):
                         headers = rows[0]
                         df_loaded = pd.DataFrame(rows[1:], columns=headers)
                         st.session_state.mem_db[s_name] = normalize_df(df_loaded, cols)
-                    elif len(rows) == 0:
-                        ws.append_row(cols)
                 except Exception:
                     pass
+
             save_local_disk_cache({
                 k: v.to_dict(orient="records") for k, v in st.session_state.mem_db.items()
             })
@@ -273,32 +376,6 @@ def init_memory_db(force_reload=False):
 def get_fast_df(sheet_name, expected_cols):
     init_memory_db(force_reload=False)
     return st.session_state.mem_db.get(sheet_name, pd.DataFrame(columns=expected_cols)).copy()
-
-def append_row_fast(sheet_name, expected_cols, row_dict):
-    init_memory_db(force_reload=False)
-    clean_row = {col: str(row_dict.get(col, "")) for col in expected_cols}
-    
-    cur_df = st.session_state.mem_db[sheet_name]
-    new_df = pd.concat([cur_df, pd.DataFrame([clean_row])], ignore_index=True)
-    st.session_state.mem_db[sheet_name] = normalize_df(new_df, expected_cols)
-    
-    save_local_disk_cache({
-        k: v.to_dict(orient="records") for k, v in st.session_state.mem_db.items()
-    })
-
-    sh, status = get_gsheet_workbook()
-    if sh is not None and status == "OK":
-        try:
-            ws = ensure_worksheet_fast(sh, sheet_name, expected_cols)
-            headers = ws.row_values(1)
-            if headers != expected_cols:
-                ws.update("A1", [expected_cols])
-            ordered_vals = [clean_row[col] for col in expected_cols]
-            ws.append_row(ordered_vals, value_input_option="USER_ENTERED")
-            return True, "구글 스프레드시트 실시간 기록 완료"
-        except Exception as e:
-            return False, f"메모리/로컬 저장 완료 (구글 시트 동기화 지연: {e})"
-    return False, f"메모리/로컬 저장 완료 ({status})"
 
 def overwrite_sheet_fast(sheet_name, expected_cols, edited_df):
     init_memory_db(force_reload=False)
@@ -316,12 +393,23 @@ def overwrite_sheet_fast(sheet_name, expected_cols, edited_df):
             ws.clear()
             all_values = [expected_cols] + clean_df.astype(str).values.tolist()
             ws.update("A1", all_values, value_input_option="USER_ENTERED")
+            if sheet_name == "properties":
+                sync_legacy_first_tab(sh, clean_df)
             return True, "구글 스프레드시트 전체 동기화 완료"
         except Exception as e:
             return False, f"메모리 저장 완료 (시트 업데이트 실패: {e})"
     return False, "메모리 및 로컬 캐시 업데이트 완료"
 
+def append_row_fast(sheet_name, expected_cols, row_dict):
+    """단건 추가 시에도 전체 테이블 규격을 완벽히 맞춰 덮어쓰기하여 행 밀림을 100% 방지합니다."""
+    init_memory_db(force_reload=False)
+    clean_row = {col: str(row_dict.get(col, "")) for col in expected_cols}
+    cur_df = st.session_state.mem_db[sheet_name]
+    new_df = pd.concat([cur_df, pd.DataFrame([clean_row])], ignore_index=True)
+    return overwrite_sheet_fast(sheet_name, expected_cols, new_df)
+
 def compress_image_to_base64(uploaded_file):
+    """구글 시트 셀 당 50,000자 제한을 절대 넘지 않도록 480x360으로 안전 압축합니다."""
     if uploaded_file is None:
         return ""
     try:
@@ -329,14 +417,13 @@ def compress_image_to_base64(uploaded_file):
             img = Image.open(uploaded_file)
             if img.mode in ("RGBA", "P"):
                 img = img.convert("RGB")
-            img.thumbnail((800, 600))
+            img.thumbnail((480, 360))
             buf = BytesIO()
-            img.save(buf, format="JPEG", quality=75)
+            img.save(buf, format="JPEG", quality=65)
             b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
-            return f"data:image/jpeg;base64,{b64}"
-        else:
-            b64 = base64.b64encode(uploaded_file.getvalue()).decode("utf-8")
-            return f"data:image/jpeg;base64,{b64}"
+            res = f"data:image/jpeg;base64,{b64}"
+            return res if len(res) < 48000 else ""
+        return ""
     except Exception:
         return ""
 
@@ -351,7 +438,6 @@ def parse_num(val, default=0.0):
         return default
 
 def calculate_match_score(prop_row, cust_row):
-    """매물 1건과 고객 1명의 조건 적합도를 100점 만점으로 정밀 산출합니다."""
     score = 0
     reasons = []
 
@@ -430,18 +516,32 @@ if not df_c_global.empty:
             due_customers.append(r)
 
 # ==========================================
-# 4. 왼쪽 사이드바: 9대 업무 전용 메뉴 네비게이션 + 상시 콜백 알림판
+# 4. 왼쪽 사이드바: 9대 업무 전용 메뉴 + 시트 원클릭 복구 버튼 + 콜백 알림판
 # ==========================================
 with st.sidebar:
     st.markdown("## 🏭 우리부동산 Pro")
     st.caption("인천 서구 공장·창고 통합업무시스템")
 
-    # 핵심: 사이드바 전용 탭(메뉴) 선택기
     selected_menu = st.radio(
         "📌 업무 메뉴 바로가기 (클릭 시 즉시 전환)",
         MENU_LIST,
         index=0
     )
+
+    st.divider()
+    st.markdown("### 🛠️ 시트 & 홈페이지 완벽 동기화")
+    if st.button("✨ 시트 뒤틀린 행 자동 복구 및 홈페이지 즉시 동기화", type="primary", use_container_width=True, help="구글 시트의 옛날 밀린 행들을 표준 26개 컬럼으로 자동 정렬하고 홈페이지(index.html)와 100% 일치시킵니다."):
+        with st.spinner("구글 시트 표준화 및 동기화 중..."):
+            init_memory_db(force_reload=True)
+            overwrite_sheet_fast("properties", PROP_COLUMNS, st.session_state.mem_db["properties"])
+        st.toast("구글 시트 표준화 및 홈페이지 동기화 완료!", icon="🎉")
+        st.rerun()
+
+    if st.button("🔄 구글 시트 최신 데이터 강제 새로고침", use_container_width=True):
+        with st.spinner("구글 시트 동기화 중..."):
+            init_memory_db(force_reload=True)
+        st.toast("최신 시트 데이터를 불러왔습니다!", icon="✅")
+        st.rerun()
 
     st.divider()
     st.markdown("### 🚨 오늘 연락할 손님 (콜백)")
@@ -460,20 +560,7 @@ with st.sidebar:
         st.success("✅ 오늘 미처리 콜백 손님이 없습니다.")
 
     st.divider()
-    st.markdown("### ⚙️ 구글 시트 & 백업 제어")
-    if sh_conn is not None and conn_msg == "OK":
-        st.caption("🟢 구글 시트 실시간 양방향 연동됨")
-    else:
-        st.caption(f"🟡 로컬 캐시 작동 중 ({conn_msg})")
-
-    if st.button("🔄 구글 시트 최신 데이터 강제 새로고침", use_container_width=True):
-        with st.spinner("구글 시트 동기화 중..."):
-            init_memory_db(force_reload=True)
-        st.toast("최신 시트 데이터를 불러왔습니다!", icon="✅")
-        st.rerun()
-
     st.markdown(f"📊 [구글 스프레드시트 원본 열기 ↗]({SPREADSHEET_URL})")
-    
     st.download_button(
         f"👥 손님장부 ({len(df_c_global)}명) CSV 백업",
         data=df_c_global.to_csv(index=False).encode("utf-8-sig"),
@@ -485,13 +572,6 @@ with st.sidebar:
         f"📋 매물장부 ({len(df_p_global)}건) CSV 백업",
         data=df_p_global.to_csv(index=False).encode("utf-8-sig"),
         file_name=f"우리부동산_매물장부_{datetime.date.today()}.csv",
-        mime="text/csv",
-        use_container_width=True
-    )
-    st.download_button(
-        f"🎯 임장장부 ({len(df_h_global)}건) CSV 백업",
-        data=df_h_global.to_csv(index=False).encode("utf-8-sig"),
-        file_name=f"우리부동산_임장장부_{datetime.date.today()}.csv",
         mime="text/csv",
         use_container_width=True
     )
@@ -509,7 +589,7 @@ st.markdown(f"""
             </p>
         </div>
         <div style="background:rgba(255,255,255,0.15); padding:6px 14px; border-radius:8px; font-weight:800; font-size:0.88rem;">
-            ⚡ 초고속 인메모리 엔진 가동중 (화면전환 0.01초)
+            {'🟢 구글시트 & 홈페이지 실시간 연동중' if sh_conn is not None and conn_msg == 'OK' else '🟡 로컬 안전 캐시 모드'}
         </div>
     </div>
 </div>
@@ -532,7 +612,7 @@ with k4:
 st.write("")
 
 # ==============================================================================
-# [사이드 메뉴 1] 👥 손님 리마인드 & 매칭 영업소 (계약을 만드는 메인 컨트롤 타워)
+# [사이드 메뉴 1] 👥 손님 리마인드 & 매칭 영업소
 # ==============================================================================
 if selected_menu == MENU_LIST[0]:
     if due_customers:
@@ -551,7 +631,6 @@ if selected_menu == MENU_LIST[0]:
     df_custs = get_fast_df("customers", CUST_COLUMNS)
     df_props = get_fast_df("properties", PROP_COLUMNS)
 
-    # 1) 전화 온 신규 손님 빠른 등록 폼
     with st.expander("➕ 전화 온 신규 손님 빠른 등록 (클릭하여 열기/닫기)", expanded=df_custs.empty):
         with st.form("crm_new_customer_form", clear_on_submit=True):
             c1, c2, c3, c4, c5 = st.columns([1, 1.3, 1.3, 1.1, 1.2])
@@ -614,7 +693,6 @@ if selected_menu == MENU_LIST[0]:
                 st.toast(f"고객 등록 완료: {c_name}", icon="👥")
                 st.rerun()
 
-    # 2) 손님 통합 장부 검색 및 실시간 수정
     st.markdown("### 📋 대기 손님 통합 장부 (셀을 더블클릭하여 통화메모·리마인드 날짜를 바로 수정하세요)")
     cf1, cf2, cf3, cf4 = st.columns([1.3, 1.1, 1.1, 2])
     with cf1:
@@ -680,7 +758,6 @@ if selected_menu == MENU_LIST[0]:
 
     st.divider()
 
-    # 3) 손님 선택 시 보유 매물 1:1 자동 매칭 & 안부 카톡 원클릭 생성
     st.markdown("### 🎯 손님 1:1 맞춤 매물 자동 매칭 & 원클릭 리마인드 카톡 발송")
     if df_custs.empty:
         st.info("위에서 손님을 1명 이상 등록하시면 보유 매물과의 자동 매칭이 시작됩니다.")
@@ -768,7 +845,7 @@ if selected_menu == MENU_LIST[0]:
 # ==============================================================================
 elif selected_menu == MENU_LIST[1]:
     st.subheader("➕ 신규 공장 · 창고 · 신축공장분양 매물 등록")
-    st.caption("새 매물을 등록하면 구글 시트와 손님용 홈페이지(index.html)에 실시간 반영되며, 동시에 이 물건을 기다리던 대기 손님이 자동으로 아래에 추출됩니다.")
+    st.caption("새 매물을 등록하면 구글 시트(properties)와 손님용 홈페이지(index.html)에 실시간 반영되며, 이 조건을 기다리던 손님이 즉시 아래에 추천됩니다.")
 
     c_top1, c_top2, c_top3, c_top4 = st.columns(4)
     with c_top1:
@@ -855,11 +932,11 @@ elif selected_menu == MENU_LIST[1]:
     st.markdown("##### 📸 대표 현장 사진 등록 (업로드 또는 이미지 URL 입력 시 홈페이지 매물 카드에 즉시 반영)")
     c_img1, c_img2 = st.columns(2)
     with c_img1:
-        p_img_file = st.file_uploader("방법 1) 대표 사진 파일 업로드 (자동 초경량 압축 저장)", type=["jpg", "jpeg", "png", "webp"])
+        p_img_file = st.file_uploader("방법 1) 대표 사진 파일 업로드 (자동 안전 압축 저장)", type=["jpg", "jpeg", "png", "webp"])
     with c_img2:
         p_img_url = st.text_input("방법 2) 또는 이미지 URL 직접 입력 (비워두면 기본 공장 사진 자동 적용)", value="")
 
-    if st.button("🚀 새 매물 등록하기 (구글 시트 & 홈페이지 반영 + 대기손님 자동 매칭)", type="primary", use_container_width=True):
+    if st.button("🚀 새 매물 등록하기 (구글 시트 & 홈페이지 즉시 반영 + 대기손님 자동 매칭)", type="primary", use_container_width=True):
         if "임대" in p_deal:
             price_str = f"보증금 {p_deposit:,}만 / 월 {p_rent:,}만"
         else:
@@ -902,7 +979,7 @@ elif selected_menu == MENU_LIST[1]:
         st.session_state["last_registered_prop"] = new_row
         if ok:
             st.toast(f"등록 완료: {final_title}", icon="🎉")
-            st.success(f"🎉 [{final_title}] 매물이 구글 시트 및 홈페이지 연동 데이터에 즉시 기록되었습니다!")
+            st.success(f"🎉 [{final_title}] 매물이 구글 시트(properties) 및 홈페이지 연동 데이터에 즉시 기록되었습니다! 이제 홈페이지를 새로고침하면 바로 뜹니다.")
         else:
             st.warning(f"📌 {msg}")
 
@@ -1016,7 +1093,7 @@ elif selected_menu == MENU_LIST[2]:
     else:
         st.caption(f"현재 총 **{len(pub_df)}건**이 손님용 홈페이지에 공개 중입니다. (상세지번·건물주 연락처는 철저히 차단됩니다)")
         cols_preview = st.columns(3)
-        for idx, (_, pr) in enumerate(pub_df.tail(6).iterrows()):
+        for idx, (_, pr) in enumerate(pub_df.iloc[::-1].head(6).iterrows()):
             with cols_preview[idx % 3]:
                 hoist_badge = f"🏗️ 호이스트: {pr['호이스트제원']}" if pr["호이스트유무"] == "있음" else "호이스트 없음"
                 st.markdown(f"""
@@ -1120,12 +1197,10 @@ elif selected_menu == MENU_LIST[3]:
 
 
 # ==============================================================================
-# [사이드 메뉴 5] 🎯 현장 임장 / 물건따기 (복붙 정규식 파서 + 정식매물 승격)
+# [사이드 메뉴 5] 🎯 현장 임장 / 물건따기 (복붙 정규식 파서)
 # ==============================================================================
 elif selected_menu == MENU_LIST[4]:
-    st.subheader("🎯 현장 임장 / 물건따기 장부 (복붙 자동추출 & 정식 매물 승격)")
-    st.caption("현장 메모나 카톡, 건축물대장 텍스트를 붙여넣으면 지번·평수·전력·호이스트·전화번호를 자동으로 분리해 주며, 물건 확보 시 1클릭으로 정식 매물장부(properties)로 넘길 수 있습니다.")
-
+    st.subheader("🎯 현장 임장 / 물건따기 장부 (복붙 자동추출 & 시트 연동)")
     raw_paste = st.text_area(
         "📋 1) 현장 메모 / 카톡 / 건축물대장 텍스트 복사·붙여넣기",
         height=90,
@@ -1211,12 +1286,10 @@ elif selected_menu == MENU_LIST[4]:
 
 
 # ==============================================================================
-# [사이드 메뉴 6] ⚖️ 인천공장 & 수도권아파트 법원 경매 분석 (수익률 시뮬레이터 포함)
+# [사이드 메뉴 6] ⚖️ 인천공장 & 수도권아파트 법원 경매 분석
 # ==============================================================================
 elif selected_menu == MENU_LIST[5]:
     st.subheader("⚖️ 인천지방법원 관할 공장·창고 및 수도권 핵심 아파트 경매 분석 시스템")
-    st.caption("감정가 대비 유찰률, 특수물건 권리분석(대항력/유치권/기계기구 목록), 경락잔금대출 한도 및 낙찰 시 총 필요자금을 정밀 계산합니다.")
-
     auc_data = [
         {
             "사건번호": "2025타경 51204",
@@ -1281,7 +1354,7 @@ elif selected_menu == MENU_LIST[5]:
     with ac1:
         auc_filter = st.radio("물건 구분 필터", ["전체 경매물건", "공장·창고 경매만", "수도권 아파트 경매만"], horizontal=True)
     with ac2:
-        bid_deposit_rate = st.slider("입찰보증금 비율 (%)", 10, 20, 10, help="통상 최저입찰가의 10% (재매각 사건은 20%)")
+        bid_deposit_rate = st.slider("입찰보증금 비율 (%)", 10, 20, 10)
 
     if auc_filter == "공장·창고 경매만":
         view_auc = auc_df[auc_df["물건종류"].str.contains("공장|창고")]
@@ -1316,7 +1389,7 @@ elif selected_menu == MENU_LIST[5]:
         """, unsafe_allow_html=True)
 
     st.divider()
-    st.markdown("### 🧮 경매 입찰가 & 경락잔금대출 실투자금 정밀 계산기 (손님 브리핑용)")
+    st.markdown("### 🧮 경매 입찰가 & 경락잔금대출 실투자금 정밀 계산기")
     ca1, ca2, ca3, ca4 = st.columns(4)
     with ca1:
         sim_app = st.number_input("감정가 (만원)", value=245000, step=5000)
@@ -1325,8 +1398,8 @@ elif selected_menu == MENU_LIST[5]:
         sim_loan_pct = st.slider("경락잔금대출 한도 (%)", 50, 85, 80)
         sim_rate = st.number_input("대출 금리 (연 %)", value=4.5, step=0.1)
     with ca3:
-        sim_tax_pct = st.selectbox("취득세율 (%)", [4.6, 1.1, 3.5, 12.4], index=0, help="공장/상가 기본 4.6%, 주택 1~3%대")
-        sim_evict = st.number_input("예상 명도비/수리비/미납공과금 (만원)", value=1000, step=200)
+        sim_tax_pct = st.selectbox("취득세율 (%)", [4.6, 1.1, 3.5, 12.4], index=0)
+        sim_evict = st.number_input("예상 명도비/수리비 (만원)", value=1000, step=200)
     with ca4:
         loan_res = int(sim_bid * (sim_loan_pct / 100.0))
         tax_res = int(sim_bid * (sim_tax_pct / 100.0))
@@ -1337,12 +1410,10 @@ elif selected_menu == MENU_LIST[5]:
 
 
 # ==============================================================================
-# [사이드 메뉴 7] 📅 수도권 아파트 & 산업단지 청약 캘린더 (+신혼희망타운/가점 계산기)
+# [사이드 메뉴 7] 📅 수도권 아파트 & 산업단지 청약 캘린더
 # ==============================================================================
 elif selected_menu == MENU_LIST[6]:
     st.subheader("📅 수도권 주요 아파트(LH/신혼희망타운/민영) 및 산업단지 분양 캘린더")
-    st.caption("부천대장 A5·A6 신혼희망타운, 검단·계양 3기 신도시 및 서구 신축 지식산업센터 분양 일정과 자금계획을 한눈에 점검합니다.")
-
     sub_data = [
         {
             "분양구분": "공공분양 / 신혼희망타운",
@@ -1370,15 +1441,6 @@ elif selected_menu == MENU_LIST[6]:
             "청약일정": "선착순 호실 지정 계약 중 (즉시 입주/분양)",
             "분양가(추정)": "평당 920만~1,050만원 (중도금 무이자, 잔금대출 80%)",
             "핵심체크": "1층~4층 5톤 화물차 도어투도어 진입, 층고 6.5m, 호이스트 설치 가능 구조"
-        },
-        {
-            "분양구분": "3기 신도시 공공분양",
-            "단지명": "인천계양 A2·A3블록 공공분양",
-            "지역": "인천광역시 계양구 테크노밸리",
-            "공급규모": "총 1,106세대 (전용 59㎡ · 74㎡ · 84㎡)",
-            "청약일정": "2026년 하반기 본청약 진행",
-            "분양가(추정)": "전용 59㎡ 약 3.9억 / 84㎡ 약 5.3억",
-            "핵심체크": "S-BRT 및 박촌역 연결, 수도권 무주택 세대구성원 청약 가능"
         }
     ]
     st.dataframe(pd.DataFrame(sub_data), use_container_width=True, height=210)
@@ -1399,16 +1461,14 @@ elif selected_menu == MENU_LIST[6]:
         dependents = st.number_input("부양가족 수 (본인 제외, 배우자/자녀 등)", 0, 6, 1)
         bank_yrs = st.number_input("청약통장 가입기간 (년)", 0, 15, 5)
         score_calc = min(homeless_yrs * 2 + 2, 32) + min((dependents + 1) * 5, 35) + min(bank_yrs + 2, 17)
-        st.info(f"📌 **예상 청약 가점:** **{score_calc}점** / 84점 만점\n\n*(공공분양/신혼희망타운은 가점이 아닌 무주택세대구성원 여부·소득/자산·청약통장 납입횟수로 선정합니다)*")
+        st.info(f"📌 **예상 청약 가점:** **{score_calc}점** / 84점 만점")
 
 
 # ==============================================================================
-# [사이드 메뉴 8] 🏗️ 신축공장분양 대출/취득세 계산기 (임차->자가 전환 영업용)
+# [사이드 메뉴 8] 🏗️ 신축공장분양 대출/취득세 계산기
 # ==============================================================================
 elif selected_menu == MENU_LIST[7]:
     st.subheader("🏗️ 신축공장분양 · 자가공장 마련 자금계획 & 대출 시뮬레이터")
-    st.caption("월세 내던 임차 대표님께 '월세와 비슷한 이자로 내 공장을 소유하는 실투자금 비교표'를 즉석에서 뽑아드리는 영업 무기입니다.")
-
     sim1, sim2, sim3 = st.columns(3)
     with sim1:
         f_pyeong = st.number_input("분양/매입 평수 (평)", min_value=10.0, value=80.0, step=5.0)
@@ -1417,7 +1477,7 @@ elif selected_menu == MENU_LIST[7]:
         f_loan_ratio = st.slider("시설자금 대출 비율 (%)", min_value=50, max_value=90, value=80, step=5)
         f_interest = st.number_input("예상 대출 금리 (연 %)", min_value=2.0, max_value=8.0, value=4.2, step=0.1)
     with sim3:
-        f_tax_discount = st.selectbox("취득세 감면 적용 (최초분양/산업단지 등)", ["기본 세율 (4.6%)", "지식산업센터/산단 감면 (35% 감면 적용)", "창업중소기업 감면 (50~75% 감면)"])
+        f_tax_discount = st.selectbox("취득세 감면 적용", ["기본 세율 (4.6%)", "지식산업센터/산단 감면 (35% 감면 적용)", "창업중소기업 감면 (50~75% 감면)"])
         current_rent = st.number_input("현재 납부 중인 월세 (비교용, 만원)", min_value=0, value=280, step=10)
 
     total_price = int(f_pyeong * f_unit_price)
@@ -1448,7 +1508,6 @@ elif selected_menu == MENU_LIST[7]:
   👉 기존 월세({current_rent:,}만원)와 비교 시 매월 {diff_rent:+,}만원 차이로 내 자가공장 소유 가능!
 
 📞 맞춤 분양 및 기업시설자금 저리대출 상담 : 우리부동산 대표 김태형 (032-582-6200 / 010-2660-8276)"""
-    st.markdown("##### 📱 손님 전송용 자금계획 브리핑 리포트 (복사하여 카톡 전송)")
     st.code(sim_report, language="markdown")
 
 
@@ -1457,8 +1516,6 @@ elif selected_menu == MENU_LIST[7]:
 # ==============================================================================
 elif selected_menu == MENU_LIST[8]:
     st.subheader("🍽️ 김소장 & 청라 어니스트 아재 맛집 · 일상 · 여행 블로그 원고 생성기")
-    st.caption("네이버 블로그 지수를 높이는 지역 맛집, 여행, 운동/일상 리뷰 원고와 SEO 해시태그를 1클릭으로 완성합니다.")
-
     b1, b2, b3 = st.columns(3)
     with b1:
         blog_nick = st.selectbox("블로그 페르소나 선택", ["김소장 (친근하고 믿음직한 동네 부동산 소장님)", "청라 어니스트 아재 (솔직담백 내돈내산 리뷰어)"])
@@ -1470,7 +1527,7 @@ elif selected_menu == MENU_LIST[8]:
         menu_point = st.text_input("주문 메뉴 / 핵심 경험 포인트 *", placeholder="예: 묵은지 감자탕 대자, 고기가 잡내 없이 부드러움")
         honest_rate = st.select_slider("솔직 만족도 총평", options=["⭐⭐⭐ 무난함", "⭐⭐⭐⭐ 맛집인정", "⭐⭐⭐⭐⭐ 인생맛집/강력추천"], value="⭐⭐⭐⭐⭐ 인생맛집/강력추천")
 
-    extra_memo = st.text_area("추가로 넣고 싶은 에피소드 (선택)", height=70, placeholder="예: 현장 임장 마치고 저녁에 방문했는데 사장님도 친절하시고 볶음밥이 진짜 별미였음")
+    extra_memo = st.text_area("추가로 넣고 싶은 에피소드 (선택)", height=70)
 
     if st.button("✍️ 네이버 상위노출용 블로그 포스팅 원고 즉시 생성", type="primary", use_container_width=True):
         p_name = place_name.strip() if place_name.strip() else "인천 서구 숨은 핫플레이스"
@@ -1492,16 +1549,10 @@ elif selected_menu == MENU_LIST[8]:
 • 솔직 평점 : {honest_rate}
 ---
 
-💡 [방문 배경 및 첫인상]
-평소 근처를 지날 때마다 눈여겨보던 곳이었는데, 드디어 시간을 내어 다녀왔습니다.
-매장 분위기나 첫인상이 깔끔해서 함께 간 일행 모두 시작부터 만족도가 높았습니다.
-
 🍽️ [본격 메뉴 & 경험 디테일 리뷰]
 이번에 경험한 핵심 포인트는 바로 **{menu_txt}**입니다!
 기대했던 것 이상으로 퀄리티가 훌륭했고, 기본에 충실하면서도 디테일이 살아있어 마지막까지 기분 좋게 즐길 수 있었습니다.{ep_txt}
 ✅ [{nick_clean}의 총평]
 자극적이지 않으면서도 확실한 매력이 있는 곳이라 조만간 재방문 의사 100%입니다!
-인근에서 실패 없는 선택지를 찾으시는 분들께 **{p_name}** 강력 추천드립니다. 오늘도 활기차고 행복한 하루 보내세요! 🙌
-
-#{p_name.replace(' ', '')} #인천서구맛집 #청라맛집 #석남동맛집 #가좌동맛집 #내돈내산솔직후기 #{nick_clean.replace(' ', '')} #인천핫플"""
+#{p_name.replace(' ', '')} #인천서구맛집 #청라맛집 #석남동맛집 #가좌동맛집 #내돈내산솔직후기 #{nick_clean.replace(' ', '')}"""
         st.code(blog_draft, language="markdown")
