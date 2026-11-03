@@ -6,194 +6,203 @@
     <title>우리부동산 | 인천 서구 공장·창고·산업용지 전문 중개플랫폼</title>
     <style>
         :root {
-            --primary: #0f172a;
-            --secondary: #1e293b;
-            --accent: #1d4ed8;
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --accent: #2563eb;
             --accent-light: #eff6ff;
+            --accent-border: #bfdbfe;
+            --warm-bg: #faf8f5;
+            --soft-ivory: #fffdf9;
             --gold: #f59e0b;
-            --danger: #dc2626;
+            --gold-light: #fef3c7;
+            --danger: #e11d48;
             --success: #059669;
-            --bg: #f1f5f9;
             --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-sub: #475569;
-            --border: #cbd5e1;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --border: #e2e8f0;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
-        body { background-color: var(--bg); color: var(--text-main); line-height: 1.5; padding-bottom: 95px; scroll-behavior: smooth; }
+        body { background-color: var(--warm-bg); color: var(--text-main); line-height: 1.55; padding-bottom: 95px; scroll-behavior: smooth; }
 
-        /* 상단 헤더 */
-        header { background: var(--primary); color: white; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        /* 1. 밝고 화사한 상단 헤더 */
+        header { background: rgba(255, 255, 255, 0.96); color: var(--text-main); position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 15px rgba(30, 64, 175, 0.06); border-bottom: 1px solid var(--border); backdrop-filter: blur(8px); }
         .header-inner { max-width: 1320px; margin: 0 auto; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .logo-group { display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; cursor: pointer; }
-        .logo-badge { background: var(--gold); color: var(--primary); font-weight: 900; padding: 5px 10px; border-radius: 6px; font-size: 13px; }
-        .logo-title { font-size: 23px; font-weight: 900; letter-spacing: -0.5px; color: #ffffff; }
-        .logo-sub { font-size: 12px; color: #94a3b8; display: block; font-weight: 500; }
+        .logo-group { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text-main); cursor: pointer; }
+        .logo-badge { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; font-weight: 900; padding: 6px 12px; border-radius: 8px; font-size: 13px; box-shadow: 0 3px 8px rgba(37, 99, 235, 0.25); }
+        .logo-title { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; color: var(--primary-dark); }
+        .logo-sub { font-size: 12px; color: var(--text-sub); display: block; font-weight: 600; }
         
         .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .sync-indicator { background: rgba(16, 185, 129, 0.18); border: 1px solid #10b981; color: #6ee7b7; padding: 7px 12px; border-radius: 6px; font-size: 12.5px; font-weight: 800; cursor: pointer; }
-        .btn-admin-toggle { background: #334155; color: #e2e8f0; border: 1px solid #475569; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; }
-        .btn-admin-toggle.active { background: var(--danger); color: white; border-color: #f87171; animation: pulse 2s infinite; }
-        .btn-add-prop { background: var(--gold); color: var(--primary); border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 900; cursor: pointer; display: none; }
-        .btn-top-call { background: var(--accent); color: white; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 800; text-decoration: none; }
+        .sync-indicator { background: #ecfdf5; border: 1px solid #6ee7b7; color: #047857; padding: 7px 13px; border-radius: 20px; font-size: 12.5px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .sync-indicator:hover { background: #d1fae5; }
+        .btn-admin-toggle { background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-admin-toggle:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-admin-toggle.active { background: var(--danger); color: white; border-color: var(--danger); animation: pulse 2s infinite; }
+        .btn-add-prop { background: var(--gold); color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; display: none; box-shadow: 0 3px 10px rgba(245, 158, 11, 0.3); }
+        .btn-top-call { background: var(--accent); color: white; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 800; text-decoration: none; box-shadow: 0 3px 10px rgba(37, 99, 235, 0.22); }
 
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6); } 70% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); } }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.5); } 70% { box-shadow: 0 0 0 8px rgba(225, 29, 72, 0); } 100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); } }
 
-        /* 히어로 배너 */
+        /* 2. 밝고 신뢰감 있는 프리미엄 히어로 배너 */
         .hero { 
-            background: linear-gradient(rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.92)), 
-                        url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
-            color: white; padding: 44px 20px; text-align: center; border-bottom: 4px solid var(--gold);
+            background: linear-gradient(135deg, #f0f7ff 0%, #e0effe 50%, #fef9ee 100%);
+            color: var(--text-main); padding: 48px 20px 44px; text-align: center; border-bottom: 2px solid #dbeafe; position: relative;
         }
         .hero-inner { max-width: 980px; margin: 0 auto; }
-        .hero-tag { display: inline-block; background: rgba(245, 158, 11, 0.2); border: 1px solid var(--gold); color: #fde047; padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 800; margin-bottom: 12px; }
-        .hero h1 { font-size: 31px; font-weight: 900; margin-bottom: 10px; letter-spacing: -0.5px; }
-        .hero p { font-size: 15px; color: #cbd5e1; margin-bottom: 22px; }
-        .hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; max-width: 820px; margin: 0 auto; background: rgba(255,255,255,0.08); padding: 14px; border-radius: 12px; backdrop-filter: blur(6px); }
-        .stat-item strong { display: block; font-size: 19px; color: #fde047; font-weight: 900; }
-        .stat-item span { font-size: 12px; color: #cbd5e1; }
+        .hero-tag { display: inline-block; background: #ffffff; border: 1.5px solid #93c5fd; color: var(--accent); padding: 6px 16px; border-radius: 25px; font-size: 13.5px; font-weight: 900; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08); }
+        .hero h1 { font-size: 33px; font-weight: 900; margin-bottom: 10px; letter-spacing: -0.6px; color: #0f172a; }
+        .hero h1 span { color: var(--accent); }
+        .hero p { font-size: 15.5px; color: #475569; margin-bottom: 24px; font-weight: 600; }
+        .hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; max-width: 840px; margin: 0 auto; background: rgba(255, 255, 255, 0.9); padding: 16px; border-radius: 16px; border: 1px solid #dbeafe; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05); }
+        .stat-item strong { display: block; font-size: 18.5px; color: var(--accent); font-weight: 900; margin-bottom: 2px; }
+        .stat-item span { font-size: 12.5px; color: #64748b; font-weight: 700; }
 
-        /* 메인 카테고리 탭 (전체 / 임대 / 매매 / 신축분양 / 매물지도 / 사무소안내 / 중개의뢰) */
-        .nav-tabs { background: white; border-bottom: 2px solid #e2e8f0; position: sticky; top: 62px; z-index: 990; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+        /* 3. 메인 카테고리 탭 */
+        .nav-tabs { background: #ffffff; border-bottom: 2px solid #e2e8f0; position: sticky; top: 63px; z-index: 990; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
         .nav-inner { max-width: 1320px; margin: 0 auto; display: flex; overflow-x: auto; }
-        .tab-btn { flex: 1; min-width: 130px; padding: 15px 10px; font-size: 14.5px; font-weight: 800; color: var(--text-sub); background: none; border: none; border-bottom: 4px solid transparent; cursor: pointer; transition: 0.2s; white-space: nowrap; text-align: center; text-decoration: none; }
+        .tab-btn { flex: 1; min-width: 135px; padding: 15px 10px; font-size: 14.5px; font-weight: 800; color: var(--text-sub); background: none; border: none; border-bottom: 3.5px solid transparent; cursor: pointer; transition: 0.2s; white-space: nowrap; text-align: center; text-decoration: none; }
         .tab-btn:hover { color: var(--accent); background: #f8fafc; }
-        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--accent-light); }
+        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--accent-light); font-weight: 900; }
 
-        .container { max-width: 1320px; margin: 24px auto; padding: 0 20px; }
+        .container { max-width: 1320px; margin: 26px auto; padding: 0 20px; }
         .tab-pane { display: none; }
         .tab-pane.active { display: block; }
 
-        /* 고도화 1: 최상단 평수대별 대형 시각 카드 & 핵심설비 원클릭 바 */
+        /* 4. 최상단 평수대별 5단계 화사한 카드 */
         .pyeong-hero-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
-        .pyeong-card { background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 16px 12px; text-align: center; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
-        .pyeong-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-        .pyeong-card.active { background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 6px 16px rgba(29, 78, 216, 0.28); }
-        .pyeong-card .py-title { font-size: 16px; font-weight: 900; display: block; margin-bottom: 4px; color: var(--primary); }
+        .pyeong-card { background: #ffffff; border: 2px solid #e2e8f0; border-radius: 14px; padding: 16px 12px; text-align: center; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .pyeong-card:hover { border-color: #93c5fd; transform: translateY(-3px); background: #f8fbff; }
+        .pyeong-card.active { background: linear-gradient(135deg, #2563eb, #1d4ed8); border-color: #1d4ed8; color: white; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25); }
+        .pyeong-card .py-title { font-size: 16px; font-weight: 900; display: block; margin-bottom: 4px; color: var(--text-main); }
         .pyeong-card .py-desc { font-size: 12px; color: var(--text-sub); font-weight: 600; display: block; }
         .pyeong-card.active .py-title, .pyeong-card.active .py-desc { color: white; }
 
-        .quick-bar-wrap { background: white; border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
-        .quick-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .quick-label { font-size: 13.5px; font-weight: 900; color: var(--primary); min-width: 105px; }
+        /* 5. 핵심설비 원클릭 퀵 탭 바 */
+        .quick-bar-wrap { background: #ffffff; border-radius: 14px; padding: 16px 22px; margin-bottom: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+        .quick-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .quick-label { font-size: 13.5px; font-weight: 900; color: var(--primary-dark); min-width: 110px; }
         .pill-group { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
-        .pill-btn { padding: 8px 16px; border-radius: 20px; font-size: 13.5px; font-weight: 800; border: 1px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer; transition: 0.15s; }
-        .pill-btn:hover { border-color: var(--accent); color: var(--accent); }
-        .pill-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 2px 6px rgba(29, 78, 216, 0.3); }
+        .pill-btn { padding: 8px 16px; border-radius: 25px; font-size: 13.5px; font-weight: 800; border: 1.5px solid #cbd5e1; background: #fcfdfd; color: #334155; cursor: pointer; transition: 0.15s; }
+        .pill-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+        .pill-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 3px 10px rgba(37, 99, 235, 0.25); }
 
-        /* 정밀 검색 필터 패널 */
-        .search-panel { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 24px; border: 1px solid #e2e8f0; }
+        /* 6. 정밀 검색 필터 패널 */
+        .search-panel { background: #ffffff; border-radius: 16px; padding: 22px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); margin-bottom: 26px; border: 1px solid #e2e8f0; }
         .search-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 12px; margin-bottom: 14px; }
-        .filter-item label { display: block; font-size: 12px; font-weight: 800; color: var(--text-sub); margin-bottom: 5px; }
-        .filter-item select, .filter-item input { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13.5px; font-weight: 700; color: var(--text-main); background: #f8fafc; }
-        .search-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px; }
-        .result-count { font-size: 15px; font-weight: 900; color: var(--primary); }
-        .result-count span { color: var(--danger); font-size: 18px; }
-        .btn-reset { background: #e2e8f0; color: #1e293b; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 800; cursor: pointer; }
+        .filter-item label { display: block; font-size: 12px; font-weight: 800; color: var(--text-sub); margin-bottom: 6px; }
+        .filter-item select, .filter-item input { width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13.5px; font-weight: 700; color: var(--text-main); background: #f8fafc; transition: 0.2s; }
+        .filter-item select:focus, .filter-item input:focus { border-color: var(--accent); background: #fff; outline: none; }
+        .search-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px dashed #cbd5e1; flex-wrap: wrap; gap: 10px; }
+        .result-count { font-size: 15.5px; font-weight: 900; color: var(--text-main); }
+        .result-count span { color: var(--danger); font-size: 19px; }
+        .btn-reset { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-reset:hover { background: #e2e8f0; }
 
-        /* 고도화 2: 인천 서구 권역별 매물 지도 & 산단 레이더 섹션 */
-        .zone-map-panel { background: white; border-radius: 14px; padding: 22px; margin-bottom: 26px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
-        .zone-map-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
-        .zone-map-header h3 { font-size: 18px; font-weight: 900; color: var(--primary); }
-        .zone-map-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; align-items: stretch; }
-        .zone-map-iframe { border-radius: 10px; overflow: hidden; border: 1px solid var(--border); min-height: 280px; background: #e2e8f0; }
-        .zone-btn-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .zone-card-btn { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 12px 14px; text-align: left; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between; }
-        .zone-card-btn:hover, .zone-card-btn.active { border-color: var(--accent); background: var(--accent-light); }
-        .zone-card-btn strong { font-size: 14.5px; color: var(--primary); font-weight: 900; display: flex; justify-content: space-between; align-items: center; }
-        .zone-card-btn span.z-cnt { background: var(--accent); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11.5px; }
-        .zone-card-btn small { font-size: 12px; color: var(--text-sub); margin-top: 4px; display: block; }
-
-        /* 매물 카드 그리드 */
+        /* 7. 밝고 깔끔한 매물 카드 그리드 */
         .property-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(370px, 1fr)); gap: 24px; margin-bottom: 44px; }
-        .prop-card { background: var(--card-bg); border-radius: 14px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; cursor: pointer; position: relative; }
-        .prop-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.13); border-color: #93c5fd; }
+        .prop-card { background: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1.5px solid #e2e8f0; box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04); transition: transform 0.22s, box-shadow 0.22s; display: flex; flex-direction: column; cursor: pointer; position: relative; }
+        .prop-card:hover { transform: translateY(-5px); box-shadow: 0 16px 32px rgba(37, 99, 235, 0.11); border-color: #93c5fd; }
         
         /* 썸네일 영역 */
-        .thumb-wrap { position: relative; height: 225px; background: #1e293b; overflow: hidden; }
-        .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .thumb-wrap { position: relative; height: 225px; background: #f1f5f9; overflow: hidden; }
+        .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s; }
         .prop-card:hover .thumb-wrap img { transform: scale(1.05); }
         .badge-group { position: absolute; top: 12px; left: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
-        .badge { padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 900; color: white; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
-        .badge-rent { background: var(--accent); }
-        .badge-sale { background: var(--danger); }
-        .badge-new { background: var(--success); }
-        .badge-hot { background: var(--gold); color: var(--primary); }
-        .prop-id { position: absolute; bottom: 10px; right: 10px; background: rgba(15, 23, 42, 0.88); color: white; padding: 4px 9px; border-radius: 5px; font-size: 11.5px; font-weight: 800; }
+        .badge { padding: 5px 11px; border-radius: 8px; font-size: 12px; font-weight: 900; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.18); }
+        .badge-rent { background: #2563eb; }
+        .badge-sale { background: #e11d48; }
+        .badge-new { background: #059669; }
+        .badge-hot { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+        .prop-id { position: absolute; bottom: 10px; right: 10px; background: rgba(255, 255, 255, 0.94); color: var(--primary-dark); padding: 4px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 900; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
 
         /* 거래완료 오버레이 */
-        .done-overlay { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.72); display: flex; align-items: center; justify-content: center; z-index: 5; }
-        .done-stamp { border: 3px solid #fde047; color: #fde047; padding: 8px 20px; font-size: 20px; font-weight: 900; border-radius: 8px; transform: rotate(-8deg); background: rgba(0,0,0,0.5); }
+        .done-overlay { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.78); display: flex; align-items: center; justify-content: center; z-index: 5; backdrop-filter: blur(2px); }
+        .done-stamp { border: 3px solid var(--danger); color: var(--danger); padding: 8px 20px; font-size: 20px; font-weight: 900; border-radius: 10px; transform: rotate(-6deg); background: #fff; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
 
         /* 핵심 설비 아이콘 바 */
-        .facility-strip { display: grid; grid-template-columns: repeat(3, 1fr); background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 8px 12px; text-align: center; font-size: 12px; font-weight: 800; }
-        .fac-item.ok { color: var(--accent); }
+        .facility-strip { display: grid; grid-template-columns: repeat(3, 1fr); background: #f0f7ff; border-bottom: 1px solid #dbeafe; padding: 9px 12px; text-align: center; font-size: 12px; font-weight: 800; }
+        .fac-item.ok { color: #1d4ed8; }
         .fac-item.no { color: #94a3b8; }
 
         /* 카드 본문 */
         .card-body { padding: 18px 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .prop-loc { font-size: 13px; font-weight: 800; color: var(--accent); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
-        .py-tag { background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 900; }
-        .prop-title { font-size: 17px; font-weight: 900; color: var(--text-main); margin-bottom: 8px; line-height: 1.35; }
-        .prop-price { font-size: 21px; font-weight: 900; color: var(--danger); margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px dashed #cbd5e1; }
+        .prop-loc { font-size: 13px; font-weight: 800; color: var(--accent); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .py-tag { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 2px 9px; border-radius: 6px; font-size: 12px; font-weight: 900; }
+        .prop-title { font-size: 17px; font-weight: 900; color: var(--text-main); margin-bottom: 8px; line-height: 1.38; }
+        .prop-price { font-size: 21px; font-weight: 900; color: var(--danger); margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; }
 
-        .spec-mini-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px 12px; background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
+        .spec-mini-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px 12px; background: #fafaf9; padding: 12px; border-radius: 10px; margin-bottom: 14px; border: 1px solid #e2e8f0; }
         .spec-row { font-size: 12.5px; display: flex; justify-content: space-between; }
         .spec-key { color: var(--text-sub); font-weight: 700; }
         .spec-val { color: var(--text-main); font-weight: 900; }
 
         /* 🔒 관리자 전용 비밀메모 박스 */
-        .secret-admin-box { background: #fef9c3; border: 2px solid #eab308; border-radius: 8px; padding: 12px; margin-bottom: 12px; font-size: 12.5px; color: #713f12; }
+        .secret-admin-box { background: #fefce8; border: 2px solid #facc15; border-radius: 10px; padding: 12px; margin-bottom: 12px; font-size: 12.5px; color: #713f12; }
         .secret-admin-box strong { color: #b91c1c; display: block; margin-bottom: 4px; font-size: 13px; }
         .admin-ctrl-btns { display: flex; gap: 6px; margin-top: 8px; }
-        .btn-sm-ctrl { flex: 1; padding: 6px; font-size: 11.5px; font-weight: 800; border-radius: 5px; border: 1px solid #cbd5e1; cursor: pointer; background: white; }
+        .btn-sm-ctrl { flex: 1; padding: 6px; font-size: 11.5px; font-weight: 800; border-radius: 6px; border: 1px solid #cbd5e1; cursor: pointer; background: white; }
 
         .card-footer { display: flex; gap: 8px; }
-        .btn-detail { flex: 1.2; background: var(--primary); color: white; border: none; padding: 11px 0; border-radius: 8px; font-weight: 800; font-size: 13.5px; cursor: pointer; }
-        .btn-call { flex: 1; background: var(--accent); color: white; text-decoration: none; padding: 11px 0; border-radius: 8px; font-weight: 800; font-size: 13.5px; text-align: center; }
+        .btn-detail { flex: 1.2; background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; padding: 11px 0; border-radius: 10px; font-weight: 800; font-size: 13.5px; cursor: pointer; transition: 0.2s; }
+        .btn-detail:hover { background: #e2e8f0; }
+        .btn-call { flex: 1; background: var(--accent); color: white; text-decoration: none; padding: 11px 0; border-radius: 10px; font-weight: 800; font-size: 13.5px; text-align: center; box-shadow: 0 3px 8px rgba(37, 99, 235, 0.2); }
 
-        /* 고도화 3~5: 하단 통합 섹션 (매물접수 / 사무소 위치 지도 / 부동산 소식) */
-        .bottom-portal-section { background: white; border-radius: 16px; padding: 32px; margin-bottom: 28px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.04); }
+        /* 8. 인천 서구 권역별 매물 지도 */
+        .zone-map-panel { background: #ffffff; border-radius: 18px; padding: 26px; margin-bottom: 28px; border: 1px solid #e2e8f0; box-shadow: 0 6px 20px rgba(0,0,0,0.03); }
+        .zone-map-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+        .zone-map-header h3 { font-size: 19px; font-weight: 900; color: var(--primary-dark); }
+        .zone-map-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; align-items: stretch; }
+        .zone-map-iframe { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); min-height: 290px; background: #f8fafc; }
+        .zone-btn-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .zone-card-btn { background: #fcfdfd; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 13px 15px; text-align: left; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between; }
+        .zone-card-btn:hover, .zone-card-btn.active { border-color: var(--accent); background: var(--accent-light); transform: translateY(-2px); }
+        .zone-card-btn strong { font-size: 14.5px; color: var(--text-main); font-weight: 900; display: flex; justify-content: space-between; align-items: center; }
+        .zone-card-btn span.z-cnt { background: var(--accent); color: white; padding: 2px 9px; border-radius: 12px; font-size: 11.5px; }
+        .zone-card-btn small { font-size: 12px; color: var(--text-sub); margin-top: 5px; display: block; }
+
+        /* 9. 하단 포털 섹션 (중개의뢰 / 오시는길 지도 / 부동산 소식) */
+        .bottom-portal-section { background: #ffffff; border-radius: 18px; padding: 32px; margin-bottom: 28px; border: 1px solid #e2e8f0; box-shadow: 0 6px 20px rgba(0,0,0,0.03); }
         .sec-head { margin-bottom: 22px; padding-bottom: 12px; border-bottom: 2px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px; }
-        .sec-head h2 { font-size: 22px; font-weight: 900; color: var(--primary); }
+        .sec-head h2 { font-size: 22px; font-weight: 900; color: var(--primary-dark); }
         .sec-head p { font-size: 14px; color: var(--text-sub); margin-top: 4px; }
 
         .office-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: stretch; }
         .office-map-box { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); min-height: 300px; }
-        .office-detail-card { background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; }
+        .office-detail-card { background: #f8fbff; border-radius: 12px; padding: 24px; border: 1px solid #dbeafe; display: flex; flex-direction: column; justify-content: space-between; }
         .office-table { list-style: none; margin: 12px 0; }
         .office-table li { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px dashed #cbd5e1; font-size: 14px; }
         .office-table li span { color: var(--text-sub); font-weight: 700; }
-        .office-table li strong { color: var(--primary); font-weight: 900; }
+        .office-table li strong { color: var(--text-main); font-weight: 900; }
 
         .news-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .news-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px; transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between; }
-        .news-card:hover { transform: translateY(-4px); background: white; border-color: #93c5fd; box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
-        .news-cat { display: inline-block; background: #dbeafe; color: #1e40af; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 900; margin-bottom: 10px; width: fit-content; }
-        .news-card h3 { font-size: 16.5px; font-weight: 900; color: var(--primary); margin-bottom: 8px; line-height: 1.4; }
+        .news-card { background: #fafaf9; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px; transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between; }
+        .news-card:hover { transform: translateY(-4px); background: white; border-color: #93c5fd; box-shadow: 0 10px 24px rgba(37, 99, 235, 0.08); }
+        .news-cat { display: inline-block; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 900; margin-bottom: 10px; width: fit-content; }
+        .news-card h3 { font-size: 16.5px; font-weight: 900; color: var(--text-main); margin-bottom: 8px; line-height: 1.4; }
         .news-card p { font-size: 13.5px; color: var(--text-sub); line-height: 1.6; margin-bottom: 12px; }
         .news-foot { font-size: 12px; color: #94a3b8; font-weight: 700; }
 
         /* 모달 공통 */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.78); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 16px; overflow-y: auto; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 16px; overflow-y: auto; backdrop-filter: blur(4px); }
         .modal-overlay.open { display: flex; }
-        .modal-box { background: white; width: 100%; max-width: 860px; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.35); max-height: 92vh; display: flex; flex-direction: column; }
-        .modal-header { background: var(--primary); color: white; padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; }
+        .modal-box { background: white; width: 100%; max-width: 860px; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.25); max-height: 92vh; display: flex; flex-direction: column; }
+        .modal-header { background: linear-gradient(135deg, #1e40af, #2563eb); color: white; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; }
         .modal-header h3 { font-size: 18px; font-weight: 900; }
         .btn-close { background: none; border: none; color: white; font-size: 26px; cursor: pointer; line-height: 1; }
         .modal-body { padding: 24px; overflow-y: auto; }
 
-        .modal-img-main { width: 100%; height: 380px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--border); }
+        .modal-img-main { width: 100%; height: 380px; object-fit: cover; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border); }
         .thumb-strip { display: flex; gap: 8px; margin-bottom: 18px; overflow-x: auto; }
         .thumb-strip img { width: 80px; height: 60px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 2px solid transparent; }
         .thumb-strip img.active { border-color: var(--accent); }
 
         .spec-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; }
         .spec-table th, .spec-table td { border: 1px solid #cbd5e1; padding: 11px 14px; text-align: left; }
-        .spec-table th { background: #f1f5f9; color: var(--text-sub); font-weight: 800; width: 20%; }
+        .spec-table th { background: #f0f7ff; color: var(--primary-dark); font-weight: 800; width: 20%; }
         .spec-table td { font-weight: 800; color: var(--text-main); width: 30%; }
-        .detail-desc { background: #f8fafc; padding: 18px; border-radius: 10px; border-left: 4px solid var(--accent); font-size: 14.5px; line-height: 1.75; margin-bottom: 20px; white-space: pre-line; }
+        .detail-desc { background: #f8fafc; padding: 18px; border-radius: 12px; border-left: 4px solid var(--accent); font-size: 14.5px; line-height: 1.75; margin-bottom: 20px; white-space: pre-line; }
 
         /* 등록 폼 스타일 */
         .form-section-title { font-size: 15px; font-weight: 900; color: var(--accent); margin: 16px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; }
@@ -201,21 +210,21 @@
         .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .form-full { grid-column: span 2; }
         .form-group label { display: block; font-size: 12.5px; font-weight: 800; margin-bottom: 5px; color: var(--text-main); }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13.5px; font-weight: 600; }
-        .btn-save { width: 100%; background: var(--accent); color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 900; cursor: pointer; margin-top: 14px; }
-        .btn-export { width: 100%; background: var(--success); color: white; border: none; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 900; cursor: pointer; margin-top: 10px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 13.5px; font-weight: 600; background: #fcfdfd; }
+        .btn-save { width: 100%; background: var(--accent); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: 900; cursor: pointer; margin-top: 14px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); }
+        .btn-export { width: 100%; background: var(--success); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 900; cursor: pointer; margin-top: 10px; }
 
-        /* 하단 플로팅 바 */
-        .floating-footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); color: white; padding: 12px 20px; z-index: 1000; border-top: 2px solid var(--gold); }
+        /* 밝고 세련된 하단 플로팅 바 */
+        .floating-footer { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.96); color: var(--text-main); padding: 12px 20px; z-index: 1000; border-top: 2px solid #bfdbfe; box-shadow: 0 -4px 15px rgba(0,0,0,0.06); backdrop-filter: blur(8px); }
         .floating-inner { max-width: 1320px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-        .broker-info { font-size: 13.5px; }
-        .broker-info strong { color: #fde047; }
+        .broker-info { font-size: 13.5px; font-weight: 700; color: #334155; }
+        .broker-info strong { color: var(--primary-dark); font-weight: 900; }
         .floating-btns { display: flex; gap: 8px; }
-        .f-btn-tel { background: var(--accent); color: white; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 14px; }
-        .f-btn-sms { background: var(--gold); color: var(--primary); padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 14px; }
+        .f-btn-tel { background: var(--accent); color: white; padding: 10px 18px; border-radius: 10px; text-decoration: none; font-weight: 800; font-size: 14px; }
+        .f-btn-sms { background: var(--gold); color: #fff; padding: 10px 18px; border-radius: 10px; text-decoration: none; font-weight: 900; font-size: 14px; }
 
         @media (max-width: 860px) {
-            .hero h1 { font-size: 22px; }
+            .hero h1 { font-size: 23px; }
             .hero-stats { grid-template-columns: repeat(2, 1fr); }
             .pyeong-hero-grid { grid-template-columns: repeat(2, 1fr); }
             .zone-map-grid { grid-template-columns: 1fr; }
@@ -252,14 +261,14 @@
         </div>
     </header>
 
-    <!-- 히어로 배너 -->
+    <!-- 밝고 화사한 히어로 배너 -->
     <section class="hero">
         <div class="hero-inner">
             <span class="hero-tag">✔ 김태형 대표 공인중개사 100% 현장 실사 브리핑</span>
-            <h1>인천 서구 공장·창고·신축분양 전문 플랫폼</h1>
+            <h1>인천 서구 <span>공장·창고·신축분양</span> 전문 플랫폼</h1>
             <p>츄레라(40ft) 진입 여부 · 호이스트 톤수 · 계약전력(kW) · 용도지역까지 완벽하게 검증된 실매물만 제공합니다</p>
             <div class="hero-stats">
-                <div class="stat-item"><strong>평수별 세분화</strong><span>소형~250평 이상 대형</span></div>
+                <div class="stat-item"><strong>평수별 맞춤분류</strong><span>소형~250평 이상 대형</span></div>
                 <div class="stat-item"><strong>츄레라·호이스트</strong><span>진입차량·설비 즉시필터</span></div>
                 <div class="stat-item"><strong>권역별 매물지도</strong><span>석남·가좌·원창·검단산단</span></div>
                 <div class="stat-item"><strong>010-2660-8276</strong><span>대표 1:1 직통상담</span></div>
@@ -274,9 +283,9 @@
             <button class="tab-btn" id="tab-임대" onclick="setDealTab('임대')">🔑 공장·창고 임대(월세)</button>
             <button class="tab-btn" id="tab-매매" onclick="setDealTab('매매')">🏛️ 공장·창고 매매</button>
             <button class="tab-btn" id="tab-분양" onclick="setDealTab('분양')">🏗️ 신축공장 특별분양</button>
-            <a class="tab-btn" href="#zone-map-section" onclick="ensureListPane()">🗺️ 권역별 매물지도</a>
-            <a class="tab-btn" href="#request-bottom-section" onclick="ensureListPane()">📝 매물 구해요/내놓아요</a>
-            <a class="tab-btn" href="#office-location-section" onclick="ensureListPane()">📍 사무소 위치·소식</a>
+            <a class="tab-btn" href="#zone-map-section">🗺️ 권역별 매물지도</a>
+            <a class="tab-btn" href="#request-bottom-section">📝 매물 구해요/내놓아요</a>
+            <a class="tab-btn" href="#office-location-section">📍 사무소 위치·소식</a>
         </div>
     </nav>
 
@@ -284,7 +293,7 @@
     <main class="container">
         <section id="pane-list" class="tab-pane active">
             
-            <!-- 고도화 1: 최상단 평수대별 대형 분류 카드 (소형 / 중형 / 준대형 / 대형) -->
+            <!-- 최상단 평수대별 5단계 대형 카드 -->
             <div class="pyeong-hero-grid" id="area-cards-top">
                 <div class="pyeong-card active" onclick="setAreaPill('ALL', this)">
                     <span class="py-title">🏢 전체 평수보기</span>
@@ -386,7 +395,7 @@
             <!-- 매물 카드 리스트 -->
             <div id="property-list" class="property-grid"></div>
 
-            <!-- 고도화 2: 인천 서구 권역별 매물 지도 (클릭 시 지도 이동 + 해당 동 매물 즉시 필터링) -->
+            <!-- 인천 서구 권역별 매물 지도 -->
             <div class="zone-map-panel" id="zone-map-section">
                 <div class="zone-map-header">
                     <div>
@@ -428,7 +437,7 @@
                 </div>
             </div>
 
-            <!-- 고도화 3: 메인 화면 하단 상시 노출형 [📝 매물 구해요 / 내놓아요 (중개의뢰 접수)] -->
+            <!-- 1:1 맞춤 중개의뢰 접수 섹션 -->
             <div class="bottom-portal-section" id="request-bottom-section">
                 <div class="sec-head">
                     <div>
@@ -467,7 +476,7 @@
                 </form>
             </div>
 
-            <!-- 고도화 4: 우리부동산 사무소 위치(실제 지도) & 오시는 길 -->
+            <!-- 우리부동산 사무소 위치(실제 지도) & 오시는 길 -->
             <div class="bottom-portal-section" id="office-location-section">
                 <div class="sec-head">
                     <div>
@@ -481,7 +490,7 @@
                     </div>
                     <div class="office-detail-card">
                         <div>
-                            <h3 style="font-size:19px; font-weight:900; color:var(--primary); margin-bottom:6px;">🏭 우리부동산공인중개사사무소</h3>
+                            <h3 style="font-size:19px; font-weight:900; color:var(--primary-dark); margin-bottom:6px;">🏭 우리부동산공인중개사사무소</h3>
                             <p style="font-size:13.5px; color:var(--text-sub); margin-bottom:14px;">공장 · 창고 · 지식산업센터 · 산업용지 전문 책임중개</p>
                             <ul class="office-table">
                                 <li><span>대표 공인중개사</span><strong>김태형</strong></li>
@@ -500,7 +509,7 @@
                 </div>
             </div>
 
-            <!-- 고도화 5: 인천 서구 공업지역 부동산 소식 & 산단 브리핑 -->
+            <!-- 인천 서구 공업지역 부동산 소식 & 산단 브리핑 -->
             <div class="bottom-portal-section" id="realestate-news-section">
                 <div class="sec-head">
                     <div>
@@ -550,7 +559,7 @@
         </div>
     </div>
 
-    <!-- 매물 등록 / 수정 모달 (관리자 전용) -->
+    <!-- 매물 등록 / 수정 모달 (관리자 전용: 563011) -->
     <div id="admin-modal" class="modal-overlay" onclick="closeModalOnBg(event, 'admin-modal')">
         <div class="modal-box">
             <div class="modal-header">
@@ -602,7 +611,7 @@
                         </div>
                         <div class="form-group">
                             <label>📐 전용평수 (숫자만 입력 -> 자동 평수분류)</label>
-                            <input type="number" id="add-area" placeholder="예: 180 (150~250평으로 자동분류됨)" required>
+                            <input type="number" id="add-area" placeholder="예: 180" required>
                         </div>
                         <div class="form-group">
                             <label>대지면적 / 건물면적 상세 표기</label>
@@ -621,7 +630,7 @@
                         </div>
                         <div class="form-group">
                             <label>진입도로 상세 설명</label>
-                            <input type="text" id="add-road" placeholder="예: 40ft 츄레라 마당 회전 가능" value="40ft 츄레라 진입 수월" required>
+                            <input type="text" id="add-road" value="40ft 츄레라 진입 수월" required>
                         </div>
                         <div class="form-group">
                             <label>🏗️ 호이스트 유무 선택</label>
@@ -632,15 +641,15 @@
                         </div>
                         <div class="form-group">
                             <label>호이스트 톤수 및 대수 표기</label>
-                            <input type="text" id="add-hoist" placeholder="예: 5톤 2기 (없으면 '없음')" value="5톤 1기" required>
+                            <input type="text" id="add-hoist" value="5톤 1기" required>
                         </div>
                         <div class="form-group">
                             <label>⚡ 계약전력 (숫자만 입력, kW)</label>
-                            <input type="number" id="add-power-num" placeholder="예: 100" value="75" required>
+                            <input type="number" id="add-power-num" value="75" required>
                         </div>
                         <div class="form-group">
                             <label>건축물 층고 (처마 높이)</label>
-                            <input type="text" id="add-height" placeholder="예: 9.5m" value="8.5m" required>
+                            <input type="text" id="add-height" value="8.5m" required>
                         </div>
                         <div class="form-group form-full">
                             <label>📸 공장 현장 사진 선택 (여러 장 동시 선택 가능)</label>
@@ -953,7 +962,6 @@
             }
         };
 
-        // 권역별 매물 카운트 업데이트 및 지도 연동
         function updateZoneCounts() {
             const counts = { "석남동": 0, "가좌동": 0, "원창동": 0, "경서동": 0, "오류동": 0, "기타": 0 };
             properties.forEach(p => {
@@ -993,11 +1001,6 @@
             renderProperties();
         }
 
-        function ensureListPane() {
-            document.getElementById('pane-list').classList.add('active');
-        }
-
-        // 평수 구간 라벨 반환
         function getAreaCategoryLabel(py) {
             if (py <= 70) return "70평 이하";
             if (py <= 150) return "70~150평";
@@ -1005,11 +1008,11 @@
             return "250평 이상 대형";
         }
 
-        // 관리자 모드 ON/OFF (비밀번호 8276)
+        // 🔒 관리자 모드 ON/OFF (보안 비밀번호: 563011)
         function toggleAdminMode() {
             if (!isAdmin) {
-                const pw = prompt("관리자 비밀번호를 입력하세요 (기본값: 8276)");
-                if (pw !== "8276") {
+                const pw = prompt("관리자 보안 비밀번호를 입력하세요:");
+                if (pw !== "563011") {
                     if (pw !== null) alert("비밀번호가 일치하지 않습니다.");
                     return;
                 }
@@ -1020,7 +1023,7 @@
             const btn = document.getElementById('btn-admin-mode');
             const addBtn = document.getElementById('btn-open-add');
             if (isAdmin) {
-                btn.innerText = "🔓 관리자모드 ON (비밀메모 노출중)";
+                btn.innerText = "🔓 관리자모드 ON (비밀장부 노출)";
                 btn.classList.add('active');
                 addBtn.style.display = 'inline-block';
             } else {
@@ -1032,7 +1035,6 @@
             renderProperties();
         }
 
-        // 상단 메인 탭 전환 (임대/매매/분양 분리)
         function setDealTab(dealType) {
             document.getElementById('pane-list').classList.add('active');
             document.querySelectorAll('.nav-tabs .tab-btn').forEach(b => b.classList.remove('active'));
@@ -1051,7 +1053,6 @@
             renderProperties();
         }
 
-        // 평수 대형 카드 클릭 연동
         function setAreaPill(areaCode, cardEl) {
             document.querySelectorAll('#area-cards-top .pyeong-card').forEach(b => b.classList.remove('active'));
             if (cardEl) cardEl.classList.add('active');
@@ -1068,7 +1069,6 @@
             renderProperties();
         }
 
-        // 츄레라 / 호이스트 / 전력 퀵 토글
         function toggleQuickTrailer() {
             const sel = document.getElementById('f-trailer');
             const btn = document.getElementById('q-trailer');
@@ -1196,7 +1196,7 @@
             document.getElementById('prop-count').innerText = cardsHtml.length;
             document.getElementById('property-list').innerHTML = cardsHtml.length > 0 
                 ? cardsHtml.join('') 
-                : `<div style="grid-column: 1/-1; text-align:center; padding: 60px 20px; background:white; border-radius:12px;">
+                : `<div style="grid-column: 1/-1; text-align:center; padding: 60px 20px; background:white; border-radius:16px; border:1px solid #e2e8f0;">
                     <h3 style="margin-bottom:8px;">조건에 맞는 매물이 없습니다.</h3>
                     <p style="color:#64748b; margin-bottom:16px;">비공개 매물이 다수 확보되어 있으니 직통전화로 문의주시면 즉시 매칭해 드립니다.</p>
                     <button class="btn-reset" onclick="resetFilters()">전체 매물 다시보기</button>
@@ -1263,7 +1263,7 @@
 
                 <div style="display:flex; gap:10px; flex-wrap:wrap;">
                     <a href="tel:010-2660-8276" class="btn-save" style="flex:1; text-decoration:none; text-align:center; margin-top:0;">📞 010-2660-8276 직통 전화상담</a>
-                    <a href="sms:010-2660-8276?body=[우리부동산] 매물번호 ${p.id} (${p.region} ${p.areaNum}평 ${p.deal}) 상세 문의드립니다." class="btn-export" style="flex:1; text-decoration:none; text-align:center; margin-top:0; background:var(--gold); color:var(--primary);">💬 이 매물번호로 문자 문의</a>
+                    <a href="sms:010-2660-8276?body=[우리부동산] 매물번호 ${p.id} (${p.region} ${p.areaNum}평 ${p.deal}) 상세 문의드립니다." class="btn-export" style="flex:1; text-decoration:none; text-align:center; margin-top:0; background:var(--gold); color:#fff;">💬 이 매물번호로 문자 문의</a>
                 </div>
             `;
             document.getElementById('detail-modal').classList.add('open');
@@ -1416,7 +1416,6 @@
             window.location.href = `sms:010-2660-8276?body=${body}`;
         }
 
-        // 초기 실행: 기본 매물 렌더링 후 구글 스프레드시트 실시간 데이터 즉시 결합
         updateZoneCounts();
         renderProperties();
         syncFromGoogleSheet();

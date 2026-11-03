@@ -5,6 +5,7 @@ import re
 import json
 import os
 import base64
+import urllib.parse
 from io import BytesIO
 
 try:
@@ -21,10 +22,10 @@ except ImportError:
     PIL_AVAILABLE = False
 
 # ==========================================
-# 0. 페이지 기본 설정 및 프로페셔널 UI 스타일링
+# 0. 페이지 기본 설정 및 프로페셔널 UI 스타일링 (Agent B)
 # ==========================================
 st.set_page_config(
-    page_title="우리부동산 통합업무시스템 Pro",
+    page_title="우리부동산 통합업무시스템 Pro (본업 CRM)",
     page_icon="🏭",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -73,6 +74,13 @@ st.markdown("""
         margin-top: 1rem;
         margin-bottom: 1rem;
     }
+    .parser-box {
+        background-color: #f8fafc;
+        border: 2px dashed #3b82f6;
+        border-radius: 12px;
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 1.2rem;
+    }
     .kpi-card {
         background-color: #ffffff;
         border: 1px solid #cbd5e1;
@@ -117,8 +125,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 1. 상수 및 표준 컬럼 규격 정의
+# 1. 상수 및 표준 컬럼 규격 정의 (Agent A)
 # ==========================================
+ADMIN_PW = "563011"
 SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/1oTTZ1ok-quer9_NR5v5hEFYpRiOrR8tAwwo7UPnwRco/edit"
 
 PROP_COLUMNS = [
@@ -154,20 +163,17 @@ CUST_STATUS_OPTIONS = [
 
 MENU_LIST = [
     "👥 1. 손님 리마인드 & 매칭 영업소",
-    "➕ 2. 새 매물 등록 (+손님 자동 역매칭)",
+    "➕ 2. 새 매물 등록 (+대장파서 & 자동역매칭)",
     "📋 3. 전체 매물 통합장부 & 홈페이지 관리",
     "💬 4. 카톡 멀티 브리핑 & 블로그 원고",
     "🎯 5. 현장 임장 / 물건따기 (복붙 파서)",
-    "⚖️ 6. 인천공장 & 수도권아파트 경매 분석",
-    "📅 7. 수도권 아파트 & 산단 청약 캘린더",
-    "🏗️ 8. 신축공장분양 대출/취득세 계산기",
-    "🍽️ 9. 김소장 맛집·일상·여행 블로그"
+    "🏗️ 6. 신축공장분양 대출/취득세 계산기"
 ]
 
 LOCAL_CACHE_FILE = "local_backup_cache.json"
 
 # ==========================================
-# 2. 레거시 뒤틀린 행 자동 복구 + 초고속 인메모리 엔진
+# 2. 레거시 뒤틀린 행 자동 복구 + 초고속 인메모리 엔진 (Agent A)
 # ==========================================
 def repair_legacy_prop_rows(raw_rows):
     """구글 시트에 옛날 컬럼 순서로 밀려 들어간 행(W-103 등)을 감지하여 26개 표준 컬럼으로 자동 교정합니다."""
@@ -428,7 +434,7 @@ def compress_image_to_base64(uploaded_file):
         return ""
 
 # ==========================================
-# 3. 스마트 매칭 점수 산출 및 리마인드 날짜 판별 엔진
+# 3. 스마트 매칭 점수 산출 · 리마인드 판별 · 건축물대장 파서 엔진 (Agent C)
 # ==========================================
 def parse_num(val, default=0.0):
     try:
@@ -436,6 +442,76 @@ def parse_num(val, default=0.0):
         return float(m.group(0)) if m else default
     except Exception:
         return default
+
+def parse_building_ledger_text(raw_text):
+    """정부24 건축물대장 및 토지이용계획 확인원 복사 원문에서 핵심 스펙을 자동 추출합니다."""
+    res = {
+        "region": "석남동",
+        "jibun": "",
+        "zone": "일반공업지역 / 일반철골조",
+        "main_use": "일반제조업, 금속가공, 물류창고",
+        "area_py": 60.0,
+        "office_py": 0.0,
+        "approval_date": "",
+        "violation": "🟢 정상 (위반건축물 표기 없음)",
+        "jimok": "장(공장용지)"
+    }
+    if not raw_text or not raw_text.strip():
+        return res
+
+    txt = raw_text.strip()
+    for rg in REGIONS:
+        if rg[:2] in txt:
+            res["region"] = rg
+            break
+
+    jibun_m = re.search(r"(석남동|가좌동|원창동|경서동|도화동|송림동|송현동|오류동)\s*(?:산\s*)?(\d{1,4}(?:-\d{1,4})?)", txt)
+    if jibun_m:
+        res["jibun"] = f"{jibun_m.group(1)} {jibun_m.group(2)}"
+    else:
+        num_m = re.search(r"(\d{1,4}-\d{1,4}|\d{1,4}\s*번지)", txt)
+        if num_m:
+            res["jibun"] = f"{res['region']} {num_m.group(1)}"
+
+    zone_found = next((z for z in ["전용공업지역", "일반공업지역", "준공업지역", "계획관리지역", "자연녹지지역", "일반상업지역"] if z in txt), "일반공업지역")
+    struct_found = next((s for s in ["일반철골조", "철골철근콘크리트구조", "철근콘크리트구조", "경량철골조", "벽돌구조"] if s in txt), "일반철골조")
+    res["zone"] = f"{zone_found} / {struct_found}"
+
+    if "위반건축물" in txt or ("위반" in txt and "해당없음" not in txt and "없음" not in txt):
+        res["violation"] = "🚨 [경고] 위반건축물 표기 감지됨! (대장 원문 필히 확인)"
+
+    if "창고시설" in txt or "창고" in txt:
+        res["main_use"] = "창고시설 (물류·보관·유통)"
+    elif "제2종근린생활시설" in txt or "제조업소" in txt:
+        res["main_use"] = "제2종근린생활시설 (제조업소·공방)"
+    elif "공장" in txt:
+        res["main_use"] = "공장 (일반제조·정밀가공·사출)"
+
+    if "공장용지" in txt or "지목: 장" in txt or "지목 장" in txt:
+        res["jimok"] = "장(공장용지)"
+    elif "창고용지" in txt:
+        res["jimok"] = "창(창고용지)"
+    elif "대지" in txt or "지목 대" in txt:
+        res["jimok"] = "대"
+
+    m2_list = re.findall(r"(\d{2,5}(?:\.\d{1,2})?)\s*(?:㎡|m2|제곱미터)", txt)
+    if m2_list:
+        res["area_py"] = round(float(m2_list[0]) * 0.3025, 1)
+        if len(m2_list) > 1:
+            res["office_py"] = round(float(m2_list[1]) * 0.3025, 1)
+    else:
+        py_m = re.search(r"(\d{2,4}(?:\.\d+)?)\s*평", txt)
+        if py_m:
+            res["area_py"] = float(py_m.group(1))
+
+    date_m = re.search(r"((?:19|20)\d{2}[\.\-\년]\s*\d{1,2}[\.\-\월]\s*\d{1,2})", txt)
+    if date_m:
+        res["approval_date"] = date_m.group(1).strip()
+
+    return res
+
+if "ledger_parsed_data" not in st.session_state:
+    st.session_state.ledger_parsed_data = parse_building_ledger_text("")
 
 def calculate_match_score(prop_row, cust_row):
     score = 0
@@ -516,14 +592,19 @@ if not df_c_global.empty:
             due_customers.append(r)
 
 # ==========================================
-# 4. 왼쪽 사이드바: 9대 업무 전용 메뉴 + 시트 원클릭 복구 버튼 + 콜백 알림판
+# 4. 왼쪽 사이드바: 보안잠금 + 6대 본업 메뉴 + 시트 원클릭 복구 + 콜백 알림판
 # ==========================================
 with st.sidebar:
-    st.markdown("## 🏭 우리부동산 Pro")
-    st.caption("인천 서구 공장·창고 통합업무시스템")
+    st.markdown("## 🏭 우리부동산 Pro (본업 CRM)")
+    st.caption("인천 서구 공장·창고 전문 통합업무시스템")
+
+    auth_pw = st.text_input("🔒 관리자 보안 비밀번호", type="password", value=ADMIN_PW)
+    if auth_pw != ADMIN_PW:
+        st.error("보안 비밀번호(563011)를 입력해 주세요.")
+        st.stop()
 
     selected_menu = st.radio(
-        "📌 업무 메뉴 바로가기 (클릭 시 즉시 전환)",
+        "📌 본업 업무 메뉴 바로가기 (클릭 시 즉시 전환)",
         MENU_LIST,
         index=0
     )
@@ -623,7 +704,7 @@ if selected_menu == MENU_LIST[0]:
                 🚨 [오늘의 콜백 리마인드 알림] 지금 안부 전화 및 매물 브리핑을 해야 할 손님이 총 <u>{len(due_customers)}명</u> 있습니다!
             </div>
             <div style="font-size:0.92rem; color:#7f1d1d;">
-                • 우선 연락 대상: <b>{due_names}</b> ➔ 아래 <b>[🎯 손님 1:1 맞춤 매물 자동 매칭]</b>에서 손님을 선택하고 1클릭으로 카톡 브리핑을 보내보세요!
+                • 우선 연락 대상: <b>{due_names}</b> ➔ 아래 <b>[🎯 손님 1:1 맞춤 매물 자동 매칭]</b>에서 손님을 선택하고 1클릭으로 카톡/문자 브리핑을 보내보세요!
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -758,7 +839,7 @@ if selected_menu == MENU_LIST[0]:
 
     st.divider()
 
-    st.markdown("### 🎯 손님 1:1 맞춤 매물 자동 매칭 & 원클릭 리마인드 카톡 발송")
+    st.markdown("### 🎯 손님 1:1 맞춤 매물 자동 매칭 & 원클릭 리마인드 카톡/문자 발송")
     if df_custs.empty:
         st.info("위에서 손님을 1명 이상 등록하시면 보유 매물과의 자동 매칭이 시작됩니다.")
     else:
@@ -831,20 +912,44 @@ if selected_menu == MENU_LIST[0]:
                     kakao_msg.append(f"■ 추천 #{i}. [{mr['권역']} {mr['해당층수']}] {mr['매물제목']}")
                     kakao_msg.append(f" • 면적/금액 : 전용 {mr['전용평수']}평 / {mr['가격설명']}")
                     kakao_msg.append(f" • 설비/도로 : 전력 {mr['전력']} / 호이스트 {mr['호이스트']} / {mr['도로조건']}\n")
+                kakao_msg.append("👉 실시간 전체 매물 보기: https://threven.github.io/my-realestate-app/")
                 kakao_msg.append("시간 괜찮으실 때 연락 주시면 현장 바로 안내해 드리겠습니다. 오늘도 좋은 하루 보내세요!")
                 kakao_msg.append("📞 우리부동산 김태형 대표 직통: 010-2660-8276 / 사무실: 032-582-6200")
 
+                full_kakao_str = "\n".join(kakao_msg)
                 st.markdown("##### 💬 손님에게 바로 보낼 맞춤형 안부 & 매물 추천 카톡 (우측 상단 복사 아이콘 클릭)")
-                st.code("\n".join(kakao_msg), language="markdown")
+                st.code(full_kakao_str, language="markdown")
+                sms_url = f"sms:{sel_c_row['연락처']}?body={urllib.parse.quote(full_kakao_str)}"
+                st.markdown(f'<a href="{sms_url}" style="display:inline-block; background:#2563eb; color:white; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:800;">📱 {sel_c_row["고객명"]}님께 문자(SMS) 앱으로 즉시 발송하기</a>', unsafe_allow_html=True)
             else:
                 st.warning("현재 보유 매물 중 45점 이상 일치하는 매물이 없습니다.")
 
 
 # ==============================================================================
-# [사이드 메뉴 2] ➕ 새 매물 등록 (+ 등록 즉시 대기손님 자동 역매칭)
+# [사이드 메뉴 2] ➕ 새 매물 등록 (+ 정부24 건축물대장 파서 & 대기손님 자동 역매칭)
 # ==============================================================================
 elif selected_menu == MENU_LIST[1]:
-    st.subheader("➕ 신규 공장 · 창고 · 신축공장분양 매물 등록")
+    st.subheader("📑 [STEP 1] 정부24 건축물대장 · 토지이용계획 확인원 원문 스마트 파서")
+    st.caption("정부24, 세움터, 토지이음에서 복사한 원문 텍스트를 붙여넣고 분석 버튼을 누르면 아래 [STEP 2] 매물 등록 폼에 권역·지번·전용평수·용도지역·사용승인일·위반건축물 여부가 자동으로 입력됩니다.")
+
+    st.markdown('<div class="parser-box">', unsafe_allow_html=True)
+    raw_ledger_input = st.text_area(
+        "📋 건축물대장 / 토지이용계획 확인원 텍스트 붙여넣기",
+        height=105,
+        placeholder="예: 대지위치 인천광역시 서구 석남동 223-12 / 지목 공장용지 / 지역지구 일반공업지역 / 주구조 일반철골조 / 주용도 공장 / 연면적 495.86㎡ / 사용승인일 2018-05-20 / 위반건축물 없음"
+    )
+    if st.button("🔍 대장 원문 1초 정밀 분석 및 아래 등록 폼에 자동 채우기", type="primary", use_container_width=True):
+        parsed = parse_building_ledger_text(raw_ledger_input)
+        st.session_state.ledger_parsed_data = parsed
+        if "경고" in parsed["violation"]:
+            st.error(f"{parsed['violation']} | 추출지번: {parsed['jibun']} | 환산평수: 약 {parsed['area_py']}평")
+        else:
+            st.success(f"✅ 자동 채우기 완료! 소재지: {parsed['jibun'] or parsed['region']} | 지목: {parsed['jimok']} | 용도/구조: {parsed['zone']} | 전용: 약 {parsed['area_py']}평 | {parsed['violation']}")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    lp_data = st.session_state.ledger_parsed_data
+
+    st.subheader("➕ [STEP 2] 신규 공장 · 창고 · 신축공장분양 매물 등록")
     st.caption("새 매물을 등록하면 구글 시트(properties)와 손님용 홈페이지(index.html)에 실시간 반영되며, 이 조건을 기다리던 손님이 즉시 아래에 추천됩니다.")
 
     c_top1, c_top2, c_top3, c_top4 = st.columns(4)
@@ -854,7 +959,8 @@ elif selected_menu == MENU_LIST[1]:
     with c_top2:
         p_deal = st.selectbox("거래구분 *", DEAL_TYPES)
     with c_top3:
-        p_region = st.selectbox("소재지 (주력 권역) *", REGIONS)
+        reg_idx = REGIONS.index(lp_data["region"]) if lp_data["region"] in REGIONS else 0
+        p_region = st.selectbox("소재지 (주력 권역) * [파서 연동]", REGIONS, index=reg_idx)
     with c_top4:
         p_show = st.selectbox("홈페이지 노출 설정 *", ["노출(공개)", "비공개(내부장부용)"])
 
@@ -869,9 +975,9 @@ elif selected_menu == MENU_LIST[1]:
             st.text_input("적용될 층수", value=p_floor_sel, disabled=True)
             p_floor = p_floor_sel
     with c_fl3:
-        p_area1 = st.number_input("전용 평수 (공장/창고 바닥면적, 평) *", min_value=0.0, value=60.0, step=5.0)
+        p_area1 = st.number_input("전용 평수 (바닥면적, 평) * [파서 연동]", min_value=0.0, value=float(lp_data["area_py"]), step=5.0)
     with c_fl4:
-        p_area2 = st.number_input("2층/부속 사무실 평수 (없으면 0)", min_value=0.0, value=0.0, step=5.0)
+        p_area2 = st.number_input("2층/부속 사무실 평수 (없으면 0)", min_value=0.0, value=float(lp_data["office_py"]), step=5.0)
 
     c_ho1, c_ho2, c_ho3, c_ho4 = st.columns([1.1, 1.9, 1.5, 1.5])
     with c_ho1:
@@ -880,13 +986,13 @@ elif selected_menu == MENU_LIST[1]:
         p_hoist_spec = st.text_input(
             "호이스트 상세 제원 (직접 입력)",
             value="",
-            placeholder="",
+            placeholder="예: 5톤 1기, 2.8톤 2기",
             disabled=(p_hoist_ox == "없음")
         )
     with c_ho3:
-        p_height = st.text_input("층고 설명 (m)", value="", placeholder="")
+        p_height = st.text_input("층고 설명 (m)", value="", placeholder="예: 8.5m")
     with c_ho4:
-        p_power = st.text_input("계약 전력(동력 kW)", value="", placeholder="")
+        p_power = st.text_input("계약 전력(동력 kW)", value="", placeholder="예: 75kW")
 
     c_mid1, c_mid2, c_mid3, c_mid4 = st.columns([2.2, 1.1, 1.1, 1.2])
     with c_mid1:
@@ -912,20 +1018,21 @@ elif selected_menu == MENU_LIST[1]:
     with c_sub2:
         p_movein = st.text_input("입주 날짜", value="즉시입주 / 협의가능")
     with c_sub3:
-        p_tags = st.text_input("추천 업종 태그", value="", placeholder="")
+        p_tags = st.text_input("추천 업종 태그 [파서 연동]", value=lp_data["main_use"])
 
     st.markdown("##### 🔒 중개사 전용 비밀장부 (손님용 홈페이지에는 절대 노출되지 않습니다)")
     c_sec1, c_sec2, c_sec3, c_sec4, c_sec5 = st.columns(5)
     with c_sec1:
-        p_jibun = st.text_input("📍 실제 상세 지번 (비공개)", value="")
+        p_jibun = st.text_input("📍 실제 상세 지번 (비공개) [파서 연동]", value=lp_data["jibun"])
     with c_sec2:
         p_owner = st.text_input("👤 건물주/임대인 성함", value="")
     with c_sec3:
         p_phone = st.text_input("📞 건물주 연락처 (비공개)", value="")
     with c_sec4:
-        p_zone = st.text_input("용도지역 / 건축구조", value="일반공업지역 / 일반철골조")
+        p_zone = st.text_input("용도지역 / 건축구조 [파서 연동]", value=lp_data["zone"])
     with c_sec5:
-        p_approval = st.text_input("사용승인일", value="")
+        app_default = f"{lp_data['approval_date']} ({lp_data['violation']})" if lp_data["approval_date"] else lp_data["violation"]
+        p_approval = st.text_input("사용승인일 / 위반여부 [파서 연동]", value=app_default)
 
     p_feature = st.text_area("💡 핵심 특징 요약 (블로그 체크리스트 및 카톡 브리핑에 자동 삽입)", height=75, value="")
 
@@ -1051,7 +1158,7 @@ elif selected_menu == MENU_LIST[2]:
         is_filtered = True
 
     st.caption(f"조회된 매물: **{len(filtered_df)}건** (전체 {len(df_props)}건) | `홈페이지노출`을 `노출(공개)`로 바꾸고 저장하면 손님용 홈페이지(index.html)에 즉시 나타납니다.")
-    
+
     col_cfg = {
         "홈페이지노출": st.column_config.SelectboxColumn("홈페이지노출", options=["노출(공개)", "비공개(내부장부용)"], required=True),
         "거래구분": st.column_config.SelectboxColumn("거래구분", options=DEAL_TYPES, required=True),
@@ -1076,7 +1183,7 @@ elif selected_menu == MENU_LIST[2]:
             target_df = base_df
         else:
             target_df = edited_sub
-            
+
         ok, msg = overwrite_sheet_fast("properties", PROP_COLUMNS, target_df)
         if ok:
             st.toast("구글 시트 동기화 완료!", icon="✅")
@@ -1115,7 +1222,7 @@ elif selected_menu == MENU_LIST[2]:
 # [사이드 메뉴 4] 💬 카톡 멀티 브리핑 & 네이버 블로그 원고 자동생성
 # ==============================================================================
 elif selected_menu == MENU_LIST[3]:
-    st.subheader("💬 손님 전송용 카톡 멀티 브리핑 & 네이버 블로그 원고 1클릭 생성")
+    st.subheader("💬 손님 전송용 카톡 멀티 브리핑 & 확보 매물 네이버 블로그 상위노출 원고 1클릭 생성")
     df_props_b = get_fast_df("properties", PROP_COLUMNS)
 
     if df_props_b.empty:
@@ -1157,41 +1264,56 @@ elif selected_menu == MENU_LIST[3]:
                         kakao_lines.append(f" • 핵심특징 : {r['핵심특징']}")
                     kakao_lines.append("")
 
+                kakao_lines.append("👉 실시간 전체 매물 보기: https://threven.github.io/my-realestate-app/")
                 kakao_lines.append("📞 현장 답사 및 상세 문의: 우리부동산 032-582-6200 / 직통 010-2660-8276")
                 st.code("\n".join(kakao_lines), language="markdown")
 
             with b_col2:
-                st.markdown("#### 🟢 네이버 블로그 포스팅용 원고 (첫 번째 선택 매물 기준)")
+                st.markdown("#### 🟢 네이버 블로그 상위노출 포스팅용 원고 (첫 번째 선택 매물 기준)")
                 r0 = sel_rows.iloc[0]
                 hoist_blog = f"설치 완료 ({r0['호이스트제원']})" if r0['호이스트유무'] == "있음" else "없음 (추후 설치 협의 가능)"
-                blog_text = f"""[제목] 인천 {r0['권역']} {r0['거래구분']} {r0['해당층수']} 전용 {r0['전용평수']}평 실매물 현장리뷰 ({r0['매물제목']})
+                blog_text = f"""### 📌 추천 상위노출 제목 3선 (택 1)
+1. 인천 {r0['권역']} {r0['거래구분']} {r0['해당층수']} 전용 {r0['전용평수']}평 실매물 현장리뷰 ({r0['매물제목']})
+2. [{r0['권역']} {r0['거래구분']}] 전용 {r0['전용평수']}평 단독/제조 공장 ({r0['도로조건']} · 호이스트 {hoist_blog}) - 우리부동산 김소장
+3. 인천 서구 {r0['권역']} 즉시 가동 가능한 {r0['전용평수']}평 {r0['거래구분']}, 전력 {r0['전력']} · 층고 {r0['층고']} 완비
 
-안녕하세요! 인천 서구 공장·창고 전문 파트너, 우리부동산 공인중개사사무소 김소장입니다.
+---
+
+안녕하세요! 인천 서구 공장·창고 전문 파트너, **우리부동산 공인중개사사무소 대표 공인중개사 김태형(김소장)**입니다.
 오늘 소개해 드릴 현장은 **{r0['권역']}**에 위치한 작업 효율 뛰어난 **{r0['해당층수']} {r0['거래구분']}** 매물입니다.
 
----
-📌 [매물 핵심 스펙 한눈에 보기]
-• 매물번호 : {r0['매물번호']}
-• 소재지역 : 인천광역시 서구 {r0['권역']} ({r0['용도지역']})
-• 거래조건 : {r0['가격설명']}
-• 해당층수 : {r0['해당층수']}
-• 전용면적 : 공장/창고 전용 {r0['전용평수']}평 (사무실 {r0['사무실평수']}평 별도)
-• 유효층고 : {r0['층고']}
-• 계약전력 : {r0['전력']}
-• 호이스트 : {hoist_blog}
-• 진입도로 : {r0['도로조건']}
-• 입주시기 : {r0['입주날짜']}
----
+📷 **[사진 1 삽입 위치: 공장 건물 외관 및 전면 진입도로 폭 (화물차 진출입로 강조)]**
 
-💡 [김소장의 현장 체크 포인트]
+---
+### 📌 [매물 핵심 스펙 한눈에 보기]
+| 구분 | 상세 스펙 |
+| :--- | :--- |
+| **매물번호** | {r0['매물번호']} |
+| **소재지역** | 인천광역시 서구 {r0['권역']} ({r0['용도지역']}) |
+| **거래조건** | **{r0['가격설명']}** |
+| **해당층수** | {r0['해당층수']} |
+| **전용면적** | **공장/창고 전용 {r0['전용평수']}평** (사무실 {r0['사무실평수']}평 별도) |
+| **유효층고 / 전력** | 층고 {r0['층고']} / 계약전력 {r0['전력']} |
+| **호이스트 설비** | {hoist_blog} |
+| **진입도로 / 입주** | {r0['도로조건']} / {r0['입주날짜']} |
+
+📷 **[사진 2 삽입 위치: 공장 내부 에폭시 바닥 및 호이스트 레일/층고 사진]**
+
+---
+### 💡 [김소장의 현장 실사 체크 포인트]
 {r0['핵심특징'] if str(r0['핵심특징']).strip() else '차량 진출입이 수월하고 바닥 에폭시 및 기본 동력 설비가 잘 갖춰져 있어 즉시 가동 가능한 알짜 공장입니다.'}
 
-추천 업종으로는 [{r0['추천업종'] if str(r0['추천업종']).strip() else '일반 제조업, 정밀가공, 물류창고'}] 등을 강력 추천합니다.
+추천 업종으로는 **[{r0['추천업종'] if str(r0['추천업종']).strip() else '일반 제조업, 정밀가공, 물류창고'}]** 등을 강력 추천합니다.
 
-🏭 인천 서구 석남동·가좌동·원창동·경서동 공장 매매/임대 문의는 언제든 편하게 연락 주세요!
-• 상호 : 우리부동산 공인중개사사무소 (대표: 김태형)
-• 소재지 : 인천 서구 건지로 167 (석남역 인근)
-• 대표번호 : 매매 032-582-6200 / 임대 032-576-2600 / 직통 010-2660-8276
+📷 **[사진 3 삽입 위치: 동력 배전반, 부속 사무실 및 외부 마당 사진]**
+
+---
+🏭 **인천 서구 석남동·가좌동·원창동·경서동 공장 매매/임대 문의는 언제든 편하게 연락 주세요!**
+- **상호** : 우리부동산 공인중개사사무소 (대표: 김태형)
+- **소재지** : 인천 서구 건지로 167 (석남역 인근)
+- **대표번호** : 매매 032-582-6200 / 임대 032-576-2600 / **직통 010-2660-8276**
+- **실시간 매물 홈페이지** : https://threven.github.io/my-realestate-app/
+
 #인천서구공장 #{r0['권역']}공장 #{r0['권역']}{r0['거래구분']} #인천공장전문 #우리부동산 #김소장"""
                 st.code(blog_text, language="markdown")
 
@@ -1286,189 +1408,12 @@ elif selected_menu == MENU_LIST[4]:
 
 
 # ==============================================================================
-# [사이드 메뉴 6] ⚖️ 인천공장 & 수도권아파트 법원 경매 분석
+# [사이드 메뉴 6] 🏗️ 신축공장분양 대출/취득세/부가세 환급 자금계획 계산기 (본업 핵심 영업용)
 # ==============================================================================
 elif selected_menu == MENU_LIST[5]:
-    st.subheader("⚖️ 인천지방법원 관할 공장·창고 및 수도권 핵심 아파트 경매 분석 시스템")
-    auc_data = [
-        {
-            "사건번호": "2025타경 51204",
-            "관할법원": "인천지방법원 본원 경매4계",
-            "물건종류": "공장 (일반철골조)",
-            "소재지": "인천광역시 서구 석남동 223-XX",
-            "토지/건물면적": "토지 310평 / 건물 245평 (1층 180평, 2층 사무실 65평)",
-            "감정가": 245000,
-            "최저입찰가": 120050,
-            "최저비율": "49% (2회 유찰)",
-            "매각기일": "2026-11-12",
-            "기계기구/설비": "호이스트 5톤 2기, 수전설비 250kW (감정가 포함 일괄매각)",
-            "권리분석핵심": "선순위 근저당 말소기준권리 이후 임차인 없음 (인도명령 대상, 권리관계 깨끗함)",
-            "예상낙찰가율": "62~66%"
-        },
-        {
-            "사건번호": "2025타경 60889",
-            "관할법원": "인천지방법원 본원 경매7계",
-            "물건종류": "공장 (지식산업센터 대평수)",
-            "소재지": "인천광역시 서구 가좌동 482-XX",
-            "토지/건물면적": "전용 115평 (지상 1층 드라이브인 도어투도어)",
-            "감정가": 138000,
-            "최저입찰가": 96600,
-            "최저비율": "70% (1회 유찰)",
-            "매각기일": "2026-11-19",
-            "기계기구/설비": "층고 7m, 호이스트 2.8톤 1기, 바닥 하드너 완비",
-            "권리분석핵심": "대항력 없는 사업자 임차인 점유 중 (보증금 전액 배당 예상, 명도 수월)",
-            "예상낙찰가율": "75~78%"
-        },
-        {
-            "사건번호": "2025타경 33910",
-            "관할법원": "인천지방법원 본원 경매2계",
-            "물건종류": "창고 및 공장용지",
-            "소재지": "인천광역시 서구 원창동 381-XX",
-            "토지/건물면적": "토지 450평 / 건물 1층 220평 (40ft 컨테이너 진입)",
-            "감정가": 320000,
-            "최저입찰가": 224000,
-            "최저비율": "70% (1회 유찰)",
-            "매각기일": "2026-11-26",
-            "기계기구/설비": "동력 100kW, 대형 마당 단독 사용, 층고 8.5m",
-            "권리분석핵심": "채무자(소유자) 직접 점유 중. 체납 관리비 및 공과금 인수 여부만 현장 확인 요망",
-            "예상낙찰가율": "78~82%"
-        },
-        {
-            "사건번호": "2025타경 77412",
-            "관할법원": "인천지방법원 부천지원 경매3계",
-            "물건종류": "수도권 아파트",
-            "소재지": "인천광역시 서구 청라동 청라국제도시 대장주 84㎡",
-            "토지/건물면적": "전용 25.7평 (34평형, 로얄동 18층)",
-            "감정가": 89000,
-            "최저입찰가": 62300,
-            "최저비율": "70% (1회 유찰)",
-            "매각기일": "2026-11-17",
-            "기계기구/설비": "7호선 연장 역세권, 초품아 단지",
-            "권리분석핵심": "소유자 거주 중, 등기부상 인수 권리 전혀 없음",
-            "예상낙찰가율": "84~88%"
-        }
-    ]
+    st.subheader("🏗️ 신축공장분양 · 자가공장 마련 자금계획 & 대출/취득세/부가세 환급 시뮬레이터")
+    st.caption("월세 임차 중인 대표님들께 '자가공장 매입/분양 시 실제 들어가는 자기자본과 월 이자 비교표'를 1초 만에 브리핑해 드리는 본업 클로징 도구입니다.")
 
-    auc_df = pd.DataFrame(auc_data)
-    ac1, ac2 = st.columns([1.5, 1])
-    with ac1:
-        auc_filter = st.radio("물건 구분 필터", ["전체 경매물건", "공장·창고 경매만", "수도권 아파트 경매만"], horizontal=True)
-    with ac2:
-        bid_deposit_rate = st.slider("입찰보증금 비율 (%)", 10, 20, 10)
-
-    if auc_filter == "공장·창고 경매만":
-        view_auc = auc_df[auc_df["물건종류"].str.contains("공장|창고")]
-    elif auc_filter == "수도권 아파트 경매만":
-        view_auc = auc_df[auc_df["물건종류"].str.contains("아파트")]
-    else:
-        view_auc = auc_df
-
-    for _, row in view_auc.iterrows():
-        min_p = int(row["최저입찰가"])
-        app_p = int(row["감정가"])
-        bid_bond = int(min_p * (bid_deposit_rate / 100))
-        loan_est = int(min_p * 0.80)
-        real_equity = min_p - loan_est
-
-        st.markdown(f"""
-        <div class="card-box">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <span class="badge-blue">{row['관할법원']}</span>
-                    <span class="badge-red">{row['최저비율']}</span>
-                    <strong style="font-size:1.15rem; margin-left:8px;">[{row['사건번호']}] {row['소재지']} ({row['물건종류']})</strong>
-                </div>
-                <div style="font-weight:800; color:#1e40af;">매각기일: {row['매각기일']}</div>
-            </div>
-            <hr style="margin:10px 0;">
-            <p style="margin:4px 0;">📐 <b>면적/스펙:</b> {row['토지/건물면적']} | ⚙️ <b>설비/특징:</b> {row['기계기구/설비']}</p>
-            <p style="margin:4px 0;">💰 <b>감정가:</b> {app_p:,}만원 ➔ <b style="color:#dc2626;">최저입찰가: {min_p:,}만원</b> (입찰보증금 {bid_deposit_rate}%: <b>{bid_bond:,}만원</b>)</p>
-            <p style="margin:4px 0;">🏦 <b>경락잔금대출(80% 가정):</b> 약 {loan_est:,}만원 가능 | <b>예상 실투자금: 약 {real_equity:,}만원</b> (취득세/명도비 별도)</p>
-            <p style="margin:4px 0; color:#065f46;">🔍 <b>권리분석 요약:</b> {row['권리분석핵심']} (예상 낙찰가율: {row['예상낙찰가율']})</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.divider()
-    st.markdown("### 🧮 경매 입찰가 & 경락잔금대출 실투자금 정밀 계산기")
-    ca1, ca2, ca3, ca4 = st.columns(4)
-    with ca1:
-        sim_app = st.number_input("감정가 (만원)", value=245000, step=5000)
-        sim_bid = st.number_input("목표 낙찰가 (만원)", value=155000, step=5000)
-    with ca2:
-        sim_loan_pct = st.slider("경락잔금대출 한도 (%)", 50, 85, 80)
-        sim_rate = st.number_input("대출 금리 (연 %)", value=4.5, step=0.1)
-    with ca3:
-        sim_tax_pct = st.selectbox("취득세율 (%)", [4.6, 1.1, 3.5, 12.4], index=0)
-        sim_evict = st.number_input("예상 명도비/수리비 (만원)", value=1000, step=200)
-    with ca4:
-        loan_res = int(sim_bid * (sim_loan_pct / 100.0))
-        tax_res = int(sim_bid * (sim_tax_pct / 100.0))
-        cash_needed = (sim_bid - loan_res) + tax_res + sim_evict
-        m_interest = int((loan_res * (sim_rate / 100.0)) / 12)
-        st.metric("총 필요 자기자본 (취득세/명도비 포함)", f"{cash_needed:,} 만원", f"감정가 대비 낙찰률 {(sim_bid/sim_app)*100:.1f}%")
-        st.metric("경락잔금대출 & 월 이자", f"{loan_res:,} 만원", f"월 이자 약 {m_interest:,}만원")
-
-
-# ==============================================================================
-# [사이드 메뉴 7] 📅 수도권 아파트 & 산업단지 청약 캘린더
-# ==============================================================================
-elif selected_menu == MENU_LIST[6]:
-    st.subheader("📅 수도권 주요 아파트(LH/신혼희망타운/민영) 및 산업단지 분양 캘린더")
-    sub_data = [
-        {
-            "분양구분": "공공분양 / 신혼희망타운",
-            "단지명": "부천대장 A5·A6블록 (e편한세상 대장 퍼스티움)",
-            "지역": "경기도 부천시 대장신도시",
-            "공급규모": "총 1,099세대 (전용 46㎡ · 55㎡)",
-            "청약일정": "2026년 본청약 및 당첨자 서류/계약 관리",
-            "분양가(추정)": "3.3㎡당 약 1,850만~1,950만원 수준 (분양가상한제)",
-            "핵심체크": "신혼부부·예비신혼부부 특화, 연 1.3% 고정금리 수익공유형 모기지 최대 4억 한도 지원"
-        },
-        {
-            "분양구분": "민영분양 (분양가상한제)",
-            "단지명": "인천 검단신도시 AA29블록 푸르지오",
-            "지역": "인천광역시 서구 검단신도시",
-            "공급규모": "총 884세대 (전용 84㎡ · 101㎡)",
-            "청약일정": "2026-11-09 특별공급 / 2026-11-10 1순위",
-            "분양가(추정)": "전용 84㎡ 기준 약 5억 6,000만원",
-            "핵심체크": "인천 1호선 연장 역세권, 거주의무 없음, 전매제한 3년"
-        },
-        {
-            "분양구분": "산업단지 / 지식산업센터 분양",
-            "단지명": "인천 서구 가좌·석남 첨단메카 트윈타워 (신축공장)",
-            "지역": "인천광역시 서구 가좌동 (주력권역)",
-            "공급규모": "제조형 드라이브인 공장 140호실",
-            "청약일정": "선착순 호실 지정 계약 중 (즉시 입주/분양)",
-            "분양가(추정)": "평당 920만~1,050만원 (중도금 무이자, 잔금대출 80%)",
-            "핵심체크": "1층~4층 5톤 화물차 도어투도어 진입, 층고 6.5m, 호이스트 설치 가능 구조"
-        }
-    ]
-    st.dataframe(pd.DataFrame(sub_data), use_container_width=True, height=210)
-
-    col_sub1, col_sub2 = st.columns(2)
-    with col_sub1:
-        st.markdown("#### 💍 신혼희망타운 (부천대장 A5 등) 전용 1.3% 모기지 계산기")
-        sh_price = st.number_input("예상 분양가 (만원)", value=45000, step=1000)
-        sh_ltv = st.slider("모기지 대출 비율 (최대 70%, 4억 한도)", 30, 70, 70)
-        sh_loan = min(int(sh_price * (sh_ltv / 100.0)), 40000)
-        sh_self = sh_price - sh_loan
-        sh_monthly_int = int((sh_loan * 0.013) / 12)
-        st.success(f"💰 **필요 자기자본:** **{sh_self:,}만원** (계약금 10% 약 {int(sh_price*0.1):,}만원)\n\n🏦 **1.3% 대출액:** **{sh_loan:,}만원** ➔ **월 이자 약 {sh_monthly_int:,}만원**")
-
-    with col_sub2:
-        st.markdown("#### 🧮 민영주택 청약 가점 계산기 (84점 만점)")
-        homeless_yrs = st.number_input("무주택 기간 (년, 만 30세 이후 또는 혼인신고일 기준)", 0, 15, 2)
-        dependents = st.number_input("부양가족 수 (본인 제외, 배우자/자녀 등)", 0, 6, 1)
-        bank_yrs = st.number_input("청약통장 가입기간 (년)", 0, 15, 5)
-        score_calc = min(homeless_yrs * 2 + 2, 32) + min((dependents + 1) * 5, 35) + min(bank_yrs + 2, 17)
-        st.info(f"📌 **예상 청약 가점:** **{score_calc}점** / 84점 만점")
-
-
-# ==============================================================================
-# [사이드 메뉴 8] 🏗️ 신축공장분양 대출/취득세 계산기
-# ==============================================================================
-elif selected_menu == MENU_LIST[7]:
-    st.subheader("🏗️ 신축공장분양 · 자가공장 마련 자금계획 & 대출 시뮬레이터")
     sim1, sim2, sim3 = st.columns(3)
     with sim1:
         f_pyeong = st.number_input("분양/매입 평수 (평)", min_value=10.0, value=80.0, step=5.0)
@@ -1484,6 +1429,7 @@ elif selected_menu == MENU_LIST[7]:
     loan_amt = int(total_price * (f_loan_ratio / 100.0))
     self_cash = total_price - loan_amt
     monthly_interest = int((loan_amt * (f_interest / 100.0)) / 12)
+    vat_refund_est = int(total_price * 0.35 * 0.10)
 
     if "35%" in f_tax_discount:
         acq_tax = int(total_price * 0.046 * 0.65)
@@ -1493,66 +1439,19 @@ elif selected_menu == MENU_LIST[7]:
         acq_tax = int(total_price * 0.046)
 
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric("총 매입/분양 금액", f"{total_price:,} 만원")
+    m1.metric("총 매입/분양 금액", f"{total_price:,} 만원", f"건물분 부가세환급 약 {vat_refund_est:,}만")
     m2.metric(f"대출 가능액 ({f_loan_ratio}%)", f"{loan_amt:,} 만원")
     m3.metric("필요 실투자금 (자기자본)", f"{self_cash:,} 만원", f"취득세 약 {acq_tax:,}만 별도")
     diff_rent = current_rent - monthly_interest
     m4.metric("월 예상 이자", f"월 {monthly_interest:,} 만원", f"현재 월세 대비 월 {diff_rent:+,}만 절감")
 
     sim_report = f"""📊 [우리부동산 신축공장 분양 · 자가공장 매입 자금 시뮬레이션 리포트]
-• 검토 면적 : 전용/분양 {f_pyeong}평 (평당 {f_unit_price:,}만원)
-• 총 분양/매매가 : {total_price:,}만원 (건물분 부가세 조기환급 대상)
-• 기업 시설자금대출({f_loan_ratio}%) : 약 {loan_amt:,}만원
-• 필요 실투자 자기자본 : {self_cash:,}만원 (+ 예상 취득세 약 {acq_tax:,}만원 / {f_tax_discount})
-• 월 예상 이자(연 {f_interest}%) : 월 약 {monthly_interest:,}만원
+- 검토 면적 : 전용/분양 {f_pyeong}평 (평당 {f_unit_price:,}만원)
+- 총 분양/매매가 : {total_price:,}만원 (건물분 부가세 약 {vat_refund_est:,}만원 조기환급 대상)
+- 기업 시설자금대출({f_loan_ratio}%) : 약 {loan_amt:,}만원
+- 필요 실투자 자기자본 : {self_cash:,}만원 (+ 예상 취득세 약 {acq_tax:,}만원 / {f_tax_discount})
+- 월 예상 이자(연 {f_interest}%) : 월 약 {monthly_interest:,}만원
   👉 기존 월세({current_rent:,}만원)와 비교 시 매월 {diff_rent:+,}만원 차이로 내 자가공장 소유 가능!
 
 📞 맞춤 분양 및 기업시설자금 저리대출 상담 : 우리부동산 대표 김태형 (032-582-6200 / 010-2660-8276)"""
     st.code(sim_report, language="markdown")
-
-
-# ==============================================================================
-# [사이드 메뉴 9] 🍽️ 김소장 & 청라 어니스트 아재 맛집·일상·여행 블로그 생성기
-# ==============================================================================
-elif selected_menu == MENU_LIST[8]:
-    st.subheader("🍽️ 김소장 & 청라 어니스트 아재 맛집 · 일상 · 여행 블로그 원고 생성기")
-    b1, b2, b3 = st.columns(3)
-    with b1:
-        blog_nick = st.selectbox("블로그 페르소나 선택", ["김소장 (친근하고 믿음직한 동네 부동산 소장님)", "청라 어니스트 아재 (솔직담백 내돈내산 리뷰어)"])
-        blog_cat = st.selectbox("포스팅 주제 카테고리", ["🍲 인천/청라/석남 맛집 내돈내산", "🚗 주말 여행·나들이·해루질 기록", "🏀 농구·운동·일상 이야기"])
-    with b2:
-        place_name = st.text_input("방문 장소 / 식당 / 여행지 이름 *", placeholder="예: 석남동 뼈해장국 맛집 / 태안 해루질 펜션")
-        loc_info = st.text_input("위치 / 주차 / 영업시간 팁", placeholder="예: 석남역 2번 출구 도보 5분, 매장 앞 주차 5대 가능")
-    with b3:
-        menu_point = st.text_input("주문 메뉴 / 핵심 경험 포인트 *", placeholder="예: 묵은지 감자탕 대자, 고기가 잡내 없이 부드러움")
-        honest_rate = st.select_slider("솔직 만족도 총평", options=["⭐⭐⭐ 무난함", "⭐⭐⭐⭐ 맛집인정", "⭐⭐⭐⭐⭐ 인생맛집/강력추천"], value="⭐⭐⭐⭐⭐ 인생맛집/강력추천")
-
-    extra_memo = st.text_area("추가로 넣고 싶은 에피소드 (선택)", height=70)
-
-    if st.button("✍️ 네이버 상위노출용 블로그 포스팅 원고 즉시 생성", type="primary", use_container_width=True):
-        p_name = place_name.strip() if place_name.strip() else "인천 서구 숨은 핫플레이스"
-        nick_clean = blog_nick.split("(")[0].strip()
-        loc_txt = loc_info.strip() if loc_info.strip() else "인천 서구 인근 (접근성 및 주차 편리)"
-        menu_txt = menu_point.strip() if menu_point.strip() else "대표 시그니처 메뉴"
-        ep_txt = f"\n특히 {extra_memo.strip()}\n" if extra_memo.strip() else ""
-
-        blog_draft = f"""[제목] {p_name} 내돈내산 솔직 방문 후기! ({nick_clean}의 찐리뷰)
-
-안녕하세요! {nick_clean}입니다. 😊
-오늘도 인천 서구 석남동·가좌동·청라 현장을 발로 뛰며 알찬 하루를 보내고, 제대로 힐링하고 돌아온 **{p_name}** 솔직 후기를 남겨봅니다!
-
----
-📍 [{p_name} 핵심 정보 요약]
-• 방문 장소 : {p_name}
-• 위치/주차 : {loc_txt}
-• 오늘의 픽 : {menu_txt}
-• 솔직 평점 : {honest_rate}
----
-
-🍽️ [본격 메뉴 & 경험 디테일 리뷰]
-이번에 경험한 핵심 포인트는 바로 **{menu_txt}**입니다!
-기대했던 것 이상으로 퀄리티가 훌륭했고, 기본에 충실하면서도 디테일이 살아있어 마지막까지 기분 좋게 즐길 수 있었습니다.{ep_txt}
-✅ [{nick_clean}의 총평]
-자극적이지 않으면서도 확실한 매력이 있는 곳이라 조만간 재방문 의사 100%입니다!
-#{p_name.replace(' ', '')} #인천서구맛집 #청라맛집 #석남동맛집 #가좌동맛집 #내돈내산솔직후기 #{nick_clean.replace(' ', '')}"""
-        st.code(blog_draft, language="markdown")
