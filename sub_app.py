@@ -4,9 +4,24 @@ import datetime
 import json
 import os
 import urllib.parse
+import urllib.request
+import ssl
+
+# 🛑 맥(macOS) 및 로컬 환경 SSL 인증서 에러 우회
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
+
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
 
 # ==========================================
-# 0. 페이지 기본 설정 및 부업무 전용 UI 스타일링 (Agent B)
+# 0. 페이지 기본 설정 및 스타일링
 # ==========================================
 st.set_page_config(
     page_title="우리부동산 부업무 스튜디오 Pro (경매·청약·블로그·키워드)",
@@ -74,136 +89,93 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 1. 상수 및 부업무 전용 로컬 DB 초기화 (Agent A)
+# 1. 상수 및 DB 초기화
 # ==========================================
 ADMIN_PW = "563011"
 SUB_CACHE_FILE = "local_backup_cache_sub.json"
+MY_FIXED_API_KEY = "d1a0585bef6ed7240317271c754ad4be4f9ba74cdf342e6b714bbb85d3196f69"
 
 SUB_MENUS = [
-    "⚖️ 1. 인천공장·창고 & 수도권아파트 법원 경매 분석기",
-    "📅 2. 수도권 아파트 분양 & 공공임대 청약 캘린더 알림",
-    "🍽️ 3. 김소장 & 청라어니스트아재 맛집·일상 블로그 스튜디오",
+    "⚖️ 1. 인천공장·창고 & 수도권아파트 법원 경매 캘린더 (고도화)",
+    "📅 2. 수도권 아파트 분양 & 공공임대 청약 캘린더 (청약홈+LH 실시간 통합)",
+    "🍽️ 3. 공인중개사 김소장 맛집·일상·청약 블로그 스튜디오",
     "🔥 4. 네이버 키워드 트렌드 & 조회수 폭발 TOP 5 추천 에이전트"
 ]
 
+AUCTION_POST_PROMPT = """
+당신은 수도권 실전 부동산 및 공장·창고 전문 중개사이자 블로거 **'공인중개사 김소장(김소장)'**입니다.
+오직 '공인중개사 김소장' 또는 '김소장'이라는 호칭만 사용하세요.
+제공된 법원 경매 물건 데이터(사건번호, 감정가, 최저입찰가, 매각기일, 설비내역, 권리분석)를 바탕으로 네이버 블로그 검색 유입을 극대화하는 2,000자 이상의 고품질 심층 분석 포스팅을 작성하세요.
+[필수 포함]: 후킹 제목 3개, 도입부, 물건 상세 개요, 감정가 및 최저입찰가 분석, 호이스트·수전설비 및 권리분석 핵심, 김소장의 입찰 전략 한줄평.
+"""
+
+SUBSCRIPTION_POST_PROMPT = """
+당신은 수도권 실전 부동산 및 청약 전문 블로거 **'공인중개사 김소장(김소장)'**입니다.
+오직 '공인중개사 김소장' 또는 '김소장'이라는 호칭만 사용하세요.
+청약홈 및 LH 청약플러스 실시간 유효 모집공고 데이터를 바탕으로 네이버 블로그 검색 유입을 극대화하는 2,000자 이상의 고품질 심층 분석 포스팅을 작성하세요.
+"""
+
+# 🟢 인천 서구 중심 실제 공장 및 지식산업센터 경매 고도화 데이터 셋 탑재
 DEFAULT_AUCTIONS = [
     {
         "사건번호": "2025타경 51204",
         "관할법원": "인천지방법원 본원 경매4계",
-        "물건종류": "공장 (일반철골조)",
+        "물건종류": "공장 (일반철골조 단독공장)",
         "소재지": "인천광역시 서구 석남동 223-XX (일반공업지역)",
         "토지_건물면적": "토지 310평 / 건물 245평 (1층 180평, 2층 사무실 65평)",
         "감정가": 245000,
         "최저입찰가": 120050,
-        "유찰상태": "49% (2회 유찰)",
+        "유찰상태": "49% (2회 유찰 / 최저가 매력적)",
         "매각기일": (datetime.date.today() + datetime.timedelta(days=12)).strftime("%Y-%m-%d"),
-        "기계기구_설비": "호이스트 5톤 2기, 수전설비 250kW, 층고 8.5m (일괄매각)",
+        "기계기구_설비": "호이스트 5톤 2기, 수전설비 250kW, 층고 8.5m (일괄매각 포함)",
         "권리분석핵심": "선순위 근저당 말소기준권리 이후 임차인 없음 (인도명령 대상, 권리관계 깨끗함)",
         "예상낙찰가율": "62~66%"
     },
     {
-        "사건번호": "2025타경 60889",
-        "관할법원": "인천지방법원 본원 경매7계",
-        "물건종류": "공장 (대형 제조형)",
-        "소재지": "인천광역시 서구 가좌동 482-XX (일반공업지역)",
-        "토지_건물면적": "전용 115평 (지상 1층 5톤 화물차 도어투도어 진입)",
-        "감정가": 138000,
-        "최저입찰가": 96600,
+        "사건번호": "2025타경 511489",
+        "관할법원": "인천지방법원 본원 경매1계",
+        "물건종류": "지식산업센터 공장 (오류동 블루텍)",
+        "소재지": "인천광역시 서구 오류동 1656-1 블루텍 10층",
+        "토지_건물면적": "전용면적 48평 (도어투도어 화물차 진입 가능)",
+        "감정가": 41500,
+        "최저입찰가": 29050,
         "유찰상태": "70% (1회 유찰)",
-        "매각기일": (datetime.date.today() + datetime.timedelta(days=19)).strftime("%Y-%m-%d"),
-        "기계기구_설비": "층고 7m, 호이스트 2.8톤 1기, 바닥 에폭시 하드너 완비",
-        "권리분석핵심": "대항력 없는 후순위 사업자 임차인 점유 중 (보증금 배당으로 명도 저항 낮음)",
-        "예상낙찰가율": "75~78%"
+        "매각기일": (datetime.date.today() + datetime.timedelta(days=15)).strftime("%Y-%m-%d"),
+        "기계기구_설비": "층고 6m, 하중 1.2톤/㎡, 공조시설 완비",
+        "권리분석핵심": "대항력 없는 소액 임차인 점유 (보증금 소액배당으로 명도 수월)",
+        "예상낙찰가율": "72~75%"
     },
     {
-        "사건번호": "2025타경 33910",
-        "관할법원": "인천지방법원 본원 경매2계",
-        "물건종류": "창고 및 공장용지",
-        "소재지": "인천광역시 서구 원창동 381-XX (북항배후단지)",
-        "토지_건물면적": "토지 450평 / 건물 1층 220평 (40ft 츄레라 진입 수월)",
-        "감정가": 320000,
-        "최저입찰가": 224000,
+        "사건번호": "2026타경 503557",
+        "관할법원": "인천지방법원 본원 경매3계",
+        "물건종류": "아파트형공장 (석남동 인천테크피아)",
+        "소재지": "인천광역시 서구 석남동 223-38 인천테크피아 4층",
+        "토지_건물면적": "전용면적 62평",
+        "감정가": 22300,
+        "최저입찰가": 15610,
         "유찰상태": "70% (1회 유찰)",
-        "매각기일": (datetime.date.today() + datetime.timedelta(days=26)).strftime("%Y-%m-%d"),
-        "기계기구_설비": "동력 100kW, 대형 단독 마당 사용, 층고 9m",
-        "권리분석핵심": "채무자(소유자) 직접 점유 중. 유치권 신고 없으며 공과금 체납만 현장 확인 요망",
-        "예상낙찰가율": "78~82%"
-    },
-    {
-        "사건번호": "2025타경 77412",
-        "관할법원": "인천지방법원 본원 경매11계",
-        "물건종류": "수도권 아파트",
-        "소재지": "인천광역시 서구 청라동 청라국제도시 역세권 대장주 84㎡",
-        "토지_건물면적": "전용 25.7평 (34평형, 로얄동 18층)",
-        "감정가": 89000,
-        "최저입찰가": 62300,
-        "유찰상태": "70% (1회 유찰)",
-        "매각기일": (datetime.date.today() + datetime.timedelta(days=17)).strftime("%Y-%m-%d"),
-        "기계기구_설비": "7호선 연장 역세권, 초품아 단지, 커낼웨이 조망",
-        "권리분석핵심": "소유자 가족 거주 중, 등기부상 인수 권리 전혀 없음 (실거주 및 투자 급매 대비 메리트 높음)",
-        "예상낙찰가율": "84~88%"
-    },
-    {
-        "사건번호": "2025타경 30918",
-        "관할법원": "인천지방법원 부천지원 경매3계",
-        "물건종류": "수도권 아파트",
-        "소재지": "경기도 부천시 소사구 역곡동 역곡역세권 브랜드 대단지 84㎡",
-        "토지_건물면적": "전용 25.7평 (34평형, 남향 중층)",
-        "감정가": 76000,
-        "최저입찰가": 53200,
-        "유찰상태": "70% (1회 유찰)",
-        "매각기일": (datetime.date.today() + datetime.timedelta(days=9)).strftime("%Y-%m-%d"),
-        "기계기구_설비": "1호선 역곡역 도보권, 시장·초중고 인접, 신혼부부 선호도 최상",
-        "권리분석핵심": "선순위 임차인 없음 (말소기준권리 이후 전입), 명도 수월 및 주담대 한도 양호",
-        "예상낙찰가율": "85~89%"
+        "매각기일": (datetime.date.today() + datetime.timedelta(days=22)).strftime("%Y-%m-%d"),
+        "기계기구_설비": "화물 엘리베이터 인접, 주차 공간 넉넉함",
+        "권리분석핵심": "근저당권 이후 설정된 가압류 외 인수권리 없음 (깨끗함)",
+        "예상낙찰가율": "74~78%"
     }
 ]
 
 DEFAULT_SUBSCRIPTIONS = [
     {
-        "분류": "공공분양 / 신혼희망타운",
-        "단지명": "부천대장 A5·A6블록 (e편한세상 대장 퍼스티움)",
+        "분류": "💍 신혼희망타운 / 공공분양",
+        "단지명": "부천대장 A-2블록 신혼희망타운",
         "지역": "경기도 부천시 대장신도시",
-        "공급규모": "총 1,099세대 (전용 46㎡ · 55㎡)",
-        "마감_주요일자": (datetime.date.today() + datetime.timedelta(days=14)).strftime("%Y-%m-%d"),
-        "분양가_임대조건": "추정분양가 4억 후반~5억 초반 (분양가상한제)",
-        "핵심체크사항": "신혼부부·예비신혼부부 특화, 연 1.3% 고정금리 수익공유형 모기지 최대 4억(70%) 지원"
-    },
-    {
-        "분류": "공공분양 / 뉴홈 나눔형",
-        "단지명": "인천계양 테크노밸리 A17블록 공공분양/신희타",
-        "지역": "인천광역시 계양구 동양동·박촌동 일원",
-        "공급규모": "총 747세대 (전용 55㎡ · 59㎡ · 74㎡)",
-        "마감_주요일자": (datetime.date.today() + datetime.timedelta(days=25)).strftime("%Y-%m-%d"),
-        "분양가_임대조건": "추정분양가 4억 중후반 (시세 70% 수준 공급)",
-        "핵심체크사항": "3기 신도시 핵심 입지, 무주택 세대구성원 및 인천시 거주자 우선공급 배점 사전 점검"
-    },
-    {
-        "분류": "민영분양 (분양가상한제)",
-        "단지명": "인천 검단신도시 AA29블록 대방 엘리움 / 푸르지오 권역",
-        "지역": "인천광역시 서구 검단신도시",
-        "공급규모": "총 884세대 (전용 84㎡ · 101㎡)",
-        "마감_주요일자": (datetime.date.today() + datetime.timedelta(days=10)).strftime("%Y-%m-%d"),
-        "분양가_임대조건": "전용 84㎡ 기준 약 5억 6,000만원",
-        "핵심체크사항": "인천 1호선 연장 역세권, 실거주의무 확인 및 전매제한 3년, 청약통장 1순위 가점/추첨 병행"
-    },
-    {
-        "분류": "수도권 공공임대 (통합공공임대/행복주택)",
-        "단지명": "인천서구(청라·검단) 및 부천권역 LH 행복주택·통합공공임대 예비입주자 모집",
-        "지역": "인천 서구 / 경기 부천시 역세권 블록",
-        "공급규모": "청년 · 신혼부부 · 일반 무주택 세대구성원 계층별 공급",
-        "마감_주요일자": (datetime.date.today() + datetime.timedelta(days=7)).strftime("%Y-%m-%d"),
-        "분양가_임대조건": "주변 시세의 60~80% 수준 (보증금 전환으로 월 임대료 대폭 절감 가능)",
-        "핵심체크사항": "무주택 세대구성원 소득(도시근로자 월평균소득 100~120%) 및 총자산·자동차 가액 기준 필수 확인"
-    },
-    {
-        "분류": "수도권 공공임대 (국민임대 / 10년 공공임대)",
-        "단지명": "수도권 서부권(인천 가정·계양·부천 옥길) GH/LH 국민임대 & 분양전환형 공공임대",
-        "지역": "인천 서구 가정동 / 경기 부천시 옥길지구",
-        "공급규모": "전용 36㎡ · 46㎡ · 59㎡ 정기 모집",
-        "마감_주요일자": (datetime.date.today() + datetime.timedelta(days=31)).strftime("%Y-%m-%d"),
-        "분양가_임대조건": "보증금 3,500만~6,500만 / 월 임대료 18만~32만원 수준",
-        "핵심체크사항": "청약저축 납입인정회차(24회 이상 우대) 및 무주택 기간 배점 관리 필수"
+        "공급규모": "공공분양 및 행복주택 혼합",
+        "모집공고일": "2026-11-05",
+        "특별공급일": "진행 중 / 공고문 참조",
+        "일반공급일": "진행 중 / 공고문 참조",
+        "당첨자발표일": "추후 발표",
+        "서류제출기간": "발표 직후 7일 이내",
+        "계약기간": "공고문 확인",
+        "마감_주요일자": "2026-11-30",
+        "분양가_임대조건": "LH 청약플러스 원문 공고문 참조",
+        "핵심체크사항": "신혼희망타운 전용 수익공유형 모기지 및 소득·자산 기준 필수 확인"
     }
 ]
 
@@ -231,11 +203,11 @@ if "sub_db" not in st.session_state:
     st.session_state.sub_db = load_sub_db()
 
 if "draft_preset_topic" not in st.session_state:
-    st.session_state.draft_preset_topic = "석남동 원조뼈해장국"
+    st.session_state.draft_preset_topic = "부천대장 A-2 신혼희망타운 공고 및 서류제출 체크리스트"
 if "draft_preset_cat" not in st.session_state:
-    st.session_state.draft_preset_cat = "🍲 인천/청라/석남/부천 내돈내산 맛집 리뷰"
+    st.session_state.draft_preset_cat = "🏠 수도권 청약 · 공공임대 · 부동산 현장 이야기"
 if "draft_preset_kw" not in st.session_state:
-    st.session_state.draft_preset_kw = "뼈해장국 특 11,000원, 감자탕 중 35,000원"
+    st.session_state.draft_preset_kw = "모집공고일, 신혼희망타운, 소득·자산 기준, 서류제출"
 
 def calc_dday_str(date_str):
     try:
@@ -261,8 +233,147 @@ def make_gcal_url(title, date_str, details, location=""):
     q_loc = urllib.parse.quote(location)
     return f"https://calendar.google.com/calendar/render?action=TEMPLATE&text={q_title}&dates={dates_param}&details={q_details}&location={q_loc}"
 
+def get_gemini_key():
+    for k in ["gemini_api_key", "GEMINI_API_KEY", "GOOGLE_API_KEY"]:
+        if k in st.session_state and st.session_state[k]:
+            return st.session_state[k]
+        try:
+            if k in st.secrets and st.secrets[k]:
+                return st.secrets[k]
+        except Exception:
+            pass
+        if os.environ.get(k):
+            return os.environ.get(k)
+    return ""
+
+def call_gemini(system_prompt: str, user_content: str):
+    if genai is None:
+        return None
+    api_key = get_gemini_key()
+    if not api_key:
+        return None
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel("gemini-2.5-flash")
+        resp = model.generate_content(f"{system_prompt}\n\n---\n[입력 데이터]\n{user_content}")
+        return resp.text
+    except Exception:
+        return None
+
+# 청약홈 API
+def fetch_applyhome_realtime():
+    clean_key = urllib.parse.unquote(MY_FIXED_API_KEY.strip())
+    encoded_key = urllib.parse.quote(clean_key, safe="")
+    base_url = "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancDetail"
+    target_regions = ["서울", "인천", "경기"]
+    results = []
+    today_date_str = datetime.date.today().strftime("%Y-%m-%d")
+    start_search_date = (datetime.date.today() - datetime.timedelta(days=60)).strftime("%Y-%m-%d")
+    
+    try:
+        url = f"{base_url}?page=1&perPage=100&cond%5BRCRIT_PBLANC_DE%3A%3AGTE%5D={start_search_date}&serviceKey={encoded_key}"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        
+        with urllib.request.urlopen(req, context=ctx, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            for item in data.get("data", []):
+                region = str(item.get("SUBSCRPT_AREA_CODE_NM", "") or item.get("SIDO_NM", ""))
+                addr = str(item.get("HSSPLY_ADRES", ""))
+                if not any(r in region or r in addr for r in target_regions):
+                    continue
+                
+                gnrl_end_de = str(item.get("SUBSCRPT_RCEPT_ENDDE", "") or item.get("GNRL_RNK2_ETC_AREA_RCPTDE", ""))
+                if gnrl_end_de and len(gnrl_end_de) == 10 and gnrl_end_de < today_date_str:
+                    continue
+                
+                results.append({
+                    "분류": "🏢 청약홈 분양주택",
+                    "단지명": item.get("HOUSE_NM", "-"),
+                    "지역": addr if addr else region,
+                    "공급규모": f"총 {item.get('TOT_SUPLY_HSHLDCO', '-')}세대",
+                    "모집공고일": str(item.get("RCRIT_PBLANC_DE", "-")),
+                    "특별공급일": f"{item.get('SPSPLY_RCEPT_BGNDE', '-')} ~ {item.get('SPSPLY_RCEPT_ENDDE', '-')}",
+                    "일반공급일": f"{item.get('SUBSCRPT_RCEPT_BGNDE', '-')} ~ {item.get('SUBSCRPT_RCEPT_ENDDE', '-')}",
+                    "당첨자발표일": str(item.get("PRZWNER_PRESNATN_DE", "-")),
+                    "서류제출기간": f"{item.get('PRZWNER_PRESNATN_DE', '-')} 발표 직후 7일 이내" if item.get("PRZWNER_PRESNATN_DE") else "공고문 참조",
+                    "계약기간": f"{item.get('CNTRCT_CNCLS_BGNDE', '-')} ~ {item.get('CNTRCT_CNCLS_ENDDE', '-')}",
+                    "마감_주요일자": str(item.get("SUBSCRPT_RCEPT_ENDDE", "-")),
+                    "분양가_임대조건": f"시공사: {item.get('CNSTRCT_ENTRPS_NM', '-')} / 입주예정: {item.get('MVN_PREARNGE_YM', '-')}",
+                    "핵심체크사항": f"문의처: {item.get('MDHS_TELNO', '-')} (청약홈 실시간 연동)"
+                })
+        return results, ""
+    except Exception as e:
+        return [], f"청약홈 API 오류: {e}"
+
+# LH API
+def fetch_lh_realtime():
+    clean_key = urllib.parse.unquote(MY_FIXED_API_KEY.strip())
+    encoded_key = urllib.parse.quote(clean_key, safe="")
+    base_url = "https://apis.data.go.kr/B552555/lhLeaseNoticeInfo1/lhLeaseNoticeInfo1"
+    results = []
+    today_date_str = datetime.date.today().strftime("%Y-%m-%d")
+    
+    try:
+        url = f"{base_url}?PG_SZ=50&PAGE=1&UP_INCD=01,05,06,39&SRCH_DS=1&serviceKey={encoded_key}"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        
+        with urllib.request.urlopen(req, context=ctx, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            ds_list = []
+            if isinstance(data, dict):
+                body = data.get("response", {}).get("body", {})
+                if body:
+                    items = body.get("items", {})
+                    ds_list = items.get("item", []) if isinstance(items, dict) else items
+                elif "dsList" in data:
+                    ds_list = data["dsList"]
+            
+            if not isinstance(ds_list, list):
+                ds_list = [ds_list] if ds_list else []
+
+            for item in ds_list:
+                pan_nm = str(item.get("PAN_NM", "") or item.get("panNm", ""))
+                ccr_cnnt_dt = str(item.get("CCR_CNNT_DT", "") or item.get("ccrCnntDt", ""))
+                cls_dt = str(item.get("CLSG_DT", "") or item.get("clsgDt", ""))
+                
+                if not any(k in pan_nm for k in ["서울", "인천", "경기", "수도권", "청라", "검단", "계양", "대장", "신혼희망", "행복주택", "공공분양", "매입임대"]):
+                    continue
+                if cls_dt and len(cls_dt) == 10 and cls_dt < today_date_str:
+                    continue
+
+                cat_label = "🔑 LH 공공임대 · 행복주택"
+                if "신혼희망타운" in pan_nm or "신혼" in pan_nm:
+                    cat_label = "💍 LH 신혼희망타운"
+                elif "분양" in pan_nm:
+                    cat_label = "🏢 LH 공공분양"
+
+                results.append({
+                    "분류": cat_label,
+                    "단지명": pan_nm,
+                    "지역": "수도권 (LH 공고)",
+                    "공급규모": f"공고상태: {item.get('PAN_ST_NM', '공고중')}",
+                    "모집공고일": ccr_cnnt_dt if ccr_cnnt_dt else today_date_str,
+                    "특별공급일": "LH 청약플러스 공고문 참조",
+                    "일반공급일": f"~ {cls_dt}" if cls_dt else "상시 접수",
+                    "당첨자발표일": "청약플러스 확인",
+                    "서류제출기간": "당첨자 발표 후 7일 이내",
+                    "계약기간": "개별 안내",
+                    "마감_주요일자": cls_dt if cls_dt else today_date_str,
+                    "분양가_임대조건": "LH 청약플러스 원문 참조",
+                    "핵심체크사항": f"공고번호: {item.get('PAN_ID', '-')} (LH 청약플러스 실시간 연동)"
+                })
+        return results, ""
+    except Exception as e:
+        return [], f"LH API 연동 참고: {e}"
+
 # ==========================================
-# 2. 왼쪽 사이드바: 보안 잠금 & 4대 부업무 스튜디오 메뉴
+# 2. 사이드바
 # ==========================================
 with st.sidebar:
     st.markdown("## 🚀 부업무 스튜디오 Pro")
@@ -280,22 +391,19 @@ with st.sidebar:
     )
 
     st.divider()
-    st.markdown("### ⚡ 빠른 데이터 관리")
-    if st.button("🔄 기본 추천 경매/청약 데이터로 초기화", use_container_width=True):
-        st.session_state.sub_db = {"auctions": DEFAULT_AUCTIONS, "subscriptions": DEFAULT_SUBSCRIPTIONS}
-        save_sub_db(st.session_state.sub_db)
-        st.toast("부업무 기본 데이터 복원 완료!", icon="✅")
-        st.rerun()
+    st.markdown("### 🔑 통합 API 인증키 상태")
+    st.success("✅ 공공데이터 API 인증키 고정 장착 완료")
 
     st.divider()
-    st.markdown("#### 💡 2개 프로그램 동시 실행 팁")
-    st.info(
-        "• **주업무 CRM (`app.py`):**\n`http://localhost:8501`\n\n"
-        "• **부업무 센터 (`sub_app.py`):**\n`http://localhost:8502`"
-    )
+    st.markdown("### ⚡ 빠른 데이터 관리")
+    if st.button("🔄 기본 경매·청약 데이터 복원", use_container_width=True):
+        st.session_state.sub_db = {"auctions": DEFAULT_AUCTIONS, "subscriptions": DEFAULT_SUBSCRIPTIONS}
+        save_sub_db(st.session_state.sub_db)
+        st.toast("기본 데이터 복원 완료!", icon="✅")
+        st.rerun()
 
 # ==========================================
-# 3. 상단 공통 헤더 및 4대 부업무 KPI 요약 바
+# 3. 상단 헤더 및 KPI 바
 # ==========================================
 st.markdown(f"""
 <div class="sub-header">
@@ -303,11 +411,11 @@ st.markdown(f"""
         <div>
             <h2 style="margin:0; color:white;">{selected_sub}</h2>
             <p style="margin:4px 0 0 0; opacity:0.9; font-size:0.9rem;">
-                김태형 대표 (김소장 · 청라 어니스트 아재) | 투자 분석 · 청약/공공임대 트래커 · 블로그 상위노출 마케팅 센터
+                김태형 대표 (공인중개사 김소장) | 공장·창고 경매 분석 · 청약/공공임대 트래커 · 블로그 마케팅 센터
             </p>
         </div>
         <div style="background:rgba(255,255,255,0.18); padding:6px 14px; border-radius:8px; font-weight:800; font-size:0.88rem;">
-            🟢 독립형 부업무 엔진 가동중 (sub_app.py)
+            🟢 경매 + 청약통합 고도화 엔진 가동중
         </div>
     </div>
 </div>
@@ -320,150 +428,241 @@ apt_auc_cnt = len(auc_list) - fac_auc_cnt
 
 k1, k2, k3, k4 = st.columns(4)
 with k1:
-    st.markdown(f'<div class="kpi-card"><div class="kpi-title">⚖️ 추적 중인 법원 경매 물건</div><div class="kpi-val">{len(auc_list)}건 <span style="font-size:0.82rem;color:#059669;">(공장 {fac_auc_cnt} · 아파트 {apt_auc_cnt})</span></div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="kpi-card"><div class="kpi-title">⚖️ 추적 중인 공장·아파트 경매 물건</div><div class="kpi-val">{len(auc_list)}건 <span style="font-size:0.82rem;color:#059669;">(공장 {fac_auc_cnt} · 기타 {apt_auc_cnt})</span></div></div>', unsafe_allow_html=True)
 with k2:
-    st.markdown(f'<div class="kpi-card"><div class="kpi-title">📅 수도권 아파트·공공임대 일정</div><div class="kpi-val" style="color:#2563eb;">{len(sub_list)}건 <span style="font-size:0.82rem;color:#475569;">(D-Day 실시간 추적)</span></div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="kpi-card"><div class="kpi-title">📅 총 청약 및 공공임대 공고</div><div class="kpi-val" style="color:#2563eb;">{len(sub_list)}건 <span style="font-size:0.82rem;color:#475569;">(분양·임대 통합)</span></div></div>', unsafe_allow_html=True)
 with k3:
-    st.markdown('<div class="kpi-card"><div class="kpi-title">✍️ 블로그 페르소나 프리셋</div><div class="kpi-val" style="color:#7c3aed;">2종 <span style="font-size:0.82rem;color:#475569;">(김소장 / 청라어니스트아재)</span></div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-title">✍️ 블로그 페르소나 브랜드</div><div class="kpi-val" style="color:#7c3aed;">김소장 <span style="font-size:0.82rem;color:#475569;">(단일 브랜딩 통일)</span></div></div>', unsafe_allow_html=True)
 with k4:
-    st.markdown('<div class="kpi-card"><div class="kpi-title">🔥 이번 주 황금 키워드 추천</div><div class="kpi-val" style="color:#dc2626;">TOP 5 <span style="font-size:0.82rem;color:#475569;">(시즌 트렌드 반영)</span></div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-title">🔥 네이버 황금 키워드 트렌드</div><div class="kpi-val" style="color:#dc2626;">TOP 5 <span style="font-size:0.82rem;color:#475569;">(경쟁강도 분석)</span></div></div>', unsafe_allow_html=True)
 
 st.write("")
 
 # ==============================================================================
-# [부업무 메뉴 1] ⚖️ 인천공장·창고 & 수도권아파트 법원 경매 분석기
+# [부업무 메뉴 1] ⚖️ 인천공장·창고 & 수도권 법원 경매 캘린더 (청약 포맷 완벽 일치 고도화)
 # ==============================================================================
 if selected_sub == SUB_MENUS[0]:
-    st.subheader("⚖️ 인천지방법원·부천지원 관할 공장·창고 및 수도권 핵심 아파트 경매 트래커")
-    st.caption("사건별 감정가 대비 최저입찰가율, 호이스트·수전설비 일괄매각 여부, 선순위 권리분석 및 경락잔금대출(80%) 실투자금을 즉시 계산합니다.")
+    st.subheader("⚖️ 인천지방법원·부천지원 관할 공장·창고 및 지식산업센터 법원 경매 캘린더")
+    st.caption("인천 서구(가좌동, 오류동, 석남동) 공장 및 지식산업센터 경매 물건의 감정가, 최저입찰가, 호이스트 설비, 권리분석 및 낙찰가율을 청약 캘린더와 동일한 포맷으로 추적합니다.")
 
-    ac1, ac2 = st.columns([1.6, 1])
-    with ac1:
-        auc_filter = st.radio("🔍 경매 물건 구분 필터", ["전체 경매물건 보기", "🏭 인천 공장·창고 경매만", "🏢 수도권 아파트 경매만"], horizontal=True)
-    with ac2:
-        bid_deposit_rate = st.slider("입찰보증금 비율 설정 (%)", min_value=10, max_value=20, value=10, step=5)
+    # 대법원 경매 및 유관 사이트 바로가기 버튼 삼총사
+    link_c1, link_c2, link_c3 = st.columns(3)
+    with link_c1:
+        st.markdown('<a href="https://www.courtauction.go.kr" target="_blank" style="display:block; text-align:center; background:#1e40af; color:white; padding:12px; border-radius:8px; text-decoration:none; font-weight:800; font-size:0.95rem;">⚖️ 대한민국 법원 경매정보 바로가기</a>', unsafe_allow_html=True)
+    with link_c2:
+        st.markdown('<a href="https://www.e-kiris.or.kr" target="_blank" style="display:block; text-align:center; background:#047857; color:white; padding:12px; border-radius:8px; text-decoration:none; font-weight:800; font-size:0.95rem;">🏭 한국산업단지공단 팩토리온 바로가기</a>', unsafe_allow_html=True)
+    with link_c3:
+        st.markdown('<a href="https://www.valueup.or.kr" target="_blank" style="display:block; text-align:center; background:#b45309; color:white; padding:12px; border-radius:8px; text-decoration:none; font-weight:800; font-size:0.95rem;">📊 밸류맵 (공장 실거래가) 바로가기</a>', unsafe_allow_html=True)
+
+    st.write("")
 
     auc_df = pd.DataFrame(auc_list)
-    if not auc_df.empty:
-        if auc_filter == "🏭 인천 공장·창고 경매만":
-            view_auc = auc_df[auc_df["물건종류"].str.contains("공장|창고", na=False)]
-        elif auc_filter == "🏢 수도권 아파트 경매만":
-            view_auc = auc_df[auc_df["물건종류"].str.contains("아파트", na=False)]
-        else:
-            view_auc = auc_df
+    
+    # 경매 물건 필터 및 검색
+    ac_f1, ac_f2 = st.columns([2, 1])
+    with ac_f1:
+        auc_filter = st.radio(
+            "🏭 경매 물건 형태별 보기",
+            ["전체 물건 보기", "🏭 단독공장 · 제조시설", "🏢 지식산업센터 · 아파트형공장"],
+            horizontal=True
+        )
+    with ac_f2:
+        auc_search = st.text_input("🔍 사건번호 / 지역 검색 (예: 51204, 석남동, 오류동)", "")
 
-        for _, row in view_auc.iterrows():
-            min_p = int(float(row.get("최저입찰가", 0)))
-            app_p = int(float(row.get("감정가", 1)))
-            bid_bond = int(min_p * (bid_deposit_rate / 100.0))
-            is_apt = "아파트" in str(row.get("물건종류", ""))
-            ltv_default = 0.70 if is_apt else 0.80
-            loan_est = int(min_p * ltv_default)
-            real_equity = min_p - loan_est
-            dday_txt, _ = calc_dday_str(row.get("매각기일", ""))
-            gcal_link = make_gcal_url(
-                title=f"[경매입찰] {row['사건번호']} ({row['소재지']})",
-                date_str=row.get("매각기일", ""),
-                details=f"감정가: {app_p:,}만원 / 최저가: {min_p:,}만원 / 입찰보증금: {bid_bond:,}만원 / 권리분석: {row['권리분석핵심']}",
-                location=row.get("관할법원", "")
+    view_auc = auc_df.copy()
+    if not view_auc.empty:
+        if "단독공장" in auc_filter:
+            view_auc = view_auc[view_auc["물건종류"].str.contains("단독공장|공장", na=False) & ~view_auc["물건종류"].str.contains("지식산업센터|아파트형공장", na=False)]
+        elif "지식산업센터" in auc_filter:
+            view_auc = view_auc[view_auc["물건종류"].str.contains("지식산업센터|아파트형공장", na=False)]
+
+        if auc_search.strip():
+            s_low = auc_search.strip().lower()
+            view_auc = view_auc[view_auc.apply(lambda r: s_low in " ".join(r.astype(str)).lower(), axis=1)]
+
+        st.markdown(f"### 📋 추적 중인 법원 경매 물건 목록 (`{len(view_auc)}건`)")
+        for _, arow in view_auc.iterrows():
+            min_p = int(float(arow.get("최저입찰가", 0)))
+            app_p = int(float(arow.get("감정가", 1)))
+            dday_str, _ = calc_dday_str(arow.get("매각기일", ""))
+            gcal_auc_url = make_gcal_url(
+                title=f"[경매입찰] {arow['사건번호']} ({arow['소재지']})",
+                date_str=arow.get("매각기일", ""),
+                details=f"감정가: {app_p:,}만원 / 최저가: {min_p:,}만원 | 설비: {arow['기계기구_설비']}",
+                location=arow.get("관할법원", "")
             )
-
+            
             st.markdown(f"""
             <div class="card-box">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                     <div>
-                        <span class="badge-blue">{row['관할법원']}</span>
-                        <span class="badge-red">{row['유찰상태']}</span>
-                        <span class="badge-green">{dday_txt}</span>
-                        <strong style="font-size:1.12rem; margin-left:6px;">[{row['사건번호']}] {row['소재지']} ({row['물건종류']})</strong>
+                        <span class="badge-blue">{arow.get('관할법원', '인천지방법원')}</span>
+                        <span class="badge-red">{arow.get('유찰상태', '유찰')}</span>
+                        <span class="badge-green">{dday_str}</span>
+                        <strong style="font-size:1.15rem; margin-left:6px;">[{arow['사건번호']}] {arow['소재지']}</strong>
                     </div>
                     <div>
-                        <strong style="color:#1e40af; margin-right:10px;">📅 매각기일: {row['매각기일']}</strong>
-                        <a href="{gcal_link}" target="_blank" style="background:#059669; color:white; padding:6px 12px; border-radius:6px; text-decoration:none; font-size:0.82rem; font-weight:800;">📅 구글캘린더 등록</a>
+                        <strong style="color:#1e40af; margin-right:10px;">📅 매각기일: {arow['매각기일']}</strong>
+                        <a href="{gcal_auc_url}" target="_blank" style="background:#059669; color:white; padding:6px 12px; border-radius:6px; text-decoration:none; font-size:0.82rem; font-weight:800;">📅 구글캘린더 등록</a>
                     </div>
                 </div>
-                <hr style="margin:10px 0;">
-                <p style="margin:4px 0;">📐 <b>면적구성:</b> {row['토지_건물면적']} | ⚙️ <b>기계기구/핵심설비:</b> {row['기계기구_설비']}</p>
-                <p style="margin:4px 0;">💰 <b>감정가:</b> {app_p:,}만원 ➔ <b style="color:#dc2626; font-size:1.05rem;">최저입찰가: {min_p:,}만원</b> (입찰보증금 {bid_deposit_rate}%: <b>{bid_bond:,}만원</b> 수표 준비)</p>
-                <p style="margin:4px 0;">🏦 <b>경락잔금대출({int(ltv_default*100)}% 가정):</b> 약 {loan_est:,}만원 가능 | 👉 <b>예상 필요 현금(자기자본): 약 {real_equity:,}만원</b> (취득세·명도비 별도)</p>
-                <p style="margin:4px 0; color:#065f46;">🔍 <b>권리분석 핵심:</b> {row['권리분석핵심']} (예상 적정 낙찰가율: <b>{row['예상낙찰가율']}</b>)</p>
+                <hr style="margin:8px 0;">
+                <p style="margin:4px 0; font-size:0.92rem;">
+                    🏭 <b>물건종류:</b> {arow['물건종류']} | 
+                    📐 <b>면적구성:</b> {arow['토지_건물면적']}
+                </p>
+                <p style="margin:4px 0; font-size:0.92rem;">
+                    ⚙️ <b>기계기구 및 설비:</b> {arow.get('기계기구_설비', '해당없음')}
+                </p>
+                <p style="margin:4px 0; font-size:0.95rem;">
+                    💰 <b>감정가:</b> {app_p:,}만원 ➔ <b style="color:#dc2626; font-size:1.05rem;">최저입찰가: {min_p:,}만원</b> (예상 낙찰가율: <b>{arow.get('예상낙찰가율', '65%')}</b>)
+                </p>
+                <p style="margin:4px 0; color:#065f46;">🔍 <b>권리분석 핵심:</b> {arow['권리분석핵심']}</p>
             </div>
             """, unsafe_allow_html=True)
 
-    with st.expander("➕ 관심 법원 경매 사건 직접 추가 / 표에서 바로 수정하기 (클릭하여 열기)"):
-        edited_auc_df = st.data_editor(auc_df, num_rows="dynamic", use_container_width=True, key="sub_auc_editor")
-        if st.button("💾 경매 사건 리스트 변경사항 저장", type="primary"):
+    with st.expander("➕ 법원 경매 물건 직접 추가·수정하기 (표 편집기)"):
+        edited_auc_df = st.data_editor(auc_df, num_rows="dynamic", use_container_width=True, key="sub_auc_editor_main")
+        if st.button("💾 경매 캘린더 변경사항 저장하기", type="primary"):
             st.session_state.sub_db["auctions"] = edited_auc_df.to_dict(orient="records")
             save_sub_db(st.session_state.sub_db)
-            st.toast("경매 리스트가 저장되었습니다!", icon="✅")
+            st.toast("경매 캘린더가 안전하게 저장되었습니다!", icon="✅")
             st.rerun()
 
     st.divider()
-    st.markdown("### 🧮 경매 목표 낙찰가 & 경락잔금대출 · 세금 · 부가세 환급 정밀 시뮬레이터")
-    ca1, ca2, ca3, ca4 = st.columns(4)
-    with ca1:
-        sim_type = st.selectbox("물건 유형 선택", ["🏭 공장·창고 경매 (취득세 4.6%)", "🏢 수도권 아파트 경매 (취득세 1.1~3.5%)"])
-        sim_app = st.number_input("감정가 (만원)", value=245000 if "공장" in sim_type else 76000, step=5000)
-        sim_bid = st.number_input("목표 입찰(낙찰)가 (만원)", value=155000 if "공장" in sim_type else 58000, step=2000)
-    with ca2:
-        sim_loan_pct = st.slider("경락잔금대출 한도 (%)", 40, 85, 80 if "공장" in sim_type else 70)
-        sim_rate = st.number_input("대출 금리 (연 %)", value=4.4, step=0.1)
-    with ca3:
-        default_tax_idx = 0 if "공장" in sim_type else 1
-        sim_tax_pct = st.selectbox("적용 취득세율 (%)", [4.6, 1.1, 3.5, 12.4], index=default_tax_idx)
-        sim_evict = st.number_input("예상 명도비 / 미납관리비 / 수리비 (만원)", value=1000, step=200)
-    with ca4:
-        loan_res = int(sim_bid * (sim_loan_pct / 100.0))
-        tax_res = int(sim_bid * (sim_tax_pct / 100.0))
-        cash_needed = (sim_bid - loan_res) + tax_res + sim_evict
-        m_interest = int((loan_res * (sim_rate / 100.0)) / 12)
-        bldg_vat = int(sim_bid * 0.35 * 0.10) if "공장" in sim_type else 0
-        st.metric("총 필요 자기자본 (취득세·명도비 포함)", f"{cash_needed:,} 만원", f"감정가 대비 낙찰가율 {(sim_bid/max(sim_app,1))*100:.1f}%")
-        st.metric("경락잔금대출 & 월 예상 이자", f"{loan_res:,} 만원", f"월 이자 약 {m_interest:,}만원")
-        if bldg_vat > 0:
-            st.caption(f"💡 공장 건물분 부가세 별도 징수 시 조기환급 예상액: 약 **{bldg_vat:,}만원**")
+    st.markdown("### ✍️ 선택 사건 [공인중개사 김소장] 공장·창고 경매 분석 블로그 포스팅 원고 생성")
+    if not view_auc.empty:
+        col_ga1, col_ga2 = st.columns([2, 1])
+        with col_ga1:
+            sel_auc = st.selectbox("포스팅할 경매 사건번호를 선택하세요", options=view_auc["사건번호"].tolist())
+        with col_ga2:
+            auc_focus = st.selectbox(
+                "작성 포커스 선택",
+                [
+                    "종합 분석 (사건개요 + 최저입찰가 분석 + 설비 가치 총정리)",
+                    "권리분석 및 명도 전략 집중 분석 (선순위 및 인도명령 대상)",
+                    "공장장 임대수익률 및 시세 차익 분석"
+                ]
+            )
+        target_auc_row = view_auc[view_auc["사건번호"] == sel_auc].iloc[0].to_dict()
+        
+        if st.button("🚀 [공인중개사 김소장] 고품질 경매 분석 포스팅 원고 생성", type="primary", use_container_width=True):
+            with st.spinner(f"'{sel_auc}' 물건 분석을 바탕으로 김소장 블로그 원고를 작성 중입니다..."):
+                ai_auc_post = call_gemini(
+                    AUCTION_POST_PROMPT,
+                    f"사건번호: {target_auc_row['사건번호']}\n관할법원: {target_auc_row.get('관할법원','인천지방법원')}\n물건종류: {target_auc_row['물건종류']}\n소재지: {target_auc_row['소재지']}\n면적: {target_auc_row['토지_건물면적']}\n감정가: {target_auc_row['감정가']}만원\n최저가: {target_auc_row['최저입찰가']}만원\n유찰상태: {target_auc_row['유찰상태']}\n매각기일: {target_auc_row['매각기일']}\n설비: {target_auc_row['기계기구_설비']}\n권리분석: {target_auc_row['권리분석핵심']}\n포커스: {auc_focus}"
+                )
+                if ai_auc_post:
+                    st.code(ai_auc_post, language="markdown")
+                else:
+                    st.code(f"""### 📌 네이버 VIEW 상위노출 추천 제목 3선
+1. [{target_auc_row['사건번호']}] 인천 서구 공장 경매 낙찰가율 분석 및 현장 임장 후기 (김소장)
+2. 감정가 반토막 난 {target_auc_row['소재지']} 공장 경매! 권리분석 및 호이스트 설비 체크
+3. 인천지방법원 공장·창고 경매 물건 추천! {target_auc_row['사건번호']} 투자 가치 분석
 
+---
+
+안녕하세요! 인천 서구 공장·창고 전문 중개사이자 현장을 발로 뛰는 **공인중개사 김소장**입니다! 😊
+
+오늘 분석해 드릴 물건은 인천지방법원에서 진행되는 알짜배기 공장 경매 물건인 **[{target_auc_row['사건번호']}]** 사건입니다.
+
+### 📋 1. 경매 물건 개요
+- **사건번호** : **{target_auc_row['사건번호']}**
+- **관할법원** : {target_auc_row.get('관할법원','인천지방법원')}
+- **물건종류** : {target_auc_row['물건종류']}
+- **소재지** : {target_auc_row['소재지']}
+- **토지·건물 면적** : {target_auc_row['토지_건물면적']}
+- **매각기일** : **{target_auc_row['매각기일']}**
+
+### 💰 2. 감정가 및 최저입찰가 분석
+- **감정가** : {int(target_auc_row['감정가']):,}만원
+- **최저입찰가** : <b style="color:red;">{int(target_auc_row['최저입찰가']):,}만원</b> ({target_auc_row['유찰상태']})
+
+### ⚙️ 3. 설비 내역 및 권리분석 핵심
+- **기계기구 및 설비** : {target_auc_row['기계기구_설비']}
+- **권리분석** : {target_auc_row['권리분석핵심']}
+
+### 💡 4. 김소장의 최종 입찰 전략 한줄평
+해당 물건은 제조장 및 물류창고로 최적의 입지를 갖추고 있으며, 철저한 권리분석과 현장 조사를 통해 안전하게 낙찰받는다면 향후 임대 수익 및 시세 차익을 동시에 기대할 수 있는 우량 물건입니다. 입찰 준비 중이신 분들은 언제든 문의주세요!
+
+#공인중개사김소장 #김소장 #인천공장경매 #{target_auc_row['사건번호'].replace(' ','')} #공장경매분석 #인천지방법원경매 #부동산경매
+""", language="markdown")
 
 # ==============================================================================
-# [부업무 메뉴 2] 📅 수도권 아파트 분양 & 공공임대 청약 캘린더 알림 (산단 분양 완전 제외)
+# [부업무 메뉴 2] 📅 수도권 청약 & 공공임대 캘린더 (청약홈 + LH 통합)
 # ==============================================================================
 elif selected_sub == SUB_MENUS[1]:
-    st.subheader("📅 수도권 주요 아파트 분양(신희타/공공/민영) 및 공공임대(행복·국민·통합임대) 청약 캘린더")
-    st.caption("부천대장, 인천계양, 검단신도시 등 수도권 핵심 아파트 청약과 LH/GH/IH 공공임대 모집 공고 D-Day를 추적하고 내 구글 캘린더와 연동합니다.")
+    st.subheader(f"📅 수도권 주요 공공분양·신혼희망타운·공공임대 청약 캘린더 (오늘 기준: {datetime.date.today().strftime('%Y년 %m월 %d일')})")
+    st.caption("청약홈과 LH 청약플러스 실시간 API를 동시에 연동하여 진행 중인 유효 공고를 한눈에 모아봅니다.")
 
+    link_c1, link_c2, link_c3 = st.columns(3)
+    with link_c1:
+        st.markdown('<a href="https://www.applyhome.co.kr/ai/aib/selectSubscrptCalenderView.do" target="_blank" style="display:block; text-align:center; background:#1e40af; color:white; padding:12px; border-radius:8px; text-decoration:none; font-weight:800; font-size:0.95rem;">🌐 청약홈 공식 분양캘린더 바로가기</a>', unsafe_allow_html=True)
+    with link_c2:
+        st.markdown('<a href="https://apply.lh.or.kr" target="_blank" style="display:block; text-align:center; background:#047857; color:white; padding:12px; border-radius:8px; text-decoration:none; font-weight:800; font-size:0.95rem;">🏢 LH 청약플러스 (공공임대/분양) 바로가기</a>', unsafe_allow_html=True)
+    with link_c3:
+        st.markdown('<a href="https://www.i-iH.co.kr" target="_blank" style="display:block; text-align:center; background:#b45309; color:white; padding:12px; border-radius:8px; text-decoration:none; font-weight:800; font-size:0.95rem;">🏡 iH 인천도시공사 분양정보 바로가기</a>', unsafe_allow_html=True)
+
+    st.write("")
+
+    sync_c1, sync_c2 = st.columns([1.8, 1])
+    with sync_c1:
+        st.info("💡 버튼을 누르면 **청약홈(민간/공공분양)**과 **LH 청약플러스(신혼희망타운·공공임대)** 서버에서 오늘 기준 유효한 공고를 동시에 긁어옵니다.")
+    with sync_c2:
+        if st.button("🔄 청약홈 + LH 실시간 공고 통합 불러오기", type="primary", use_container_width=True):
+            with st.spinner("청약홈 및 LH 청약플러스 서버에서 실시간 공고를 수집 및 병합 중입니다..."):
+                apply_items, err1 = fetch_applyhome_realtime()
+                lh_items, err2 = fetch_lh_realtime()
+                
+                existing = st.session_state.sub_db.get("subscriptions", [])
+                merged_dict = {x["단지명"]: x for x in existing}
+                
+                for item in apply_items + lh_items:
+                    merged_dict[item["단지명"]] = item
+                
+                new_list = list(merged_dict.values())
+                st.session_state.sub_db["subscriptions"] = new_list
+                save_sub_db(st.session_state.sub_db)
+                st.success(f"✅ 총 {len(new_list)}건의 유효 공고 동기화 완료! (청약홈 {len(apply_items)}건, LH {len(lh_items)}건)")
+                st.rerun()
+
+    sub_list = st.session_state.sub_db.get("subscriptions", [])
     sub_df = pd.DataFrame(sub_list)
-    sc_f1, sc_f2 = st.columns([1.8, 1])
+
+    sc_f1, sc_f2 = st.columns([2, 1])
     with sc_f1:
-        sub_cat_filter = st.radio(
-            "🏠 청약 / 임대 구분 필터",
-            ["전체 일정 보기", "💍 공공분양 · 신혼희망타운", "🏢 수도권 민영분양 (분양가상한제 등)", "🔑 수도권 공공임대 (행복·국민·통합임대)"],
+        sub_type_filter = st.radio(
+            "🏠 청약 및 임대 유형별 보기",
+            ["전체 일정 보기", "💍 신혼희망타운 · 공공분양", "🔑 LH 공공임대 · 행복주택", "🏢 청약홈 분양주택"],
             horizontal=True
         )
     with sc_f2:
-        kw_sub = st.text_input("단지명 / 지역 검색 (예: 부천대장, 계양, 청라)", "")
+        sub_search_kw = st.text_input("🔍 단지명 / 지역 검색 (예: 부천대장, 계양, 청라)", "")
 
     view_sub = sub_df.copy()
     if not view_sub.empty:
-        if "신혼희망타운" in sub_cat_filter:
-            view_sub = view_sub[view_sub["분류"].str.contains("공공분양|신혼희망타운|뉴홈", na=False)]
-        elif "민영분양" in sub_cat_filter:
-            view_sub = view_sub[view_sub["분류"].str.contains("민영", na=False)]
-        elif "공공임대" in sub_cat_filter:
-            view_sub = view_sub[view_sub["분류"].str.contains("공공임대|행복주택|국민임대", na=False)]
+        if "신혼희망타운" in sub_type_filter:
+            view_sub = view_sub[view_sub["분류"].str.contains("신혼희망타운|공공분양", na=False)]
+        elif "공공임대" in sub_type_filter:
+            view_sub = view_sub[view_sub["분류"].str.contains("공공임대|행복주택", na=False)]
+        elif "청약홈" in sub_type_filter:
+            view_sub = view_sub[view_sub["분류"].str.contains("청약홈", na=False)]
 
-        if kw_sub.strip():
-            k_low = kw_sub.strip().lower()
+        if sub_search_kw.strip():
+            k_low = sub_search_kw.strip().lower()
             view_sub = view_sub[view_sub.apply(lambda r: k_low in " ".join(r.astype(str)).lower(), axis=1)]
 
+        st.markdown(f"### 📋 조건에 일치하는 실시간 공고 (`{len(view_sub)}건`)")
         for _, srow in view_sub.iterrows():
-            dday_str, _ = calc_dday_str(srow.get("마감_주요일자", ""))
-            gcal_sub_url = make_gcal_url(
+            dday_str, _ = calc_dday_str(srow.get("모집공고일", ""))
+            gcal_url = make_gcal_url(
                 title=f"[청약/임대] {srow['단지명']}",
-                date_str=srow.get("마감_주요일자", ""),
-                details=f"구분: {srow['분류']} | 조건: {srow['분양가_임대조건']} | 체크: {srow['핵심체크사항']}",
+                date_str=srow.get("모집공고일", ""),
+                details=f"분류: {srow['분류']} | 조건: {srow['분양가_임대조건']} | 체크: {srow['핵심체크사항']}",
                 location=srow.get("지역", "")
             )
-            badge_cls = "badge-purple" if "임대" in srow["분류"] else "badge-blue"
+            badge_cls = "badge-purple" if "임대" in str(srow["분류"]) else ("badge-red" if "신혼희망" in str(srow["분류"]) else "badge-blue")
+            
             st.markdown(f"""
             <div class="card-box">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
@@ -473,303 +672,184 @@ elif selected_sub == SUB_MENUS[1]:
                         <strong style="font-size:1.1rem; margin-left:6px;">{srow['단지명']} ({srow['지역']})</strong>
                     </div>
                     <div>
-                        <strong style="color:#dc2626; margin-right:10px;">⏰ 청약/서류 일정: {srow['마감_주요일자']}</strong>
-                        <a href="{gcal_sub_url}" target="_blank" style="background:#2563eb; color:white; padding:6px 12px; border-radius:6px; text-decoration:none; font-size:0.82rem; font-weight:800;">📅 구글캘린더 알림 등록</a>
+                        <strong style="color:#dc2626; margin-right:10px;">📢 공고일: {srow['모집공고일']}</strong>
+                        <a href="{gcal_url}" target="_blank" style="background:#2563eb; color:white; padding:6px 12px; border-radius:6px; text-decoration:none; font-size:0.82rem; font-weight:800;">📅 구글캘린더 등록</a>
                     </div>
                 </div>
                 <hr style="margin:8px 0;">
-                <p style="margin:4px 0;">🏠 <b>공급규모:</b> {srow['공급규모']} | 💰 <b>분양가 / 임대조건:</b> <b style="color:#0f172a;">{srow['분양가_임대조건']}</b></p>
-                <p style="margin:4px 0; color:#1e40af;">✅ <b>필수 체크포인트:</b> {srow['핵심체크사항']}</p>
+                <p style="margin:4px 0; font-size:0.92rem;">
+                    🎯 <b>특별공급:</b> {srow.get('특별공급일', '-')} | 
+                    🏢 <b>일반공급:</b> {srow.get('일반공급일', '-')} | 
+                    🎉 <b>당첨자발표:</b> <b style="color:#1e40af;">{srow.get('당첨자발표일', '-')}</b>
+                </p>
+                <p style="margin:4px 0; font-size:0.92rem;">
+                    📂 <b>서류제출기간:</b> <b style="color:#dc2626;">{srow.get('서류제출기간', '-')}</b> | 
+                    ✍️ <b>계약기간:</b> {srow.get('계약기간', '-')}
+                </p>
+                <p style="margin:4px 0;">🏠 <b>공급규모:</b> {srow['공급규모']} | 💰 <b>분양가/임대조건:</b> <b style="color:#0f172a;">{srow['분양가_임대조건']}</b></p>
+                <p style="margin:4px 0; color:#1e40af;">✅ <b>핵심 체크포인트:</b> {srow['핵심체크사항']}</p>
             </div>
             """, unsafe_allow_html=True)
 
-    with st.expander("➕ 신규 아파트 청약 / 수도권 공공임대 공고 일정 직접 추가·수정하기"):
-        edited_sub_df = st.data_editor(sub_df, num_rows="dynamic", use_container_width=True, key="sub_cal_editor")
-        if st.button("💾 청약/공공임대 캘린더 저장", type="primary"):
+    with st.expander("➕ 청약 및 공공임대 공고 직접 추가·수정하기 (표 편집기)"):
+        edited_sub_df = st.data_editor(sub_df, num_rows="dynamic", use_container_width=True, key="sub_cal_editor_main")
+        if st.button("💾 청약 캘린더 변경사항 저장하기", type="primary"):
             st.session_state.sub_db["subscriptions"] = edited_sub_df.to_dict(orient="records")
             save_sub_db(st.session_state.sub_db)
-            st.toast("청약 및 공공임대 캘린더가 업데이트되었습니다!", icon="✅")
+            st.toast("청약 캘린더가 안전하게 저장되었습니다!", icon="✅")
             st.rerun()
 
     st.divider()
-    col_sub1, col_sub2 = st.columns(2)
-    with col_sub1:
-        st.markdown("#### 💍 신혼희망타운 / 뉴홈 전용 모기지 대출 & 자금 계산기")
-        sh_price = st.number_input("예상 분양가 (만원)", value=48000, step=1000)
-        sh_ltv = st.slider("전용 모기지 대출 비율 (최대 70%, 4억 한도)", 30, 70, 70)
-        sh_rate = st.number_input("고정 금리 (연 %, 신희타 1.3% / 나눔형 1.9~3.0%)", value=1.3, step=0.1)
-        sh_loan = min(int(sh_price * (sh_ltv / 100.0)), 40000)
-        sh_self = sh_price - sh_loan
-        sh_monthly_int = int((sh_loan * (sh_rate / 100.0)) / 12)
-        st.success(
-            f"💰 **총 필요 자기자본:** **{sh_self:,}만원** (계약금 10% 약 `{int(sh_price*0.1):,}만원`)\n\n"
-            f"🏦 **전용 모기지 대출액:** **{sh_loan:,}만원** (연 {sh_rate}%) ➔ **월 이자 약 `{sh_monthly_int:,}만원`**"
-        )
+    st.markdown("### ✍️ 선택 단지 [공인중개사 김소장] 청약 · 공공임대 분석 블로그 포스팅 원고 생성")
+    if not view_sub.empty:
+        col_g1, col_g2 = st.columns([2, 1])
+        with col_g1:
+            sel_apt = st.selectbox("포스팅할 단지를 선택하세요", options=view_sub["단지명"].tolist())
+        with col_g2:
+            post_focus = st.selectbox(
+                "작성 포커스 선택",
+                [
+                    "종합 분석 (청약일정 + 분양가/임대조건 + 자격요건 총정리)",
+                    "당첨자 서류 제출 기간 & 부적격 방지 필수 서류 집중 안내",
+                    "특별공급 당첨 전략 및 주변 시세 비교 분석"
+                ]
+            )
+        target_sub_row = view_sub[view_sub["단지명"] == sel_apt].iloc[0].to_dict()
+        
+        if st.button("🚀 [공인중개사 김소장] 고품질 청약/임대 포스팅 원고 생성", type="primary", use_container_width=True):
+            with st.spinner(f"'{sel_apt}' 데이터를 바탕으로 김소장 블로그 원고를 작성 중입니다..."):
+                ai_post = call_gemini(
+                    SUBSCRIPTION_POST_PROMPT,
+                    f"분류: {target_sub_row['분류']}\n단지명: {target_sub_row['단지명']}\n지역: {target_sub_row['지역']}\n공급규모: {target_sub_row['공급규모']}\n모집공고일: {target_sub_row.get('모집공고일','-')}\n특별공급: {target_sub_row.get('특별공급일','-')}\n일반공급: {target_sub_row.get('일반공급일','-')}\n당첨자발표: {target_sub_row.get('당첨자발표일','-')}\n서류제출기간: {target_sub_row.get('서류제출기간','-')}\n계약기간: {target_sub_row.get('계약기간','-')}\n조건: {target_sub_row['분양가_임대조건']}\n체크사항: {target_sub_row['핵심체크사항']}\n포커스: {post_focus}"
+                )
+                if ai_post:
+                    st.code(ai_post, language="markdown")
+                else:
+                    st.code(f"""### 📌 네이버 VIEW 상위노출 추천 제목 3선
+1. {target_sub_row['단지명']} 모집공고 총정리! 청약 일정·분양가 및 서류제출 기간 필수 체크 (김소장)
+2. [{target_sub_row['지역']}] {target_sub_row['단지명']} 청약 자격과 부적격 방지 체크리스트 완벽 분석
+3. {target_sub_row['단지명']} 당첨 전략! 특별공급·일반공급 일정부터 계약까지 한눈에 보기
 
-    with col_sub2:
-        st.markdown("#### 🧮 민영주택 청약 가점 (84점 만점) & 공공임대 보증금 전환 계산기")
-        calc_tab1, calc_tab2 = st.tabs(["📊 민영 청약 가점 계산 (84점)", "🔑 공공임대 보증금 증액(월세 절감) 계산"])
-        with calc_tab1:
-            homeless_yrs = st.number_input("무주택 기간 (년, 만 30세 이후 또는 혼인신고일 기준)", 0, 15, 2)
-            dependents = st.number_input("부양가족 수 (본인 제외, 배우자·직계존비속)", 0, 6, 1)
-            bank_yrs = st.number_input("청약통장 가입기간 (년)", 0, 15, 6)
-            p_homeless = min(homeless_yrs * 2 + 2, 32) if homeless_yrs > 0 else 0
-            p_dep = min((dependents + 1) * 5, 35)
-            p_bank = min(bank_yrs + 2, 17)
-            total_score = p_homeless + p_dep + p_bank
-            st.info(f"📌 **나의 청약 가점 총점:** **{total_score}점** / 84점 만점 (무주택 {p_homeless}점 + 부양가족 {p_dep}점 + 통장 {p_bank}점)")
-        with calc_tab2:
-            base_dep = st.number_input("기본 임대보증금 (만원)", value=4500, step=500)
-            base_rent = st.number_input("기본 월 임대료 (만원)", value=26, step=2)
-            add_dep = st.number_input("추가 납부할 전환보증금 (만원)", value=2000, step=500)
-            conv_rate = st.number_input("전환이율 (연 %, LH/GH 통상 6~7%)", value=6.5, step=0.5)
-            rent_cut = round((add_dep * (conv_rate / 100.0)) / 12, 1)
-            final_rent = max(round(base_rent - rent_cut, 1), 0)
-            st.info(f"📉 보증금 **{base_dep + add_dep:,}만원**으로 증액 시 ➔ 월 임대료 **{rent_cut}만원 절감**되어 **월 약 `{final_rent}만원`** 납부!")
+---
 
+안녕하세요! 수도권 부동산과 청약 현장을 발로 뛰며 분석하는 **공인중개사 김소장**입니다! 😊
+
+오늘은 실수요자분들이 가장 기다리셨던 **'{target_sub_row['단지명']}'** 모집공고 핵심 내용과 청약 일정, 그리고 당첨 후 가장 중요한 **서류 제출 기간 및 자격 요건**을 꼼꼼하게 정리해 드립니다.
+
+### 📋 1. 사업 개요 및 공급 규모
+- **분류** : {target_sub_row['분류']}
+- **단지명** : **{target_sub_row['단지명']}**
+- **공급 위치** : {target_sub_row['지역']}
+- **공급 규모** : {target_sub_row['공급규모']}
+- **분양가 / 임대조건** : {target_sub_row['분양가_임대조건']}
+
+### 🗓️ 2. 핵심 청약 일정 및 서류 제출 기간
+- **모집공고일** : {target_sub_row.get('모집공고일', '-')}
+- **특별공급 접수일** : {target_sub_row.get('특별공급일', '-')}
+- **일반공급 접수일** : {target_sub_row.get('일반공급일', '-')}
+- **당첨자 발표일** : **{target_sub_row.get('당첨자발표일', '-')}**
+- **서류 제출 기간** : **<span style="color:red;">{target_sub_row.get('서류제출기간', '-')}</span>** *(발표 직후 기한 내 미제출 시 당첨 취소 주의!)*
+- **정당 계약 기간** : {target_sub_row.get('계약기간', '-')}
+
+### ✅ 3. 김소장의 핵심 체크포인트 & 부적격 방지 팁
+- **체크사항** : {target_sub_row['핵심체크사항']}
+- **현장 조언** : 공공분양·신혼희망타운 및 공공임대의 경우 무주택 세대구성원 유지와 소득·자산 기준 충족 여부가 당락을 결정합니다. 서류 제출 시 주민등록초본(과거 주소변동 포함) 등 세부 서류를 기한 내에 완벽하게 구비하시기 바랍니다.
+
+#공인중개사김소장 #김소장 #{target_sub_row['단지명'].replace(' ','')} #수도권청약 #신혼희망타운 #공공임대 #서류제출기간
+""", language="markdown")
 
 # ==============================================================================
-# [부업무 메뉴 3] 🍽️ 김소장 & 청라 어니스트 아재 맛집·일상 포토 블로그 오토 스튜디오
+# [부업무 메뉴 3] 🍽️ 맛집·일상 블로그 스튜디오
 # ==============================================================================
 elif selected_sub == SUB_MENUS[2]:
-    st.subheader("🍽️ 김소장 & 청라 어니스트 아재 맛집 · 일상 · 여행 포토 블로그 오토 스튜디오")
-    st.caption("직접 찍은 사진들을 업로드하고 사진별 코멘트를 적어주시면, 네이버 스마트블록/VIEW 상위노출 구조에 맞춘 생생한 내돈내산 원고가 자동 완성됩니다.")
+    st.subheader("🍽️ 공인중개사 김소장 맛집 · 일상 · 여행 포토 블로그 오토 스튜디오")
+    st.caption("사진을 여러 장 업로드하고 각 사진마다 한 줄 코멘트를 적어주시면 '김소장' 페르소나에 맞춘 고품질 블로그 원고가 완성됩니다.")
 
     b1, b2, b3 = st.columns(3)
     with b1:
-        blog_nick = st.selectbox(
-            "👤 블로그 페르소나 선택",
-            [
-                "청라 어니스트 아재 (솔직담백 내돈내산 리뷰어)",
-                "김소장 (인천 서구 현장을 발로 뛰는 친근한 부동산 소장님)"
-            ]
-        )
-        cat_options = [
-            "🍲 인천/청라/석남/부천 내돈내산 맛집 리뷰",
-            "🚗 주말 여행 · 태안 해루질 · 나들이 기록",
-            "🏀 농구(도약/RESUME) · 러닝 · 운동 일상",
-            "🏠 수도권 청약 · 공공임대 · 부동산 현장 이야기"
-        ]
-        default_cat_idx = cat_options.index(st.session_state.draft_preset_cat) if st.session_state.draft_preset_cat in cat_options else 0
-        blog_cat = st.selectbox("📂 포스팅 카테고리", cat_options, index=default_cat_idx)
+        place_name = st.text_input("📍 방문 식당 / 핵심 주제 *", value=st.session_state.draft_preset_topic)
     with b2:
-        place_name = st.text_input("📍 방문 식당 / 여행지 / 포스팅 핵심 주제 *", value=st.session_state.draft_preset_topic)
-        loc_info = st.text_input("🗺️ 동네 위치 / 주차 / 영업시간 팁", value="인천 서구 청라동·석남동 일대 (주차 가능)")
+        loc_info = st.text_input("🗺️ 위치 및 주차 팁", value="인천 서구 청라동·석남동 일대")
     with b3:
-        menu_point = st.text_input("🍖 주문 메뉴 및 가격 (또는 핵심 키워드) *", value=st.session_state.draft_preset_kw)
-        honest_rate = st.select_slider(
-            "⭐ 솔직 만족도 총평",
-            options=["⭐⭐⭐ 무난함 (한 번쯤 가볼 만한 곳)", "⭐⭐⭐⭐ 맛집인정 (든든하고 만족스러운 곳)", "⭐⭐⭐⭐⭐ 인생맛집/강력추천 (재방문 200%)"],
-            value="⭐⭐⭐⭐⭐ 인생맛집/강력추천 (재방문 200%)"
-        )
+        menu_point = st.text_input("🍖 주문 메뉴 및 가격", value=st.session_state.draft_preset_kw)
 
-    extra_memo = st.text_area(
-        "💬 추가로 넣고 싶은 생생 에피소드 한 줄 (선택)",
-        value="현장 일정 마치고 허기진 상태에서 방문했는데 양도 푸짐하고 잡내 하나 없이 깔끔해서 에너지 제대로 충전하고 왔습니다!",
-        height=68
-    )
-
-    st.markdown("##### 📸 블로그에 올릴 사진 다중 업로드 (사진을 올리면 사진별 1줄 설명 입력칸이 자동 생성됩니다)")
     uploaded_photos = st.file_uploader(
-        "JPG / PNG 사진 여러 장을 한꺼번에 선택해 주세요",
+        "📸 블로그에 올릴 사진 다중 업로드 (여러 장 선택 가능)",
         type=["jpg", "jpeg", "png", "webp"],
         accept_multiple_files=True,
-        key="sub_blog_photos"
+        key="sub_blog_photos_main"
     )
 
     photo_blocks_md = ""
     if uploaded_photos:
-        st.markdown("###### 🖼️ 업로드된 사진 미리보기 및 사진별 코멘트 매칭")
+        st.markdown("###### 🖼️ 업로드된 사진별 코멘트 입력")
         p_cols = st.columns(min(len(uploaded_photos), 3))
         for idx, pf in enumerate(uploaded_photos):
             with p_cols[idx % 3]:
                 st.image(pf, use_container_width=True, caption=f"사진 #{idx+1}: {pf.name}")
-                p_comment = st.text_input(
-                    f"📝 사진 #{idx+1} 설명 입력",
-                    key=f"sub_pcomment_{idx}",
-                    placeholder="예: 보글보글 끓어오르는 뚝배기 클로즈업 비주얼"
-                )
-                c_txt = p_comment.strip() if p_comment.strip() else "직접 촬영한 생생한 현장 사진입니다."
-                photo_blocks_md += (
-                    f"\n📷 **[사진 #{idx+1} 삽입 위치: `{pf.name}`]**\n"
-                    f"> 💬 *{c_txt}*\n\n"
-                    f"{c_txt} 사진에서 보시는 것처럼 실제 비주얼과 현장 분위기가 기대 이상으로 훌륭했습니다.\n"
-                )
+                p_comment = st.text_input(f"📝 사진 #{idx+1} 설명", key=f"sub_pcomment_{idx}", placeholder="비주얼 및 느낌 한 줄 요약")
+                c_txt = p_comment.strip() if p_comment.strip() else "김소장이 직접 촬영한 생생한 현장 사진입니다."
+                photo_blocks_md += f"\n📷 **[사진 #{idx+1} 삽입 위치: `{pf.name}`]**\n> 💬 *{c_txt}*\n\n{c_txt} 사진에서 보시는 것처럼 실제 분위기와 퀄리티가 훌륭했습니다.\n"
     else:
-        photo_blocks_md = (
-            "\n📷 **[사진 1 삽입 위치: 매장 외부 전경 간판 및 주차장 안내 사진]**\n"
-            "> 💬 *찾아가기 수월한 외관과 주차 공간 모습입니다.*\n\n"
-            "📷 **[사진 2 삽입 위치: 메뉴판 가격표 및 정갈한 기본 밑반찬 세팅 사진]**\n"
-            "> 💬 *가성비와 구성이 한눈에 보이는 메뉴판과 기본 상차림입니다.*\n\n"
-            "📷 **[사진 3 삽입 위치: 오늘 주문한 메인 메뉴 클로즈업 및 한 입 디테일 샷]**\n"
-            "> 💬 *비주얼부터 군침이 도는 오늘의 메인 하이라이트입니다!*\n"
-        )
+        photo_blocks_md = "\n📷 **[사진 1: 외부 및 전경]**\n> 💬 *찾아가기 편한 전경 모습입니다.*\n\n📷 **[사진 2: 메인 메뉴]**\n> 💬 *군침 도는 비주얼의 메인 메뉴입니다!*\n"
 
-    is_honest_ajae = "청라 어니스트 아재" in blog_nick
-    nick_short = "청라 어니스트 아재" if is_honest_ajae else "김소장"
-    greeting_line = (
-        "안녕하세요. 청라 솔직리뷰어 **청라 어니스트 아재**입니다! 😊"
-        if is_honest_ajae
-        else "안녕하세요! 인천 서구 현장을 발로 뛰는 친근한 이웃, **김소장**입니다! 😊"
-    )
-
-    clean_tag_name = place_name.replace(" ", "")
-    final_blog_md = f"""### 📌 네이버 VIEW / 스마트블록 상위노출 추천 제목 3선 (택 1)
-1. {place_name} 내돈내산 솔직 후기! {menu_point} 리얼 먹방 & 방문 꿀팁 ({nick_short})
-2. [{loc_info.split('(')[0].strip()}] {place_name} | 주차부터 대표 메뉴({menu_point})까지 100% 내돈내산 찐리뷰
-3. 실패 없는 {place_name} 방문기! 직접 다녀와 보고 느낀 솔직 장단점 총정리
+    final_blog_md = f"""### 📌 네이버 VIEW 상위노출 추천 제목 3선
+1. {place_name} 내돈내산 솔직 후기! {menu_point} 리얼 먹방 & 방문 꿀팁 (김소장)
+2. [{loc_info}] {place_name} | 주차부터 대표 메뉴({menu_point})까지 100% 찐리뷰
 
 ---
 
-{greeting_line}
+안녕하세요! 인천 서구 현장을 발로 뛰며 친근하게 소통하는 **공인중개사 김소장**입니다! 😊
 
-바쁜 일상 속에서도 기분 좋은 에너지를 채우기 위해 오늘 다녀온 곳은 바로 **'{place_name}'**입니다.
-광고나 협찬 일절 없이, 100% 제 지갑으로 직접 경험하고 남기는 솔직 담백한 리뷰를 지금 바로 시작해 볼게요!
+오늘 다녀온 곳은 바로 **'{place_name}'**입니다. 광고 일절 없이 직접 경험하고 남기는 솔직 리뷰를 시작합니다!
 
----
+### 📍 1. 핵심 정보
+- **장소** : {place_name}
+- **위치** : {loc_info}
+- **주요메뉴** : {menu_point}
 
-### 📍 1. [{place_name}] 핵심 정보 한눈에 보기
-* **방문 장소 / 주제** : **{place_name}**
-* **위치 및 주차 팁** : {loc_info}
-* **주요 메뉴 / 포인트** : **{menu_point}**
-* **{nick_short}의 솔직 평점** : {honest_rate}
-
----
-
-### 📸 2. 사진으로 보는 생생 현장 & 디테일 리뷰
+### 📸 2. 현장 스케치 & 디테일 리뷰
 {photo_blocks_md}
----
 
-### 💡 3. 경험 디테일 & {nick_short}의 솔직 총평
-이번에 경험한 핵심 포인트는 바로 **{menu_point}**였습니다.
-{extra_memo}
-
-* **좋았던 점** : 기본기가 탄탄하고 디테일이 살아있어 처음부터 끝까지 기분 좋게 즐길 수 있었습니다.
-* **총평 및 재방문 의사** : 자극적이지 않으면서도 확실한 매력이 있는 곳이라 근처 지나실 일이 있다면 꼭 한 번 들러보시길 추천합니다! 오늘도 기분 좋은 하루 보내세요.
-
-**#{clean_tag_name} #인천서구맛집 #청라맛집 #석남동맛집 #가좌동맛집 #역곡맛집 #내돈내산솔직후기 #김소장 #청라어니스트아재**
+### 💡 3. 김소장 총평
+기본기가 탄탄하고 만족스러운 곳이었습니다. 근처에 가실 일이 있다면 꼭 들러보시길 추천합니다!
+#공인중개사김소장 #김소장 #{place_name.replace(' ','')} #내돈내산솔직후기
 """
-
-    st.markdown("#### 🟢 완성된 네이버 블로그 포스팅 원고 (우측 상단 복사 아이콘 클릭)")
+    st.markdown("#### 🟢 완성된 블로그 포스팅 원고")
     st.code(final_blog_md, language="markdown")
 
-
 # ==============================================================================
-# [부업무 메뉴 4] 🔥 네이버 키워드 트렌드 & 조회수 폭발 TOP 5 추천 에이전트
+# [부업무 메뉴 4] 🔥 네이버 키워드 트렌드 추천
 # ==============================================================================
 elif selected_sub == SUB_MENUS[3]:
-    st.subheader("🔥 네이버 주요 키워드 트렌드 분석 & 이번 주 조회수 폭발 추천 키워드 TOP 5")
-    st.caption("블로그 지수를 빠르게 높이고 실제 유입(조회수·문의)을 폭발시키는 '월간 검색량 대비 문서수 경쟁강도(황금키워드)' 분석 및 주간 글감 추천 에이전트입니다.")
-
-    season_col1, season_col2 = st.columns([1.4, 1])
-    with season_col1:
-        target_theme = st.selectbox(
-            "🎯 집중 공략할 블로그 카테고리 테마 선택",
-            [
-                "🌟 전체 통합 (이번 주 조회수 폭발 황금 키워드 TOP 5)",
-                "🍲 청라 · 석남동 · 역곡 · 부천 로컬 맛집 & 핫플 (청라 어니스트 아재)",
-                "🏠 부천대장 · 인천계양 청약 & 수도권 공공임대 (정보성 유입 폭발)",
-                "🏭 인천 서구 공장 · 창고 실매물 & 산업단지 현장 (김소장 본업 유입)",
-                "🚗 주말 해루질 · 농구 · 운동 · 라이프스타일 (이웃 소통 & 체류시간 상승)"
-            ]
-        )
-    with season_col2:
-        st.info("💡 **황금 키워드 판별 공식:**\n`경쟁강도 = 누적 문서수 ÷ 월간 총검색량`\n👉 경쟁강도가 **1.5 미만**이면 상위노출 확률이 매우 높은 **초특급 황금 키워드**입니다!")
+    st.subheader("🔥 네이버 부동산 키워드 트렌드 분석 & 조회수 폭발 추천 키워드 TOP 5")
+    st.caption("실수요자 유입이 가장 높은 수도권 신혼희망타운, 공공분양, 공공임대 황금 키워드 리스트입니다.")
 
     kw_database = [
         {
-            "테마": "맛집",
-            "추천키워드": "석남역 점심 해장국 맛집",
-            "월간검색량": 4200,
-            "블로그문서수": 1850,
-            "경쟁강도": 0.44,
-            "등급": "👑 초특급 황금",
-            "추천카테고리": "🍲 인천/청라/석남/부천 내돈내산 맛집 리뷰",
-            "프리셋메뉴": "뼈해장국 특 11,000원, 수육 한 접시",
-            "후킹제목": "석남역 직장인들이 줄 서서 먹는 진짜 해장국집, 내돈내산 솔직 후기 (주차·웨이팅 팁)"
+            "추천키워드": "부천대장 A-2블록 신혼희망타운 분양가 서류제출",
+            "월간검색량": 16500, "블로그문서수": 3100, "경쟁강도": 0.18,
+            "등급": "👑 초특급 황금", "후킹제목": "부천대장 A-2블록 신혼희망타운 공고 총정리 및 서류제출 필수 체크 (김소장)"
         },
         {
-            "테마": "맛집",
-            "추천키워드": "청라 커낼웨이 데이트 저녁 맛집",
-            "월간검색량": 8900,
-            "블로그문서수": 6400,
-            "경쟁강도": 0.72,
-            "등급": "🔥 조회수 폭발",
-            "추천카테고리": "🍲 인천/청라/석남/부천 내돈내산 맛집 리뷰",
-            "프리셋메뉴": "시그니처 스테이크 & 파스타 세트 (주차 편한 곳)",
-            "후킹제목": "청라 어니스트 아재가 직접 가본 커낼웨이 분위기 깡패 맛집, 광고 뺀 100% 내돈내산 리뷰!"
+            "추천키워드": "인천계양 공공분양 A17블록 본청약 분양가",
+            "월간검색량": 15400, "블로그문서수": 3800, "경쟁강도": 0.25,
+            "등급": "👑 초특급 황금", "후킹제목": "인천계양 테크노밸리 공공분양 본청약 일정 및 필요 자금 완벽 분석 (김소장)"
         },
         {
-            "테마": "청약/임대",
-            "추천키워드": "부천대장 신혼희망타운 본청약 분양가 모기지",
-            "월간검색량": 12400,
-            "블로그문서수": 3900,
-            "경쟁강도": 0.31,
-            "등급": "👑 초특급 황금",
-            "추천카테고리": "🏠 수도권 청약 · 공공임대 · 부동산 현장 이야기",
-            "프리셋메뉴": "전용 55㎡ 추정분양가 및 1.3% 고정금리 대출 한도 총정리",
-            "후킹제목": "부천대장 A5·A6 신혼희망타운 본청약 임박! 필요 현금과 1.3% 대출 월 이자 직접 계산해 봤습니다"
+            "추천키워드": "수도권 LH 행복주택 공공임대 예비입주자 모집",
+            "월간검색량": 21500, "블로그문서수": 7200, "경쟁강도": 0.33,
+            "등급": "🔥 조회수 폭발", "후킹제목": "수도권 LH 공공임대 및 행복주택 신청 자격·소득기준 한눈에 보기 (김소장)"
         },
         {
-            "테마": "청약/임대",
-            "추천키워드": "인천 청년 신혼부부 행복주택 통합공공임대 소득기준",
-            "월간검색량": 9600,
-            "블로그문서수": 4100,
-            "경쟁강도": 0.43,
-            "등급": "👑 초특급 황금",
-            "추천카테고리": "🏠 수도권 청약 · 공공임대 · 부동산 현장 이야기",
-            "프리셋메뉴": "무주택 세대구성원 소득·자산 컷 및 보증금 상호전환 계산법",
-            "후킹제목": "월세 10만원대로 거주 가능? 수도권 행복주택·통합공공임대 자격조건과 보증금 전환 꿀팁 총정리"
-        },
-        {
-            "테마": "공장/본업",
-            "추천키워드": "인천 서구 가좌동 호이스트 단독공장 임대",
-            "월간검색량": 3100,
-            "블로그문서수": 1200,
-            "경쟁강도": 0.39,
-            "등급": "💎 진성고객 유입",
-            "추천카테고리": "🏠 수도권 청약 · 공공임대 · 부동산 현장 이야기",
-            "프리셋메뉴": "전용 120평 / 호이스트 5톤 / 40ft 츄레라 진입 단독공장",
-            "후킹제목": "인천 가좌동·석남동 40ft 츄레라 진입 수월한 단독공장 구할 때 반드시 체크해야 할 3가지 (김소장)"
-        },
-        {
-            "테마": "일상/여행",
-            "추천키워드": "태안 진산리 해루질 물때표 준비물 펜션",
-            "월간검색량": 7500,
-            "블로그문서수": 4800,
-            "경쟁강도": 0.64,
-            "등급": "🔥 조회수 폭발",
-            "추천카테고리": "🚗 주말 여행 · 태안 해루질 · 나들이 기록",
-            "프리셋메뉴": "태안 해루질 포인트, 조개·꽃게 수확 꿀팁 및 펜션 바비큐",
-            "후킹제목": "초보자도 통 가득 채우는 태안 진산리 해루질 리얼 후기! 필수 준비물부터 물때 보는 법까지"
-        },
-        {
-            "테마": "일상/여행",
-            "추천키워드": "나이키 사브리나4 EP 발볼러 사이즈 후기",
-            "월간검색량": 6200,
-            "블로그문서수": 2100,
-            "경쟁강도": 0.34,
-            "등급": "👑 초특급 황금",
-            "추천카테고리": "🏀 농구(도약/RESUME) · 러닝 · 운동 일상",
-            "프리셋메뉴": "발볼 넓은 가드 포지션 실착 접지력·쿠셔닝·사이즈 반업 팁",
-            "후킹제목": "발볼 넓은 가드가 직접 뛰어본 나이키 사브리나 4 EP 내돈내산 실착 리뷰 (270 vs 275 사이즈 선택법)"
+            "추천키워드": "인천 서구 가좌동 석남동 호이스트 단독공장 임대",
+            "월간검색량": 4300, "블로그문서수": 1150, "경쟁강도": 0.27,
+            "등급": "💎 진성고객 유입", "후킹제목": "인천 가좌동·석남동·원창동 40ft 츄레라 진입 단독공장 계약 전 체크사항 (김소장)"
         }
     ]
 
-    kw_df = pd.DataFrame(kw_database)
-    if "맛집" in target_theme:
-        view_kw = kw_df[kw_df["테마"] == "맛집"]
-    elif "청약" in target_theme:
-        view_kw = kw_df[kw_df["테마"] == "청약/임대"]
-    elif "공장" in target_theme:
-        view_kw = kw_df[kw_df["테마"] == "공장/본업"]
-    elif "해루질" in target_theme:
-        view_kw = kw_df[kw_df["테마"] == "일상/여행"]
-    else:
-        view_kw = kw_df.sort_values(by="경쟁강도", ascending=True).head(5)
-
-    st.markdown("#### 🏆 이번 주 블로그에 쓰면 조회수가 가장 잘 터질 추천 키워드 리스트")
-    for idx, krow in view_kw.iterrows():
+    st.markdown("#### 🏆 이번 주 [공인중개사 김소장] 조회수 폭발 황금 키워드")
+    for krow in kw_database:
         st.markdown(f"""
         <div class="kw-card">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
@@ -786,28 +866,15 @@ elif selected_sub == SUB_MENUS[3]:
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("##### ⚡ 선택한 황금 키워드로 3번 블로그 스튜디오 원고 즉시 세팅하기")
-    pick_kw_col1, pick_kw_col2 = st.columns([2.2, 1])
-    with pick_kw_col1:
-        sel_kw_str = st.selectbox("👇 바로 글을 작성할 추천 키워드를 선택하세요", view_kw["추천키워드"].tolist())
-    with pick_kw_col2:
-        st.write("")
-        if st.button("🚀 이 키워드로 블로그 원고 세팅", type="primary", use_container_width=True):
-            chosen_row = view_kw[view_kw["추천키워드"] == sel_kw_str].iloc[0]
-            st.session_state.draft_preset_topic = chosen_row["추천키워드"]
-            st.session_state.draft_preset_cat = chosen_row["추천카테고리"]
-            st.session_state.draft_preset_kw = chosen_row["프리셋메뉴"]
-            st.success(f"✅ '{sel_kw_str}' 키워드가 [🍽️ 3. 맛집·일상 블로그 스튜디오]에 세팅되었습니다! 왼쪽 메뉴에서 3번을 클릭해 보세요.")
-
     st.divider()
     st.markdown("#### 🧮 내 키워드 황금비율(경쟁강도) 직접 판별기 & 조회수 폭발 제목 생성기")
     kc1, kc2, kc3, kc4 = st.columns([1.5, 1, 1, 1.2])
     with kc1:
-        my_kw = st.text_input("분석할 키워드 입력", value="청라 삼겹살 내돈내산 맛집")
+        my_kw = st.text_input("분석할 키워드 입력", value="부천대장 A-2 신혼희망타운")
     with kc2:
-        my_vol = st.number_input("월간 총 검색량 (PC+모바일)", min_value=10, value=3500, step=100)
+        my_vol = st.number_input("월간 총 검색량 (PC+모바일)", min_value=10, value=12500, step=100)
     with kc3:
-        my_docs = st.number_input("현재 네이버 블로그 총 문서수", min_value=1, value=1900, step=100)
+        my_docs = st.number_input("현재 네이버 블로그 총 문서수", min_value=1, value=2200, step=100)
     with kc4:
         ratio_val = round(my_docs / max(my_vol, 1), 2)
         if ratio_val < 0.8:
@@ -819,9 +886,9 @@ elif selected_sub == SUB_MENUS[3]:
         st.metric("산출된 경쟁강도 지수", f"{ratio_val}", grade_txt)
 
     hook_titles = f"""### 🎯 [{my_kw}] 클릭률(CTR) 200% 끌어올리는 후킹 제목 5대 공식
-1. [솔직비교형] {my_kw}, 직접 다녀와 보고 느낀 장단점 3가지 (100% 내돈내산)
-2. [실패방지형] {my_kw} 가기 전에 모르면 손해 보는 주차·웨이팅·대표메뉴 꿀팁 총정리
-3. [페르소나형] 청라 어니스트 아재(김소장)가 추천하는 {my_kw}, 재방문 의사 200% 찐후기!
-4. [숫자강조형] 단돈 1만원대부터 즐기는 {my_kw} TOP 포인트 5가지 한눈에 보기
-5. [궁금증유발] 현지인들만 조용히 찾아간다는 {my_kw}, 과연 소문만큼 맛있을까?"""
+1. [실전분석형] {my_kw}, 현업 공인중개사 김소장이 짚어주는 핵심 체크포인트 3가지
+2. [실패방지형] {my_kw} 신청·방문 전에 모르면 손해 보는 필수 서류·자격조건 총정리
+3. [페르소나형] 공인중개사 김소장이 직접 분석한 {my_kw}, 실수요자 맞춤 완벽 가이드!
+4. [숫자강조형] 단 5분 만에 끝내는 {my_kw} 핵심 비교 포인트 TOP 5 한눈에 보기
+5. [궁금증유발] 요즘 가장 문의 많은 {my_kw}, 실제 현장 분위기와 안전마진은 어떨까?"""
     st.code(hook_titles, language="markdown")
