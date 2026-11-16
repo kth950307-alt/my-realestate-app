@@ -1,0 +1,6 @@
+.streamlit/secrets.toml
+*.csv
+local_backup_cache*.json
+.DS_Store
+__pycache__/
+*.pyc

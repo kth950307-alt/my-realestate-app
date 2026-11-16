@@ -561,7 +561,7 @@
         </div>
     </div>
 
-    <!-- 매물 등록 / 수정 모달 (관리자 전용: 563011) -->
+    <!-- 매물 등록 / 수정 모달 (관리자 전용) -->
     <div id="admin-modal" class="modal-overlay" onclick="closeModalOnBg(event, 'admin-modal')">
         <div class="modal-box">
             <div class="modal-header">
@@ -894,7 +894,7 @@
             return "250평 이상 대형";
         }
 
-        // 🔒 관리자 모드 ON/OFF (보안 비밀번호: 563011)
+        // 🔒 관리자 모드 ON/OFF
         function toggleAdminMode() {
             if (!isAdmin) {
                 const pw = prompt("관리자 보안 비밀번호를 입력하세요:");

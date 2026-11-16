@@ -627,7 +627,7 @@ with st.sidebar:
     st.divider()
     st.markdown("### 🚨 오늘 연락할 손님 (콜백)")
     if due_customers:
-        st.error(f"🔥 오늘 연락할 손님 **{len(due_customers)}명**!")
+        st.error(f"🔥 오늘 연락할 손님 {len(due_customers)}명!")
         for dc in due_customers[:6]:
             st.markdown(f"""
             <div class="sidebar-call-card">
@@ -853,7 +853,7 @@ if selected_menu == MENU_LIST[0]:
 
         q_col1, q_col2, q_col3, q_col4 = st.columns([1.5, 1, 1, 1])
         with q_col1:
-            st.markdown(f"**📞 직통 전화:** [{sel_c_row['연락처']}](tel:{sel_c_row['연락처']}) | **현재상태:** `{sel_c_row['진행상태']}`")
+            st.markdown(f"📞 직통 전화: [{sel_c_row['연락처']}](tel:{sel_c_row['연락처']}) | 현재상태: `{sel_c_row['진행상태']}`")
         with q_col2:
             if st.button("✅ 오늘 통화완료 (+3일 뒤 리마인드)", use_container_width=True):
                 df_custs.at[sel_c_row.name, "최근통화일"] = datetime.date.today().strftime("%Y-%m-%d")
@@ -900,7 +900,7 @@ if selected_menu == MENU_LIST[0]:
 
             if matches:
                 m_df = pd.DataFrame(matches).sort_values(by="매칭점수", ascending=False)
-                st.success(f"🔥 **{sel_c_row['고객명']}** 님 조건에 부합하는 추천 매물이 **{len(m_df)}건** 자동 매칭되었습니다!")
+                st.success(f"🔥 {sel_c_row['고객명']} 님 조건에 부합하는 추천 매물이 {len(m_df)}건 자동 매칭되었습니다!")
                 st.dataframe(m_df, use_container_width=True, height=220)
 
                 top_matches = m_df.head(3)
@@ -912,7 +912,7 @@ if selected_menu == MENU_LIST[0]:
                     kakao_msg.append(f"■ 추천 #{i}. [{mr['권역']} {mr['해당층수']}] {mr['매물제목']}")
                     kakao_msg.append(f" • 면적/금액 : 전용 {mr['전용평수']}평 / {mr['가격설명']}")
                     kakao_msg.append(f" • 설비/도로 : 전력 {mr['전력']} / 호이스트 {mr['호이스트']} / {mr['도로조건']}\n")
-                kakao_msg.append("👉 실시간 전체 매물 보기: https://threven.github.io/my-realestate-app/")
+                kakao_msg.append("👉 실시간 전체 매물 보기: https://kth950307-alt.github.io/my-realestate-app/")
                 kakao_msg.append("시간 괜찮으실 때 연락 주시면 현장 바로 안내해 드리겠습니다. 오늘도 좋은 하루 보내세요!")
                 kakao_msg.append("📞 우리부동산 김태형 대표 직통: 010-2660-8276 / 사무실: 032-582-6200")
 
@@ -1157,7 +1157,7 @@ elif selected_menu == MENU_LIST[2]:
         filtered_df = filtered_df[mask]
         is_filtered = True
 
-    st.caption(f"조회된 매물: **{len(filtered_df)}건** (전체 {len(df_props)}건) | `홈페이지노출`을 `노출(공개)`로 바꾸고 저장하면 손님용 홈페이지(index.html)에 즉시 나타납니다.")
+    st.caption(f"조회된 매물: {len(filtered_df)}건 (전체 {len(df_props)}건) | `홈페이지노출`을 `노출(공개)`로 바꾸고 저장하면 손님용 홈페이지(index.html)에 즉시 나타납니다.")
 
     col_cfg = {
         "홈페이지노출": st.column_config.SelectboxColumn("홈페이지노출", options=["노출(공개)", "비공개(내부장부용)"], required=True),
@@ -1198,7 +1198,7 @@ elif selected_menu == MENU_LIST[2]:
     if pub_df.empty:
         st.info("현재 홈페이지에 '노출(공개)'로 설정된 매물이 없습니다.")
     else:
-        st.caption(f"현재 총 **{len(pub_df)}건**이 손님용 홈페이지에 공개 중입니다. (상세지번·건물주 연락처는 철저히 차단됩니다)")
+        st.caption(f"현재 총 {len(pub_df)}건이 손님용 홈페이지에 공개 중입니다. (상세지번·건물주 연락처는 철저히 차단됩니다)")
         cols_preview = st.columns(3)
         for idx, (_, pr) in enumerate(pub_df.iloc[::-1].head(6).iterrows()):
             with cols_preview[idx % 3]:
@@ -1264,7 +1264,7 @@ elif selected_menu == MENU_LIST[3]:
                         kakao_lines.append(f" • 핵심특징 : {r['핵심특징']}")
                     kakao_lines.append("")
 
-                kakao_lines.append("👉 실시간 전체 매물 보기: https://threven.github.io/my-realestate-app/")
+                kakao_lines.append("👉 실시간 전체 매물 보기: https://kth950307-alt.github.io/my-realestate-app/")
                 kakao_lines.append("📞 현장 답사 및 상세 문의: 우리부동산 032-582-6200 / 직통 010-2660-8276")
                 st.code("\n".join(kakao_lines), language="markdown")
 
@@ -1272,50 +1272,48 @@ elif selected_menu == MENU_LIST[3]:
                 st.markdown("#### 🟢 네이버 블로그 상위노출 포스팅용 원고 (첫 번째 선택 매물 기준)")
                 r0 = sel_rows.iloc[0]
                 hoist_blog = f"설치 완료 ({r0['호이스트제원']})" if r0['호이스트유무'] == "있음" else "없음 (추후 설치 협의 가능)"
-                blog_text = f"""### 📌 추천 상위노출 제목 3선 (택 1)
+                blog_text = f"""📌 추천 상위노출 제목 3선 (택 1)
 1. 인천 {r0['권역']} {r0['거래구분']} {r0['해당층수']} 전용 {r0['전용평수']}평 실매물 현장리뷰 ({r0['매물제목']})
 2. [{r0['권역']} {r0['거래구분']}] 전용 {r0['전용평수']}평 단독/제조 공장 ({r0['도로조건']} · 호이스트 {hoist_blog}) - 우리부동산 김소장
 3. 인천 서구 {r0['권역']} 즉시 가동 가능한 {r0['전용평수']}평 {r0['거래구분']}, 전력 {r0['전력']} · 층고 {r0['층고']} 완비
 
----
 
-안녕하세요! 인천 서구 공장·창고 전문 파트너, **우리부동산 공인중개사사무소 대표 공인중개사 김태형(김소장)**입니다.
-오늘 소개해 드릴 현장은 **{r0['권역']}**에 위치한 작업 효율 뛰어난 **{r0['해당층수']} {r0['거래구분']}** 매물입니다.
+안녕하세요! 인천 서구 공장·창고 전문 파트너, '우리부동산 공인중개사사무소' 대표 공인중개사 김태형(김소장)입니다.
+오늘 소개해 드릴 현장은 '{r0['권역']}'에 위치한 작업 효율 뛰어난 {r0['해당층수']} {r0['거래구분']} 매물입니다.
 
-📷 **[사진 1 삽입 위치: 공장 건물 외관 및 전면 진입도로 폭 (화물차 진출입로 강조)]**
+📷 [사진 1 삽입 위치: 공장 건물 외관 및 전면 진입도로 폭 (화물차 진출입로 강조)]
 
----
-### 📌 [매물 핵심 스펙 한눈에 보기]
-| 구분 | 상세 스펙 |
-| :--- | :--- |
-| **매물번호** | {r0['매물번호']} |
-| **소재지역** | 인천광역시 서구 {r0['권역']} ({r0['용도지역']}) |
-| **거래조건** | **{r0['가격설명']}** |
-| **해당층수** | {r0['해당층수']} |
-| **전용면적** | **공장/창고 전용 {r0['전용평수']}평** (사무실 {r0['사무실평수']}평 별도) |
-| **유효층고 / 전력** | 층고 {r0['층고']} / 계약전력 {r0['전력']} |
-| **호이스트 설비** | {hoist_blog} |
-| **진입도로 / 입주** | {r0['도로조건']} / {r0['입주날짜']} |
 
-📷 **[사진 2 삽입 위치: 공장 내부 에폭시 바닥 및 호이스트 레일/층고 사진]**
+📌 [매물 핵심 스펙 한눈에 보기]
+• 매물번호 : {r0['매물번호']}
+• 소재지역 : 인천광역시 서구 {r0['권역']} ({r0['용도지역']})
+• 거래조건 : {r0['가격설명']}
+• 해당층수 : {r0['해당층수']}
+• 전용면적 : 공장/창고 전용 {r0['전용평수']}평 (사무실 {r0['사무실평수']}평 별도)
+• 층고 / 계약전력 : 층고 {r0['층고']} / 계약전력 {r0['전력']}
+• 호이스트 설비 : {hoist_blog}
+• 진입도로 / 입주 : {r0['도로조건']} / {r0['입주날짜']}
 
----
-### 💡 [김소장의 현장 실사 체크 포인트]
+📷 [사진 2 삽입 위치: 공장 내부 에폭시 바닥 및 호이스트 레일/층고 사진]
+
+
+💡 [김소장의 현장 실사 체크 포인트]
 {r0['핵심특징'] if str(r0['핵심특징']).strip() else '차량 진출입이 수월하고 바닥 에폭시 및 기본 동력 설비가 잘 갖춰져 있어 즉시 가동 가능한 알짜 공장입니다.'}
 
-추천 업종으로는 **[{r0['추천업종'] if str(r0['추천업종']).strip() else '일반 제조업, 정밀가공, 물류창고'}]** 등을 강력 추천합니다.
+추천 업종으로는 [{r0['추천업종'] if str(r0['추천업종']).strip() else '일반 제조업, 정밀가공, 물류창고'}] 등을 강력 추천합니다.
 
-📷 **[사진 3 삽입 위치: 동력 배전반, 부속 사무실 및 외부 마당 사진]**
+📷 [사진 3 삽입 위치: 동력 배전반, 부속 사무실 및 외부 마당 사진]
 
----
-🏭 **인천 서구 석남동·가좌동·원창동·경서동 공장 매매/임대 문의는 언제든 편하게 연락 주세요!**
-- **상호** : 우리부동산 공인중개사사무소 (대표: 김태형)
-- **소재지** : 인천 서구 건지로 167 (석남역 인근)
-- **대표번호** : 매매 032-582-6200 / 임대 032-576-2600 / **직통 010-2660-8276**
-- **실시간 매물 홈페이지** : https://threven.github.io/my-realestate-app/
 
-#인천서구공장 #{r0['권역']}공장 #{r0['권역']}{r0['거래구분']} #인천공장전문 #우리부동산 #김소장"""
-                st.code(blog_text, language="markdown")
+🏭 인천 서구 석남동·가좌동·원창동·경서동 공장 매매/임대 문의는 언제든 편하게 연락 주세요!
+- 상호 : 우리부동산 공인중개사사무소 (대표: 김태형)
+- 소재지 : 인천 서구 건지로 167 (석남역 인근)
+- 대표번호 : 매매 032-582-6200 / 임대 032-576-2600 / 직통 010-2660-8276
+- 실시간 매물 홈페이지 : https://kth950307-alt.github.io/my-realestate-app/
+
+#인천서구공장 #{r0['권역']}공장 #{r0['권역']}{r0['거래구분']} #인천공장전문 #우리부동산 #김소장
+"""
+                st.code(blog_text, language="text")
 
 
 # ==============================================================================
