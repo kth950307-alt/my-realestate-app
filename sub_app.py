@@ -209,6 +209,28 @@ if "draft_preset_cat" not in st.session_state:
 if "draft_preset_kw" not in st.session_state:
     st.session_state.draft_preset_kw = "모집공고일, 신혼희망타운, 소득·자산 기준, 서류제출"
 
+# 청약 캘린더에서 반드시 있어야 하는 표준 컬럼 (누락된 데이터가 들어와도 방어)
+SUBSCRIPTION_COLUMNS = [
+    "분류", "단지명", "지역", "공급규모", "모집공고일", "특별공급일", "일반공급일",
+    "당첨자발표일", "서류제출기간", "계약기간", "마감_주요일자", "분양가_임대조건", "핵심체크사항"
+]
+
+def safe_cell(row, key, default="-"):
+    """행(dict/Series)에 컬럼이 없거나 값이 비어 있어도 KeyError 없이 안전하게 값을 꺼낸다."""
+    try:
+        val = row.get(key, default)
+    except Exception:
+        return default
+    if val is None:
+        return default
+    try:
+        if pd.isna(val):
+            return default
+    except (TypeError, ValueError):
+        pass
+    text = str(val).strip()
+    return text if text else default
+
 def calc_dday_str(date_str):
     try:
         target = datetime.datetime.strptime(str(date_str)[:10], "%Y-%m-%d").date()
@@ -628,6 +650,12 @@ elif selected_sub == SUB_MENUS[1]:
 
     sub_list = st.session_state.sub_db.get("subscriptions", [])
     sub_df = pd.DataFrame(sub_list)
+    # 🛡️ 예전에 저장된 자료나 다른 경로에서 들어온 공고에 특정 컬럼(모집공고일 등)이 없어도 화면이 멈추지 않도록 표준 컬럼을 채워 넣는다.
+    for _col in SUBSCRIPTION_COLUMNS:
+        if _col not in sub_df.columns:
+            sub_df[_col] = "-"
+        # 빈 값(NaN/None)도 '-'로 통일해서 표시·검색·선택 단계에서 오류가 나지 않게 한다.
+        sub_df[_col] = sub_df[_col].map(lambda v, _c=_col: safe_cell({_c: v}, _c))
 
     sc_f1, sc_f2 = st.columns([2, 1])
     with sc_f1:
@@ -654,40 +682,45 @@ elif selected_sub == SUB_MENUS[1]:
 
         st.markdown(f"### 📋 조건에 일치하는 실시간 공고 (`{len(view_sub)}건`)")
         for _, srow in view_sub.iterrows():
-            dday_str, _ = calc_dday_str(srow.get("모집공고일", ""))
+            s_분류 = safe_cell(srow, "분류")
+            s_단지명 = safe_cell(srow, "단지명")
+            s_지역 = safe_cell(srow, "지역")
+            s_모집공고일 = safe_cell(srow, "모집공고일")
+            s_dday_base = "" if s_모집공고일 == "-" else s_모집공고일
+            dday_str, _ = calc_dday_str(s_dday_base)
             gcal_url = make_gcal_url(
-                title=f"[청약/임대] {srow['단지명']}",
-                date_str=srow.get("모집공고일", ""),
-                details=f"분류: {srow['분류']} | 조건: {srow['분양가_임대조건']} | 체크: {srow['핵심체크사항']}",
-                location=srow.get("지역", "")
+                title=f"[청약/임대] {s_단지명}",
+                date_str=s_dday_base,
+                details=f"분류: {s_분류} | 조건: {safe_cell(srow, '분양가_임대조건')} | 체크: {safe_cell(srow, '핵심체크사항')}",
+                location="" if s_지역 == "-" else s_지역
             )
-            badge_cls = "badge-purple" if "임대" in str(srow["분류"]) else ("badge-red" if "신혼희망" in str(srow["분류"]) else "badge-blue")
+            badge_cls = "badge-purple" if "임대" in s_분류 else ("badge-red" if "신혼희망" in s_분류 else "badge-blue")
             
             st.markdown(f"""
             <div class="card-box">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                     <div>
-                        <span class="{badge_cls}">{srow['분류']}</span>
+                        <span class="{badge_cls}">{s_분류}</span>
                         <span class="badge-green">{dday_str}</span>
-                        <strong style="font-size:1.1rem; margin-left:6px;">{srow['단지명']} ({srow['지역']})</strong>
+                        <strong style="font-size:1.1rem; margin-left:6px;">{s_단지명} ({s_지역})</strong>
                     </div>
                     <div>
-                        <strong style="color:#dc2626; margin-right:10px;">📢 공고일: {srow['모집공고일']}</strong>
+                        <strong style="color:#dc2626; margin-right:10px;">📢 공고일: {s_모집공고일}</strong>
                         <a href="{gcal_url}" target="_blank" style="background:#2563eb; color:white; padding:6px 12px; border-radius:6px; text-decoration:none; font-size:0.82rem; font-weight:800;">📅 구글캘린더 등록</a>
                     </div>
                 </div>
                 <hr style="margin:8px 0;">
                 <p style="margin:4px 0; font-size:0.92rem;">
-                    🎯 <b>특별공급:</b> {srow.get('특별공급일', '-')} | 
-                    🏢 <b>일반공급:</b> {srow.get('일반공급일', '-')} | 
-                    🎉 <b>당첨자발표:</b> <b style="color:#1e40af;">{srow.get('당첨자발표일', '-')}</b>
+                    🎯 <b>특별공급:</b> {safe_cell(srow, '특별공급일')} | 
+                    🏢 <b>일반공급:</b> {safe_cell(srow, '일반공급일')} | 
+                    🎉 <b>당첨자발표:</b> <b style="color:#1e40af;">{safe_cell(srow, '당첨자발표일')}</b>
                 </p>
                 <p style="margin:4px 0; font-size:0.92rem;">
-                    📂 <b>서류제출기간:</b> <b style="color:#dc2626;">{srow.get('서류제출기간', '-')}</b> | 
-                    ✍️ <b>계약기간:</b> {srow.get('계약기간', '-')}
+                    📂 <b>서류제출기간:</b> <b style="color:#dc2626;">{safe_cell(srow, '서류제출기간')}</b> | 
+                    ✍️ <b>계약기간:</b> {safe_cell(srow, '계약기간')}
                 </p>
-                <p style="margin:4px 0;">🏠 <b>공급규모:</b> {srow['공급규모']} | 💰 <b>분양가/임대조건:</b> <b style="color:#0f172a;">{srow['분양가_임대조건']}</b></p>
-                <p style="margin:4px 0; color:#1e40af;">✅ <b>핵심 체크포인트:</b> {srow['핵심체크사항']}</p>
+                <p style="margin:4px 0;">🏠 <b>공급규모:</b> {safe_cell(srow, '공급규모')} | 💰 <b>분양가/임대조건:</b> <b style="color:#0f172a;">{safe_cell(srow, '분양가_임대조건')}</b></p>
+                <p style="margin:4px 0; color:#1e40af;">✅ <b>핵심 체크포인트:</b> {safe_cell(srow, '핵심체크사항')}</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -714,7 +747,10 @@ elif selected_sub == SUB_MENUS[1]:
                     "특별공급 당첨 전략 및 주변 시세 비교 분석"
                 ]
             )
-        target_sub_row = view_sub[view_sub["단지명"] == sel_apt].iloc[0].to_dict()
+        _sel_rows = view_sub[view_sub["단지명"] == sel_apt]
+        target_sub_row = (_sel_rows.iloc[0] if not _sel_rows.empty else view_sub.iloc[0]).to_dict()
+        # 🛡️ 선택한 단지 정보도 표준 컬럼으로 정리해서 KeyError가 날 수 없게 한다.
+        target_sub_row = {_k: safe_cell(target_sub_row, _k) for _k in SUBSCRIPTION_COLUMNS}
         
         if st.button("🚀 [공인중개사 김소장] 고품질 청약/임대 포스팅 원고 생성", type="primary", use_container_width=True):
             with st.spinner(f"'{sel_apt}' 데이터를 바탕으로 김소장 블로그 원고를 작성 중입니다..."):
