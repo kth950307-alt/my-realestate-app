@@ -24,7 +24,7 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
-        body { background-color: var(--warm-bg); color: var(--text-main); line-height: 1.55; padding-bottom: 95px; scroll-behavior: smooth; }
+        body { background-color: var(--warm-bg); color: var(--text-main); line-height: 1.55; padding-bottom: 102px; scroll-behavior: smooth; }
 
         /* 1. 밝고 화사한 상단 헤더 */
         header { background: rgba(255, 255, 255, 0.96); color: var(--text-main); position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 15px rgba(30, 64, 175, 0.06); border-bottom: 1px solid var(--border); backdrop-filter: blur(8px); }
@@ -48,13 +48,28 @@
         /* 2. 밝고 신뢰감 있는 프리미엄 히어로 배너 */
         .hero { 
             background: linear-gradient(135deg, #f0f7ff 0%, #e0effe 50%, #fef9ee 100%);
-            color: var(--text-main); padding: 48px 20px 44px; text-align: center; border-bottom: 2px solid #dbeafe; position: relative;
+            color: var(--text-main); padding: 22px 20px 34px; text-align: center; border-bottom: 2px solid #dbeafe; position: relative;
         }
-        .hero-inner { max-width: 980px; margin: 0 auto; }
+        .hero-inner { max-width: 1000px; margin: 0 auto; }
         .hero-tag { display: inline-block; background: #ffffff; border: 1.5px solid #93c5fd; color: var(--accent); padding: 6px 16px; border-radius: 25px; font-size: 13.5px; font-weight: 900; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08); }
-        .hero h1 { font-size: 33px; font-weight: 900; margin-bottom: 10px; letter-spacing: -0.6px; color: #0f172a; }
+        .hero h1 { font-size: 27px; font-weight: 900; margin-bottom: 8px; letter-spacing: -0.6px; color: #0f172a; }
         .hero h1 span { color: var(--accent); }
-        .hero p { font-size: 15.5px; color: #475569; margin-bottom: 24px; font-weight: 600; }
+        .hero p { font-size: 14.5px; color: #475569; margin-bottom: 20px; font-weight: 600; }
+
+        /* 2-1. 블로그 상단 배너(우리부동산)를 홈페이지 히어로로 배치 */
+        .hero-banner-wrap { margin: 0 auto 20px; }
+        .hero-banner-pc { display: block; width: 100%; max-width: 1000px; height: auto; margin: 0 auto; border-radius: 16px; border: 1px solid #dbeafe; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.13); }
+        .hero-mobile { display: none; }
+        /* 모바일 전용 히어로 카드 (배너 글자가 작아지지 않도록 사진 + 텍스트로 재구성) */
+        .hero-m-card { background: #ffffff; border: 1px solid #dbeafe; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10); text-align: center; }
+        .hero-m-photo { display: block; width: 100%; height: 176px; object-fit: cover; }
+        .hero-m-body { padding: 14px 16px 16px; }
+        .hero-m-badge { display: inline-block; background: #1e3a8a; color: #ffffff; font-size: 12px; font-weight: 900; padding: 5px 12px; border-radius: 6px; letter-spacing: -0.2px; }
+        .hero-m-title { font-size: 31px; font-weight: 900; color: #1e3a8a; letter-spacing: -1px; margin: 7px 0 2px; line-height: 1.15; }
+        .hero-m-sub { font-size: 13px; font-weight: 700; color: #475569; letter-spacing: -0.3px; margin-bottom: 12px; }
+        .hero-m-phones { display: flex; gap: 8px; }
+        .hero-m-phone { flex: 1; background: #1e3a8a; color: #ffffff; text-decoration: none; border-radius: 10px; padding: 10px 6px; font-size: 13.5px; font-weight: 900; box-shadow: 0 3px 10px rgba(30, 58, 138, 0.22); }
+        .hero-m-phone.cell { background: #2563eb; }
         .hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; max-width: 840px; margin: 0 auto; background: rgba(255, 255, 255, 0.9); padding: 16px; border-radius: 16px; border: 1px solid #dbeafe; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05); }
         .stat-item strong { display: block; font-size: 18.5px; color: var(--accent); font-weight: 900; margin-bottom: 2px; }
         .stat-item span { font-size: 12.5px; color: #64748b; font-weight: 700; }
@@ -87,6 +102,22 @@
         .pill-btn { padding: 8px 16px; border-radius: 25px; font-size: 13.5px; font-weight: 800; border: 1.5px solid #cbd5e1; background: #fcfdfd; color: #334155; cursor: pointer; transition: 0.15s; }
         .pill-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
         .pill-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 3px 10px rgba(37, 99, 235, 0.25); }
+
+        /* 5-1. 원클릭 빠른 필터 칩 (거래구분 · 평수 · 지역) */
+        .quick-filter-panel { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 18px 10px; margin-bottom: 16px; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04); }
+        .qf-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 6px; }
+        .qf-head h2 { font-size: 15.5px; font-weight: 900; color: var(--primary-dark); }
+        .qf-reset { background: none; border: none; color: var(--text-sub); font-size: 12.5px; font-weight: 800; cursor: pointer; text-decoration: underline; padding: 4px; }
+        .qf-reset:hover { color: var(--accent); }
+        .qf-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px dashed #e2e8f0; }
+        .qf-head + .qf-row { border-top: none; }
+        .qf-label { flex: 0 0 56px; font-size: 12.5px; font-weight: 900; color: #475569; }
+        .qf-chips { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
+        .qf-chips::-webkit-scrollbar { display: none; }
+        .qf-chip { padding: 9px 16px; border-radius: 22px; border: 1.5px solid #d3dbe6; background: #ffffff; color: #334155; font-size: 13.5px; font-weight: 800; cursor: pointer; transition: 0.15s; white-space: nowrap; }
+        .qf-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+        .qf-chip.active { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; border-color: #1d4ed8; box-shadow: 0 3px 10px rgba(37, 99, 235, 0.28); }
+        .qf-chip .qf-num { font-size: 11.5px; font-weight: 800; opacity: 0.72; margin-left: 4px; }
 
         /* 6. 정밀 검색 필터 패널 */
         .search-panel { background: #ffffff; border-radius: 16px; padding: 22px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); margin-bottom: 26px; border: 1px solid #e2e8f0; }
@@ -216,18 +247,32 @@
         .btn-save { width: 100%; background: var(--accent); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: 900; cursor: pointer; margin-top: 14px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); }
         .btn-export { width: 100%; background: var(--success); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 900; cursor: pointer; margin-top: 10px; }
 
-        /* 밝고 세련된 하단 플로팅 바 */
-        .floating-footer { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.96); color: var(--text-main); padding: 12px 20px; z-index: 1000; border-top: 2px solid #bfdbfe; box-shadow: 0 -4px 15px rgba(0,0,0,0.06); backdrop-filter: blur(8px); }
-        .floating-inner { max-width: 1320px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        /* 밝고 세련된 하단 플로팅 상담 바 (PC·모바일 공통) */
+        .floating-footer { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.97); color: var(--text-main); padding: 10px 20px calc(10px + env(safe-area-inset-bottom)); z-index: 1000; border-top: 2px solid #bfdbfe; box-shadow: 0 -4px 18px rgba(15, 23, 42, 0.08); backdrop-filter: blur(8px); }
+        .floating-inner { max-width: 1320px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
         .broker-info { font-size: 13.5px; font-weight: 700; color: #334155; }
         .broker-info strong { color: var(--primary-dark); font-weight: 900; }
-        .floating-btns { display: flex; gap: 8px; }
-        .f-btn-tel { background: var(--accent); color: white; padding: 10px 18px; border-radius: 10px; text-decoration: none; font-weight: 800; font-size: 14px; }
-        .f-btn-sms { background: var(--gold); color: #fff; padding: 10px 18px; border-radius: 10px; text-decoration: none; font-weight: 900; font-size: 14px; }
+        .floating-btns { display: flex; gap: 8px; align-items: stretch; }
+        .f-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 12px; text-decoration: none; font-weight: 900; font-size: 14.5px; line-height: 1.15; }
+        .f-btn .f-txt { display: flex; flex-direction: column; align-items: flex-start; }
+        .f-btn .f-txt small { font-size: 11.5px; font-weight: 800; opacity: 0.92; letter-spacing: 0.2px; }
+        .f-btn-tel { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); }
+        .f-btn-sms { background: linear-gradient(135deg, #f59e0b, #ea8a04); color: #ffffff; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.28); }
+        .f-btn-sub { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; font-size: 13.5px; }
 
         @media (max-width: 860px) {
-            .hero h1 { font-size: 23px; }
+            body { padding-bottom: 122px; }
+            .hero { padding: 14px 12px 26px; }
+            .hero-banner-pc { display: none; }
+            .hero-mobile { display: block; max-width: 520px; margin: 0 auto 16px; }
+            .hero h1 { font-size: 21px; }
+            .hero p { font-size: 13px; margin-bottom: 16px; }
             .hero-stats { grid-template-columns: repeat(2, 1fr); }
+            .quick-filter-panel { padding: 12px 14px 6px; }
+            .qf-row { display: block; padding: 9px 0; }
+            .qf-label { display: block; margin-bottom: 7px; }
+            .qf-chips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 3px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+            .qf-chip { padding: 10px 15px; font-size: 13px; }
             .pyeong-hero-grid { grid-template-columns: repeat(2, 1fr); }
             .zone-map-grid { grid-template-columns: 1fr; }
             .office-grid { grid-template-columns: 1fr; }
@@ -236,8 +281,12 @@
             .form-grid { grid-template-columns: 1fr; }
             .form-full { grid-column: span 1; }
             .broker-info { display: none; }
-            .floating-btns { width: 100%; }
-            .f-btn-tel, .f-btn-sms { flex: 1; text-align: center; }
+            .floating-inner { gap: 8px; }
+            .floating-btns { width: 100%; gap: 8px; }
+            .f-btn { flex: 1; flex-direction: row; padding: 12px 6px; font-size: 14px; border-radius: 12px; }
+            .f-btn .f-txt { align-items: center; flex: 1; }
+            .f-btn .f-txt small { font-size: 11.5px; }
+            .f-btn-sub { display: none; }
             .modal-img-main { height: 240px; }
         }
     </style>
@@ -266,6 +315,25 @@
     <!-- 밝고 화사한 히어로 배너 -->
     <section class="hero">
         <div class="hero-inner">
+            <!-- 우리부동산 블로그 상단 배너 (PC) -->
+            <div class="hero-banner-wrap">
+                <img class="hero-banner-pc" src="skin/01c_pc_hero_banner_966.png" alt="우리부동산 - 인천 서구 석남동 공장·창고·토지 전문 공인중개사 / 032-576-2600 · 010-2660-8276" width="966" height="264">
+                <!-- 모바일에서는 배너 글자가 작아지지 않도록 사진 + 텍스트 카드로 표시 -->
+                <div class="hero-mobile">
+                    <div class="hero-m-card">
+                        <img class="hero-m-photo" src="skin/01m_hero_photo.jpg" alt="인천 서구 북항배후단지 물류창고 전경">
+                        <div class="hero-m-body">
+                            <span class="hero-m-badge">공장·창고·토지 전문</span>
+                            <div class="hero-m-title">우리부동산</div>
+                            <p class="hero-m-sub">인천 서구 석남동 공장·창고 전문 공인중개사</p>
+                            <div class="hero-m-phones">
+                                <a href="tel:032-576-2600" class="hero-m-phone">📞 032-576-2600</a>
+                                <a href="tel:010-2660-8276" class="hero-m-phone cell">📱 010-2660-8276</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <span class="hero-tag">✔ 김태형 대표 공인중개사 100% 현장 실사 브리핑</span>
             <h1>인천 서구 <span>공장·창고·신축분양</span> 전문 플랫폼</h1>
             <p>츄레라(40ft) 진입 여부 · 호이스트 톤수 · 계약전력(kW) · 용도지역까지 완벽하게 검증된 실매물만 제공합니다</p>
@@ -294,7 +362,45 @@
     <!-- 메인 컨텐츠 영역 -->
     <main class="container">
         <section id="pane-list" class="tab-pane active">
-            
+
+            <!-- 원클릭 빠른 필터 (거래구분 · 평수 · 주요 지역) -->
+            <div class="quick-filter-panel" id="quick-filter">
+                <div class="qf-head">
+                    <h2>⚡ 원클릭 빠른 찾기</h2>
+                    <button type="button" class="qf-reset" onclick="resetFilters()">조건 초기화</button>
+                </div>
+                <div class="qf-row">
+                    <span class="qf-label">거래구분</span>
+                    <div class="qf-chips" id="chips-deal">
+                        <button type="button" class="qf-chip active" data-deal="ALL" onclick="setDealChip('ALL')">전체</button>
+                        <button type="button" class="qf-chip" data-deal="임대" onclick="setDealChip('임대')">🔑 임대</button>
+                        <button type="button" class="qf-chip" data-deal="매매" onclick="setDealChip('매매')">🏛️ 매매</button>
+                        <button type="button" class="qf-chip" data-deal="분양" onclick="setDealChip('분양')">🏗️ 분양</button>
+                    </div>
+                </div>
+                <div class="qf-row">
+                    <span class="qf-label">평수별</span>
+                    <div class="qf-chips" id="chips-area">
+                        <button type="button" class="qf-chip active" data-area="ALL" onclick="setAreaChip('ALL')">전체</button>
+                        <button type="button" class="qf-chip" data-area="L50" onclick="setAreaChip('L50')">50평 이하</button>
+                        <button type="button" class="qf-chip" data-area="50TO100" onclick="setAreaChip('50TO100')">50~100평</button>
+                        <button type="button" class="qf-chip" data-area="100TO200" onclick="setAreaChip('100TO200')">100~200평</button>
+                        <button type="button" class="qf-chip" data-area="OVER200" onclick="setAreaChip('OVER200')">200평 이상</button>
+                    </div>
+                </div>
+                <div class="qf-row">
+                    <span class="qf-label">주요 지역</span>
+                    <div class="qf-chips" id="chips-region">
+                        <button type="button" class="qf-chip active" data-region="ALL" onclick="setRegionChip('ALL')">전체</button>
+                        <button type="button" class="qf-chip" data-region="석남동" onclick="setRegionChip('석남동')">석남동</button>
+                        <button type="button" class="qf-chip" data-region="가좌동" onclick="setRegionChip('가좌동')">가좌동</button>
+                        <button type="button" class="qf-chip" data-region="원창동" onclick="setRegionChip('원창동')">원창동</button>
+                        <button type="button" class="qf-chip" data-region="도화·주안" onclick="setRegionChip('도화·주안')">도화·주안</button>
+                        <button type="button" class="qf-chip" data-region="청라·경서" onclick="setRegionChip('청라·경서')">청라·경서</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- 최상단 평수대별 5단계 대형 카드 -->
             <div class="pyeong-hero-grid" id="area-cards-top">
                 <div class="pyeong-card active" onclick="setAreaPill('ALL', this)">
@@ -353,6 +459,8 @@
                             <option value="경서동">경서동</option>
                             <option value="오류동">오류동 (검단산단)</option>
                             <option value="도화동">도화동</option>
+                            <option value="도화·주안">도화·주안 (도화·송림·송현)</option>
+                            <option value="청라·경서">청라·경서 (북인천IC)</option>
                             <option value="송림동">송림동</option>
                             <option value="송현동">송현동</option>
                         </select>
@@ -692,16 +800,22 @@
         </div>
     </div>
 
-    <!-- 하단 플로팅 바 -->
+    <!-- 하단 플로팅 상담 바 (PC·모바일 썸지 바로 닿는 위치) -->
     <div class="floating-footer">
         <div class="floating-inner">
             <div class="broker-info">
                 🏭 <strong>우리부동산공인중개사사무소</strong> (대표: 김태형 | 등록번호: 28260-2023-00082) | 인천 서구 건지로 167
             </div>
             <div class="floating-btns">
-                <a href="tel:032-582-6200" class="f-btn-tel">☎ 매매 032-582-6200</a>
-                <a href="tel:032-576-2600" class="f-btn-tel" style="background:#059669;">☎ 임대 032-576-2600</a>
-                <a href="tel:010-2660-8276" class="f-btn-sms">📱 대표직통 010-2660-8276</a>
+                <a href="tel:032-576-2600" class="f-btn f-btn-tel">
+                    <span class="f-ico">📞</span>
+                    <span class="f-txt">전화상담<small>032-576-2600</small></span>
+                </a>
+                <a href="sms:010-2660-8276?body=%5B%EC%9A%B0%EB%A6%AC%EB%B6%80%EB%8F%99%EC%82%B0%5D%20%ED%99%88%ED%8E%98%EC%9D%B4%EC%A7%80%20%EB%B3%B4%EA%B3%A0%20%EB%AC%B8%EC%9D%98%EB%93%9C%EB%A6%BD%EB%8B%88%EB%8B%A4.%20(%ED%9D%AC%EB%A7%9D%20%EC%A7%80%EC%97%AD%2F%ED%8F%89%EC%88%98%20%EA%B8%B0%EC%9E%85%20%EB%B6%80%ED%83%81%EB%93%9C%EB%A6%BD%EB%8B%88%EB%8B%A4)" class="f-btn f-btn-sms">
+                    <span class="f-ico">💬</span>
+                    <span class="f-txt">문자문의<small>010-2660-8276</small></span>
+                </a>
+                <a href="tel:032-582-6200" class="f-btn f-btn-sub">☎ 매매 032-582-6200</a>
             </div>
         </div>
     </div>
@@ -715,6 +829,64 @@
     <script>
         let isAdmin = false;
         let quickPower100 = false;
+        let chipArea = 'ALL';
+
+        // 주요 지역 묶음 (칩·드롭다운 공통 매칭). 매물 데이터의 권역 값과 정확히 대응한다.
+        const REGION_GROUPS = {
+            '도화·주안': ['도화동', '주안동', '송림동', '송현동'],
+            '청라·경서': ['경서동', '청라동']
+        };
+
+        function matchRegion(pRegion, selected) {
+            if (selected === 'ALL') return true;
+            const keys = REGION_GROUPS[selected] || [selected];
+            const target = String(pRegion || '');
+            return keys.some(k => target.includes(k));
+        }
+
+        // ⚡ 원클릭 빠른 필터 칩
+        function setDealChip(value) {
+            document.getElementById('f-deal').value = value;
+            syncFromDropdown();
+        }
+
+        function setAreaChip(value) {
+            chipArea = value;
+            // 한 번에 하나의 평수 조건만 적용되도록 기존 평수 카드·드롭다운은 '전체'로 되돌림
+            document.getElementById('f-area').value = 'ALL';
+            document.querySelectorAll('#area-cards-top .pyeong-card').forEach((c, i) => c.classList.toggle('active', i === 0));
+            renderProperties();
+        }
+
+        function setRegionChip(value) {
+            const sel = document.getElementById('f-region');
+            sel.value = value;
+            if (sel.value !== value) sel.value = 'ALL';
+            onRegionSelectChange();
+        }
+
+        function syncQuickChips() {
+            const deal = document.getElementById('f-deal').value;
+            document.querySelectorAll('#chips-deal .qf-chip').forEach(b => b.classList.toggle('active', b.dataset.deal === deal));
+
+            document.querySelectorAll('#chips-area .qf-chip').forEach(b => b.classList.toggle('active', b.dataset.area === chipArea));
+
+            const region = document.getElementById('f-region').value;
+            let activeRegion = 'ALL';
+            if (region !== 'ALL') {
+                document.querySelectorAll('#chips-region .qf-chip').forEach(b => {
+                    if (b.dataset.region === region) activeRegion = region;
+                });
+                if (activeRegion === 'ALL') {
+                    // 드롭다운에서 개별 동(예: 도화동·송림동)을 고르면 해당 묶음 칩을 켜준다
+                    document.querySelectorAll('#chips-region .qf-chip').forEach(b => {
+                        const grp = REGION_GROUPS[b.dataset.region];
+                        if (grp && grp.includes(region)) activeRegion = b.dataset.region;
+                    });
+                }
+            }
+            document.querySelectorAll('#chips-region .qf-chip').forEach(b => b.classList.toggle('active', b.dataset.region === activeRegion));
+        }
 
         function extractNum(val, defVal = 0) {
             const m = String(val || "").replace(/,/g, "").match(/[\d.]+/);
@@ -878,7 +1050,9 @@
                 "원창동": "인천광역시 서구 원창동 381",
                 "경서동": "인천광역시 서구 경서동 363",
                 "오류동": "인천광역시 서구 오류동 1640",
-                "도화동": "인천광역시 미추홀구 도화동"
+                "도화동": "인천광역시 미추홀구 도화동",
+                "도화·주안": "인천광역시 미추홀구 도화동",
+                "청라·경서": "인천광역시 서구 경서동 363"
             };
             const frame = document.getElementById("zone-map-frame");
             if (frame && queryMap[r]) {
@@ -942,12 +1116,14 @@
         function setAreaPill(areaCode, cardEl) {
             document.querySelectorAll('#area-cards-top .pyeong-card').forEach(b => b.classList.remove('active'));
             if (cardEl) cardEl.classList.add('active');
+            chipArea = 'ALL';
             document.getElementById('f-area').value = areaCode;
             renderProperties();
         }
 
         function syncAreaDropdown() {
             const val = document.getElementById('f-area').value;
+            chipArea = 'ALL';
             const map = { 'ALL': 0, 'UNDER70': 1, '70TO150': 2, '150TO250': 3, 'OVER250': 4 };
             const cards = document.querySelectorAll('#area-cards-top .pyeong-card');
             cards.forEach(b => b.classList.remove('active'));
@@ -1059,17 +1235,22 @@
             const hoist = document.getElementById('f-hoist').value;
             const keyword = document.getElementById('f-keyword').value.trim().toLowerCase();
 
+            syncQuickChips();
             document.getElementById('q-trailer').classList.toggle('active', trailer === 'YES');
             document.getElementById('q-hoist').classList.toggle('active', hoist === 'YES');
 
             const cardsHtml = [];
             properties.forEach((p, idx) => {
                 if (deal !== 'ALL' && p.deal !== deal) return;
-                if (region !== 'ALL' && !p.region.includes(region)) return;
+                if (!matchRegion(p.region, region)) return;
                 if (area === 'UNDER70' && p.areaNum > 70) return;
                 if (area === '70TO150' && (p.areaNum <= 70 || p.areaNum > 150)) return;
                 if (area === '150TO250' && (p.areaNum <= 150 || p.areaNum > 250)) return;
                 if (area === 'OVER250' && p.areaNum <= 250) return;
+                if (chipArea === 'L50' && p.areaNum > 50) return;
+                if (chipArea === '50TO100' && (p.areaNum <= 50 || p.areaNum > 100)) return;
+                if (chipArea === '100TO200' && (p.areaNum <= 100 || p.areaNum > 200)) return;
+                if (chipArea === 'OVER200' && p.areaNum <= 200) return;
                 if (trailer !== 'ALL' && p.hasTrailer !== trailer) return;
                 if (hoist !== 'ALL' && p.hasHoist !== hoist) return;
                 if (quickPower100 && p.powerNum < 100) return;
@@ -1097,6 +1278,7 @@
             document.getElementById('f-trailer').value = 'ALL';
             document.getElementById('f-hoist').value = 'ALL';
             document.getElementById('f-keyword').value = '';
+            chipArea = 'ALL';
             quickPower100 = false;
             document.getElementById('q-power').classList.remove('active');
             syncFromDropdown();
