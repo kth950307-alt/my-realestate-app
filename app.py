@@ -1545,6 +1545,7 @@ elif selected_menu == MENU_LIST[3]:
         st.session_state["bc_result"] = ""
     with st.expander("✨ AI 글 줄바꿈·별표 자동 정리기 (붙여넣고 1초 정리 · 지금 바로 써보기)", expanded=False):
         st.caption("제미나이나 챗GPT가 써준 블로그 글을 그대로 붙여넣고 [✨ 정리하기]만 누르면 별표(**)가 사라지고, 문장 중간에서 끊긴 줄이 이어져 네이버 블로그에 붙여도 깨지지 않습니다.")
+        st.caption("📱 외출 중이나 휴대폰으로 쓸 때는 전용 페이지를 즐겨찾기 해두세요 → https://kth950307-alt.github.io/my-realestate-app/blog-clean.html")
         bc_raw = st.text_area(
             "① 원문 붙여넣기 (Ctrl+V)",
             height=170, key="bc_raw",
@@ -1552,7 +1553,7 @@ elif selected_menu == MENU_LIST[3]:
         )
         bc_mode = st.radio(
             "② 정리 방식",
-            ["PC·모바일 겸용 (추천) · 문장 중간 줄바꿈만 정리", "모바일 전용 · 18자 줄및춤"],
+            ["PC·모바일 겸용 (추천) · 문장 중간 줄바꿈만 정리", "모바일 전용 · 18자 줄맞춤"],
             index=0, horizontal=True, key="bc_mode"
         )
         bc_c1, bc_c2 = st.columns([1, 1])
