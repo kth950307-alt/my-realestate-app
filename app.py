@@ -173,6 +173,228 @@ MENU_LIST = [
 LOCAL_CACHE_FILE = "local_backup_cache.json"
 
 # ==========================================
+# 2-1. ✨ AI 글 줄바꿈·별표 자동 정리기 (블로그 붙여넣기 전 1초 정리)
+# ==========================================
+_BC_LIST_START = re.compile(r"^(?:[•●○■□▶▷▪◦◆◇★☆※①②③④⑤📌📷📸💡🏭👉✅⚠]|\d{1,3}[.)]\s|\[)")
+_BC_EMOJI_HEAD = re.compile(r"^(?:📌|📷|📸|💡|🏭|👉|✅|※|■|▶|★|\[)")
+_BC_SENT_PUNCT = re.compile(r"""[.!?。！？…"'’”)\]｝》」』】~]$""")
+_BC_SENT_KO = re.compile(r"(?:요|다|죠|까|네|음|함|됨|임|니|오)$")
+_BC_HR = re.compile(r"^\s*(?:[-*_]\s*){3,}$")
+_BC_TABLE_SEP = re.compile(r"^\s*\|?[\s:|-]*-{2,}[\s:|-]*\|?\s*$")
+_BC_ATOMIC = "\u0001"   # # 소제목으로 들어온 줄 표시 (출력 전에 제거)
+_BC_HEAD_MARK = re.compile(r"^\s{0,3}#{1,6}(?:\s+|$)")
+
+
+def _bc_is_sentence_end(s):
+    if not s:
+        return False
+    return bool(_BC_SENT_PUNCT.search(s) or _BC_SENT_KO.search(s))
+
+
+def _bc_is_heading(s):
+    if not s:
+        return False
+    if s.startswith(_BC_ATOMIC):
+        return True
+    if _BC_EMOJI_HEAD.search(s):
+        return True
+    if re.search(r"[:：]$", s):
+        return True
+    if re.fullmatch(r"\[[^\]]{1,40}\]", s):
+        return True
+    return False
+
+
+def _bc_normalize_lines(raw):
+    """마크다운 기호·숨은 문자를 걷어내고 줄 단위 목록으로 만듭니다."""
+    t = str(raw or "")
+    t = t.replace("\r\n", "\n").replace("\r", "\n")
+    t = t.replace("\u00a0", " ")
+    t = re.sub(r"[\u200b-\u200d\ufeff]", "", t)
+    t = re.sub(r"<br\s*/?>", "\n", t, flags=re.IGNORECASE)
+    t = re.sub(r"</(?:p|div|li|h[1-6])>", "\n", t, flags=re.IGNORECASE)
+    t = re.sub(r"<[^>]+>", "", t)
+    t = re.sub(r"^\s*```.*$", "", t, flags=re.MULTILINE)
+
+    out = []
+    src_lines = t.split("\n")
+    for _i, line in enumerate(src_lines):
+        nxt = src_lines[_i + 1] if _i + 1 < len(src_lines) else ""
+        s = line.replace("\t", " ")
+        s = re.sub(r"^(?:\s*>\s?)+", "", s)                      # 인용구
+        if _BC_HR.match(s):                                          # 가로줄 --- *** ___
+            out.append("")
+            continue
+        if "|" in s and _BC_TABLE_SEP.match(s):                     # 표 구분선 |---|---| → 버림
+            continue
+        m_head = _BC_HEAD_MARK.match(s)                              # 제목 ###
+        if m_head:
+            rest = s[m_head.end():]
+            if not rest.strip():
+                continue
+            s = _BC_ATOMIC + rest.lstrip()
+        if "|" in s:                                                 # 표 행 | a | b | → • a · b
+            parts = [p.strip() for p in s.split("|") if p.strip()]
+            if len(parts) >= 2:
+                if "|" in nxt and _BC_TABLE_SEP.match(nxt):           # 헤더 행은 버림
+                    continue
+                s = "• " + " · ".join(parts)
+        m_bul = re.match(r"^\s*[-*+]\s+(.*)$", s)                   # 목록 기호 통일
+        if m_bul:
+            s = "• " + m_bul.group(1)
+        else:
+            s = re.sub(r"^\s*[•·●○■□▶▷▪◦◆◇]\s*", "• ", s)
+        s = re.sub(r"^(\d{1,3})\)\s*", r"\1. ", s)
+        m_bold = re.match(r"^\s*(?:\*\*|__)\s*([^*_]{1,80}?)\s*(?:\*\*|__)\s*$", s)   # 한 줄 전체가 굵은 글씨 → 소제목
+        if m_bold and m_bold.group(1).strip():
+            s = _BC_ATOMIC + m_bold.group(1).strip()
+        s = re.sub(r"\*{2,}", "", s)                               # ** __ ~~ ` 제거
+        s = re.sub(r"_{2,}", "", s)
+        s = s.replace("~~", "")
+        s = re.sub(r"`+", "", s)
+        s = re.sub(r"(^|\s)\*(\S)", r"\1\2", s)                     # 강조용 홑별표
+        s = re.sub(r"(\S)\*(\s|$)", r"\1\2", s)
+        s = re.sub(r"(^|\s)_(\S)", r"\1\2", s)
+        s = re.sub(r"(\S)_(\s|$)", r"\1\2", s)
+        s = re.sub(r"\[([^\]\n]{1,80})\]\(([^)\s]{1,300})\)", r"\1 (\2)", s)  # 링크
+        s = re.sub(r"[ \u3000]{2,}", " ", s).strip()
+        out.append(s)
+
+    cleaned = []
+    for ln in out:
+        if ln == "":
+            if not cleaned:
+                continue
+            if cleaned[-1] == "":
+                continue
+        cleaned.append(ln)
+    while cleaned and cleaned[-1] == "":
+        cleaned.pop()
+    return cleaned
+
+
+def _bc_join_sentences(lines):
+    """문장 중간에서 끊긴 줄을 이어 붙이고, 문장이 끝난 줄은 그대로 둡니다."""
+    res = []
+    for cur in lines:
+        if cur == "":
+            if res and res[-1] != "":
+                res.append("")
+            continue
+        prev = res[-1] if res else ""
+        can_join = False
+        if prev:
+            can_join = True
+            if _bc_is_sentence_end(prev):
+                can_join = False
+            elif _bc_is_heading(prev):
+                can_join = False
+            elif _bc_is_heading(cur):
+                can_join = False
+            elif _BC_LIST_START.match(cur):
+                can_join = False
+        if can_join:
+            res[-1] = prev + " " + cur
+        else:
+            res.append(cur)
+    return res
+
+
+def _bc_wrap_line(text, width):
+    raw = [w for w in re.split(r"\s+", text) if w]
+    words = []
+    k = 0
+    while k < len(raw):                                   # (괄호 묶음)은 한 덩어리로
+        w = raw[k]
+        while re.match(r"^[(（]", w) and not re.search(r"[)）]$", w) and len(w) < width and k + 1 < len(raw):
+            k += 1
+            w += " " + raw[k]
+        words.append(w)
+        k += 1
+    lines, line = [], ""
+    for w in words:
+        if len(w) > width and re.match(r"^[(<\[]?(?:https?://|www\.)", w):   # 주소는 자르지 않고 통째로
+            if line:
+                lines.append(line)
+                line = ""
+            lines.append(w)
+            continue
+        if not line:
+            while len(w) > width:
+                lines.append(w[:width])
+                w = w[width:]
+            line = w
+        elif len(line) + 1 + len(w) <= width:
+            line += " " + w
+        else:
+            lines.append(line)
+            while len(w) > width:
+                lines.append(w[:width])
+                w = w[width:]
+            line = w
+    if line:
+        lines.append(line)
+    return lines
+
+
+def _bc_blocks(lines):
+    blocks, cur, head_only = [], None, False
+    for raw_ln in lines:
+        ln = raw_ln[1:] if raw_ln.startswith(_BC_ATOMIC) else raw_ln
+        atom = raw_ln.startswith(_BC_ATOMIC)
+        if ln == "":
+            if cur is not None:
+                blocks.append({"text": cur})
+                cur, head_only = None, False
+            blocks.append({"blank": True})
+            continue
+        fresh = atom or bool(_BC_LIST_START.match(ln) or _bc_is_heading(ln))
+        if cur is None:
+            cur = ln
+            head_only = atom or (_bc_is_heading(ln) and not ln.startswith("•"))
+        elif fresh or head_only:
+            blocks.append({"text": cur})
+            cur = ln
+            head_only = atom or (_bc_is_heading(ln) and not ln.startswith("•"))
+        else:
+            cur += " " + ln
+    if cur is not None:
+        blocks.append({"text": cur})
+    return blocks
+
+
+def clean_ai_blog_text(raw, mode="pc"):
+    """제미나이·챗GPT 글을 네이버 블로그용으로 정리합니다.
+    mode="pc"     : 별표 제거 + 문장 중간 줄바꿈 이어 붙이기 (PC·모바일 겸용, 기본)
+    mode="mobile" : 별표 제거 + 모바일 화면 폭(18자)에 맞춰 단어 단위 줄맞춤
+    """
+    lines = _bc_normalize_lines(raw)
+    if mode == "mobile":
+        out = []
+        for b in _bc_blocks(lines):
+            if b.get("blank"):
+                if out and out[-1] != "":
+                    out.append("")
+                continue
+            text = b.get("text", "")
+            is_bullet = text.startswith("• ")
+            body = re.sub(r"^•\s*", "", text) if is_bullet else text
+            parts = _bc_wrap_line(body, 16 if is_bullet else 18)
+            for i, p in enumerate(parts):
+                if i == 0:
+                    out.append(("• " if is_bullet else "") + p.strip())
+                else:
+                    out.append(("  " if is_bullet else "") + p.strip())
+        while out and out[-1] == "":
+            out.pop()
+        return "\n".join(out).replace(_BC_ATOMIC, "")
+    joined = _bc_join_sentences(lines)
+    while joined and joined[-1] == "":
+        joined.pop()
+    return "\n".join(joined).replace(_BC_ATOMIC, "")
+
+
+# ==========================================
 # 2. 레거시 뒤틀린 행 자동 복구 + 초고속 인메모리 엔진 (Agent A)
 # ==========================================
 def repair_legacy_prop_rows(raw_rows):
@@ -1313,7 +1535,48 @@ elif selected_menu == MENU_LIST[3]:
 
 #인천서구공장 #{r0['권역']}공장 #{r0['권역']}{r0['거래구분']} #인천공장전문 #우리부동산 #김소장
 """
-                st.code(blog_text, language="text")
+                st.code(clean_ai_blog_text(blog_text, "pc"), language="text")
+
+    # ------------------------------------------------------------------
+    # ✨ AI 글 줄바꿈·별표 자동 정리기 (제미나이·챗GPT 글 붙여넣고 1초 정리)
+    # ------------------------------------------------------------------
+    st.divider()
+    if "bc_result" not in st.session_state:
+        st.session_state["bc_result"] = ""
+    with st.expander("✨ AI 글 줄바꿈·별표 자동 정리기 (붙여넣고 1초 정리 · 지금 바로 써보기)", expanded=False):
+        st.caption("제미나이나 챗GPT가 써준 블로그 글을 그대로 붙여넣고 [✨ 정리하기]만 누르면 별표(**)가 사라지고, 문장 중간에서 끊긴 줄이 이어져 네이버 블로그에 붙여도 깨지지 않습니다.")
+        bc_raw = st.text_area(
+            "① 원문 붙여넣기 (Ctrl+V)",
+            height=170, key="bc_raw",
+            placeholder="예)\n**인천 석남동 맛집 후기**\n\n안녕하세요 오늘은\n인천 석남동 맛집을\n다녀왔어요."
+        )
+        bc_mode = st.radio(
+            "② 정리 방식",
+            ["PC·모바일 겸용 (추천) · 문장 중간 줄바꿈만 정리", "모바일 전용 · 18자 줄및춤"],
+            index=0, horizontal=True, key="bc_mode"
+        )
+        bc_c1, bc_c2 = st.columns([1, 1])
+        with bc_c1:
+            bc_do = st.button("✨ 정리하기", type="primary", use_container_width=True)
+        with bc_c2:
+            bc_clear = st.button("비우기", use_container_width=True)
+        if bc_clear:
+            st.session_state["bc_result"] = ""
+            st.rerun()
+        if bc_do:
+            st.session_state["bc_result"] = (
+                clean_ai_blog_text(bc_raw, "mobile" if bc_mode.startswith("모바일") else "pc")
+                if bc_raw.strip() else ""
+            )
+        bc_out = st.session_state["bc_result"]
+        if bc_out:
+            bc_with = len(bc_out.replace("\n", ""))
+            bc_no = len(re.sub(r"\s", "", bc_out))
+            st.markdown("#### ③ 정리 결과 (오른쪽 위 복사 아이콘 → 네이버에 Ctrl+Shift+V)")
+            st.code(bc_out, language=None)
+            st.caption(f"공백 포함 {bc_with:,}자 / 공백 제외 {bc_no:,}자" + ("  ·  ✅ 체험단 1,000자 충족" if bc_with >= 1000 else f"  ·  체험단 1,000자까지 {1000 - bc_with:,}자"))
+        else:
+            st.caption("위 칸에 글을 붙여넣고 [✨ 정리하기]를 누르면 결과가 여기에 나옵니다.")
 
 
 # ==============================================================================
