@@ -1213,9 +1213,11 @@ function init(){
       setTrade(b.dataset.trade);
       const cur = $('price').value.trim();
       if (!cur || cur === prev) $('price').value = TPL[b.dataset.trade];
-      /* 스펙 마지막 칸 이름도 같이 */
+      /* 스펙 마지막 칸도 같이 */
       const l4 = $('specL4').value.trim();
       if (l4 === '임대 조건' || l4 === '매매가') $('specL4').value = b.dataset.trade === 'sale' ? '매매가' : '임대 조건';
+      const v4 = $('specV4').value.trim();
+      if (!v4 || v4 === prev || v4 === TPL.rent || v4 === TPL.sale) $('specV4').value = TPL[b.dataset.trade];
       render(); saveState();
     });
   });
