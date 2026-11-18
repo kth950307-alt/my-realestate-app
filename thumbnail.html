@@ -96,18 +96,21 @@
   .dlbar{display:flex; gap:8px}
   .dlbar button{flex:1; padding:13px 10px; font-size:15px}
   @media (max-width:920px){
-    main{grid-template-columns:1fr; padding:10px; gap:10px}
+    main{display:block; padding:10px}
+    .topbar{position:static}
     .previewWrap{
-      position:sticky; top:52px; z-index:20; background:var(--bg);
-      padding-bottom:6px; margin:0 -2px;
+      position:sticky; top:0; z-index:20; background:var(--bg);
+      padding:0 0 6px;
     }
     .canvasBox{padding:7px; border-radius:13px; box-shadow:0 6px 18px rgba(16,27,46,.10)}
     .previewMeta{display:none}
+    .controls{margin-top:6px}
     .card{padding:13px}
     .topbar{padding:9px 12px}
     .brand{font-size:14px}
     .brand small{display:none}
     button{padding:9px 11px; font-size:13.5px}
+    input[type=text],select{font-size:16px}
   }
 </style>
 </head>
