@@ -14,6 +14,7 @@
     --line:#E4E8EF; --bg:#F5F7FB; --muted:#6B7A90;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  [hidden]{display:none !important}
   html,body{margin:0;padding:0}
   body{
     background:var(--bg); color:var(--ink);
@@ -590,10 +591,10 @@ function drawA(){
     /* gold edge */
     ctx.fillStyle = '#F2C14E';
     ctx.beginPath();
-    ctx.moveTo(P + bw + skew - 7, by);
+    ctx.moveTo(P + bw + skew - 15, by);
     ctx.lineTo(P + bw + skew, by);
     ctx.lineTo(P + bw, by + bh);
-    ctx.lineTo(P + bw - 7, by + bh);
+    ctx.lineTo(P + bw - 15, by + bh);
     ctx.closePath();
     ctx.fill();
     setFont(700, fs, 0);
@@ -890,10 +891,12 @@ function drawB(){
 
   const checks = [S.chk0, S.chk1, S.chk2, S.chk3].map(function(s){ return (s || '').trim(); }).filter(Boolean);
   const room = photoBot - 26 - cy;
-  const perCheck = checks.length ? Math.min(138, room / checks.length) : 0;
+  const rowGap = checks.length ? Math.min(92, room / checks.length) : 0;
+  const blockH = checks.length ? (checks.length - 1) * rowGap + 46 : 0;
+  const startY = cy + Math.max(0, (room - blockH) / 2);
 
   checks.forEach(function(t, i){
-    const yy = cy + i * perCheck;
+    const yy = startY + i * rowGap;
     const lines = wrapText(t, 320, 600, 22, 0, 2);
     const boxSize = 24;
     const midY = yy + (lines.length > 1 ? 14 : 13);
@@ -946,7 +949,7 @@ function drawB(){
   ctx.fillStyle = '#F2C14E';
   ctx.fillRect(0, specTop, W, 3);
 
-  const CW = [184, 184, 184, 184, 264];
+  const CW = [190, 200, 180, 180, 250];
   let sx = 0;
   for (let i = 0; i < 5; i++){
     const lab = (S['specL' + i] || '').trim();
@@ -974,17 +977,21 @@ function drawB(){
     ctx.fillStyle = isPrice ? '#FFD84D' : '#8CA3C4';
     ctx.fillText(lab, x + 28, specTop + 64);
 
-    let vfs = 25;
-    while (vfs > 14){
-      const ls = wrapText(val, inner, 800, vfs, -0.6, 0);
-      let ok = ls.length <= 2;
-      for (let k = 0; ok && k < ls.length; k++){
-        if (tw(ls[k], 800, vfs, -0.6) > inner + 1) ok = false;
-      }
-      if (ok) break;
-      vfs -= 1;
+    let vfs = 0, vLines;
+    for (let s = 25; s >= 20; s--){
+      if (tw(val, 800, s, -0.6) <= inner){ vfs = s; break; }
     }
-    const vLines = wrapText(val, inner, 800, vfs, -0.6, 2);
+    if (vfs){
+      vLines = [val];
+    } else {
+      vfs = 24;
+      while (vfs > 14){
+        const ls = wrapText(val, inner, 800, vfs, -0.6, 0);
+        if (ls.length <= 2) break;
+        vfs -= 1;
+      }
+      vLines = wrapText(val, inner, 800, vfs, -0.6, 2);
+    }
     vLines.forEach(function(l, j){
       setFont(800, vfs, -0.6);
       ctx.fillStyle = '#FFFFFF';
