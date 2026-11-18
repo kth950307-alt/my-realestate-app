@@ -917,6 +917,28 @@
             document.body.appendChild(script);
         }
 
+        // 📅 최신등록순 정렬 도우미
+        //  ① 새로 등록한 매물(W-...) → 이관된 예전 매물(OLD-...) 순
+        //  ② 각 그룹 안에서는 등록일 최신 → 과거
+        //  ③ 같은 날짜면 매물번호가 뒤(늦은 시간)인 것부터, 이관 물건은 원본 순서(OLD-001 →)
+        function trailingNum(id) {
+            const m = String(id || "").match(/(\d+)\s*$/);
+            return m ? parseInt(m[1], 10) : 0;
+        }
+
+        function sortByLatestRegistration(items) {
+            return items.slice().sort((a, b) => {
+                const aMig = a.isMigrated ? 1 : 0;
+                const bMig = b.isMigrated ? 1 : 0;
+                if (aMig !== bMig) return aMig - bMig;
+                const aDate = a.regDate || "";
+                const bDate = b.regDate || "";
+                if (aDate !== bDate) return aDate < bDate ? 1 : -1;
+                if (aMig) return trailingNum(a.id) - trailingNum(b.id);
+                return trailingNum(b.id) - trailingNum(a.id);
+            });
+        }
+
         window.onWooriSheetLoaded = function(res) {
             const badge = document.getElementById('sheet-sync-badge');
             if (!res || !res.table || !res.table.rows) return;
@@ -954,6 +976,8 @@
                     sheetIds.add(idStr);
                     sheetItems.push({
                         id: idStr,
+                        regDate: c0,
+                        isMigrated: /^OLD-/i.test(idStr),
                         deal: dealClean,
                         region: c3 || "석남동",
                         badge: c4 ? `✨ ${c4}` : "🌟 실매물",
@@ -984,6 +1008,8 @@
                     sheetIds.add(idStr);
                     sheetItems.push({
                         id: idStr,
+                        regDate: "",
+                        isMigrated: /^OLD-/i.test(idStr),
                         deal: normalizeDeal(c3),
                         region: c4 || "석남동",
                         badge: c(6).includes("2층") ? "✨ 지상 2층" : "🌟 추천매물",
@@ -1010,7 +1036,7 @@
 
             if (sheetItems.length > 0) {
                 const remainingBase = baseProperties.filter(b => !sheetIds.has(b.id));
-                properties = [...sheetItems.reverse(), ...remainingBase];
+                properties = [...sortByLatestRegistration(sheetItems), ...remainingBase];
                 if (badge) badge.innerText = `🟢 시트 실시간 연동 (${sheetItems.length}건 + 기본 ${remainingBase.length}건)`;
                 updateZoneCounts();
                 renderProperties();
