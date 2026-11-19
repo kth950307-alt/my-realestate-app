@@ -842,6 +842,20 @@ function kSummaryBar(top, barH){
   });
 }
 
+/* 흰색으로 꽉 찬 공장 아이콘 — 작은 배지에서도 형태가 또렷하게 */
+function drawIconFactorySolid(x, y, s){
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(s / 24, s / 24);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.moveTo(3.5, 20); ctx.lineTo(3.5, 9); ctx.lineTo(9, 12.8); ctx.lineTo(9, 9);
+  ctx.lineTo(14.5, 12.8); ctx.lineTo(14.5, 4.5); ctx.lineTo(20.5, 4.5);
+  ctx.lineTo(20.5, 20); ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
 function kFooter(top){
   /* 밝은 홈페이지형 푸터 — index.html 헤더와 같은 화이트 · 로열블루 톤 */
   const g = ctx.createLinearGradient(0, top, 0, H);
@@ -874,18 +888,18 @@ function kFooter(top){
     ctx.fillText(phone, rx, cy - 36);
 
     /* 파란 원형 전화 아이콘 */
-    const ir = 17, icy = cy - 36 + pfs * 0.38, icx = rx - pw - 12 - ir;
+    const ir = 18, icy = cy - 36 + pfs * 0.38, icx = rx - pw - 12 - ir;
     ctx.save();
     ctx.shadowColor = 'rgba(37,99,235,.32)';
     ctx.shadowBlur = 8;
     ctx.shadowOffsetY = 2;
     const ig = ctx.createLinearGradient(icx - ir, icy - ir, icx + ir, icy + ir);
-    ig.addColorStop(0, '#2563EB');
+    ig.addColorStop(0, '#3B82F6');
     ig.addColorStop(1, '#1D4ED8');
     ctx.fillStyle = ig;
     ctx.beginPath(); ctx.arc(icx, icy, ir, 0, 6.2832); ctx.fill();
     ctx.restore();
-    drawIcon('phone', icx - 9, icy - 9, 18, '#FFFFFF');
+    drawIcon('phone', icx - 11, icy - 11, 23, '#FFFFFF');
   }
   if (addr){
     const afs = fitSize(addr, 700, 420, 20, 13, 0);
@@ -905,7 +919,7 @@ function kFooter(top){
   rr(bx, by, bs, bs, 18);
   ctx.fill();
   ctx.restore();
-  drawIcon('factory', bx + 16, by + 18, 32, '#FFFFFF');
+  drawIconFactorySolid(bx + 14, by + 12, 38);
 
   /* 상호 · 대표 */
   const lx = bx + bs + 16;
