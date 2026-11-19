@@ -316,12 +316,14 @@
             .hero-tag { font-size: 11px; padding: 4px 10px; margin-bottom: 7px; }
             .hero h1 { font-size: 19px; line-height: 1.32; }
             .hero p { font-size: 12px; line-height: 1.5; }
-            .hero-points { gap: 5px; margin-top: 9px; }
+            .hero-points { gap: 6px; margin-top: 9px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+            .hero-points::-webkit-scrollbar { display: none; }
             .hero-points li { font-size: 11px; padding: 4px 9px; }
             .quick-filter-panel { padding: 12px 14px 6px; }
             .qf-row { display: block; padding: 9px 0; }
             .qf-label { display: block; margin-bottom: 7px; }
-            .qf-chips { flex-wrap: wrap; gap: 6px; padding-bottom: 2px; }
+            .qf-chips { flex-wrap: nowrap; gap: 6px; padding-bottom: 2px; overflow-x: auto; scrollbar-width: none; }
+            .qf-chips::-webkit-scrollbar { display: none; }
             .qf-chip { padding: 9px 13px; font-size: 13px; }
             .pyeong-hero-grid { grid-template-columns: repeat(2, 1fr); }
             .zone-map-grid { grid-template-columns: 1fr; }
