@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
 <style>
   :root{
-    --navy:#0F2A55; --navy2:#123A70; --gold:#F2C14E; --ink:#101B2E;
+    --navy:#0F2A55; --navy2:#123A70; --gold:#F2C14E; --red:#D51C24; --ink:#101B2E;
     --line:#E4E8EF; --bg:#F5F7FB; --muted:#6B7A90;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
@@ -59,6 +59,7 @@
     color:#1C2B41;
   }
   .tag{font-size:10.5px; font-weight:800; color:var(--navy2); background:#E8F0FB; padding:3px 7px; border-radius:6px}
+  .tag.red{color:#B0171E; background:#FDEAEA}
   label.f{display:block; margin-bottom:9px}
   label.f>span{display:block; font-size:11.5px; font-weight:700; color:var(--muted); margin-bottom:4px}
   input[type=text],select{
@@ -67,8 +68,9 @@
   }
   input[type=text]:focus,select:focus{outline:2px solid #BFD4F2; border-color:#8FB2E3; outline-offset:0}
   .seg{display:flex; gap:5px; background:#EEF2F8; padding:4px; border-radius:12px; margin-bottom:0}
-  .seg button{flex:1; background:transparent; color:#5A6A80; font-size:13.5px; padding:9px 6px; border-radius:9px}
+  .seg button{flex:1; background:transparent; color:#5A6A80; font-size:13px; padding:9px 5px; border-radius:9px; line-height:1.25}
   .seg button.on{background:#fff; color:var(--navy2); box-shadow:0 1px 4px rgba(16,27,46,.10)}
+  .seg button.on.k{color:#C0161C}
   .drop{
     position:relative; border:2px dashed #C9D3E2; border-radius:12px; padding:13px; text-align:center;
     cursor:pointer; background:#FBFCFE; transition:.14s; overflow:hidden;
@@ -91,7 +93,9 @@
   .specGrid{display:flex; flex-direction:column; gap:6px; margin:4px 0 10px}
   .specRow{display:grid; grid-template-columns:104px 1fr; gap:6px}
   .specRow input{font-size:14px; padding:8px 10px}
+  .specRow.k{grid-template-columns:96px 1fr}
   .hint{font-size:11.5px; color:#8494A8; line-height:1.55; margin:8px 0 0}
+  .hint b{color:#41505F}
   .foot{font-size:11px; color:#9AA7B8; text-align:center; padding:6px 0 22px; line-height:1.6}
   .dlbar{display:flex; gap:8px}
   .dlbar button{flex:1; padding:13px 10px; font-size:15px}
@@ -145,7 +149,8 @@
     <div class="card">
       <div class="cardTitle">1. 스타일</div>
       <div class="seg" id="styleSeg">
-        <button type="button" data-style="A" class="on">A · 큰 사진형</button>
+        <button type="button" data-style="K" class="on k">김해 진영읍형</button>
+        <button type="button" data-style="A">A · 큰 사진형</button>
         <button type="button" data-style="B">B · 정보 카드형</button>
       </div>
     </div>
@@ -172,24 +177,28 @@
         </label>
       </div>
 
-      <div class="drop small" id="subDrop">
-        <input type="file" id="subFile" accept="image/*" hidden>
-        <div class="dropInner">
-          <span class="ic">＋</span>
-          <b>추가 사진</b>
-          <i>내부 · 사무실 사진 (선택)</i>
+      <div id="subPhotoBox">
+        <div class="drop small" id="subDrop">
+          <input type="file" id="subFile" accept="image/*" hidden>
+          <div class="dropInner">
+            <span class="ic">＋</span>
+            <b>추가 사진</b>
+            <i>내부 · 사무실 사진 (선택)</i>
+          </div>
+          <img id="subThumb" class="thumb" alt="">
         </div>
-        <img id="subThumb" class="thumb" alt="">
+
+        <div class="row">
+          <select id="subMode">
+            <option value="none">추가 사진 표시 안 함</option>
+            <option value="rect">사각으로 넣기</option>
+            <option value="circle">원형으로 넣기</option>
+          </select>
+          <button type="button" class="ghost" id="clearImg">사진 지우기</button>
+        </div>
       </div>
 
-      <div class="row">
-        <select id="subMode">
-          <option value="none">추가 사진 표시 안 함</option>
-          <option value="rect">사각으로 넣기</option>
-          <option value="circle">원형으로 넣기</option>
-        </select>
-        <button type="button" class="ghost" id="clearImg">사진 지우기</button>
-      </div>
+      <p class="hint" id="subPhotoNote" hidden>김해 진영읍형은 <b>대표 사진 한 장</b>만 씁니다. (동그라미 사진 없음)</p>
     </div>
 
     <div class="card">
@@ -200,31 +209,62 @@
       <label class="f"><span>강조 · 뒷부분 (노란 글씨)</span>
         <input type="text" id="t2" maxlength="18" placeholder="예) 대형창고 임대">
       </label>
-      <label class="f"><span>부제 · 한 줄 설명</span>
-        <input type="text" id="sub" maxlength="44" placeholder="예) 북항 초입 | 40m 대로변">
+      <label class="f" style="margin-bottom:0"><span id="subLabel">흰 배지 · 핵심 스펙</span>
+        <input type="text" id="sub" maxlength="44" placeholder="예) 대지 300평 · 층고 12.9m">
       </label>
-      <div class="row2">
-        <label class="f"><span>배지 항목</span>
-          <input type="text" id="areaLabel" maxlength="8" placeholder="대지">
-        </label>
-        <label class="f" style="margin-bottom:0"><span>배지 값</span>
-          <input type="text" id="areaValue" maxlength="14" placeholder="882평">
-        </label>
-      </div>
     </div>
 
     <div class="card">
-      <div class="cardTitle">4. 가격</div>
+      <div class="cardTitle">4. 가격 · 거래구분</div>
       <div class="seg" id="tradeSeg" style="margin-bottom:9px">
         <button type="button" data-trade="rent" class="on">임대</button>
         <button type="button" data-trade="sale">매매</button>
       </div>
-      <label class="f" style="margin-bottom:0"><span>가격 문구</span>
-        <input type="text" id="price" maxlength="42" placeholder="예) 보증금 5억 / 월 4,500만">
-      </label>
+      <div class="row2">
+        <label class="f" style="margin-bottom:0"><span>가격 카드 제목</span>
+          <input type="text" id="priceLabel" maxlength="10" placeholder="매매가">
+        </label>
+        <label class="f" style="margin-bottom:0"><span>가격 문구</span>
+          <input type="text" id="price" maxlength="30" placeholder="예) 7억원">
+        </label>
+      </div>
+      <p class="hint">매매를 고르면 배지가 <b>공장 매매</b>, 전화가 <b>032-582-6200</b>으로 바뀝니다.</p>
     </div>
 
-    <div class="card" id="bOnly">
+    <div class="card" id="kPanel">
+      <div class="cardTitle">5. 김해 진영읍형 내용 <span class="tag red">기본</span></div>
+
+      <label class="f"><span>왼쪽 위 붉은 배지</span>
+        <input type="text" id="badge" maxlength="14" placeholder="공장 매매">
+      </label>
+
+      <div class="cardTitle" style="margin:14px 0 8px">체크리스트 (최대 5줄)</div>
+      <label class="f"><span>체크 1</span><input type="text" id="chk0" maxlength="34"></label>
+      <label class="f"><span>체크 2</span><input type="text" id="chk1" maxlength="34"></label>
+      <label class="f"><span>체크 3</span><input type="text" id="chk2" maxlength="34"></label>
+      <label class="f"><span>체크 4</span><input type="text" id="chk3" maxlength="34"></label>
+      <label class="f"><span>체크 5</span><input type="text" id="chk4" maxlength="34"></label>
+
+      <div class="cardTitle" style="margin:14px 0 8px">하단 카드 4칸</div>
+      <div class="specGrid">
+        <div class="specRow k"><input type="text" id="kSpecL0" maxlength="10"><input type="text" id="kSpecV0" maxlength="24"></div>
+        <div class="specRow k"><input type="text" id="kSpecL1" maxlength="10"><input type="text" id="kSpecV1" maxlength="24"></div>
+        <div class="specRow k"><input type="text" id="kSpecL2" maxlength="10"><input type="text" id="kSpecV2" maxlength="24"></div>
+        <div class="specRow k"><input type="text" id="kSpecL3" maxlength="10"><input type="text" id="kSpecV3" maxlength="24"></div>
+      </div>
+
+      <div class="row2">
+        <label class="f"><span>대표 전화</span>
+          <input type="text" id="phone" maxlength="20" placeholder="032-576-2600">
+        </label>
+        <label class="f"><span>주소</span>
+          <input type="text" id="address" maxlength="34" placeholder="인천 서구 건지로 167">
+        </label>
+      </div>
+      <p class="hint">매매 <b>032-582-6200</b> · 임대 <b>032-576-2600</b> (거래구분을 바꾸면 자동으로 따라 바뀝니다. 직접 고쳐도 됩니다.)</p>
+    </div>
+
+    <div class="card" id="bPanel" hidden>
       <div class="cardTitle">5. 카드형 정보 <span class="tag">스타일 B</span></div>
 
       <label class="f"><span>매물번호</span>
@@ -234,11 +274,6 @@
       <label class="f"><span>추천 업종 · 제목</span>
         <input type="text" id="checkTitle" maxlength="22" placeholder="예) 이런 업종에 추천">
       </label>
-
-      <label class="f"><span>체크 포인트 1</span><input type="text" id="chk0" maxlength="34"></label>
-      <label class="f"><span>체크 포인트 2</span><input type="text" id="chk1" maxlength="34"></label>
-      <label class="f"><span>체크 포인트 3</span><input type="text" id="chk2" maxlength="34"></label>
-      <label class="f"><span>체크 포인트 4</span><input type="text" id="chk3" maxlength="34"></label>
 
       <div class="cardTitle" style="margin:14px 0 8px">하단 스펙 5칸</div>
       <div class="specGrid">
@@ -287,18 +322,27 @@ const $ = id => document.getElementById(id);
 
 /* ------------------------------------------------------------------ state */
 const DEFAULTS = {
+  badge: '공장 임대',
   t1: '원창동',
   t2: '대형창고 임대',
-  sub: '북항 초입 | 40m 대로변 | 1층 882평',
+  sub: '1층 882평 · 층고 7~9m',
   areaLabel: '대지',
   areaValue: '882평',
+  priceLabel: '임대가',
   price: '보증금 5억 / 월 4,500만',
-  listingNo: 'W-261117-0958',
-  checkTitle: '이런 업종에 추천',
-  chk0: '수출입 물류창고',
-  chk1: '건자재 유통 · 중량물 보관',
+  phone: '032-576-2600',
+  address: '인천 서구 건지로 167 (석남동)',
+  kSpecL0: '대지면적', kSpecV0: '1,200평',
+  kSpecL1: '건물면적', kSpecV1: '1,035평',
+  kSpecL2: '층고',     kSpecV2: '7~9m',
+  kSpecL3: '호이스트', kSpecV3: '설치',
+  chk0: '북항 초입 · 40m 대로변',
+  chk1: '1층 882평 + 사무동 153평',
   chk2: '층고 7~9m · 동력 20kW',
   chk3: '40ft 츄레라 도크 완비',
+  chk4: '보증금 5억 / 월 4,500만',
+  listingNo: 'W-261117-0958',
+  checkTitle: '이런 업종에 추천',
   specL0: '층수 · 평수', specV0: '1층 882평',
   specL1: '사무동',     specV1: '1~3층 153평',
   specL2: '층고',       specV2: '7~9m',
@@ -310,21 +354,31 @@ const DEFAULTS = {
   focusY: '50'
 };
 
-const TEXT_IDS = ['t1','t2','sub','areaLabel','areaValue','price','listingNo','checkTitle',
-  'chk0','chk1','chk2','chk3','contactLine',
+const TEXT_IDS = ['badge','t1','t2','sub','areaLabel','areaValue','priceLabel','price',
+  'phone','address',
+  'kSpecL0','kSpecV0','kSpecL1','kSpecV1','kSpecL2','kSpecV2','kSpecL3','kSpecV3',
+  'chk0','chk1','chk2','chk3','chk4',
+  'listingNo','checkTitle','contactLine',
   'specL0','specV0','specL1','specV1','specL2','specV2','specL3','specV3','specL4','specV4'];
 
 const S = {
-  style: 'A',
+  style: 'K',
   trade: 'rent',
   mainImg: null, subImg: null,
   mainName: '', subName: ''
 };
 
-const LS_KEY = 'woori_thumb_v1';
+const TPL = {
+  rent: { badge: '공장 임대', priceLabel: '임대가', price: '보증금 5억 / 월 4,500만', phone: '032-576-2600' },
+  sale: { badge: '공장 매매', priceLabel: '매매가', price: '매매 7억원',           phone: '032-582-6200' }
+};
+
+const LS_KEY = 'woori_thumb_v2';
+const LS_OLD = 'woori_thumb_v1';
 
 /* ------------------------------------------------------------- tiny utils */
 function setFont(weight, size, spacing){
+  if (typeof size !== 'number' || !isFinite(size) || size <= 0) size = 12;
   ctx.font = weight + ' ' + size + 'px ' + FF;
   try { ctx.letterSpacing = (spacing || 0) + 'px'; } catch(e){}
 }
@@ -339,15 +393,15 @@ function fitSize(text, weight, maxW, maxSize, minSize, spacing){
 }
 function rr(x, y, w, h, r){
   const rad = Math.min(r, w / 2, h / 2);
-  ctx.beginPath();
-  ctx.moveTo(x + rad, y);
+  ctx.beginPath(); ctx.moveTo(x + rad, y);
   ctx.arcTo(x + w, y, x + w, y + h, rad);
   ctx.arcTo(x + w, y + h, x, y + h, rad);
   ctx.arcTo(x, y + h, x, y, rad);
   ctx.arcTo(x, y, x + w, y, rad);
   ctx.closePath();
 }
-function wrapText(text, maxW, weight, size, spacing, maxLines){  setFont(weight, size, spacing);
+function wrapText(text, maxW, weight, size, spacing, maxLines){
+  setFont(weight, size, spacing);
   const lines = [];
   let line = '';
   for (let i = 0; i < text.length; i++){
@@ -418,10 +472,16 @@ function drawIcon(kind, x, y, s, color){
     ctx.lineTo(20, 20); ctx.lineTo(4, 20); ctx.closePath(); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(9.5, 20); ctx.lineTo(9.5, 14); ctx.lineTo(14.5, 14);
     ctx.lineTo(14.5, 20); ctx.stroke();
+  } else if (kind === 'land'){
+    ctx.moveTo(5, 3); ctx.lineTo(19, 3); ctx.lineTo(19, 21); ctx.lineTo(5, 21); ctx.closePath(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(5, 12); ctx.lineTo(10, 12); ctx.moveTo(5, 16.5); ctx.lineTo(9, 16.5); ctx.stroke();
   } else if (kind === 'lift'){
     ctx.strokeRect(5, 3, 14, 18);
     ctx.beginPath(); ctx.moveTo(9, 9.5); ctx.lineTo(12, 6.5); ctx.lineTo(15, 9.5); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(9, 14.5); ctx.lineTo(12, 17.5); ctx.lineTo(15, 14.5); ctx.stroke();
+  } else if (kind === 'height'){
+    ctx.moveTo(7, 3); ctx.lineTo(7, 21); ctx.moveTo(3, 3); ctx.lineTo(11, 3); ctx.moveTo(3, 21); ctx.lineTo(11, 21);
+    ctx.moveTo(14, 3); ctx.lineTo(21, 12); ctx.lineTo(14, 21); ctx.stroke();
   } else if (kind === 'power'){
     ctx.moveTo(13, 2); ctx.lineTo(5, 13.5); ctx.lineTo(10.5, 13.5);
     ctx.lineTo(9.5, 22); ctx.lineTo(18.5, 10.5); ctx.lineTo(13, 10.5); ctx.closePath(); ctx.fill();
@@ -431,6 +491,19 @@ function drawIcon(kind, x, y, s, color){
     ctx.lineTo(21, 15); ctx.lineTo(14, 15); ctx.closePath(); ctx.stroke();
     ctx.beginPath(); ctx.arc(7, 17.5, 2, 0, 6.2832); ctx.stroke();
     ctx.beginPath(); ctx.arc(17.5, 17.5, 2, 0, 6.2832); ctx.stroke();
+  } else if (kind === 'pin'){
+    ctx.moveTo(12, 22); ctx.lineTo(5, 12.5);
+    ctx.bezierCurveTo(2, 8, 3.5, 3, 12, 3);
+    ctx.bezierCurveTo(20.5, 3, 22, 8, 19, 12.5);
+    ctx.closePath(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(12, 9, 3, 0, 6.2832); ctx.stroke();
+  } else if (kind === 'phone'){
+    ctx.moveTo(7, 3.5); ctx.lineTo(10, 8); ctx.lineTo(7.5, 10.5);
+    ctx.bezierCurveTo(9.5, 14.5, 13.5, 18.5, 17.5, 20.5);
+    ctx.lineTo(20, 18); ctx.lineTo(16.5, 15);
+    ctx.bezierCurveTo(14.5, 15.5, 12.5, 15, 11, 13.5);
+    ctx.bezierCurveTo(9.5, 12, 9, 10, 9.5, 8);
+    ctx.closePath(); ctx.fill();
   } else if (kind === 'won'){
     ctx.moveTo(4, 5); ctx.lineTo(8, 19); ctx.lineTo(12, 8); ctx.lineTo(16, 19); ctx.lineTo(20, 5);
     ctx.stroke();
@@ -475,7 +548,7 @@ function outlined(text, x, y, opt){
   ctx.shadowBlur = Math.max(6, size * 0.16);
   ctx.shadowOffsetY = Math.max(2, size * 0.05);
   ctx.strokeStyle = '#0A1120';
-  ctx.lineWidth = Math.max(6, size * 0.155);
+  ctx.lineWidth = Math.max(6, size * (opt.strokeK || 0.155));
   ctx.strokeText(text, x, y);
   ctx.restore();
   ctx.save();
@@ -508,6 +581,437 @@ function placeholder(x, y, w, h, note){
   ctx.fillStyle = 'rgba(255,255,255,.38)';
   ctx.fillText(note || '오른쪽에서 사진 선택 · 끌어다 놓기 · 붙여넣기', x + w / 2, y + h / 2 + 24);
   ctx.restore();
+}
+
+/* =========================================================================
+   STYLE K — 김해 진영읍형 (기본)
+   ========================================================================= */
+const K_FOOT_H = 112, K_BAR_H = 158;
+
+function kOutlined(text, x, y, size, yellow){
+  setFont(900, size, -3);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.lineJoin = 'round';
+  ctx.miterLimit = 2;
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,.5)';
+  ctx.shadowBlur = Math.max(8, size * 0.18);
+  ctx.shadowOffsetY = Math.max(3, size * 0.06);
+  ctx.strokeStyle = '#080F1C';
+  ctx.lineWidth = Math.max(9, size * 0.13);
+  ctx.strokeText(text, x, y);
+  ctx.restore();
+  ctx.save();
+  ctx.fillStyle = yellow ? yellowGrad(y, size) : '#FFFFFF';
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+function kRibbon(text, x, y, h){
+  setFont(900, 43, 1);
+  const w = ctx.measureText(text).width + 78;
+  const tail = 30;
+  ctx.save();
+  ctx.translate(x + w / 2, y + h / 2);
+  ctx.rotate(-2.2 * Math.PI / 180);
+  ctx.translate(-(x + w / 2), -(y + h / 2));
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,.48)';
+  ctx.shadowBlur = 18;
+  ctx.shadowOffsetY = 7;
+  const g = ctx.createLinearGradient(x, y, x, y + h);
+  g.addColorStop(0, '#F3322B');
+  g.addColorStop(0.5, '#DE1414');
+  g.addColorStop(1, '#A50E12');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + w, y);
+  ctx.lineTo(x + w - tail, y + h * 0.5);
+  ctx.lineTo(x + w, y + h);
+  ctx.lineTo(x, y + h);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  ctx.strokeStyle = 'rgba(255,255,255,.92)';
+  ctx.lineWidth = 3.5;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + w, y);
+  ctx.lineTo(x + w - tail, y + h * 0.5);
+  ctx.lineTo(x + w, y + h);
+  ctx.lineTo(x, y + h);
+  ctx.closePath();
+  ctx.stroke();
+
+  setFont(900, 43, 1);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillText(text, x + 34, y + h / 2 + 2);
+  ctx.restore();
+}
+
+/* 흰 배지 안 글씨: 숫자·단위는 빨간색 */
+function kMixedText(text, x, y, size, maxW){
+  const tokens = text.split(/(\d[\d,.]*\s*(?:평|㎡|m|억|만|천|분|개|kW|톤|%|층)?)/);
+  setFont(900, size, -0.5);
+  let total = 0;
+  for (let i = 0; i < tokens.length; i++){ total += ctx.measureText(tokens[i]).width; }
+  let sc = 1;
+  if (total > maxW && total > 0) sc = maxW / total;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  let cx = x;
+  for (let i = 0; i < tokens.length; i++){
+    const t = tokens[i];
+    if (!t) continue;
+    ctx.save();
+    ctx.translate(cx, y);
+    ctx.scale(sc, sc);
+    ctx.fillStyle = /^\d/.test(t) ? '#D51C24' : '#0F2A55';
+    ctx.fillText(t, 0, 0);
+    ctx.restore();
+    cx += ctx.measureText(t).width * sc;
+  }
+  return total * sc;
+}
+
+function kSpecBadge(text, x, y, h){
+  const skew = 18;
+  const maxW = W - x * 2 - 40;
+  setFont(900, 48, -0.5);
+  let tw0 = ctx.measureText(text).width;
+  let fs = 48;
+  while (fs > 26 && tw0 > maxW - 74){ fs -= 1; setFont(900, fs, -0.5); tw0 = ctx.measureText(text).width; }
+  const w = Math.min(tw0 + 74, maxW);
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,.4)';
+  ctx.shadowBlur = 16;
+  ctx.shadowOffsetY = 6;
+  ctx.fillStyle = 'rgba(255,255,255,.97)';
+  ctx.beginPath();
+  ctx.moveTo(x + skew, y);
+  ctx.lineTo(x + w, y);
+  ctx.lineTo(x + w - skew, y + h);
+  ctx.lineTo(x, y + h);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  ctx.strokeStyle = 'rgba(255,255,255,.6)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x + skew, y);
+  ctx.lineTo(x + w, y);
+  ctx.lineTo(x + w - skew, y + h);
+  ctx.lineTo(x, y + h);
+  ctx.closePath();
+  ctx.stroke();
+
+  kMixedText(text, x + 37, y + h / 2 + 2, fs, w - 74);
+}
+
+function kSummaryBar(top, barH){
+  const bg = ctx.createLinearGradient(0, top, 0, top + barH);
+  bg.addColorStop(0, '#FFFFFF');
+  bg.addColorStop(1, '#E9EEF6');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, top, W, barH);
+  ctx.fillStyle = '#0F2A55';
+  ctx.fillRect(0, top, W, 4);
+
+  const cardY = top + 16;
+  const cardH = barH - 32;
+  const priceW = 256;
+  const gap = 9;
+
+  /* --- 가격 카드 --- */
+  const px = 20;
+  ctx.save();
+  ctx.shadowColor = 'rgba(16,27,46,.16)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 4;
+  ctx.fillStyle = '#FFFFFF';
+  rr(px, cardY, priceW, cardH, 16);
+  ctx.fill();
+  ctx.restore();
+  ctx.save();
+  rr(px, cardY, priceW, cardH, 16);
+  ctx.clip();
+  const rg = ctx.createLinearGradient(px, cardY, px, cardY + 48);
+  rg.addColorStop(0, '#E8241D');
+  rg.addColorStop(1, '#B01217');
+  ctx.fillStyle = rg;
+  ctx.fillRect(px, cardY, priceW, 48);
+  ctx.restore();
+  ctx.strokeStyle = '#D9E0EB';
+  ctx.lineWidth = 1.5;
+  rr(px, cardY, priceW, cardH, 16);
+  ctx.stroke();
+
+  const plab = (S.priceLabel || '').trim();
+  if (plab){
+    plain(plab, px + priceW / 2, cardY + 13, 800, 27, '#FFFFFF', 'center', 1);
+  }
+
+  const priceText = (S.price || '').trim();
+  const pAreaY = cardY + 52;
+  const pAreaH = cardH - 56;
+  if (priceText){
+    const maxPW = priceW - 28;
+    let oneLine = fitSize(priceText, 900, maxPW, 58, 24, -1);
+    if (oneLine > 30){
+      setFont(900, oneLine, -1);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#D51C24';
+      ctx.fillText(priceText, px + priceW / 2, pAreaY + pAreaH / 2 + 1);
+    } else {
+      const ls = wrapText(priceText, maxPW, 900, 34, -1, 2);
+      const lh = 36;
+      let ly = pAreaY + (pAreaH - ls.length * lh) / 2 + lh / 2 + 1;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#D51C24';
+      ls.forEach(function(l){
+        setFont(900, 34, -1);
+        ctx.fillText(l, px + priceW / 2, ly);
+        ly += lh;
+      });
+    }
+  }
+
+  /* --- 스펙 카드 --- */
+  const specs = [];
+  for (let i = 0; i < 4; i++){
+    const l = (S['kSpecL' + i] || '').trim(), v = (S['kSpecV' + i] || '').trim();
+    if (l || v) specs.push({ l: l, v: v });
+  }
+  const n = Math.max(specs.length, 1);
+  const cw = (W - 40 - priceW - gap - (n - 1) * gap) / n;
+  let cx = px + priceW + gap;
+  const icons = ['land', 'layer', 'height', 'lift'];
+
+  specs.forEach(function(sp, i){
+    ctx.save();
+    ctx.shadowColor = 'rgba(16,27,46,.10)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetY = 3;
+    ctx.fillStyle = '#FFFFFF';
+    rr(cx, cardY, cw, cardH, 16);
+    ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = '#DCE3EE';
+    ctx.lineWidth = 1.5;
+    rr(cx, cardY, cw, cardH, 16);
+    ctx.stroke();
+
+    drawIcon(icons[i % 4], cx + 14, cardY + 12, 24, '#1B3B6F');
+
+    const innerW = cw - 28;
+    if (sp.l){
+      const lfs = fitSize(sp.l, 700, innerW, 21, 14, 0);
+      plain(sp.l, cx + 14, cardY + 42, 700, lfs, '#6C7C93', 'left', 0.2);
+    }
+    if (sp.v){
+      /* 괄호 부분은 작게 아래에 */
+      let main = sp.v, paren = '';
+      const m = sp.v.match(/^(.*?)\s*(\(.*\))\s*$/);
+      if (m && m[1]){ main = m[1].trim(); paren = m[2].replace(/^\(|\)$/g, '').trim(); }
+      const vfs = fitSize(main, 900, innerW, 34, 19, -0.8);
+      plain(main, cx + 14, cardY + 64, 900, vfs, '#10233F', 'left', -0.8);
+      if (paren){
+        const pfs = fitSize(paren, 700, innerW, 19, 13, 0);
+        plain(paren, cx + 14, cardY + 64 + vfs + 4, 700, pfs, '#64748B', 'left', 0);
+      }
+    }
+    cx += cw + gap;
+  });
+}
+
+function kFooter(top){
+  const g = ctx.createLinearGradient(0, top, 0, H);
+  g.addColorStop(0, '#0D2350');
+  g.addColorStop(1, '#06132A');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, top, W, H - top);
+  ctx.fillStyle = '#D51C24';
+  ctx.fillRect(0, top, W, 3);
+
+  const cy = top + (H - top) / 2 + 2;
+  const r = 34, lcx = 26 + r;
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,.35)';
+  ctx.shadowBlur = 10;
+  ctx.shadowOffsetY = 3;
+  const lg = ctx.createRadialGradient(lcx - 10, cy - 12, 5, lcx, cy, r);
+  lg.addColorStop(0, '#1D4477');
+  lg.addColorStop(1, '#071227');
+  ctx.fillStyle = lg;
+  ctx.beginPath(); ctx.arc(lcx, cy, r, 0, 6.2832); ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle = '#F2C14E';
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(lcx, cy, r - 1.5, 0, 6.2832); ctx.stroke();
+  drawIcon('factory', lcx - 15, cy - 15, 30, '#F2C14E');
+
+  const lx = lcx + r + 16;
+  plain('우리부동산 공인중개사사무소', lx, cy - 32, 800, 27, '#FFFFFF', 'left', -0.6);
+  plain('대표 김태형 · 공인중개사', lx, cy + 6, 600, 21, '#A9C0DF', 'left', 0);
+
+  const phone = (S.phone || '').trim();
+  const addr = (S.address || '').trim();
+  const rx = W - 24;
+
+  if (phone){
+    let pfs = fitSize(phone, 900, 330, 45, 26, -0.5);
+    setFont(900, pfs, -0.5);
+    const pw = ctx.measureText(phone).width;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = goldGrad(cy - 32, 45);
+    ctx.fillText(phone, rx, cy - 32);
+
+    /* 전화 아이콘 */
+    const icx = rx - pw - 34;
+    ctx.beginPath();
+    ctx.arc(icx + 13, cy - 10, 16, 0, 6.2832);
+    ctx.fillStyle = '#F2C14E';
+    ctx.fill();
+    drawIcon('phone', icx + 5, cy - 18, 16, '#0D2350');
+  }
+  if (addr){
+    const afs = fitSize(addr, 600, 420, 20, 13, 0);
+    plain(addr, rx, cy + 12, 600, afs, '#A9C0DF', 'right', 0);
+  }
+}
+
+function drawK(){
+  const M = 26;
+  const BAR_TOP = H - K_FOOT_H - K_BAR_H;
+  const FOOT_TOP = H - K_FOOT_H;
+  const PHOTO_BOT = BAR_TOP;
+
+  if (S.mainImg) drawCover(S.mainImg, 0, 0, W, H, S.focusX, S.focusY);
+  else placeholder(0, 0, W, H, '오른쪽에서 사진 선택 · 끌어다 놓기');
+
+  /* 위쪽 어둡게 */
+  let g = ctx.createLinearGradient(0, 0, 0, 430);
+  g.addColorStop(0, 'rgba(4,10,22,.60)');
+  g.addColorStop(0.45, 'rgba(4,10,22,.22)');
+  g.addColorStop(1, 'rgba(4,10,22,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, 430);
+
+  /* 붉은 배지 */
+  const badge = (S.badge || '').trim() || TPL[S.trade].badge;
+  kRibbon(badge, M, 22, 78);
+
+  /* 제목 */
+  const t1 = (S.t1 || '').trim(), t2 = (S.t2 || '').trim();
+  const maxW = W - M * 2;
+  let y = 114;
+  if (t1){
+    const s = fitSize(t1, 900, maxW, 112, 54, -3);
+    kOutlined(t1, M, y, s, false);
+    y += s + 2;
+  }
+  if (t2){
+    const s = fitSize(t2, 900, maxW, 134, 54, -3);
+    kOutlined(t2, M, y, s, true);
+    y += s;
+  }
+
+  /* 흰 스펙 배지 */
+  const sub = (S.sub || '').trim();
+  const specY = Math.max(y + 16, 344);
+  if (sub) kSpecBadge(sub, M, specY, 70);
+
+  /* 체크리스트 박스 */
+  const boxW = 646, boxX = W - M - boxW;
+  const lineH = 40, cfs = 34;
+  const textX = boxX + 74;
+  const maxTextW = boxW - 74 - 24;
+  const items = [];
+  for (let i = 0; i < 5; i++){
+    const v = (S['chk' + i] || '').trim();
+    if (v) items.push(v);
+  }
+  const rows = [];
+  let cut = false;
+  for (let i = 0; i < items.length; i++){
+    const ls = wrapText(items[i], maxTextW, 800, cfs, -0.6, 2);
+    for (let j = 0; j < ls.length; j++){
+      if (rows.length >= 5){ cut = true; break; }
+      rows.push({ t: ls[j], first: j === 0 });
+    }
+    if (rows.length >= 5 && i < items.length - 1) cut = true;
+    if (rows.length >= 5) break;
+  }
+  if (cut && rows.length){
+    let last = rows[rows.length - 1].t;
+    while (last.length > 1 && tw(last + '…', 800, cfs, -0.6) > maxTextW) last = last.slice(0, -1);
+    rows[rows.length - 1].t = last + '…';
+  }
+
+  if (rows.length){
+    const padT = 24, padB = 22;
+    const boxH = padT + rows.length * lineH + padB;
+    const boxBottom = PHOTO_BOT - 14;
+    const boxTop = boxBottom - boxH;
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,.32)';
+    ctx.shadowBlur = 26;
+    ctx.shadowOffsetY = 8;
+    ctx.fillStyle = 'rgba(255,255,255,.94)';
+    rr(boxX, boxTop, boxW, boxH, 26);
+    ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(255,255,255,.9)';
+    ctx.lineWidth = 2.5;
+    rr(boxX, boxTop, boxW, boxH, 26);
+    ctx.stroke();
+
+    let ly = boxTop + padT;
+    for (let i = 0; i < rows.length; i++){
+      const r = rows[i];
+      if (r.first){
+        const cx = boxX + 26 + 17, cyy = ly + lineH / 2;
+        ctx.beginPath();
+        ctx.arc(cx, cyy, 17, 0, 6.2832);
+        ctx.fillStyle = '#E8211B';
+        ctx.fill();
+        ctx.save();
+        ctx.translate(cx, cyy);
+        ctx.beginPath();
+        ctx.moveTo(-8, 0.5);
+        ctx.lineTo(-2.5, 6);
+        ctx.lineTo(8.5, -6.5);
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 4.4;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+        ctx.restore();
+      }
+      setFont(800, cfs, -0.6);
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#13233C';
+      ctx.fillText(r.t, textX, ly + lineH / 2 + 1);
+      ly += lineH;
+    }
+  }
+
+  kSummaryBar(BAR_TOP, K_BAR_H);
+  kFooter(FOOT_TOP);
 }
 
 /* =========================================================================
@@ -544,8 +1048,8 @@ function drawA(){
   let y = 38;
 
   if (t1 && t2){
-    const oneSize = fitSize(t1 + ' ' + t2, 900, maxTitleW, 120, 62, spacing);
-    if (oneSize >= 86){
+    const oneSize = fitSize(t1 + ' ' + t2, 900, maxTitleW, 130, 62, spacing);
+    if (oneSize >= 90){
       const a1 = clampText(t1, 900, oneSize, maxTitleW * 0.55, spacing);
       const a2 = clampText(t2, 900, oneSize, maxTitleW - tw(a1 + ' ', 900, oneSize, spacing), spacing);
       const w1 = tw(a1 + ' ', 900, oneSize, spacing);
@@ -553,8 +1057,8 @@ function drawA(){
       outlined(a2, P + w1, y, { size: oneSize, weight: 900, spacing: spacing, fill: yellowGrad(y, oneSize) });
       y += oneSize * 1.02;
     } else {
-      const s1 = fitSize(t1, 900, maxTitleW, 98, 48, spacing);
-      const s2 = fitSize(t2, 900, maxTitleW, 112, 48, spacing);
+      const s1 = fitSize(t1, 900, maxTitleW, 104, 48, spacing);
+      const s2 = fitSize(t2, 900, maxTitleW, 120, 48, spacing);
       const sA = Math.min(s1, s2);
       outlined(clampText(t1, 900, sA, maxTitleW, spacing), P, y, { size: sA, weight: 900, spacing: spacing, fill: '#FFFFFF' });
       y += sA * 1.08;
@@ -563,7 +1067,7 @@ function drawA(){
     }
   } else if (t1 || t2){
     const t = t1 || t2;
-    const s = fitSize(t, 900, maxTitleW, 120, 62, spacing);
+    const s = fitSize(t, 900, maxTitleW, 130, 62, spacing);
     outlined(clampText(t, 900, s, maxTitleW, spacing), P, y, { size: s, weight: 900, spacing: spacing, fill: t1 ? '#FFFFFF' : yellowGrad(y, s) });
     y += s * 1.02;
   }
@@ -571,9 +1075,9 @@ function drawA(){
   /* sub badge */
   const subText = S.sub.trim();
   if (subText){
-    const by = Math.max(y + 16, 150);
-    const bh = 62, skew = 16, padL = 26, padR = 34;
-    let fs = fitSize(subText, 700, 620, 31, 20, 0);
+    const by = Math.max(y + 16, 158);
+    const bh = 66, skew = 16, padL = 26, padR = 34;
+    let fs = fitSize(subText, 700, 640, 33, 20, 0);
     const bw = tw(subText, 700, fs, 0) + padL + padR;
     ctx.save();
     ctx.shadowColor = 'rgba(0,0,0,.42)';
@@ -616,9 +1120,9 @@ function drawA(){
   let by2 = BOT;
   const priceText = S.price.trim();
   if (priceText){
-    const ph = 94;
+    const ph = 100;
     by2 -= ph;
-    let fs = fitSize(priceText, 900, maxBadgeW - 64, 40, 22, -0.8);
+    let fs = fitSize(priceText, 900, maxBadgeW - 64, 44, 22, -0.8);
     const pw = tw(priceText, 900, fs, -0.8) + 64;
     ctx.save();
     ctx.shadowColor = 'rgba(0,0,0,.45)';
@@ -642,11 +1146,11 @@ function drawA(){
 
   const aLabel = S.areaLabel.trim(), aValue = S.areaValue.trim();
   if (aLabel || aValue){
-    const ah = 84;
+    const ah = 90;
     by2 -= ah;
     const labelTxt = aLabel;
-    const lw = labelTxt ? tw(labelTxt, 600, 27, 0) + 13 : 0;
-    let vfs = fitSize(aValue, 900, maxBadgeW - lw - 66, 40, 22, -0.5);
+    const lw = labelTxt ? tw(labelTxt, 600, 29, 0) + 13 : 0;
+    let vfs = fitSize(aValue, 900, maxBadgeW - lw - 66, 44, 22, -0.5);
     const vw = tw(aValue, 900, vfs, -0.5);
     const aw = 32 + lw + vw + 32;
     ctx.save();
@@ -667,7 +1171,7 @@ function drawA(){
 
     ctx.textBaseline = 'middle';
     if (labelTxt){
-      setFont(600, 27, 0);
+      setFont(600, 29, 0);
       ctx.textAlign = 'left';
       ctx.fillStyle = '#CFE0F7';
       ctx.fillText(labelTxt, P + 30, by2 + ah / 2 + 1);
@@ -747,9 +1251,9 @@ function drawEmblem(cx, cy, r){
 const ICONS = ['layer', 'lift', 'power', 'truck', 'won'];
 
 function drawB(){
-  const headerH = 150, contactH = 64, specH = 150;
-  const specTop = H - contactH - specH;   /* 786 */
-  const contactTop = H - contactH;        /* 936 */
+  const headerH = 150, contactH = 70, specH = 156;
+  const specTop = H - contactH - specH;
+  const contactTop = H - contactH;
 
   /* ---- header ---- */
   let g = ctx.createLinearGradient(0, 0, 0, headerH);
@@ -810,10 +1314,10 @@ function drawB(){
   const tx = 286;
   const tMaxW = (noText ? badgeX - 24 : W - 44) - tx;
 
-  let ty = 30;
+  let ty = 28;
   if (t1 || t2){
     const both = t1 && t2 ? t1 + ' ' + t2 : (t1 || t2);
-    let fs = fitSize(both, 900, tMaxW, 58, 30, -1.6);
+    let fs = fitSize(both, 900, tMaxW, 62, 30, -1.6);
     setFont(900, fs, -1.6);
     ctx.textAlign = 'left'; ctx.textBaseline = 'top';
     let x = tx;
@@ -833,21 +1337,20 @@ function drawB(){
 
   const subText = S.sub.trim();
   if (subText){
-    const lines = wrapText(subText, tMaxW, 600, 21, 0, 1);
-    setFont(600, 21, 0);
+    const lines = wrapText(subText, tMaxW, 600, 22, 0, 1);
+    setFont(600, 22, 0);
     ctx.textAlign = 'left'; ctx.textBaseline = 'top';
     ctx.fillStyle = '#AFC5E4';
-    ctx.fillText(lines[0] || '', tx, Math.min(ty + 6, headerH - 34));
+    ctx.fillText(lines[0] || '', tx, Math.min(ty + 6, headerH - 36));
   }
 
   /* ---- photo ---- */
   const photoTop = headerH, photoBot = specTop;
-  const photoH = photoBot - photoTop;
-  if (S.mainImg) drawCover(S.mainImg, 0, photoTop, W, photoH, S.focusX, S.focusY);
-  else placeholder(0, photoTop, W, photoH, '오른쪽에서 사진 선택 · 끌어다 놓기');
+  if (S.mainImg) drawCover(S.mainImg, 0, photoTop, W, photoBot - photoTop, S.focusX, S.focusY);
+  else placeholder(0, photoTop, W, photoBot - photoTop, '오른쪽에서 사진 선택 · 끌어다 놓기');
 
   /* checkpoint panel */
-  const panelW = 430, panelBotX = 40;
+  const panelW = 446, panelBotX = 40;
   const px0 = W - panelW;
   const pg = ctx.createLinearGradient(px0, photoTop, W, photoBot);
   pg.addColorStop(0, '#0A1B36');
@@ -869,7 +1372,7 @@ function drawB(){
   ctx.stroke();
 
   /* panel text */
-  const cx0 = px0 + 26;
+  const cx0 = px0 + 24;
   let cy = photoTop + 26;
 
   const cTitle = S.checkTitle.trim();
@@ -878,42 +1381,41 @@ function drawB(){
     ctx.beginPath(); ctx.arc(cx0 + 17, cy + 17, 18, 0, 6.2832); ctx.fill();
     drawIcon('check', cx0 + 6, cy + 6, 22, '#0A1B36');
 
-    const hLines = wrapText(cTitle, 318, 800, 26, -0.8, 2);
+    const hLines = wrapText(cTitle, 330, 800, 28, -0.8, 2);
     hLines.forEach(function(l, i){
-      setFont(800, 26, -0.8);
+      setFont(800, 28, -0.8);
       ctx.textAlign = 'left'; ctx.textBaseline = 'top';
       ctx.fillStyle = '#FFD84D';
-      ctx.fillText(l, cx0 + 46, cy - 2 + i * 33);
+      ctx.fillText(l, cx0 + 46, cy - 2 + i * 35);
     });
-    cy += Math.max(48, hLines.length * 33 + 12);
-    /* divider */
+    cy += Math.max(50, hLines.length * 35 + 12);
     ctx.fillStyle = 'rgba(255,255,255,.16)';
-    ctx.fillRect(cx0, cy - 8, 356, 2);
+    ctx.fillRect(cx0, cy - 8, 370, 2);
     cy += 14;
   }
 
-  const checks = [S.chk0, S.chk1, S.chk2, S.chk3].map(function(s){ return (s || '').trim(); }).filter(Boolean);
+  const checks = [S.chk0, S.chk1, S.chk2, S.chk3, S.chk4].map(function(s){ return (s || '').trim(); }).filter(Boolean);
   const room = photoBot - 26 - cy;
-  const rowGap = checks.length ? Math.min(92, room / checks.length) : 0;
-  const blockH = checks.length ? (checks.length - 1) * rowGap + 46 : 0;
+  const rowGap = checks.length ? Math.min(96, room / checks.length) : 0;
+  const blockH = checks.length ? (checks.length - 1) * rowGap + 50 : 0;
   const startY = cy + Math.max(0, (room - blockH) / 2);
 
   checks.forEach(function(t, i){
     const yy = startY + i * rowGap;
-    const lines = wrapText(t, 320, 600, 22, 0, 2);
-    const boxSize = 24;
-    const midY = yy + (lines.length > 1 ? 14 : 13);
+    const lines = wrapText(t, 332, 800, 25, 0, 2);
+    const boxSize = 26;
+    const midY = yy + (lines.length > 1 ? 15 : 14);
     ctx.save();
     ctx.fillStyle = '#F2C14E';
     rr(cx0, midY - boxSize / 2, boxSize, boxSize, 6);
     ctx.fill();
-    drawIcon('check', cx0 + 1, midY - boxSize / 2 + 1, 22, '#0A1B36');
+    drawIcon('check', cx0 + 1.5, midY - boxSize / 2 + 1.5, 23, '#0A1B36');
     ctx.restore();
     lines.forEach(function(l, j){
-      setFont(600, 22, 0);
+      setFont(800, 25, 0);
       ctx.textAlign = 'left'; ctx.textBaseline = 'top';
       ctx.fillStyle = '#E9F0FB';
-      ctx.fillText(l, cx0 + 36, yy + j * 29);
+      ctx.fillText(l, cx0 + 38, yy + j * 32);
     });
   });
 
@@ -921,15 +1423,15 @@ function drawB(){
   const hasSub = !!(S.subImg && S.subMode !== 'none');
   if (hasSub){
     if (S.subMode === 'circle'){
-      const r = 150, cx = 168, cy = photoBot - 40 - r;
+      const r = 150, cx = 168, cy2 = photoBot - 40 - r;
       ctx.save();
       ctx.shadowColor = 'rgba(0,0,0,.5)';
       ctx.shadowBlur = 24;
       ctx.shadowOffsetY = 8;
-      ctx.beginPath(); ctx.arc(cx, cy, r + 9, 0, 6.2832);
+      ctx.beginPath(); ctx.arc(cx, cy2, r + 9, 0, 6.2832);
       ctx.fillStyle = '#fff'; ctx.fill();
       ctx.restore();
-      ctx.save(); clipCircle(cx, cy, r); drawCover(S.subImg, cx - r, cy - r, r * 2, r * 2, .5, .5); ctx.restore();
+      ctx.save(); clipCircle(cx, cy2, r); drawCover(S.subImg, cx - r, cy2 - r, r * 2, r * 2, .5, .5); ctx.restore();
     } else {
       const w = 340, h = 246, x = 44, yy = photoBot - 40 - h;
       ctx.save();
@@ -972,22 +1474,22 @@ function drawB(){
       ctx.fillStyle = g2;
       ctx.fillRect(x + 1, specTop + 3, cw - 1, specH - 3);
     }
-    drawIcon(ICONS[i], x + 28, specTop + 24, 30, isPrice ? '#FFD84D' : '#F2C14E');
+    drawIcon(ICONS[i], x + 26, specTop + 22, 30, isPrice ? '#FFD84D' : '#F2C14E');
 
-    const lfs = fitSize(lab, 700, inner + 10, 15, 10, 0.6);
+    const lfs = fitSize(lab, 700, inner + 10, 16, 10, 0.6);
     setFont(700, lfs, 0.6);
     ctx.textAlign = 'left'; ctx.textBaseline = 'top';
     ctx.fillStyle = isPrice ? '#FFD84D' : '#8CA3C4';
-    ctx.fillText(lab, x + 28, specTop + 64);
+    ctx.fillText(lab, x + 26, specTop + 62);
 
     let vfs = 0, vLines;
-    for (let s = 25; s >= 20; s--){
+    for (let s = 28; s >= 22; s--){
       if (tw(val, 800, s, -0.6) <= inner){ vfs = s; break; }
     }
     if (vfs){
       vLines = [val];
     } else {
-      vfs = 24;
+      vfs = 26;
       while (vfs > 14){
         const ls = wrapText(val, inner, 800, vfs, -0.6, 0);
         if (ls.length <= 2) break;
@@ -998,7 +1500,7 @@ function drawB(){
     vLines.forEach(function(l, j){
       setFont(800, vfs, -0.6);
       ctx.fillStyle = '#FFFFFF';
-      ctx.fillText(l, x + 28, specTop + 88 + j * (vfs + 6));
+      ctx.fillText(l, x + 26, specTop + 88 + j * (vfs + 6));
     });
     sx += cw;
   }
@@ -1023,20 +1525,20 @@ function drawB(){
   }
   const joined = parts.join('   |   ');
 
-  let phoneFs = phonePart ? fitSize(phonePart, 800, 360, 22, 13, 0) : 0;
+  let phoneFs = phonePart ? fitSize(phonePart, 800, 380, 25, 13, 0) : 0;
   const phoneW = phonePart ? tw(phonePart, 800, phoneFs, 0) : 0;
   const availW = W - 44 - 40 - (phonePart ? phoneW + 34 : 0);
 
   if (joined){
-    let fs1 = fitSize(joined, 600, availW, 16, 9, 0);
+    let fs1 = fitSize(joined, 600, availW, 18, 9, 0);
     const lines = wrapText(joined, availW, 600, fs1, 0, 2);
     const lh = fs1 + 5;
-    let ty = contactTop + contactH / 2 - (lines.length * lh) / 2 + 1;
+    let ty2 = contactTop + contactH / 2 - (lines.length * lh) / 2 + 1;
     lines.forEach(function(l, i){
       setFont(600, fs1, 0);
       ctx.textAlign = 'left'; ctx.textBaseline = 'top';
       ctx.fillStyle = i === 0 ? '#DCE7F7' : '#9FB6D4';
-      ctx.fillText(l, 44, ty + i * lh);
+      ctx.fillText(l, 44, ty2 + i * lh);
     });
   }
 
@@ -1057,27 +1559,22 @@ function readInputs(){
 }
 
 let raf = 0;
-function render(){
-  cancelAnimationFrame(raf);
-  raf = requestAnimationFrame(function(){
-    readInputs();
-    ctx.save();
-    ctx.clearRect(0, 0, W, H);
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    if (S.style === 'A') drawA(); else drawB();
-    ctx.restore();
-  });
-}
-function renderNow(){
+function drawAll(){
   readInputs();
   ctx.save();
   ctx.clearRect(0, 0, W, H);
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
-  if (S.style === 'A') drawA(); else drawB();
+  if (S.style === 'B') drawB();
+  else if (S.style === 'A') drawA();
+  else drawK();
   ctx.restore();
 }
+function render(){
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(drawAll);
+}
+function renderNow(){ drawAll(); }
 
 /* ---------------------------------------------------------------- storage */
 function saveState(){
@@ -1089,15 +1586,26 @@ function saveState(){
 }
 function loadState(){
   try {
-    const raw = localStorage.getItem(LS_KEY);
+    let raw = localStorage.getItem(LS_KEY);
+    const old = localStorage.getItem(LS_OLD);
+    if (!raw && old){
+      raw = old;
+      const data = JSON.parse(raw);
+      /* 예전 저장값은 글씨만 살리고 스타일은 새 기본(김해 진영읍형)으로 */
+      TEXT_IDS.forEach(function(id){
+        if (typeof data[id] === 'string' && DEFAULTS[id] !== undefined) $(id).value = data[id];
+      });
+      setStyle('K'); setTrade(data.trade === 'sale' ? 'sale' : 'rent');
+      return true;
+    }
     if (!raw) return false;
     const data = JSON.parse(raw);
     TEXT_IDS.forEach(function(id){
       if (typeof data[id] === 'string') $(id).value = data[id];
     });
     if (data.subMode) $('subMode').value = data.subMode;
-    if (data.style === 'B') setStyle('B'); else setStyle('A');
-    if (data.trade === 'sale') setTrade('sale'); else setTrade('rent');
+    setStyle(data.style === 'A' || data.style === 'B' ? data.style : 'K');
+    setTrade(data.trade === 'sale' ? 'sale' : 'rent');
     return true;
   } catch(e){ return false; }
 }
@@ -1166,6 +1674,16 @@ function setStyle(v){
   Array.prototype.forEach.call(document.querySelectorAll('#styleSeg button'), function(b){
     b.classList.toggle('on', b.dataset.style === v);
   });
+  updatePanels();
+}
+function updatePanels(){
+  const k = S.style === 'K';
+  $('kPanel').hidden = !k;
+  $('bPanel').hidden = S.style !== 'B';
+  $('subPhotoBox').hidden = k;
+  $('subPhotoNote').hidden = !k;
+  $('subLabel').textContent = k ? '흰 배지 · 핵심 스펙' : '부제 · 한 줄 설명';
+  $('sub').placeholder = k ? '예) 대지 300평 · 층고 12.9m' : '예) 북항 초입 | 40m 대로변';
 }
 function setTrade(v){
   S.trade = v;
@@ -1173,10 +1691,6 @@ function setTrade(v){
     b.classList.toggle('on', b.dataset.trade === v);
   });
 }
-const TPL = {
-  rent: '보증금 5억 / 월 4,500만',
-  sale: '매매 12억원'
-};
 
 function download(type){
   readInputs();
@@ -1209,15 +1723,16 @@ function init(){
   });
   Array.prototype.forEach.call(document.querySelectorAll('#tradeSeg button'), function(b){
     b.addEventListener('click', function(){
-      const prev = TPL[S.trade];
+      const oldT = TPL[S.trade], newT = TPL[b.dataset.trade];
       setTrade(b.dataset.trade);
-      const cur = $('price').value.trim();
-      if (!cur || cur === prev) $('price').value = TPL[b.dataset.trade];
-      /* 스펙 마지막 칸도 같이 */
-      const l4 = $('specL4').value.trim();
-      if (l4 === '임대 조건' || l4 === '매매가') $('specL4').value = b.dataset.trade === 'sale' ? '매매가' : '임대 조건';
-      const v4 = $('specV4').value.trim();
-      if (!v4 || v4 === prev || v4 === TPL.rent || v4 === TPL.sale) $('specV4').value = TPL[b.dataset.trade];
+      const curPrice = $('price').value.trim();
+      if (!curPrice || curPrice === oldT.price) $('price').value = newT.price;
+      const curLab = $('priceLabel').value.trim();
+      if (!curLab || curLab === oldT.priceLabel) $('priceLabel').value = newT.priceLabel;
+      const curBadge = $('badge').value.trim();
+      if (!curBadge || curBadge === oldT.badge) $('badge').value = newT.badge;
+      const curPhone = $('phone').value.trim();
+      if (!curPhone || curPhone === oldT.phone) $('phone').value = newT.phone;
       render(); saveState();
     });
   });
@@ -1279,13 +1794,14 @@ function init(){
    .then(function(){ renderNow(); setTimeout(renderNow, 700); })
    .catch(function(){ renderNow(); });
 
+  updatePanels();
   renderNow();
 }
 
 init();
 
 /* 검증용 (개발 확인) */
-window.__thumb = { render: renderNow, state: S };
+window.__thumb = { render: renderNow, state: S, setStyle: setStyle, setTrade: setTrade };
 })();
 </script>
 </body>
