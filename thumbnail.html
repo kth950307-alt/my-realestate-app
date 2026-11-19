@@ -1620,6 +1620,12 @@ function loadState(){
 }
 function fillDefaults(){
   TEXT_IDS.forEach(function(id){ setVal(id, DEFAULTS[id] || ''); });
+  /* 거래구분에 맞는 배지·가격·전화로 맞춰 준다 */
+  const t = TPL[S.trade] || TPL.rent;
+  setVal('badge', t.badge);
+  setVal('priceLabel', t.priceLabel);
+  setVal('price', t.price);
+  setVal('phone', t.phone);
   $('subMode').value = DEFAULTS.subMode;
   $('focusX').value = DEFAULTS.focusX;
   $('focusY').value = DEFAULTS.focusY;
