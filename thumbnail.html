@@ -843,60 +843,77 @@ function kSummaryBar(top, barH){
 }
 
 function kFooter(top){
+  /* 밝은 홈페이지형 푸터 — index.html 헤더와 같은 화이트 · 로열블루 톤 */
   const g = ctx.createLinearGradient(0, top, 0, H);
-  g.addColorStop(0, '#0D2350');
-  g.addColorStop(1, '#06132A');
+  g.addColorStop(0, '#FFFFFF');
+  g.addColorStop(1, '#F4F8FD');
   ctx.fillStyle = g;
   ctx.fillRect(0, top, W, H - top);
-  ctx.fillStyle = '#D51C24';
-  ctx.fillRect(0, top, W, 3);
 
-  const cy = top + (H - top) / 2 + 2;
-  const r = 34, lcx = 26 + r;
-  ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,.35)';
-  ctx.shadowBlur = 10;
-  ctx.shadowOffsetY = 3;
-  const lg = ctx.createRadialGradient(lcx - 10, cy - 12, 5, lcx, cy, r);
-  lg.addColorStop(0, '#1D4477');
-  lg.addColorStop(1, '#071227');
+  /* 상단 구분선: 로열블루 */
+  const lg = ctx.createLinearGradient(0, top, W, top);
+  lg.addColorStop(0, '#2563EB');
+  lg.addColorStop(1, '#1D4ED8');
   ctx.fillStyle = lg;
-  ctx.beginPath(); ctx.arc(lcx, cy, r, 0, 6.2832); ctx.fill();
-  ctx.restore();
-  ctx.strokeStyle = '#F2C14E';
-  ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.arc(lcx, cy, r - 1.5, 0, 6.2832); ctx.stroke();
-  drawIcon('factory', lcx - 15, cy - 15, 30, '#F2C14E');
+  ctx.fillRect(0, top, W, 4);
 
-  const lx = lcx + r + 16;
-  plain('우리부동산 공인중개사사무소', lx, cy - 34, 800, 29, '#FFFFFF', 'left', -0.6);
-  plain('대표 김태형 · 공인중개사', lx, cy + 6, 600, 22, '#A9C0DF', 'left', 0);
-
+  const cy = top + (H - top) / 2;
+  const rx = W - 26;
   const phone = (S.phone || '').trim();
   const addr = (S.address || '').trim();
-  const rx = W - 24;
 
+  /* 오른쪽: 대표 전화(로열블루) + 주소 */
+  let pw = 0;
   if (phone){
-    let pfs = fitSize(phone, 900, 330, 45, 26, -0.5);
+    const pfs = fitSize(phone, 900, 330, 45, 26, -0.5);
     setFont(900, pfs, -0.5);
-    const pw = ctx.measureText(phone).width;
+    pw = ctx.measureText(phone).width;
     ctx.textAlign = 'right';
     ctx.textBaseline = 'top';
-    ctx.fillStyle = goldGrad(cy - 32, 45);
-    ctx.fillText(phone, rx, cy - 32);
+    ctx.fillStyle = '#1D4ED8';
+    ctx.fillText(phone, rx, cy - 36);
 
-    /* 전화 아이콘 */
-    const icx = rx - pw - 34;
-    ctx.beginPath();
-    ctx.arc(icx + 13, cy - 10, 16, 0, 6.2832);
-    ctx.fillStyle = '#F2C14E';
-    ctx.fill();
-    drawIcon('phone', icx + 5, cy - 18, 16, '#0D2350');
+    /* 파란 원형 전화 아이콘 */
+    const ir = 17, icy = cy - 36 + pfs * 0.38, icx = rx - pw - 12 - ir;
+    ctx.save();
+    ctx.shadowColor = 'rgba(37,99,235,.32)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 2;
+    const ig = ctx.createLinearGradient(icx - ir, icy - ir, icx + ir, icy + ir);
+    ig.addColorStop(0, '#2563EB');
+    ig.addColorStop(1, '#1D4ED8');
+    ctx.fillStyle = ig;
+    ctx.beginPath(); ctx.arc(icx, icy, ir, 0, 6.2832); ctx.fill();
+    ctx.restore();
+    drawIcon('phone', icx - 9, icy - 9, 18, '#FFFFFF');
   }
   if (addr){
-    const afs = fitSize(addr, 600, 420, 20, 13, 0);
-    plain(addr, rx, cy + 12, 600, afs, '#A9C0DF', 'right', 0);
+    const afs = fitSize(addr, 700, 420, 20, 13, 0);
+    plain(addr, rx, cy + 13, 700, afs, '#475569', 'right', 0);
   }
+
+  /* 왼쪽: 로열블루 라운드 배지 + 흰색 공장 아이콘 */
+  const bs = 64, bx = 26, by = cy - bs / 2;
+  ctx.save();
+  ctx.shadowColor = 'rgba(37,99,235,.28)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 4;
+  const bgr = ctx.createLinearGradient(bx, by, bx + bs, by + bs);
+  bgr.addColorStop(0, '#2563EB');
+  bgr.addColorStop(1, '#1D4ED8');
+  ctx.fillStyle = bgr;
+  rr(bx, by, bs, bs, 18);
+  ctx.fill();
+  ctx.restore();
+  drawIcon('factory', bx + 16, by + 18, 32, '#FFFFFF');
+
+  /* 상호 · 대표 */
+  const lx = bx + bs + 16;
+  const rightEdge = phone ? rx - pw - 12 - 34 - 18 : rx - 18;
+  const nameMax = Math.max(180, rightEdge - lx - 14);
+  const nfs = fitSize('우리부동산 공인중개사사무소', 900, nameMax, 29, 21, -0.6);
+  plain('우리부동산 공인중개사사무소', lx, cy - 30, 900, nfs, '#0F172A', 'left', -0.6);
+  plain('대표 김태형 · 공인중개사', lx, cy + 8, 700, 21, '#475569', 'left', 0);
 }
 
 function drawK(){
