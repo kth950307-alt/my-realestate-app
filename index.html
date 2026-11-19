@@ -21,67 +21,52 @@
             --text-main: #1e293b;
             --text-sub: #64748b;
             --border: #e2e8f0;
+            --header-h: 62px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
-        body { background-color: var(--warm-bg); color: var(--text-main); line-height: 1.55; padding-bottom: 102px; scroll-behavior: smooth; }
+        html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h) + 56px); }
+        body { background-color: var(--warm-bg); color: var(--text-main); line-height: 1.55; padding-bottom: 0; }
 
-        /* 1. 밝고 화사한 상단 헤더 */
+        /* 1. 밝고 화사한 상단 헤더 (로고 + 상담번호 + 시트 상태만) */
         header { background: rgba(255, 255, 255, 0.96); color: var(--text-main); position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 15px rgba(30, 64, 175, 0.06); border-bottom: 1px solid var(--border); backdrop-filter: blur(8px); }
-        .header-inner { max-width: 1320px; margin: 0 auto; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .logo-group { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text-main); cursor: pointer; }
-        .logo-badge { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; font-weight: 900; padding: 6px 12px; border-radius: 8px; font-size: 13px; box-shadow: 0 3px 8px rgba(37, 99, 235, 0.25); white-space: nowrap; }
-        .logo-title { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; color: var(--primary-dark); }
-        .logo-sub { font-size: 12px; color: var(--text-sub); display: block; font-weight: 600; }
+        .header-inner { max-width: 1320px; margin: 0 auto; padding: 9px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px 10px; }
+        .logo-group { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text-main); cursor: pointer; }
+        .logo-badge { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; font-weight: 900; padding: 5px 10px; border-radius: 8px; font-size: 12px; box-shadow: 0 3px 8px rgba(37, 99, 235, 0.25); white-space: nowrap; }
+        .logo-title { font-size: 21px; font-weight: 900; letter-spacing: -0.5px; color: var(--primary-dark); line-height: 1.2; }
+        .logo-sub { font-size: 11.5px; color: var(--text-sub); display: block; font-weight: 600; }
         
-        .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .sync-indicator { background: #ecfdf5; border: 1px solid #6ee7b7; color: #047857; padding: 7px 13px; border-radius: 20px; font-size: 12.5px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .header-actions { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+        .sync-indicator { background: #ecfdf5; border: 1px solid #6ee7b7; color: #047857; padding: 6px 11px; border-radius: 20px; font-size: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; white-space: nowrap; }
         .sync-indicator:hover { background: #d1fae5; }
-        .btn-admin-toggle { background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-admin-toggle { background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; padding: 6px 11px; border-radius: 8px; font-size: 12.5px; font-weight: 800; cursor: pointer; transition: 0.2s; white-space: nowrap; }
         .btn-admin-toggle:hover { border-color: var(--accent); color: var(--accent); }
         .btn-admin-toggle.active { background: var(--danger); color: white; border-color: var(--danger); animation: pulse 2s infinite; }
         .btn-add-prop { background: var(--gold); color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; display: none; box-shadow: 0 3px 10px rgba(245, 158, 11, 0.3); }
-        .btn-top-call { background: var(--accent); color: white; padding: 8px 14px; border-radius: 8px; font-size: 13.5px; font-weight: 800; text-decoration: none; box-shadow: 0 3px 10px rgba(37, 99, 235, 0.22); white-space: nowrap; }
+        .btn-top-call { background: var(--accent); color: white; padding: 7px 13px; border-radius: 8px; font-size: 13px; font-weight: 800; text-decoration: none; box-shadow: 0 3px 10px rgba(37, 99, 235, 0.22); white-space: nowrap; }
         .btn-top-call small { display: block; font-size: 10.5px; font-weight: 900; opacity: 0.92; letter-spacing: 0.2px; line-height: 1.1; }
         .btn-top-call.rent { background: #0f766e; box-shadow: 0 3px 10px rgba(15, 118, 110, 0.25); }
 
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.5); } 70% { box-shadow: 0 0 0 8px rgba(225, 29, 72, 0); } 100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); } }
 
-        /* 2. 밝고 신뢰감 있는 프리미엄 히어로 배너 */
-        .hero { 
-            background: linear-gradient(135deg, #f0f7ff 0%, #e0effe 50%, #fef9ee 100%);
-            color: var(--text-main); padding: 22px 20px 34px; text-align: center; border-bottom: 2px solid #dbeafe; position: relative;
-        }
-        .hero-inner { max-width: 1000px; margin: 0 auto; }
-        .hero-tag { display: inline-block; background: #ffffff; border: 1.5px solid #93c5fd; color: var(--accent); padding: 6px 16px; border-radius: 25px; font-size: 13.5px; font-weight: 900; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08); }
-        .hero h1 { font-size: 27px; font-weight: 900; margin-bottom: 8px; letter-spacing: -0.6px; color: #0f172a; word-break: keep-all; }
+        /* 2. 컴팩트 히어로 (번호는 헤더·하단 바에서만 — 소개와 한 줄 요약만 담는다) */
+        .hero { background: linear-gradient(120deg, #eef6ff 0%, #e3effe 55%, #fff8ec 100%); color: var(--text-main); padding: 18px 20px 20px; border-bottom: 1px solid #dbeafe; }
+        .hero-inner { max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) 400px; align-items: center; gap: 28px; }
+        .hero-copy { min-width: 0; }
+        .hero-tag { display: inline-block; background: #ffffff; border: 1.5px solid #93c5fd; color: var(--accent); padding: 5px 13px; border-radius: 25px; font-size: 12.5px; font-weight: 900; margin-bottom: 9px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08); }
+        .hero h1 { font-size: 25px; font-weight: 900; margin-bottom: 6px; letter-spacing: -0.6px; color: #0f172a; word-break: keep-all; line-height: 1.3; }
         .hero h1 span { color: var(--accent); }
-        .hero p { font-size: 14.5px; color: #475569; margin-bottom: 20px; font-weight: 600; word-break: keep-all; }
+        .hero p { font-size: 13.5px; color: #475569; font-weight: 600; word-break: keep-all; }
+        .hero-points { list-style: none; display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+        .hero-points li { background: #ffffff; border: 1px solid #dbeafe; color: #1e40af; border-radius: 999px; padding: 5px 12px; font-size: 12.5px; font-weight: 800; white-space: nowrap; }
+        .hero-shot { margin: 0; position: relative; border-radius: 14px; overflow: hidden; border: 1px solid #dbeafe; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12); }
+        .hero-shot img { display: block; width: 100%; height: 196px; object-fit: cover; }
+        .hero-shot figcaption { position: absolute; left: 10px; bottom: 10px; background: rgba(15, 23, 42, 0.72); color: #ffffff; font-size: 11px; font-weight: 800; padding: 4px 9px; border-radius: 6px; }
 
-        /* 2-1. 블로그 상단 배너(우리부동산)를 홈페이지 히어로로 배치 */
-        .hero-banner-wrap { margin: 0 auto 20px; }
-        .hero-banner-pc { display: block; width: 100%; max-width: 1000px; height: auto; margin: 0 auto; border-radius: 16px; border: 1px solid #dbeafe; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.13); }
-        .hero-mobile { display: none; }
-        /* 모바일 전용 히어로 카드 (배너 글자가 작아지지 않도록 사진 + 텍스트로 재구성) */
-        .hero-m-card { background: #ffffff; border: 1px solid #dbeafe; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10); text-align: center; }
-        .hero-m-photo { display: block; width: 100%; height: 176px; object-fit: cover; }
-        .hero-m-body { padding: 14px 16px 16px; }
-        .hero-m-badge { display: inline-block; background: #1e3a8a; color: #ffffff; font-size: 12px; font-weight: 900; padding: 5px 12px; border-radius: 6px; letter-spacing: -0.2px; }
-        .hero-m-title { font-size: 31px; font-weight: 900; color: #1e3a8a; letter-spacing: -1px; margin: 7px 0 2px; line-height: 1.15; }
-        .hero-m-sub { font-size: 13px; font-weight: 700; color: #475569; letter-spacing: -0.3px; margin-bottom: 12px; }
-        .hero-m-phones { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .hero-m-phone { background: #1e3a8a; color: #ffffff; text-decoration: none; border-radius: 10px; padding: 9px 4px; font-size: 12.5px; font-weight: 900; box-shadow: 0 3px 10px rgba(30, 58, 138, 0.22); white-space: nowrap; }
-        .hero-m-phone small { display: block; font-size: 10.5px; font-weight: 900; opacity: 0.9; letter-spacing: 0.2px; line-height: 1.15; }
-        .hero-m-phone.rent { background: #0f766e; box-shadow: 0 3px 10px rgba(15, 118, 110, 0.25); }
-        .hero-m-phone.cell { grid-column: 1 / -1; background: #2563eb; }
-        .hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; max-width: 840px; margin: 0 auto; background: rgba(255, 255, 255, 0.9); padding: 16px; border-radius: 16px; border: 1px solid #dbeafe; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05); }
-        .stat-item strong { display: block; font-size: 18.5px; color: var(--accent); font-weight: 900; margin-bottom: 2px; }
-        .stat-item span { font-size: 12.5px; color: #64748b; font-weight: 700; }
-
-        /* 3. 메인 카테고리 탭 */
-        .nav-tabs { background: #ffffff; border-bottom: 2px solid #e2e8f0; position: sticky; top: 63px; z-index: 990; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        /* 3. 메인 카테고리 탭 (헤더 실제 높이에 맞춰 가려지지 않게) */
+        .nav-tabs { background: #ffffff; border-bottom: 2px solid #e2e8f0; position: sticky; top: var(--header-h, 62px); z-index: 990; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
         .nav-inner { max-width: 1320px; margin: 0 auto; display: flex; overflow-x: auto; }
-        .tab-btn { flex: 1; min-width: 135px; padding: 15px 10px; font-size: 14.5px; font-weight: 800; color: var(--text-sub); background: none; border: none; border-bottom: 3.5px solid transparent; cursor: pointer; transition: 0.2s; white-space: nowrap; text-align: center; text-decoration: none; }
+        .tab-btn { flex: 1; min-width: 135px; padding: 13px 10px; font-size: 14px; font-weight: 800; color: var(--text-sub); background: none; border: none; border-bottom: 3.5px solid transparent; cursor: pointer; transition: 0.2s; white-space: nowrap; text-align: center; text-decoration: none; }
         .tab-btn:hover { color: var(--accent); background: #f8fafc; }
         .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--accent-light); font-weight: 900; }
 
@@ -156,29 +141,25 @@
         .done-overlay { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.78); display: flex; align-items: center; justify-content: center; z-index: 5; backdrop-filter: blur(2px); }
         .done-stamp { border: 3px solid var(--danger); color: var(--danger); padding: 8px 20px; font-size: 20px; font-weight: 900; border-radius: 10px; transform: rotate(-6deg); background: #fff; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
 
-        /* 핵심 설비 아이콘 바 */
-        .facility-strip { display: grid; grid-template-columns: repeat(3, 1fr); background: #f0f7ff; border-bottom: 1px solid #dbeafe; padding: 9px 12px; text-align: center; font-size: 12px; font-weight: 800; }
-        .fac-item.ok { color: #1d4ed8; }
-        .fac-item.no { color: #94a3b8; }
-        /* 🏗️ 호이스트 표시 — 있음은 카드에서 바로 눈에 띄게, 없음도 읽히게 */
-        .fac-item.hoist-yes { justify-self: center; display: inline-flex; align-items: center; justify-content: center; gap: 3px; background: linear-gradient(135deg, #fbbf24, #d97706); color: #3f1d07; border: 1.5px solid #b45309; border-radius: 999px; padding: 3px 7px; font-size: 12px; font-weight: 900; letter-spacing: -0.4px; box-shadow: 0 2px 7px rgba(180, 83, 9, 0.30); white-space: nowrap; }
-        .fac-item.hoist-no { justify-self: center; display: inline-flex; align-items: center; justify-content: center; gap: 3px; background: #e8edf4; color: #475569; border: 1px solid #cbd5e1; border-radius: 999px; padding: 3px 7px; font-size: 11.5px; font-weight: 800; letter-spacing: -0.3px; white-space: nowrap; }
-        .hoist-flag { position: absolute; top: 12px; right: 12px; z-index: 3; display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(135deg, #d97706, #92400e); color: #ffffff; border: 2px solid #ffffff; border-radius: 10px; padding: 6px 11px; font-size: 13.5px; font-weight: 900; letter-spacing: -0.3px; box-shadow: 0 5px 16px rgba(146, 64, 14, 0.50); }
+        /* 🏗️ 호이스트 표시 — 사진 위 배지로 한 번만, 한눈에 띄게 */
+        .hoist-flag { position: absolute; top: 12px; right: 12px; z-index: 3; display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(135deg, #d97706, #92400e); color: #ffffff; border: 2px solid #ffffff; border-radius: 10px; padding: 6px 11px; font-size: 13.5px; font-weight: 900; letter-spacing: -0.3px; box-shadow: 0 5px 16px rgba(146, 64, 14, 0.50); white-space: nowrap; }
         .hoist-flag .hf-sub { font-size: 11px; font-weight: 800; opacity: 0.95; }
         .spec-val.hoist-val-yes { color: #b45309; }
         .spec-val.hoist-val-no { color: #64748b; }
 
         /* 카드 본문 */
-        .card-body { padding: 18px 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .prop-loc { font-size: 13px; font-weight: 800; color: var(--accent); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
-        .py-tag { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 2px 9px; border-radius: 6px; font-size: 12px; font-weight: 900; }
-        .prop-title { font-size: 17px; font-weight: 900; color: var(--text-main); margin-bottom: 8px; line-height: 1.38; }
-        .prop-price { font-size: 21px; font-weight: 900; color: var(--danger); margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; }
+        .card-body { padding: 16px 18px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; }
+        .prop-loc { font-size: 12.5px; font-weight: 800; color: var(--accent); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+        .prop-loc > span:first-child { min-width: 0; }
+        .py-tag { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 2px 9px; border-radius: 6px; font-size: 11.5px; font-weight: 900; white-space: nowrap; }
+        .prop-title { font-size: 16.5px; font-weight: 900; color: var(--text-main); margin-bottom: 8px; line-height: 1.4; word-break: keep-all; }
+        .prop-price { font-size: 20px; font-weight: 900; color: var(--danger); margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; letter-spacing: -0.4px; }
 
-        .spec-mini-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px 12px; background: #fafaf9; padding: 12px; border-radius: 10px; margin-bottom: 14px; border: 1px solid #e2e8f0; }
-        .spec-row { font-size: 12.5px; display: flex; justify-content: space-between; }
-        .spec-key { color: var(--text-sub); font-weight: 700; }
-        .spec-val { color: var(--text-main); font-weight: 900; }
+        /* 카드 스펙 — 2×2 표. 항목은 한 번씩만, 라벨은 줄바꿈되지 않게 */
+        .spec-mini-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px 12px; background: #f8fafc; padding: 12px 13px; border-radius: 10px; margin-bottom: 0; border: 1px solid #e2e8f0; }
+        .spec-cell { min-width: 0; }
+        .spec-key { display: block; font-size: 11px; color: var(--text-sub); font-weight: 800; white-space: nowrap; letter-spacing: -0.2px; margin-bottom: 1px; }
+        .spec-val { display: block; font-size: 13px; color: var(--text-main); font-weight: 900; line-height: 1.35; word-break: keep-all; overflow-wrap: anywhere; }
 
         /* 🔒 관리자 전용 비밀메모 박스 */
         .secret-admin-box { background: #fefce8; border: 2px solid #facc15; border-radius: 10px; padding: 12px; margin-bottom: 12px; font-size: 12.5px; color: #713f12; }
@@ -186,12 +167,11 @@
         .admin-ctrl-btns { display: flex; gap: 6px; margin-top: 8px; }
         .btn-sm-ctrl { flex: 1; padding: 6px; font-size: 11.5px; font-weight: 800; border-radius: 6px; border: 1px solid #cbd5e1; cursor: pointer; background: white; }
 
-        .card-footer { display: flex; gap: 8px; flex-wrap: wrap; }
-        .card-footer .btn-detail { flex: 1.2 1 auto; }
-        .card-footer .btn-call { flex: 1 1 auto; }
-        .btn-detail { flex: 1.2; background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; padding: 11px 0; border-radius: 10px; font-weight: 800; font-size: 13.5px; cursor: pointer; transition: 0.2s; }
+        .card-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .card-footer .btn-detail, .card-footer .btn-call { padding: 11px 8px; white-space: nowrap; }
+        .btn-detail { background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; transition: 0.2s; }
         .btn-detail:hover { background: #e2e8f0; }
-        .btn-call { flex: 1; background: var(--accent); color: white; text-decoration: none; padding: 11px 0; border-radius: 10px; font-weight: 800; font-size: 13.5px; text-align: center; box-shadow: 0 3px 8px rgba(37, 99, 235, 0.2); }
+        .btn-call { background: var(--accent); color: white; text-decoration: none; border-radius: 10px; font-weight: 900; font-size: 13.5px; text-align: center; box-shadow: 0 3px 8px rgba(37, 99, 235, 0.2); display: flex; align-items: center; justify-content: center; }
 
         /* 8. 인천 서구 권역별 매물 지도 */
         .zone-map-panel { background: #ffffff; border-radius: 18px; padding: 26px; margin-bottom: 28px; border: 1px solid #e2e8f0; box-shadow: 0 6px 20px rgba(0,0,0,0.03); }
@@ -296,8 +276,8 @@
         .btn-load-more:hover { background: var(--accent-light); transform: translateY(-2px); }
         .btn-load-more .lm-remain { color: var(--danger); }
 
-        /* 12. 카드별 [이 매물 바로 문의] + 문의 팝업 */
-        .btn-inquiry { flex: 1 1 100%; background: linear-gradient(135deg, #f59e0b, #ea8a04); color: #ffffff; border: none; padding: 12px 0; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 3px 10px rgba(245, 158, 11, 0.28); }
+        /* 12. 카드별 [문자·카톡으로 문의] 팝업 버튼 */
+        .btn-inquiry { grid-column: 1 / -1; width: 100%; background: linear-gradient(135deg, #f59e0b, #ea8a04); color: #ffffff; border: none; padding: 11px 0; border-radius: 10px; font-weight: 900; font-size: 13.5px; cursor: pointer; box-shadow: 0 3px 10px rgba(245, 158, 11, 0.28); white-space: nowrap; }
         .btn-inquiry:hover { filter: brightness(1.05); }
         .inq-summary { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; }
         .inq-id { display: inline-block; background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 900; margin-bottom: 8px; }
@@ -312,14 +292,32 @@
         .inq-btn-copy { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; font-size: 13px; }
         .inq-msg { white-space: pre-wrap; word-break: break-all; background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 12px; font-size: 12.5px; font-weight: 600; color: #475569; margin-top: 12px; line-height: 1.6; }
 
+        /* PC 넓은 화면: 하단 상담바는 화면을 가리지 않도록 페이지 끝 일반 푸터로 내린다 */
+        @media (min-width: 861px) {
+            body { padding-bottom: 0; }
+            .floating-footer { position: static; background: #ffffff; padding: 16px 20px; border-top: 1px solid #dbeafe; box-shadow: none; }
+            .f-btn { padding: 9px 16px; font-size: 13.5px; }
+            .f-btn .f-txt small { font-size: 11px; }
+        }
+
         @media (max-width: 860px) {
-            body { padding-bottom: 122px; }
-            .hero { padding: 14px 12px 26px; }
-            .hero-banner-pc { display: none; }
-            .hero-mobile { display: block; max-width: 520px; margin: 0 auto 16px; }
-            .hero h1 { font-size: 21px; }
-            .hero p { font-size: 13px; margin-bottom: 16px; }
-            .hero-stats { grid-template-columns: repeat(2, 1fr); }
+            body { padding-bottom: 92px; }
+            .header-inner { padding: 8px 14px; gap: 7px; }
+            .logo-group { gap: 8px; }
+            .logo-badge { font-size: 11px; padding: 4px 8px; }
+            .logo-title { font-size: 19px; }
+            .logo-sub { display: none; }
+            .btn-top-call { display: none; }
+            .sync-indicator { font-size: 10.5px; padding: 5px 8px; }
+            .btn-admin-toggle { font-size: 11px; padding: 5px 8px; }
+            .hero { padding: 12px 14px 14px; }
+            .hero-inner { grid-template-columns: 1fr; gap: 0; }
+            .hero-shot { display: none; }
+            .hero-tag { font-size: 11px; padding: 4px 10px; margin-bottom: 7px; }
+            .hero h1 { font-size: 19px; line-height: 1.32; }
+            .hero p { font-size: 12px; line-height: 1.5; }
+            .hero-points { gap: 5px; margin-top: 9px; }
+            .hero-points li { font-size: 11px; padding: 4px 9px; }
             .quick-filter-panel { padding: 12px 14px 6px; }
             .qf-row { display: block; padding: 9px 0; }
             .qf-label { display: block; margin-bottom: 7px; }
@@ -334,14 +332,13 @@
             .form-full { grid-column: span 1; }
             .broker-info { display: none; }
             .floating-inner { gap: 8px; }
-            .floating-btns { width: 100%; gap: 8px; }
-            .f-btn { flex: 1; flex-direction: row; padding: 10px 4px; font-size: 13px; border-radius: 12px; gap: 4px; min-width: 0; }
+            .floating-btns { width: 100%; gap: 6px; }
+            .f-btn { flex: 1; flex-direction: row; padding: 9px 4px; font-size: 12.5px; border-radius: 12px; gap: 4px; min-width: 0; }
             .f-btn .f-ico { display: none; }
             .f-btn .f-txt { align-items: center; flex: 1; min-width: 0; }
             .f-btn .f-txt small { font-size: 10px; letter-spacing: 0; }
             .f-btn-sub { display: flex; background: #f1f5f9; }
             .f-btn-sms { display: none; }
-            .btn-top-call.rent { display: none; }
             .modal-img-main { height: 240px; }
             .qf-search-box { flex-direction: column; align-items: stretch; gap: 6px; }
             .btn-detail-toggle { width: 100%; padding: 12px 16px; }
@@ -365,7 +362,7 @@
                 </div>
             </a>
             <div class="header-actions">
-                <span id="sheet-sync-badge" class="sync-indicator" onclick="syncFromGoogleSheet()" title="클릭 시 구글 시트 매물 즉시 새로고침">🔄 시트 실시간 연동중</span>
+                <span id="sheet-sync-badge" class="sync-indicator" onclick="syncFromGoogleSheet()" title="클릭 시 구글 시트 매물 즉시 새로고침">🔄 시트 연동중</span>
                 <button id="btn-admin-mode" class="btn-admin-toggle" onclick="toggleAdminMode()">🔒 관리자모드 OFF</button>
                 <button id="btn-open-add" class="btn-add-prop" onclick="openAdminModal()">+ 새 매물 등록 / 파일저장</button>
                 <a href="tel:032-582-6200" class="btn-top-call">📞 매매상담 032-582-6200</a>
@@ -374,38 +371,24 @@
         </div>
     </header>
 
-    <!-- 밝고 화사한 히어로 배너 -->
+    <!-- 컴팩트 히어로: 상담번호는 위 헤더(PC)·아래 상담바(모바일)에서만 보여 번호 중복 없이 소개만 담는다 -->
     <section class="hero">
         <div class="hero-inner">
-            <!-- 우리부동산 블로그 상단 배너 (PC) -->
-            <div class="hero-banner-wrap">
-                <img class="hero-banner-pc" src="skin/01c_pc_hero_banner_966.png" alt="우리부동산 - 인천 서구 석남동 공장·창고·토지 전문 공인중개사 / 매매상담 032-582-6200 · 임대상담 032-576-2600 · 직통 010-2660-8276" width="966" height="264">
-                <!-- 모바일에서는 배너 글자가 작아지지 않도록 사진 + 텍스트 카드로 표시 -->
-                <div class="hero-mobile">
-                    <div class="hero-m-card">
-                        <img class="hero-m-photo" src="skin/01m_hero_photo.jpg" alt="인천 서구 북항배후단지 물류창고 전경">
-                        <div class="hero-m-body">
-                            <span class="hero-m-badge">공장·창고·토지 전문</span>
-                            <div class="hero-m-title">우리부동산</div>
-                            <p class="hero-m-sub">인천 서구 석남동 공장·창고 전문 공인중개사</p>
-                            <div class="hero-m-phones">
-                                <a href="tel:032-582-6200" class="hero-m-phone"><small>매매상담</small>032-582-6200</a>
-                                <a href="tel:032-576-2600" class="hero-m-phone rent"><small>임대상담</small>032-576-2600</a>
-                                <a href="tel:010-2660-8276" class="hero-m-phone cell"><small>김태형 대표 직통</small>010-2660-8276</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="hero-copy">
+                <span class="hero-tag">✔ 김태형 대표 공인중개사 100% 현장 실사</span>
+                <h1>인천 서구 <span>공장·창고·신축분양</span> 전문 플랫폼</h1>
+                <p>츄레라(40ft) 진입 · 호이스트 톤수 · 계약전력(kW) · 용도지역까지 확인한 실매물만 보여드립니다.</p>
+                <ul class="hero-points">
+                    <li>📐 평수별 맞춤분류</li>
+                    <li>🚛 츄레라·호이스트 즉시필터</li>
+                    <li>🗺️ 권역별 매물지도</li>
+                    <li>🏭 석남·가좌·원창·검단산단</li>
+                </ul>
             </div>
-            <span class="hero-tag">✔ 김태형 대표 공인중개사 100% 현장 실사 브리핑</span>
-            <h1>인천 서구 <span>공장·창고·신축분양</span> 전문 플랫폼</h1>
-            <p>츄레라(40ft) 진입 여부 · 호이스트 톤수 · 계약전력(kW) · 용도지역까지 완벽하게 검증된 실매물만 제공합니다</p>
-            <div class="hero-stats">
-                <div class="stat-item"><strong>평수별 맞춤분류</strong><span>소형~250평 이상 대형</span></div>
-                <div class="stat-item"><strong>츄레라·호이스트</strong><span>진입차량·설비 즉시필터</span></div>
-                <div class="stat-item"><strong>권역별 매물지도</strong><span>석남·가좌·원창·검단산단</span></div>
-                <div class="stat-item"><strong>010-2660-8276</strong><span>대표 1:1 직통상담</span></div>
-            </div>
+            <figure class="hero-shot">
+                <img src="skin/01m_hero_photo.jpg" alt="인천 서구 북항배후단지 물류창고 전경">
+                <figcaption>인천 서구 북항배후단지 · 현장 실사 사진</figcaption>
+            </figure>
         </div>
     </section>
 
@@ -1231,7 +1214,7 @@
             if (sheetItems.length > 0) {
                 const remainingBase = baseProperties.filter(b => !sheetIds.has(b.id));
                 properties = [...sortByLatestRegistration(sheetItems), ...remainingBase];
-                if (badge) badge.innerText = `🟢 시트 실시간 연동 (${sheetItems.length}건 + 기본 ${remainingBase.length}건)`;
+                if (badge) badge.innerText = `🟢 실시간 연동 ${sheetItems.length}건` + (remainingBase.length ? ` + 기본 ${remainingBase.length}` : '');
                 updateZoneCounts();
                 renderProperties();
             } else {
@@ -1386,10 +1369,6 @@
         function createCardHtml(p, idx) {
             const dealBadgeClass = p.deal === '임대' ? 'badge-rent' : (p.deal === '매매' ? 'badge-sale' : 'badge-new');
             const mainImg = (p.imgs && p.imgs.length > 0) ? p.imgs[0] : 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80';
-            const trailerBadge = p.hasTrailer === 'YES' ? `<span class="fac-item ok">🚛 츄레라 가능</span>` : `<span class="fac-item no">🚛 11톤/5톤 진입</span>`;
-            const hoistBadge = p.hasHoist === 'YES'
-                ? `<span class="fac-item hoist-yes">🏗️ 호이스트 있음</span>`
-                : `<span class="fac-item hoist-no">🏗️ 호이스트 없음</span>`;
             const hoistFlag = p.hasHoist === 'YES'
                 ? `<span class="hoist-flag">🏗️ 호이스트 있음${hoistSpecDetail(p) ? `<span class="hf-sub">${hoistSpecDetail(p)}</span>` : ''}</span>`
                 : '';
@@ -1422,11 +1401,6 @@
                         </div>
                         <span class="prop-id">매물번호 ${p.id}</span>
                     </div>
-                    <div class="facility-strip">
-                        ${trailerBadge}
-                        ${hoistBadge}
-                        <span class="fac-item ok">⚡ 동력 ${p.powerNum}kW</span>
-                    </div>
                     <div class="card-body">
                         <div>
                             <div class="prop-loc">
@@ -1436,18 +1410,17 @@
                             <h3 class="prop-title">${p.title}</h3>
                             <div class="prop-price">${p.price}</div>
                             <div class="spec-mini-grid">
-                                <div class="spec-row"><span class="spec-key">📐 면적</span><span class="spec-val">${p.landInfo}</span></div>
-                                <div class="spec-row"><span class="spec-key">🏗️ 호이스트</span><span class="spec-val ${p.hasHoist === 'YES' ? 'hoist-val-yes' : 'hoist-val-no'}">${hoistText(p)}</span></div>
-                                <div class="spec-row"><span class="spec-key">⚡ 전력/층고</span><span class="spec-val">${p.powerNum}kW / ${p.height}</span></div>
-                                <div class="spec-row"><span class="spec-key">🚛 차량진입</span><span class="spec-val">${p.road}</span></div>
+                                <div class="spec-cell"><span class="spec-key">📐 면적</span><span class="spec-val">${p.landInfo}</span></div>
+                                <div class="spec-cell"><span class="spec-key">🏗️ 호이스트</span><span class="spec-val ${p.hasHoist === 'YES' ? 'hoist-val-yes' : 'hoist-val-no'}">${hoistText(p)}</span></div>
+                                <div class="spec-cell"><span class="spec-key">⚡ 전력/층고</span><span class="spec-val">${p.powerNum}kW / ${p.height}</span></div>
+                                <div class="spec-cell"><span class="spec-key">🚛 차량진입</span><span class="spec-val">${p.road}</span></div>
                             </div>
                             ${secretHtml}
                         </div>
                         <div class="card-footer" onclick="event.stopPropagation()">
-                            <button class="btn-detail" onclick="openDetailModal(${idx})">🔍 상세 스펙표 보기</button>
-                            <a href="sms:010-2660-8276?body=${encodeURIComponent('[우리부동산] 매물번호 ' + p.id + ' (' + p.region + ' ' + p.areaNum + '평 ' + p.deal + ') 문의드립니다.')}" class="btn-detail" style="text-decoration:none; text-align:center;">💬 문자문의</a>
+                            <button class="btn-detail" onclick="openDetailModal(${idx})">🔍 상세보기</button>
                             <a href="tel:010-2660-8276" class="btn-call">📞 전화문의</a>
-                            <button class="btn-inquiry" onclick="openInquiryModal(${idx})">📞 이 매물 바로 문의</button>
+                            <button class="btn-inquiry" onclick="openInquiryModal(${idx})">💬 문자·카톡으로 이 매물 문의</button>
                         </div>
                     </div>
                 </article>
@@ -1795,6 +1768,23 @@
             window.location.href = `sms:010-2660-8276?body=${body}`;
         }
 
+        // 📏 sticky 탭이 상단 헤더에 가려지지 않도록 헤더 실제 높이를 CSS 변수에 반영
+        function syncHeaderHeight() {
+            const header = document.querySelector('header');
+            if (!header) return;
+            const h = Math.round(header.getBoundingClientRect().height);
+            if (h > 0) document.documentElement.style.setProperty('--header-h', h + 'px');
+        }
+        window.addEventListener('load', syncHeaderHeight);
+        window.addEventListener('resize', syncHeaderHeight);
+        window.addEventListener('orientationchange', syncHeaderHeight);
+        if (window.ResizeObserver) {
+            const header = document.querySelector('header');
+            if (header) new ResizeObserver(syncHeaderHeight).observe(header);
+        }
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncHeaderHeight);
+
+        syncHeaderHeight();
         updateZoneCounts();
         renderProperties();
         syncFromGoogleSheet();
