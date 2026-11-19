@@ -362,7 +362,7 @@
                 </div>
             </a>
             <div class="header-actions">
-                <span id="sheet-sync-badge" class="sync-indicator" onclick="syncFromGoogleSheet()" title="클릭 시 구글 시트 매물 즉시 새로고침">🔄 시트 연동중</span>
+                <span id="sheet-sync-badge" class="sync-indicator" onclick="syncFromGoogleSheet()" title="클릭 시 구글 시트 매물 즉시 새로고침">🔄 연동중</span>
                 <button id="btn-admin-mode" class="btn-admin-toggle" onclick="toggleAdminMode()">🔒 관리자모드 OFF</button>
                 <button id="btn-open-add" class="btn-add-prop" onclick="openAdminModal()">+ 새 매물 등록 / 파일저장</button>
                 <a href="tel:032-582-6200" class="btn-top-call">📞 매매상담 032-582-6200</a>
@@ -1077,7 +1077,7 @@
         // 🚀 구글 스프레드시트('properties' 탭) 실시간 연동 함수
         function syncFromGoogleSheet() {
             const badge = document.getElementById('sheet-sync-badge');
-            if (badge) badge.innerText = "🔄 시트 동기화중...";
+            if (badge) badge.innerText = "🔄 연동중";
 
             const old = document.getElementById('woori-sheet-jsonp');
             if (old) old.remove();
@@ -1086,7 +1086,7 @@
             script.id = 'woori-sheet-jsonp';
             script.src = "https://docs.google.com/spreadsheets/d/1OofGenPy_CCWUz4GVNrmUPEOXkEcaCoQxEoAiMLQS5w/gviz/tq?tqx=responseHandler:onWooriSheetLoaded&sheet=properties&t=" + Date.now();
             script.onerror = function() {
-                if (badge) badge.innerText = "⚠️ 기본매물 표시중";
+                if (badge) badge.innerText = "⚠️ 기본매물";
             };
             document.body.appendChild(script);
         }
@@ -1214,12 +1214,12 @@
             if (sheetItems.length > 0) {
                 const remainingBase = baseProperties.filter(b => !sheetIds.has(b.id));
                 properties = [...sortByLatestRegistration(sheetItems), ...remainingBase];
-                if (badge) badge.innerText = `🟢 실시간 연동 ${sheetItems.length}건` + (remainingBase.length ? ` + 기본 ${remainingBase.length}` : '');
+                if (badge) badge.innerText = `🟢 ${sheetItems.length}건` + (remainingBase.length ? ` + 기본 ${remainingBase.length}` : '');
                 updateZoneCounts();
                 renderProperties();
             } else {
                 updateZoneCounts();
-                if (badge) badge.innerText = `🟢 매물 안내중 (${properties.length}건)`;
+                if (badge) badge.innerText = `🟢 ${properties.length}건`;
             }
         };
 
