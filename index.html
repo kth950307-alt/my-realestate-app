@@ -41,7 +41,9 @@
         .btn-admin-toggle:hover { border-color: var(--accent); color: var(--accent); }
         .btn-admin-toggle.active { background: var(--danger); color: white; border-color: var(--danger); animation: pulse 2s infinite; }
         .btn-add-prop { background: var(--gold); color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; display: none; box-shadow: 0 3px 10px rgba(245, 158, 11, 0.3); }
-        .btn-top-call { background: var(--accent); color: white; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 800; text-decoration: none; box-shadow: 0 3px 10px rgba(37, 99, 235, 0.22); }
+        .btn-top-call { background: var(--accent); color: white; padding: 8px 14px; border-radius: 8px; font-size: 13.5px; font-weight: 800; text-decoration: none; box-shadow: 0 3px 10px rgba(37, 99, 235, 0.22); white-space: nowrap; }
+        .btn-top-call small { display: block; font-size: 10.5px; font-weight: 900; opacity: 0.92; letter-spacing: 0.2px; line-height: 1.1; }
+        .btn-top-call.rent { background: #0f766e; box-shadow: 0 3px 10px rgba(15, 118, 110, 0.25); }
 
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.5); } 70% { box-shadow: 0 0 0 8px rgba(225, 29, 72, 0); } 100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); } }
 
@@ -67,9 +69,11 @@
         .hero-m-badge { display: inline-block; background: #1e3a8a; color: #ffffff; font-size: 12px; font-weight: 900; padding: 5px 12px; border-radius: 6px; letter-spacing: -0.2px; }
         .hero-m-title { font-size: 31px; font-weight: 900; color: #1e3a8a; letter-spacing: -1px; margin: 7px 0 2px; line-height: 1.15; }
         .hero-m-sub { font-size: 13px; font-weight: 700; color: #475569; letter-spacing: -0.3px; margin-bottom: 12px; }
-        .hero-m-phones { display: flex; gap: 8px; }
-        .hero-m-phone { flex: 1; background: #1e3a8a; color: #ffffff; text-decoration: none; border-radius: 10px; padding: 10px 6px; font-size: 13.5px; font-weight: 900; box-shadow: 0 3px 10px rgba(30, 58, 138, 0.22); }
-        .hero-m-phone.cell { background: #2563eb; }
+        .hero-m-phones { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .hero-m-phone { background: #1e3a8a; color: #ffffff; text-decoration: none; border-radius: 10px; padding: 9px 4px; font-size: 12.5px; font-weight: 900; box-shadow: 0 3px 10px rgba(30, 58, 138, 0.22); white-space: nowrap; }
+        .hero-m-phone small { display: block; font-size: 10.5px; font-weight: 900; opacity: 0.9; letter-spacing: 0.2px; line-height: 1.15; }
+        .hero-m-phone.rent { background: #0f766e; box-shadow: 0 3px 10px rgba(15, 118, 110, 0.25); }
+        .hero-m-phone.cell { grid-column: 1 / -1; background: #2563eb; }
         .hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; max-width: 840px; margin: 0 auto; background: rgba(255, 255, 255, 0.9); padding: 16px; border-radius: 16px; border: 1px solid #dbeafe; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05); }
         .stat-item strong { display: block; font-size: 18.5px; color: var(--accent); font-weight: 900; margin-bottom: 2px; }
         .stat-item span { font-size: 12.5px; color: #64748b; font-weight: 700; }
@@ -156,6 +160,13 @@
         .facility-strip { display: grid; grid-template-columns: repeat(3, 1fr); background: #f0f7ff; border-bottom: 1px solid #dbeafe; padding: 9px 12px; text-align: center; font-size: 12px; font-weight: 800; }
         .fac-item.ok { color: #1d4ed8; }
         .fac-item.no { color: #94a3b8; }
+        /* 🏗️ 호이스트 표시 — 있음은 카드에서 바로 눈에 띄게, 없음도 읽히게 */
+        .fac-item.hoist-yes { justify-self: center; display: inline-flex; align-items: center; justify-content: center; gap: 3px; background: linear-gradient(135deg, #fbbf24, #d97706); color: #3f1d07; border: 1.5px solid #b45309; border-radius: 999px; padding: 3px 7px; font-size: 12px; font-weight: 900; letter-spacing: -0.4px; box-shadow: 0 2px 7px rgba(180, 83, 9, 0.30); white-space: nowrap; }
+        .fac-item.hoist-no { justify-self: center; display: inline-flex; align-items: center; justify-content: center; gap: 3px; background: #e8edf4; color: #475569; border: 1px solid #cbd5e1; border-radius: 999px; padding: 3px 7px; font-size: 11.5px; font-weight: 800; letter-spacing: -0.3px; white-space: nowrap; }
+        .hoist-flag { position: absolute; top: 12px; right: 12px; z-index: 3; display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(135deg, #d97706, #92400e); color: #ffffff; border: 2px solid #ffffff; border-radius: 10px; padding: 6px 11px; font-size: 13.5px; font-weight: 900; letter-spacing: -0.3px; box-shadow: 0 5px 16px rgba(146, 64, 14, 0.50); }
+        .hoist-flag .hf-sub { font-size: 11px; font-weight: 800; opacity: 0.95; }
+        .spec-val.hoist-val-yes { color: #b45309; }
+        .spec-val.hoist-val-no { color: #64748b; }
 
         /* 카드 본문 */
         .card-body { padding: 18px 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
@@ -257,6 +268,7 @@
         .f-btn .f-txt { display: flex; flex-direction: column; align-items: flex-start; }
         .f-btn .f-txt small { font-size: 11.5px; font-weight: 800; opacity: 0.92; letter-spacing: 0.2px; }
         .f-btn-tel { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); }
+        .f-btn-rent { background: linear-gradient(135deg, #0f766e, #115e59); color: #ffffff; box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25); }
         .f-btn-sms { background: linear-gradient(135deg, #f59e0b, #ea8a04); color: #ffffff; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.28); }
         .f-btn-sub { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; font-size: 13.5px; }
 
@@ -325,8 +337,10 @@
             .floating-btns { width: 100%; gap: 8px; }
             .f-btn { flex: 1; flex-direction: row; padding: 12px 6px; font-size: 14px; border-radius: 12px; }
             .f-btn .f-txt { align-items: center; flex: 1; }
-            .f-btn .f-txt small { font-size: 11.5px; }
-            .f-btn-sub { display: none; }
+            .f-btn .f-txt small { font-size: 11px; }
+            .f-btn-sub { display: flex; background: #f1f5f9; }
+            .f-btn-sms { display: none; }
+            .btn-top-call.rent { display: none; }
             .modal-img-main { height: 240px; }
             .qf-search-box { flex-direction: column; align-items: stretch; gap: 6px; }
             .btn-detail-toggle { width: 100%; padding: 12px 16px; }
@@ -353,7 +367,8 @@
                 <span id="sheet-sync-badge" class="sync-indicator" onclick="syncFromGoogleSheet()" title="클릭 시 구글 시트 매물 즉시 새로고침">🔄 시트 실시간 연동중</span>
                 <button id="btn-admin-mode" class="btn-admin-toggle" onclick="toggleAdminMode()">🔒 관리자모드 OFF</button>
                 <button id="btn-open-add" class="btn-add-prop" onclick="openAdminModal()">+ 새 매물 등록 / 파일저장</button>
-                <a href="tel:032-582-6200" class="btn-top-call">📞 032-582-6200</a>
+                <a href="tel:032-582-6200" class="btn-top-call">📞 매매상담 032-582-6200</a>
+                <a href="tel:032-576-2600" class="btn-top-call rent">🔑 임대상담 032-576-2600</a>
             </div>
         </div>
     </header>
@@ -363,7 +378,7 @@
         <div class="hero-inner">
             <!-- 우리부동산 블로그 상단 배너 (PC) -->
             <div class="hero-banner-wrap">
-                <img class="hero-banner-pc" src="skin/01c_pc_hero_banner_966.png" alt="우리부동산 - 인천 서구 석남동 공장·창고·토지 전문 공인중개사 / 032-576-2600 · 010-2660-8276" width="966" height="264">
+                <img class="hero-banner-pc" src="skin/01c_pc_hero_banner_966.png" alt="우리부동산 - 인천 서구 석남동 공장·창고·토지 전문 공인중개사 / 매매상담 032-582-6200 · 임대상담 032-576-2600 · 직통 010-2660-8276" width="966" height="264">
                 <!-- 모바일에서는 배너 글자가 작아지지 않도록 사진 + 텍스트 카드로 표시 -->
                 <div class="hero-mobile">
                     <div class="hero-m-card">
@@ -373,8 +388,9 @@
                             <div class="hero-m-title">우리부동산</div>
                             <p class="hero-m-sub">인천 서구 석남동 공장·창고 전문 공인중개사</p>
                             <div class="hero-m-phones">
-                                <a href="tel:032-576-2600" class="hero-m-phone">📞 032-576-2600</a>
-                                <a href="tel:010-2660-8276" class="hero-m-phone cell">📱 010-2660-8276</a>
+                                <a href="tel:032-582-6200" class="hero-m-phone"><small>매매상담</small>032-582-6200</a>
+                                <a href="tel:032-576-2600" class="hero-m-phone rent"><small>임대상담</small>032-576-2600</a>
+                                <a href="tel:010-2660-8276" class="hero-m-phone cell"><small>김태형 대표 직통</small>010-2660-8276</a>
                             </div>
                         </div>
                     </div>
@@ -544,8 +560,8 @@
                         <label>🏗️ 호이스트 유무</label>
                         <select id="f-hoist" onchange="renderProperties()">
                             <option value="ALL">호이스트 전체</option>
-                            <option value="YES">호이스트 있음 (有)</option>
-                            <option value="NO">호이스트 없음 (無)</option>
+                            <option value="YES">🏗️ 호이스트 있음</option>
+                            <option value="NO">호이스트 없음</option>
                         </select>
                     </div>
                 </div>
@@ -674,14 +690,15 @@
                             <ul class="office-table">
                                 <li><span>대표 공인중개사</span><strong>김태형</strong></li>
                                 <li><span>중개사무소 등록번호</span><strong>28260-2023-00082</strong></li>
-                                <li><span>사무실 대표번호 (매매)</span><strong>032-582-6200</strong></li>
-                                <li><span>사무실 직통번호 (임대)</span><strong>032-576-2600</strong></li>
+                                <li><span>매매 상담 전화</span><strong>032-582-6200</strong></li>
+                                <li><span>임대 상담 전화</span><strong>032-576-2600</strong></li>
                                 <li><span>대표 1:1 직통 휴대전화</span><strong>010-2660-8276</strong></li>
                                 <li><span>사무소 소재지</span><strong>인천광역시 서구 건지로 167 (석남동)</strong></li>
                             </ul>
                         </div>
-                        <div style="display:flex; gap:10px; margin-top:14px;">
-                            <a href="tel:032-582-6200" class="btn-detail" style="text-decoration:none; text-align:center;">☎ 사무실 전화걸기</a>
+                        <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+                            <a href="tel:032-582-6200" class="btn-detail" style="text-decoration:none; text-align:center;">☎ 매매상담 032-582-6200</a>
+                            <a href="tel:032-576-2600" class="btn-detail" style="text-decoration:none; text-align:center; background:#0f766e;">🔑 임대상담 032-576-2600</a>
                             <a href="tel:010-2660-8276" class="btn-call">📱 대표 직통연결</a>
                         </div>
                     </div>
@@ -825,8 +842,8 @@
                         <div class="form-group">
                             <label>🏗️ 호이스트 유무 선택</label>
                             <select id="add-has-hoist">
-                                <option value="YES">호이스트 있음 (有)</option>
-                                <option value="NO">호이스트 없음 (無)</option>
+                                <option value="YES">호이스트 있음</option>
+                                <option value="NO">호이스트 없음</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -887,15 +904,22 @@
                 🏭 <strong>우리부동산공인중개사사무소</strong> (대표: 김태형 | 등록번호: 28260-2023-00082) | 인천 서구 건지로 167
             </div>
             <div class="floating-btns">
-                <a href="tel:032-576-2600" class="f-btn f-btn-tel">
+                <a href="tel:032-582-6200" class="f-btn f-btn-tel">
                     <span class="f-ico">📞</span>
-                    <span class="f-txt">전화상담<small>032-576-2600</small></span>
+                    <span class="f-txt">매매상담<small>032-582-6200</small></span>
+                </a>
+                <a href="tel:032-576-2600" class="f-btn f-btn-rent">
+                    <span class="f-ico">🔑</span>
+                    <span class="f-txt">임대상담<small>032-576-2600</small></span>
+                </a>
+                <a href="tel:010-2660-8276" class="f-btn f-btn-sub">
+                    <span class="f-ico">📱</span>
+                    <span class="f-txt">대표직통<small>010-2660-8276</small></span>
                 </a>
                 <a href="sms:010-2660-8276?body=%5B%EC%9A%B0%EB%A6%AC%EB%B6%80%EB%8F%99%EC%82%B0%5D%20%ED%99%88%ED%8E%98%EC%9D%B4%EC%A7%80%20%EB%B3%B4%EA%B3%A0%20%EB%AC%B8%EC%9D%98%EB%93%9C%EB%A6%BD%EB%8B%88%EB%8B%A4.%20(%ED%9D%AC%EB%A7%9D%20%EC%A7%80%EC%97%AD%2F%ED%8F%89%EC%88%98%20%EA%B8%B0%EC%9E%85%20%EB%B6%80%ED%83%81%EB%93%9C%EB%A6%BD%EB%8B%88%EB%8B%A4)" class="f-btn f-btn-sms">
                     <span class="f-ico">💬</span>
                     <span class="f-txt">문자문의<small>010-2660-8276</small></span>
                 </a>
-                <a href="tel:032-582-6200" class="f-btn f-btn-sub">☎ 매매 032-582-6200</a>
             </div>
         </div>
     </div>
@@ -1031,6 +1055,41 @@
             return "임대";
         }
 
+        // 🏗️ 호이스트 유무 판별 (시트 원본 값: 있음/없음 · 유/무 · O/X · 숫자 톤수 등 모두 대응)
+        function judgeHoist(ox, spec) {
+            const o = String(ox || "").trim();
+            const s = String(spec || "").trim();
+            const yesWords = ["있음", "유", "有", "yes", "y", "o", "〇", "보유", "설치", "가능"];
+            const noWords = ["없음", "무", "無", "no", "n", "x", "미보유", "불가", "-", "해당없음", "해당 없음"];
+            const isYes = (t) => yesWords.includes(t) || /^(있슴|있음|보유중)$/.test(t);
+            const isNo = (t) => noWords.includes(t) || /^(없슴|업음|미설치)$/.test(t);
+            if (isYes(o)) return "YES";
+            if (isNo(o)) return "NO";
+            // 유무 칸에 톤수·설비명이 직접 들어온 경우 (예: "5T", "호이스트 5T", "화물승강기")
+            if (o && (/\d/.test(o) || /(호이스트|리프트|승강기|크레인|엘리베이터)/.test(o))) return "YES";
+            // 유무 칸이 비었거나 애매하면 제원 칸으로 판단
+            if (s && !isNo(s) && !/^(없음|무|미정|미입력)$/.test(s)) return "YES";
+            return "NO";
+        }
+
+        // 제원에서 "호이스트" 접두어를 빼고 톤수·설비명만 추출 (예: "호이스트 5T" → "5T", "2.8" → "2.8톤")
+        function hoistSpecDetail(p) {
+            if (!p || p.hasHoist !== "YES") return "";
+            let s = String(p.hoist || "").trim();
+            if (!s || /^(없음|무|미입력|호이스트 보유|보유|있음)$/.test(s)) return "";
+            s = s.replace(/^호이스트\s*/i, "").trim();
+            if (!s || /^(보유|있음)$/.test(s)) return "";
+            if (/^\d+(\.\d+)?$/.test(s)) s = s + "톤";
+            return s;
+        }
+
+        // 카드·상세 어디서든 동일한 문구: "호이스트 있음 (5T)" / "호이스트 없음"
+        function hoistText(p) {
+            if (!p || p.hasHoist !== "YES") return "호이스트 없음";
+            const d = hoistSpecDetail(p);
+            return d ? `호이스트 있음 (${d})` : "호이스트 있음";
+        }
+
         // 🚀 구글 스프레드시트('properties' 탭) 실시간 연동 함수
         function syncFromGoogleSheet() {
             const badge = document.getElementById('sheet-sync-badge');
@@ -1092,7 +1151,10 @@
                     const powerVal = extractNum(c(13), 50);
                     const hoistOx = c(14);
                     const hoistSpec = c(15);
-                    const hasH = (hoistOx === "있음" || (hoistSpec && hoistSpec !== "없음")) ? "YES" : "NO";
+                    const hasH = judgeHoist(hoistOx, hoistSpec);
+                    const hoistToneTxt = (hoistSpec && !/^(없음|무|無|-)$/.test(hoistSpec.trim()))
+                        ? hoistSpec
+                        : (!/^(있음|유|有|yes|y|o|보유)$/i.test(hoistOx) ? hoistOx : "");
                     const roadStr = c(16) || "5톤 화물차 진입";
                     const rawImg = c(25);
                     const validImg = (rawImg.startsWith("http") || rawImg.startsWith("data:image"))
@@ -1120,7 +1182,7 @@
                         hasTrailer: (roadStr.includes("츄레라") || roadStr.includes("40ft") || roadStr.includes("25톤")) ? "YES" : "WING",
                         road: roadStr,
                         hasHoist: hasH,
-                        hoist: hasH === "YES" ? (hoistSpec && hoistSpec !== "없음" ? hoistSpec : "호이스트 보유") : "없음",
+                        hoist: hasH === "YES" ? (hoistToneTxt || "호이스트 보유") : "없음",
                         powerNum: powerVal,
                         height: c(12) ? (c(12).includes("m") ? c(12) : c(12) + "m") : "-",
                         isDone: c5.includes("완료") || c(6).includes("계약완료"),
@@ -1134,8 +1196,8 @@
                 else if (c0.startsWith("W-") && (c2.includes("공개") || c2.includes("노출") || isAdmin)) {
                     const idStr = c0;
                     const areaOld = extractNum(c(8), 80);
-                    const hoistRaw = c(12) || "없음";
-                    const hasH = (hoistRaw.includes("호이스트") && !hoistRaw.includes("없음")) ? "YES" : "NO";
+                    const hoistRaw = c(12) || "";
+                    const hasH = judgeHoist(c(14) || hoistRaw, c(15));
                     sheetIds.add(idStr);
                     sheetItems.push({
                         id: idStr,
@@ -1324,7 +1386,12 @@
             const dealBadgeClass = p.deal === '임대' ? 'badge-rent' : (p.deal === '매매' ? 'badge-sale' : 'badge-new');
             const mainImg = (p.imgs && p.imgs.length > 0) ? p.imgs[0] : 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80';
             const trailerBadge = p.hasTrailer === 'YES' ? `<span class="fac-item ok">🚛 츄레라 가능</span>` : `<span class="fac-item no">🚛 11톤/5톤 진입</span>`;
-            const hoistBadge = p.hasHoist === 'YES' ? `<span class="fac-item ok">🏗️ 호이스트 有</span>` : `<span class="fac-item no">🏗️ 호이스트 無</span>`;
+            const hoistBadge = p.hasHoist === 'YES'
+                ? `<span class="fac-item hoist-yes">🏗️ 호이스트 있음</span>`
+                : `<span class="fac-item hoist-no">🏗️ 호이스트 없음</span>`;
+            const hoistFlag = p.hasHoist === 'YES'
+                ? `<span class="hoist-flag">🏗️ 호이스트 있음${hoistSpecDetail(p) ? `<span class="hf-sub">${hoistSpecDetail(p)}</span>` : ''}</span>`
+                : '';
             
             const doneHtml = p.isDone ? `<div class="done-overlay"><div class="done-stamp">계약완료 (유사매물 문의)</div></div>` : '';
 
@@ -1347,6 +1414,7 @@
                     <div class="thumb-wrap">
                         <img src="${mainImg}" alt="${p.title}">
                         ${doneHtml}
+                        ${hoistFlag}
                         <div class="badge-group">
                             <span class="badge ${dealBadgeClass}">${p.deal}</span>
                             <span class="badge badge-hot">${p.badge}</span>
@@ -1368,7 +1436,7 @@
                             <div class="prop-price">${p.price}</div>
                             <div class="spec-mini-grid">
                                 <div class="spec-row"><span class="spec-key">📐 면적</span><span class="spec-val">${p.landInfo}</span></div>
-                                <div class="spec-row"><span class="spec-key">🏗️ 호이스트</span><span class="spec-val">${p.hoist}</span></div>
+                                <div class="spec-row"><span class="spec-key">🏗️ 호이스트</span><span class="spec-val ${p.hasHoist === 'YES' ? 'hoist-val-yes' : 'hoist-val-no'}">${hoistText(p)}</span></div>
                                 <div class="spec-row"><span class="spec-key">⚡ 전력/층고</span><span class="spec-val">${p.powerNum}kW / ${p.height}</span></div>
                                 <div class="spec-row"><span class="spec-key">🚛 차량진입</span><span class="spec-val">${p.road}</span></div>
                             </div>
@@ -1466,6 +1534,9 @@
             const msg = `[우리부동산] 매물번호 ${p.id} 문의드립니다.\n· 매물: ${p.title}\n· 가격: ${p.price}\n· 위치: 인천 서구 ${p.region} / ${p.areaNum}평 / ${p.deal}`;
             window.__lastInquiryMsg = msg;
             const smsHref = 'sms:010-2660-8276?body=' + encodeURIComponent(msg);
+            const isSale = p.deal === '매매';
+            const saleBtn = `<a href="tel:032-582-6200" class="inq-btn ${isSale ? 'inq-btn-main' : 'inq-btn-tel'}">☎ 매매상담 032-582-6200${isSale ? ' · 이 매물' : ''}</a>`;
+            const rentBtn = `<a href="tel:032-576-2600" class="inq-btn ${isSale ? 'inq-btn-tel' : 'inq-btn-main'}">🔑 임대상담 032-576-2600${isSale ? '' : ' · 이 매물'}</a>`;
             document.getElementById('inq-body').innerHTML = `
                 <div class="inq-summary">
                     <span class="inq-id">매물번호 ${p.id}</span>
@@ -1475,8 +1546,7 @@
                 </div>
                 <div class="inq-actions">
                     <a href="${smsHref}" class="inq-btn inq-btn-sms">💬 이 매물 문자로 문의 (010-2660-8276)</a>
-                    <a href="tel:032-576-2600" class="inq-btn inq-btn-main">📞 임대 상담 032-576-2600</a>
-                    <a href="tel:032-582-6200" class="inq-btn inq-btn-tel">☎ 매매 상담 032-582-6200</a>
+                    ${isSale ? saleBtn + rentBtn : rentBtn + saleBtn}
                     <a href="tel:010-2660-8276" class="inq-btn inq-btn-tel">📱 김태형 대표 직통 010-2660-8276</a>
                     <button type="button" class="inq-btn inq-btn-copy" id="inq-copy-btn" onclick="copyInquiryText()">📋 문의 내용 복사해서 카톡·메일로 보내기</button>
                 </div>
@@ -1561,7 +1631,7 @@
                         <th>진입도로 조건</th><td>${p.road}</td>
                     </tr>
                     <tr>
-                        <th>🏗️ 호이스트 설비</th><td>${p.hasHoist === 'YES' ? '⭕ ' + p.hoist : '없음'}</td>
+                        <th>🏗️ 호이스트 설비</th><td>${p.hasHoist === 'YES' ? '⭕ ' + hoistText(p) : '호이스트 없음'}</td>
                         <th>⚡ 전력 / 층고</th><td>동력 ${p.powerNum}kW / 층고 ${p.height}</td>
                     </tr>
                 </table>
@@ -1569,6 +1639,7 @@
                 <div class="detail-desc"><strong>💡 김태형 대표 공인중개사 현장 실사 브리핑</strong>\n${p.desc}</div>
 
                 <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <a href="tel:${p.deal === '매매' ? '032-582-6200' : '032-576-2600'}" class="btn-save" style="flex:1; text-decoration:none; text-align:center; margin-top:0; background:${p.deal === '매매' ? '#1d4ed8' : '#0f766e'};">☎ ${p.deal === '매매' ? '매매상담 032-582-6200' : '임대상담 032-576-2600'}</a>
                     <a href="tel:010-2660-8276" class="btn-save" style="flex:1; text-decoration:none; text-align:center; margin-top:0;">📞 010-2660-8276 직통 전화상담</a>
                     <a href="sms:010-2660-8276?body=[우리부동산] 매물번호 ${p.id} (${p.region} ${p.areaNum}평 ${p.deal}) 상세 문의드립니다." class="btn-export" style="flex:1; text-decoration:none; text-align:center; margin-top:0; background:var(--gold); color:#fff;">💬 이 매물번호로 문자 문의</a>
                 </div>
