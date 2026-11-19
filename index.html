@@ -260,6 +260,46 @@
         .f-btn-sms { background: linear-gradient(135deg, #f59e0b, #ea8a04); color: #ffffff; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.28); }
         .f-btn-sub { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; font-size: 13.5px; }
 
+        /* 10. 검색줄 + 상세조건 접기 토글 */
+        .qf-search-box { display: flex; gap: 8px; flex: 1; align-items: center; min-width: 0; }
+        .qf-search-input { flex: 1; min-width: 0; padding: 11px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13.5px; font-weight: 700; color: var(--text-main); background: #f8fafc; transition: 0.2s; }
+        .qf-search-input:focus { border-color: var(--accent); background: #fff; outline: none; }
+        .btn-detail-toggle { flex: 0 0 auto; padding: 11px 16px; border-radius: 10px; border: 1.5px solid var(--accent-border); background: var(--accent-light); color: var(--accent); font-size: 13.5px; font-weight: 900; cursor: pointer; white-space: nowrap; transition: 0.15s; }
+        .btn-detail-toggle:hover { background: #dbeafe; border-color: #93c5fd; }
+        .btn-detail-toggle .dt-caret { display: inline-block; margin-left: 4px; transition: transform 0.2s; }
+        .btn-detail-toggle[aria-expanded="true"] .dt-caret { transform: rotate(180deg); }
+        .detail-filters { display: block; }
+        .detail-filters.is-collapsed { display: none; }
+
+        /* 11. 정렬 버튼 · 24건 더 보기 */
+        .list-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+        .list-toolbar .result-count { font-size: 15.5px; font-weight: 900; color: var(--text-main); }
+        .list-toolbar .result-count span { color: var(--danger); font-size: 19px; }
+        .sort-bar { display: flex; gap: 4px; background: #ffffff; border: 1px solid var(--border); border-radius: 12px; padding: 4px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03); }
+        .sort-btn { padding: 8px 15px; border: none; border-radius: 9px; background: none; color: #475569; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.15s; white-space: nowrap; }
+        .sort-btn:hover { color: var(--accent); background: var(--accent-light); }
+        .sort-btn.active { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; box-shadow: 0 3px 10px rgba(37, 99, 235, 0.25); }
+        .load-more-wrap { text-align: center; margin: -20px 0 44px; }
+        .btn-load-more { background: #ffffff; border: 2px solid var(--accent); color: var(--accent); padding: 14px 38px; border-radius: 12px; font-size: 15px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.10); transition: 0.18s; }
+        .btn-load-more:hover { background: var(--accent-light); transform: translateY(-2px); }
+        .btn-load-more .lm-remain { color: var(--danger); }
+
+        /* 12. 카드별 [이 매물 바로 문의] + 문의 팝업 */
+        .btn-inquiry { flex: 1 1 100%; background: linear-gradient(135deg, #f59e0b, #ea8a04); color: #ffffff; border: none; padding: 12px 0; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 3px 10px rgba(245, 158, 11, 0.28); }
+        .btn-inquiry:hover { filter: brightness(1.05); }
+        .inq-summary { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; }
+        .inq-id { display: inline-block; background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 900; margin-bottom: 8px; }
+        .inq-title { font-size: 15.5px; font-weight: 900; color: var(--text-main); line-height: 1.4; margin-bottom: 6px; }
+        .inq-price { font-size: 19px; font-weight: 900; color: var(--danger); }
+        .inq-meta { font-size: 12.5px; font-weight: 700; color: var(--text-sub); margin-top: 6px; }
+        .inq-actions { display: grid; gap: 8px; }
+        .inq-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 10px; border-radius: 11px; font-size: 14.5px; font-weight: 900; text-decoration: none; border: none; cursor: pointer; }
+        .inq-btn-sms { background: linear-gradient(135deg, #f59e0b, #ea8a04); color: #ffffff; box-shadow: 0 3px 10px rgba(245, 158, 11, 0.28); }
+        .inq-btn-main { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; box-shadow: 0 3px 10px rgba(37, 99, 235, 0.25); }
+        .inq-btn-tel { background: #eff6ff; color: #1d4ed8; border: 1.5px solid #bfdbfe; }
+        .inq-btn-copy { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; font-size: 13px; }
+        .inq-msg { white-space: pre-wrap; word-break: break-all; background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 12px; font-size: 12.5px; font-weight: 600; color: #475569; margin-top: 12px; line-height: 1.6; }
+
         @media (max-width: 860px) {
             body { padding-bottom: 122px; }
             .hero { padding: 14px 12px 26px; }
@@ -288,6 +328,12 @@
             .f-btn .f-txt small { font-size: 11.5px; }
             .f-btn-sub { display: none; }
             .modal-img-main { height: 240px; }
+            .qf-search-box { flex-direction: column; align-items: stretch; gap: 6px; }
+            .btn-detail-toggle { width: 100%; padding: 12px 16px; }
+            .list-toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
+            .sort-bar { display: grid; grid-template-columns: repeat(3, 1fr); }
+            .sort-btn { padding: 10px 4px; font-size: 12.5px; }
+            .btn-load-more { width: 100%; padding: 14px 10px; font-size: 14.5px; }
         }
     </style>
 </head>
@@ -399,7 +445,18 @@
                         <button type="button" class="qf-chip" data-region="청라·경서" onclick="setRegionChip('청라·경서')">청라·경서</button>
                     </div>
                 </div>
+                <!-- 키워드 검색 + 상세조건 접기/펼치기 -->
+                <div class="qf-row">
+                    <span class="qf-label">검색</span>
+                    <div class="qf-search-box">
+                        <input type="text" id="f-keyword" class="qf-search-input" placeholder="매물번호·지역·도로·업종 검색" oninput="renderProperties()">
+                        <button type="button" class="btn-detail-toggle" id="btn-detail-toggle" aria-expanded="false" aria-controls="detail-filters" onclick="toggleDetailFilters()"><span class="dt-label">🔍 상세조건 펼치기</span><span class="dt-caret">▾</span></button>
+                    </div>
+                </div>
             </div>
+
+            <!-- 🔍 상세조건 묶음 (기본 접힘 — 평수카드 · 핵심설비 · 상세 드롭다운) -->
+            <div id="detail-filters" class="detail-filters is-collapsed">
 
             <!-- 최상단 평수대별 5단계 대형 카드 -->
             <div class="pyeong-hero-grid" id="area-cards-top">
@@ -491,19 +548,31 @@
                             <option value="NO">호이스트 없음 (無)</option>
                         </select>
                     </div>
-                    <div class="filter-item">
-                        <label>키워드 / 매물번호 검색</label>
-                        <input type="text" id="f-keyword" placeholder="매물번호, 도로, 층수, 업종 등" oninput="renderProperties()">
-                    </div>
                 </div>
-                <div class="search-bottom">
-                    <div class="result-count">선택하신 조건의 실매물 <span id="prop-count">0</span>건</div>
+                <div class="search-bottom" style="justify-content: flex-end;">
                     <button class="btn-reset" onclick="resetFilters()">🔄 전체 조건 초기화</button>
                 </div>
             </div>
 
-            <!-- 매물 카드 리스트 -->
+            </div><!-- /#detail-filters -->
+
+            <!-- 정렬 선택 + 결과 건수 -->
+            <div class="list-toolbar">
+                <div class="result-count">선택하신 조건의 실매물 <span id="prop-count">0</span>건</div>
+                <div class="sort-bar" role="group" aria-label="매물 정렬">
+                    <button type="button" class="sort-btn active" data-sort="latest" onclick="setSortMode('latest', this)">최신등록순</button>
+                    <button type="button" class="sort-btn" data-sort="price" onclick="setSortMode('price', this)">낮은가격순</button>
+                    <button type="button" class="sort-btn" data-sort="area" onclick="setSortMode('area', this)">넓은평수순</button>
+                </div>
+            </div>
+
+            <!-- 매물 카드 리스트 (24건씩 끊어 보기) -->
             <div id="property-list" class="property-grid"></div>
+
+            <!-- 더 보기 버튼 -->
+            <div class="load-more-wrap" id="load-more-wrap" style="display:none;">
+                <button type="button" class="btn-load-more" id="btn-load-more" onclick="loadMoreProperties()">더 보기</button>
+            </div>
 
             <!-- 인천 서구 권역별 매물 지도 -->
             <div class="zone-map-panel" id="zone-map-section">
@@ -657,6 +726,17 @@
 
         </section>
     </main>
+
+    <!-- 매물 바로 문의 팝업 -->
+    <div id="inquiry-modal" class="modal-overlay" onclick="closeModalOnBg(event, 'inquiry-modal')">
+        <div class="modal-box" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3>📞 이 매물 바로 문의</h3>
+                <button class="btn-close" onclick="closeInquiryModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="inq-body"></div>
+        </div>
+    </div>
 
     <!-- 매물 상세 모달 -->
     <div id="detail-modal" class="modal-overlay" onclick="closeModalOnBg(event, 'detail-modal')">
@@ -831,6 +911,11 @@
         let quickPower100 = false;
         let chipArea = 'ALL';
 
+        // 📄 목록 표시 상태 (24건씩 끊어 보기 · 정렬)
+        const PAGE_SIZE = 24;
+        let visibleCount = PAGE_SIZE;
+        let sortMode = 'latest';   // latest | price | area
+
         // 주요 지역 묶음 (칩·드롭다운 공통 매칭). 매물 데이터의 권역 값과 정확히 대응한다.
         const REGION_GROUPS = {
             '도화·주안': ['도화동', '주안동', '송림동', '송현동'],
@@ -842,6 +927,52 @@
             const keys = REGION_GROUPS[selected] || [selected];
             const target = String(pRegion || '');
             return keys.some(k => target.includes(k));
+        }
+
+        // 🔍 상세조건 펼치기 / 접기
+        function toggleDetailFilters() {
+            const panel = document.getElementById('detail-filters');
+            const btn = document.getElementById('btn-detail-toggle');
+            const collapsed = panel.classList.toggle('is-collapsed');
+            btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            btn.querySelector('.dt-label').innerText = collapsed ? '🔍 상세조건 펼치기' : '🔍 상세조건 접기';
+        }
+
+        // ↕ 정렬 전환 (최신등록순 기본 / 낮은가격순 / 넓은평수순)
+        function setSortMode(mode, btnEl) {
+            sortMode = mode;
+            document.querySelectorAll('.sort-bar .sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === mode));
+            renderProperties();
+        }
+
+        // 💰 정렬용 금액 (만원 단위). 보증금·매매가 같은 대표 금액을 기준으로 잡는다.
+        function priceSortValue(p) {
+            const raw = String(p.price || "").replace(/,/g, "");
+            const nums = [];
+            const re = /(\d+(?:\.\d+)?)\s*(억|만)/g;
+            let m;
+            while ((m = re.exec(raw)) !== null) {
+                nums.push(parseFloat(m[1]) * (m[2] === "억" ? 10000 : 1));
+            }
+            if (nums.length > 0) {
+                let v = Math.max.apply(null, nums);
+                if (raw.indexOf("평당") >= 0) v = v * (Number(p.areaNum) || 1);   // 평당가 표기는 총액으로 환산
+                return v;
+            }
+            const n = raw.match(/\d+(?:\.\d+)?/);
+            return n ? parseFloat(n[0]) : 0;
+        }
+
+        function sortPropertyItems(items) {
+            if (sortMode === 'price') {
+                return items.slice().sort((a, b) => priceSortValue(a.p) - priceSortValue(b.p));
+            }
+            if (sortMode === 'area') {
+                return items.slice().sort((a, b) => (Number(b.p.areaNum) || 0) - (Number(a.p.areaNum) || 0));
+            }
+            // 기본 최신등록순: 기존 sortByLatestRegistration() 로직 그대로 사용
+            const wrapped = items.map(it => Object.assign({}, it.p, { __ref: it }));
+            return sortByLatestRegistration(wrapped).map(w => w.__ref);
         }
 
         // ⚡ 원클릭 빠른 필터 칩
@@ -1247,13 +1378,14 @@
                             <button class="btn-detail" onclick="openDetailModal(${idx})">🔍 상세 스펙표 보기</button>
                             <a href="sms:010-2660-8276?body=${encodeURIComponent('[우리부동산] 매물번호 ' + p.id + ' (' + p.region + ' ' + p.areaNum + '평 ' + p.deal + ') 문의드립니다.')}" class="btn-detail" style="text-decoration:none; text-align:center;">💬 문자문의</a>
                             <a href="tel:010-2660-8276" class="btn-call">📞 전화문의</a>
+                            <button class="btn-inquiry" onclick="openInquiryModal(${idx})">📞 이 매물 바로 문의</button>
                         </div>
                     </div>
                 </article>
             `;
         }
 
-        function renderProperties() {
+        function getFilteredItems() {
             const deal = document.getElementById('f-deal').value;
             const region = document.getElementById('f-region').value;
             const area = document.getElementById('f-area').value;
@@ -1261,11 +1393,7 @@
             const hoist = document.getElementById('f-hoist').value;
             const keyword = document.getElementById('f-keyword').value.trim().toLowerCase();
 
-            syncQuickChips();
-            document.getElementById('q-trailer').classList.toggle('active', trailer === 'YES');
-            document.getElementById('q-hoist').classList.toggle('active', hoist === 'YES');
-
-            const cardsHtml = [];
+            const items = [];
             properties.forEach((p, idx) => {
                 if (deal !== 'ALL' && p.deal !== deal) return;
                 if (!matchRegion(p.region, region)) return;
@@ -1284,18 +1412,102 @@
                     const searchTarget = (p.id + p.title + p.region + p.road + p.hoist + p.desc + (isAdmin ? (p.secretAddr + p.secretOwner + p.secretMemo) : '')).toLowerCase();
                     if (!searchTarget.includes(keyword)) return;
                 }
-                cardsHtml.push(createCardHtml(p, idx));
+                items.push({ p: p, idx: idx });
             });
+            return items;
+        }
 
-            document.getElementById('prop-count').innerText = cardsHtml.length;
-            document.getElementById('property-list').innerHTML = cardsHtml.length > 0 
-                ? cardsHtml.join('') 
+        // 24건씩 끊어 그리는 실제 렌더링
+        function renderList() {
+            const trailer = document.getElementById('f-trailer').value;
+            const hoist = document.getElementById('f-hoist').value;
+            syncQuickChips();
+            document.getElementById('q-trailer').classList.toggle('active', trailer === 'YES');
+            document.getElementById('q-hoist').classList.toggle('active', hoist === 'YES');
+
+            const all = sortPropertyItems(getFilteredItems());
+            const shown = all.slice(0, visibleCount);
+
+            document.getElementById('prop-count').innerText = all.length;
+            document.getElementById('property-list').innerHTML = shown.length > 0
+                ? shown.map(it => createCardHtml(it.p, it.idx)).join('')
                 : `<div style="grid-column: 1/-1; text-align:center; padding: 60px 20px; background:white; border-radius:16px; border:1px solid #e2e8f0;">
                     <h3 style="margin-bottom:8px;">조건에 맞는 매물이 없습니다.</h3>
                     <p style="color:#64748b; margin-bottom:16px;">비공개 매물이 다수 확보되어 있으니 직통전화로 문의주시면 즉시 매칭해 드립니다.</p>
                     <button class="btn-reset" onclick="resetFilters()">전체 매물 다시보기</button>
                    </div>`;
+
+            const remain = all.length - shown.length;
+            const wrap = document.getElementById('load-more-wrap');
+            const btn = document.getElementById('btn-load-more');
+            if (remain > 0) {
+                btn.innerHTML = `더 보기 (<span class="lm-remain">남은 ${remain}건</span>)`;
+                wrap.style.display = 'block';
+            } else {
+                wrap.style.display = 'none';
+            }
         }
+
+        // 필터·정렬이 바뀌면 항상 24건부터 다시 보여준다.
+        function renderProperties() {
+            visibleCount = PAGE_SIZE;
+            renderList();
+        }
+
+        function loadMoreProperties() {
+            visibleCount += PAGE_SIZE;
+            renderList();
+        }
+
+        // 📞 카드의 [이 매물 바로 문의] 팝업
+        function openInquiryModal(idx) {
+            const p = properties[idx];
+            if (!p) return;
+            const msg = `[우리부동산] 매물번호 ${p.id} 문의드립니다.\n· 매물: ${p.title}\n· 가격: ${p.price}\n· 위치: 인천 서구 ${p.region} / ${p.areaNum}평 / ${p.deal}`;
+            window.__lastInquiryMsg = msg;
+            const smsHref = 'sms:010-2660-8276?body=' + encodeURIComponent(msg);
+            document.getElementById('inq-body').innerHTML = `
+                <div class="inq-summary">
+                    <span class="inq-id">매물번호 ${p.id}</span>
+                    <div class="inq-title">${p.title}</div>
+                    <div class="inq-price">${p.price}</div>
+                    <div class="inq-meta">📍 인천 서구 ${p.region} · ${p.areaNum}평 · ${p.deal} · ${p.zone}</div>
+                </div>
+                <div class="inq-actions">
+                    <a href="${smsHref}" class="inq-btn inq-btn-sms">💬 이 매물 문자로 문의 (010-2660-8276)</a>
+                    <a href="tel:032-576-2600" class="inq-btn inq-btn-main">📞 임대 상담 032-576-2600</a>
+                    <a href="tel:032-582-6200" class="inq-btn inq-btn-tel">☎ 매매 상담 032-582-6200</a>
+                    <a href="tel:010-2660-8276" class="inq-btn inq-btn-tel">📱 김태형 대표 직통 010-2660-8276</a>
+                    <button type="button" class="inq-btn inq-btn-copy" id="inq-copy-btn" onclick="copyInquiryText()">📋 문의 내용 복사해서 카톡·메일로 보내기</button>
+                </div>
+                <div class="inq-msg" id="inq-msg-box">${msg.replace(/</g, '&lt;')}</div>
+                <p style="font-size:12px; color:#94a3b8; margin-top:10px; line-height:1.5;">문자 앱이 열리지 않는 환경(PC 등)에서는 위 [문의 내용 복사] 후 문자·카톡으로 보내주세요.</p>
+            `;
+            document.getElementById('inquiry-modal').classList.add('open');
+        }
+
+        function copyInquiryText() {
+            const msg = window.__lastInquiryMsg || '';
+            const btn = document.getElementById('inq-copy-btn');
+            const done = () => { if (btn) { btn.innerText = '✅ 복사 완료 — 붙여넣기 하세요'; setTimeout(() => { btn.innerText = '📋 문의 내용 복사해서 카톡·메일로 보내기'; }, 2000); } };
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(msg).then(done).catch(fallbackCopy);
+            } else {
+                fallbackCopy();
+            }
+            function fallbackCopy() {
+                const ta = document.createElement('textarea');
+                ta.value = msg;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); done(); } catch (e) { alert('복사가 되지 않았습니다. 아래 문의 내용을 직접 선택해 복사해 주세요.'); }
+                document.body.removeChild(ta);
+            }
+        }
+
+        function closeInquiryModal() { document.getElementById('inquiry-modal').classList.remove('open'); }
 
         function resetFilters() {
             document.getElementById('f-deal').value = 'ALL';
