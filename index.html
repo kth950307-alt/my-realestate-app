@@ -148,11 +148,11 @@
         .spec-val.hoist-val-no { color: #64748b; }
 
         /* 카드 본문 */
-        .card-body { padding: 16px 18px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; }
+        .card-body { padding: 16px 18px; flex: 1; display: flex; flex-direction: column; justify-content: flex-start; gap: 0; }
         .prop-loc { font-size: 12.5px; font-weight: 800; color: var(--accent); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
         .prop-loc > span:first-child { min-width: 0; }
         .py-tag { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 2px 9px; border-radius: 6px; font-size: 11.5px; font-weight: 900; white-space: nowrap; }
-        .prop-title { font-size: 16.5px; font-weight: 900; color: var(--text-main); margin-bottom: 8px; line-height: 1.4; word-break: keep-all; }
+        .prop-title { font-size: 16.5px; font-weight: 900; color: var(--text-main); margin-bottom: 8px; line-height: 1.4; word-break: keep-all; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .prop-price { font-size: 20px; font-weight: 900; color: var(--danger); margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; letter-spacing: -0.4px; }
 
         /* 카드 스펙 — 2×2 표. 항목은 한 번씩만, 라벨은 줄바꿈되지 않게 */
@@ -167,7 +167,7 @@
         .admin-ctrl-btns { display: flex; gap: 6px; margin-top: 8px; }
         .btn-sm-ctrl { flex: 1; padding: 6px; font-size: 11.5px; font-weight: 800; border-radius: 6px; border: 1px solid #cbd5e1; cursor: pointer; background: white; }
 
-        .card-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .card-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: auto; padding-top: 12px; }
         .card-footer .btn-detail, .card-footer .btn-call { padding: 11px 8px; white-space: nowrap; }
         .btn-detail { background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; transition: 0.2s; }
         .btn-detail:hover { background: #e2e8f0; }
