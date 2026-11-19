@@ -74,7 +74,7 @@
   .charcount .goal{margin-left:auto; font-weight:700; color:var(--ink-3);}
   .charcount .goal.ok{color:var(--green-dark);}
 
-  .actionbar{margin-top:16px; display:flex; gap:10px; align-items:center;}
+  .actionbar{margin-top:16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
   .btn-main{flex:1; border:0; border-radius:16px; background:var(--green); color:#fff;
     font-family:inherit; font-size:16.5px; font-weight:800; letter-spacing:-.3px; padding:17px 14px;
     cursor:pointer; box-shadow:0 6px 16px rgba(3,199,90,.25); transition:transform .08s, background .12s;}
@@ -82,6 +82,9 @@
   .btn-ghost{border:1px solid var(--line); background:var(--card); color:var(--ink-2);
     font-family:inherit; font-size:14px; font-weight:700; padding:16px 15px; border-radius:16px; cursor:pointer; white-space:nowrap;}
   .btn-ghost:active{background:#f2f4f6;}
+  .btn-clear{border:1.5px solid #f0c9c5; background:#fff6f5; color:#b3261e;
+    box-shadow:0 2px 8px rgba(179,38,30,.08);}
+  .btn-clear:active{background:#fde8e6;}
 
   .hint{font-size:12.8px; color:var(--ink-3); margin:12px 2px 0; line-height:1.6;}
   .hint b{color:var(--ink-2);}
@@ -109,10 +112,10 @@
   @media (max-width:879px){
     .actionbar{position:fixed; left:0; right:0; bottom:0; margin:0; padding:10px 14px calc(12px + env(safe-area-inset-bottom));
       background:rgba(255,255,255,.97); border-top:1px solid var(--line); box-shadow:0 -6px 18px rgba(0,0,0,.06); z-index:50;}
-    .btn-main{font-size:15px; padding:15px 12px;}
-    .btn-ghost{padding:14px 13px; font-size:13.5px;}
-    body{padding-bottom:104px;}
-    .toast{bottom:96px;}
+    .btn-main{flex:1 1 100%; font-size:15px; padding:15px 12px;}
+    .btn-ghost{flex:1 1 0; min-width:0; padding:14px 10px; font-size:13.5px; text-align:center;}
+    body{padding-bottom:154px;}
+    .toast{bottom:146px;}
     .modes{flex-direction:column;}
   }
 </style>
@@ -176,6 +179,7 @@
   <div class="actionbar">
     <button class="btn-main" id="btnMain" type="button">📋 네이버 블로그 서식 복사 (표 포함)</button>
     <button class="btn-ghost" id="btnText" type="button">📄 텍스트만 복사</button>
+    <button class="btn-ghost btn-clear" id="btnClearBar" type="button">🗑️ 비우기</button>
   </div>
 
   <p class="hint">
@@ -843,12 +847,16 @@
     render();
     doCopyText();
   });
-  document.getElementById("btnClear").addEventListener("click", function(){
+  /* 비우기: 입력창 + 미리보기 + 저장된 초안(localStorage)까지 모두 초기화 */
+  function clearAll(){
     inputEl.value = "";
+    try { localStorage.removeItem("blogCleanInput"); } catch(e){}
     render();
-    inputEl.focus();
-    showToast("비웠습니다", "새 글을 붙여넣어 주세요.");
-  });
+    if(window.matchMedia && window.matchMedia("(min-width:880px)").matches){ inputEl.focus(); }
+    showToast("🗑️ 비웠습니다", "새 글을 붙여넣어 주세요.");
+  }
+  document.getElementById("btnClear").addEventListener("click", clearAll);
+  document.getElementById("btnClearBar").addEventListener("click", clearAll);
 
   var modeBtns = document.querySelectorAll(".modes .m");
   for(var i=0;i<modeBtns.length;i++){
