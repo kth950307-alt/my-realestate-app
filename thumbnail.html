@@ -320,6 +320,10 @@ const ctx = cv.getContext('2d');
 
 const $ = id => document.getElementById(id);
 
+/* 없는 입력칸을 건너뛰는 안전한 접근 */
+const val = id => { const el = $(id); return el ? el.value : (DEFAULTS[id] || ''); };
+function setVal(id, v){ const el = $(id); if (el) el.value = v; }
+
 /* ------------------------------------------------------------------ state */
 const DEFAULTS = {
   badge: '공장 임대',
@@ -1144,7 +1148,7 @@ function drawA(){
     by2 -= 16;
   }
 
-  const aLabel = S.areaLabel.trim(), aValue = S.areaValue.trim();
+  const aLabel = (S.areaLabel || '').trim(), aValue = (S.areaValue || '').trim();
   if (aLabel || aValue){
     const ah = 90;
     by2 -= ah;
@@ -1552,7 +1556,7 @@ function drawB(){
 
 /* ------------------------------------------------------------------ render */
 function readInputs(){
-  TEXT_IDS.forEach(function(id){ S[id] = $(id).value; });
+  TEXT_IDS.forEach(function(id){ S[id] = val(id); });
   S.subMode = $('subMode').value;
   S.focusX = parseInt($('focusX').value, 10) / 100;
   S.focusY = parseInt($('focusY').value, 10) / 100;
@@ -1580,7 +1584,7 @@ function renderNow(){ drawAll(); }
 function saveState(){
   try {
     const data = { style: S.style, trade: S.trade, subMode: $('subMode').value };
-    TEXT_IDS.forEach(function(id){ data[id] = $(id).value; });
+    TEXT_IDS.forEach(function(id){ data[id] = val(id); });
     localStorage.setItem(LS_KEY, JSON.stringify(data));
   } catch(e){}
 }
@@ -1593,7 +1597,7 @@ function loadState(){
       const data = JSON.parse(raw);
       /* 예전 저장값은 글씨만 살리고 스타일은 새 기본(김해 진영읍형)으로 */
       TEXT_IDS.forEach(function(id){
-        if (typeof data[id] === 'string' && DEFAULTS[id] !== undefined) $(id).value = data[id];
+        if (typeof data[id] === 'string' && DEFAULTS[id] !== undefined) setVal(id, data[id]);
       });
       setStyle('K'); setTrade(data.trade === 'sale' ? 'sale' : 'rent');
       return true;
@@ -1601,7 +1605,7 @@ function loadState(){
     if (!raw) return false;
     const data = JSON.parse(raw);
     TEXT_IDS.forEach(function(id){
-      if (typeof data[id] === 'string') $(id).value = data[id];
+      if (typeof data[id] === 'string') setVal(id, data[id]);
     });
     if (data.subMode) $('subMode').value = data.subMode;
     setStyle(data.style === 'A' || data.style === 'B' ? data.style : 'K');
@@ -1610,7 +1614,7 @@ function loadState(){
   } catch(e){ return false; }
 }
 function fillDefaults(){
-  TEXT_IDS.forEach(function(id){ $(id).value = DEFAULTS[id] || ''; });
+  TEXT_IDS.forEach(function(id){ setVal(id, DEFAULTS[id] || ''); });
   $('subMode').value = DEFAULTS.subMode;
   $('focusX').value = DEFAULTS.focusX;
   $('focusY').value = DEFAULTS.focusY;
@@ -1741,7 +1745,8 @@ function init(){
   bindDrop($('subDrop'), $('subFile'), $('subThumb'), function(f){ loadFile(f, 'sub'); });
 
   TEXT_IDS.forEach(function(id){
-    $(id).addEventListener('input', function(){ render(); saveState(); });
+    const el = $(id);
+    if (el) el.addEventListener('input', function(){ render(); saveState(); });
   });
   $('subMode').addEventListener('change', function(){ render(); saveState(); });
   $('focusX').addEventListener('input', render);
