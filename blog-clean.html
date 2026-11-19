@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="제미나이·챗GPT 블로그 글의 별표(**)를 지우고 문장 중간 줄바꿈을 정리해 주는 도구">
+<meta name="description" content="제미나이·챗GPT 블로그 글의 별표(**)를 지우고 문장 중간 줄바꿈을 정리하고, 마크다운 표는 네이버 블로그 서식 그대로 복사해 주는 도구">
 <title>블로그 글 줄바꿈 정리기 · 우리부동산</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%E2%9C%A8%3C/text%3E%3C/svg%3E">
 <style>
@@ -52,12 +52,15 @@
   .pane-head .label{font-size:13.5px; font-weight:800; letter-spacing:-.2px;}
   .pane-head .label span{color:var(--green-dark);}
   .pane-head .meta{font-size:12px; color:var(--ink-3); font-weight:600; white-space:nowrap;}
+  .pane-head .tools{display:flex; align-items:center; gap:6px;}
   textarea#input{flex:1; width:100%; border:0; outline:0; resize:vertical; min-height:210px;
     padding:14px; font-family:inherit; font-size:15px; line-height:1.7; color:var(--ink); background:transparent;}
   textarea#input::placeholder{color:#b0b8c1;}
-  .out{flex:1; padding:14px; font-size:15px; line-height:1.75; white-space:pre-wrap; word-break:break-word;
+  .out{flex:1; padding:14px; font-size:15px; line-height:1.75; word-break:break-word;
     min-height:210px; max-height:56vh; overflow:auto; user-select:text;}
-  .out.empty{color:#b0b8c1;}
+  .out p{margin:0 0 14px;}
+  .out p:last-child{margin-bottom:0;}
+  .out.empty{color:#b0b8c1; white-space:pre-wrap;}
   .out.mobileview{text-align:center;}
   .mini{border:0; background:#eef1f4; color:var(--ink-2); font-family:inherit; font-size:12px;
     font-weight:700; padding:5px 9px; border-radius:8px; cursor:pointer;}
@@ -66,12 +69,14 @@
   .charcount{display:flex; gap:14px; flex-wrap:wrap; padding:9px 14px; border-top:1px solid var(--line);
     font-size:12.5px; color:var(--ink-2); background:#fbfcfd;}
   .charcount b{color:var(--ink); font-weight:800;}
+  .charcount .tbl{font-weight:800; color:var(--ink-3);}
+  .charcount .tbl.ok{color:var(--green-dark);}
   .charcount .goal{margin-left:auto; font-weight:700; color:var(--ink-3);}
   .charcount .goal.ok{color:var(--green-dark);}
 
   .actionbar{margin-top:16px; display:flex; gap:10px; align-items:center;}
   .btn-main{flex:1; border:0; border-radius:16px; background:var(--green); color:#fff;
-    font-family:inherit; font-size:17px; font-weight:800; letter-spacing:-.3px; padding:17px 14px;
+    font-family:inherit; font-size:16.5px; font-weight:800; letter-spacing:-.3px; padding:17px 14px;
     cursor:pointer; box-shadow:0 6px 16px rgba(3,199,90,.25); transition:transform .08s, background .12s;}
   .btn-main:active{transform:scale(.985); background:var(--green-dark);}
   .btn-ghost{border:1px solid var(--line); background:var(--card); color:var(--ink-2);
@@ -104,7 +109,7 @@
   @media (max-width:879px){
     .actionbar{position:fixed; left:0; right:0; bottom:0; margin:0; padding:10px 14px calc(12px + env(safe-area-inset-bottom));
       background:rgba(255,255,255,.97); border-top:1px solid var(--line); box-shadow:0 -6px 18px rgba(0,0,0,.06); z-index:50;}
-    .btn-main{font-size:16px; padding:15px 12px;}
+    .btn-main{font-size:15px; padding:15px 12px;}
     .btn-ghost{padding:14px 13px; font-size:13.5px;}
     body{padding-bottom:104px;}
     .toast{bottom:96px;}
@@ -116,15 +121,15 @@
 <div class="wrap">
 
   <header class="hero">
-    <div class="tag">블로그 글 1초 정리</div>
+    <div class="tag">블로그 글 1초 정리 · 표 자동 인식</div>
     <h1>✨ 블로그 글 줄바꿈 정리기</h1>
-    <p>제미나이·챗GPT가 써준 글을 그대로 붙여넣고 버튼 한 번만 누르면, <b>별표(**)</b>는 사라지고 <b>문장 중간에 끊긴 줄</b>이 이어집니다. 네이버 블로그(PC·모바일)에 붙여도 줄이 깨지지 않습니다.</p>
+    <p>제미나이·챗GPT가 써준 글을 그대로 붙여넣고 버튼 한 번만 누르면, <b>별표(**)</b>는 사라지고 <b>문장 중간에 끊긴 줄</b>이 이어집니다. 매물 원고의 <b>표(| … |)</b>는 네이버 블로그에서 깨지지 않는 <b>표 서식</b>으로 살려서 복사됩니다.</p>
   </header>
 
   <div class="steps">
     <div class="s"><div class="n">1</div><div class="t"><b>글 복사</b>해서 아래 칸에 붙여넣기</div></div>
-    <div class="s"><div class="n">2</div><div class="t"><b>정리하고 바로 복사하기</b> 누르기</div></div>
-    <div class="s"><div class="n">3</div><div class="t">네이버에 <b>Ctrl+Shift+V</b> (폰은 길게 눌러 <b>붙여넣기</b>)</div></div>
+    <div class="s"><div class="n">2</div><div class="t">표는 <b>자동으로 표 서식</b>, 나머지는 <b>문단</b>으로 정리</div></div>
+    <div class="s"><div class="n">3</div><div class="t">네이버에 <b>그냥 붙여넣기</b> (Ctrl+V / 폰은 길게 눌러 붙여넣기)</div></div>
   </div>
 
   <div class="modes" role="radiogroup" aria-label="정리 방식">
@@ -142,35 +147,42 @@
     <section class="pane">
       <div class="pane-head">
         <div class="label"><span>①</span> 원문 붙여넣기</div>
-        <div class="meta" id="inMeta">0자</div>
+        <div class="tools">
+          <div class="meta" id="inMeta">0자</div>
+          <button class="mini" id="btnClear" type="button">비우기</button>
+        </div>
       </div>
       <textarea id="input" spellcheck="false"
-        placeholder="여기에 붙여넣으세요.&#10;&#10;예)&#10;**인천 석남동 맛집 후기**&#10;&#10;안녕하세요 오늘은&#10;인천 석남동 맛집을&#10;다녀왔어요."></textarea>
+        placeholder="여기에 붙여넣으세요.&#10;&#10;예)&#10;**인천 석남동 맛집 후기**&#10;&#10;안녕하세요 오늘은&#10;인천 석남동 맛집을&#10;다녀왔어요.&#10;&#10;| 매물 항목 | 상세 정보 |&#10;| --- | --- |&#10;| 위치 | 인천 서구 석남동 |"></textarea>
     </section>
 
     <section class="pane">
       <div class="pane-head">
-        <div class="label"><span>②</span> 정리된 글</div>
-        <button class="mini" id="copyMini" type="button">📋 복사</button>
+        <div class="label"><span>②</span> 서식 미리보기</div>
+        <div class="tools">
+          <button class="mini" id="copyMini" type="button">📋 복사</button>
+        </div>
       </div>
       <div class="out empty" id="output">붙여넣으면 여기에 정리된 글이 바로 나옵니다.</div>
       <div class="charcount">
         <span>공백 포함 <b id="cWith">0</b>자</span>
         <span>공백 제외 <b id="cNo">0</b>자</span>
+        <span class="tbl" id="tableInfo">표 자동 인식</span>
         <span class="goal" id="goal">체험단 1,000자 기준</span>
       </div>
     </section>
   </div>
 
   <div class="actionbar">
-    <button class="btn-main" id="btnMain" type="button">✨ 정리하고 바로 복사하기</button>
-    <button class="btn-ghost" id="btnClear" type="button">비우기</button>
+    <button class="btn-main" id="btnMain" type="button">📋 네이버 블로그 서식 복사 (표 포함)</button>
+    <button class="btn-ghost" id="btnText" type="button">📄 텍스트만 복사</button>
   </div>
 
   <p class="hint">
-    · 붙여넣으면 <b>자동으로 정리</b>됩니다. 위 버튼은 정리된 글을 <b>클립보드에 담아</b> 주기만 하고, 원문은 그대로 남습니다.<br>
-    · 네이버에 붙일 때는 꼭 <b>Ctrl+Shift+V</b>(서식 없이 붙여넣기)로 붙여야 글꼴·색이 섞이지 않습니다. 휴대폰은 입력창을 <b>길게 눌러 [붙여넣기]</b>.<br>
-    · 휴대폰에서 쓰실 때는 브라우저 메뉴의 <b>[홈 화면에 추가]</b>를 해두면 앱처럼 바로 열립니다.
+    · 표(<b>| 매물 항목 | 상세 정보 |</b>)가 있으면 자동으로 표 서식이 살아나고, 표가 없는 맛집·일상 원고는 <b>문단만</b> 깔끔하게 복사됩니다.<br>
+    · <b>서식 복사</b>는 네이버에 <b>그냥 붙여넣기(Ctrl+V)</b> — 폰은 입력창을 길게 눌러 [붙여넣기]. 표 테두리와 문단이 그대로 들어갑니다.<br>
+    · <b>텍스트만 복사</b>는 글자만 담기니, 서식 없이 넣을 때는 <b>Ctrl+Shift+V</b>로 붙여넣으세요.<br>
+    · 붙여넣으면 자동으로 정리되고 원문은 그대로 남습니다. 휴대폰은 브라우저 메뉴의 <b>[홈 화면에 추가]</b>를 해두면 앱처럼 바로 열립니다.
   </p>
 
   <footer>
@@ -190,10 +202,18 @@
      ============================================================ */
   var LIST_START = /^(?:•|●|○|■|□|▶|▷|▪|◦|◆|◇|★|☆|※|①|②|③|④|⑤|📌|📷|📸|💡|🏭|👉|✅|❌|⚠️|🗺|📞|🚚|⏰|🔥|▶|\[\s*\d+\s*\]|\d{1,3}[.)]\s)/;
   var EMOJI_HEAD = /^(?:📌|📷|📸|💡|🏭|👉|✅|※|■|▶|★|\[)/;
-  var SENT_END_PUNCT = /[.!?。！？…"'’”)\]｝》」』】~]$/;
+  var SENT_END_PUNCT = /[.!?。！？…"'’”)\]}｝》」』】~]$/;
   var SENT_END_KO = /(?:요|다|죠|까|네|음|함|됨|임|니|오)$/;
   var ATOMIC = "\u0001";                       /* # 소제목으로 들어온 줄 표시 (출력 전 제거) */
+  var TBL = "\u0002";                          /* 표 자리 표시자 */
+  var TBL_TOKEN = /^\u0002T(\d+)\u0002$/;
   var HEAD_MARK = /^\s{0,3}#{1,6}(?:\s+|$)/;
+
+  function isTblLine(s){
+    var t = String(s || "");
+    if(t.charAt(0) === ATOMIC) t = t.slice(1);
+    return TBL_TOKEN.test(t);
+  }
 
   function isSentenceEnd(s){
     if(!s) return false;
@@ -210,6 +230,83 @@
     return false;
   }
 
+  /* ---------- 마크다운 표 추출 ----------
+     | 항목 | 내용 |
+     | --- | --- |
+     | 위치 | 인천 서구 |
+     위 3줄 묶음을 찾아 표 데이터로 빼고, 원문에는 자리 표시자 한 줄만 남긴다.
+     (표가 없으면 아무 일도 일어나지 않는다) */
+  function isTableSep(s){
+    if(s.indexOf("|") < 0) return false;
+    return /^\s*\|?[\s:|-]*-{2,}[\s:|-]*\|?\s*$/.test(s);
+  }
+  function splitRow(s){
+    var t = String(s).trim();
+    if(t.charAt(0) === "|") t = t.slice(1);
+    if(t.charAt(t.length - 1) === "|") t = t.slice(0, -1);
+    var cells = t.split("|");
+    var out = [];
+    for(var i=0;i<cells.length;i++) out.push(cleanInline(cells[i]));
+    return out;
+  }
+  function cleanInline(s){
+    s = String(s == null ? "" : s);
+    s = s.replace(/<br\s*\/?>/gi, " ").replace(/<[^>]+>/g, "");
+    s = s.replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1");
+    s = s.replace(/\[([^\]\n]{1,80})\]\(([^)\s]{1,300})\)/g, "$1 ($2)");
+    s = s.replace(/\*{2,}/g, "").replace(/_{2,}/g, "").replace(/~~/g, "").replace(/`+/g, "");
+    s = s.replace(/(^|\s)\*(\S)/g, "$1$2").replace(/(\S)\*(\s|$)/g, "$1$2");
+    s = s.replace(/(^|\s)_(\S)/g, "$1$2").replace(/(\S)_(\s|$)/g, "$1$2");
+    s = s.replace(/[ \u3000]{2,}/g, " ").replace(/^\s+|\s+$/g, "");
+    return s;
+  }
+  function alignOf(cell){
+    var c = String(cell).trim();
+    var l = c.charAt(0) === ":", r = c.charAt(c.length - 1) === ":";
+    if(l && r) return "center";
+    if(r) return "right";
+    if(l) return "left";
+    return "";
+  }
+  function extractTables(raw){
+    var lines = String(raw || "").replace(/\r\n?/g, "\n").split("\n");
+    var tables = [], out = [];
+    for(var i=0;i<lines.length;i++){
+      var cur = lines[i];
+      var rowLike = cur.indexOf("|") >= 0 && (cur.match(/\|/g) || []).length >= 1;
+      if(rowLike && i + 1 < lines.length && isTableSep(lines[i + 1])){
+        var header = splitRow(cur);
+        var seps = splitRow(lines[i + 1]);
+        if(header.length >= 2){
+          var rows = [], j = i + 2;
+          for(; j < lines.length; j++){
+            var ln = lines[j];
+            if(!ln.trim()) break;
+            if(ln.indexOf("|") < 0) break;
+            if(isTableSep(ln)) continue;
+            var cells = splitRow(ln);
+            if(cells.length < 2) break;
+            rows.push(cells);
+          }
+          var cols = header.length;
+          for(var r=0;r<rows.length;r++){ if(rows[r].length > cols) cols = rows[r].length; }
+          for(var r2=0;r2<rows.length;r2++){
+            while(rows[r2].length < cols) rows[r2].push("");
+          }
+          while(header.length < cols) header.push("");
+          var align = [];
+          for(var c=0;c<cols;c++) align.push(seps[c] ? alignOf(seps[c]) : "");
+          tables.push({header: header, rows: rows, align: align, cols: cols});
+          out.push(ATOMIC + TBL + "T" + (tables.length - 1) + TBL);
+          i = j - 1;
+          continue;
+        }
+      }
+      out.push(cur);
+    }
+    return {text: out.join("\n"), tables: tables};
+  }
+
   function normalizeLines(raw){
     var t = String(raw || "");
     t = t.replace(/\r\n?/g, "\n");
@@ -222,6 +319,9 @@
     for(var i=0;i<src.length;i++){
       var s = src[i].replace(/\t/g, " ");
 
+      /* 표 자리 표시자는 그대로 둔다 */
+      if(isTblLine(s.replace(/^\s+|\s+$/g, ""))){ out.push(s.replace(/^\s+|\s+$/g, "")); continue; }
+
       /* 인용구 > */
       s = s.replace(/^(?:\s*>\s?)+/, "");
 
@@ -229,7 +329,7 @@
       if(/^\s*(?:[-*_]\s*){3,}$/.test(s)){ out.push(""); continue; }
 
       /* 표 구분선 |---|---| → 버림 */
-      if(s.indexOf("|") >= 0 && /^\s*\|?[\s:|-]*-{2,}[\s:|-]*\|?\s*$/.test(s)){ continue; }
+      if(isTableSep(s)){ continue; }
 
       /* 제목 # ## ### (해시태그 #인천공장 은 그대로) */
       var mh = s.match(HEAD_MARK);
@@ -300,7 +400,8 @@
       var canJoin = false;
       if(prev && prev !== ""){
         canJoin = true;
-        if(keepSentenceBreaks && isSentenceEnd(prev)) canJoin = false;  /* 문장이 끝난 곳은 유지 */
+        if(isTblLine(cur) || isTblLine(prev)) canJoin = false;
+        else if(keepSentenceBreaks && isSentenceEnd(prev)) canJoin = false;  /* 문장이 끝난 곳은 유지 */
         else if(isHeading(prev)) canJoin = false;
         else if(isHeading(cur)) canJoin = false;
         else if(LIST_START.test(cur)) canJoin = false;
@@ -311,7 +412,6 @@
         res.push(cur);
       }
     }
-    /* 이어 붙인 뒤 생긴 문장 끝 줄을 다시 분리 (문단 단위 흐름 유지용) */
     return res;
   }
 
@@ -357,14 +457,14 @@
       var atom = rawLn.charAt(0) === ATOMIC;
       var ln = atom ? rawLn.slice(1) : rawLn;
       if(ln === ""){ close(); blocks.push({blank:true}); continue; }
-      var fresh = atom || LIST_START.test(ln) || isHeading(ln);
+      var fresh = atom || LIST_START.test(ln) || isHeading(ln) || TBL_TOKEN.test(ln);
       if(cur === null){
         cur = ln;
-        headOnly = atom || (isHeading(ln) && !/^•/.test(ln));   /* 소제목은 한 줄로 따로 */
+        headOnly = atom || TBL_TOKEN.test(ln) || (isHeading(ln) && !/^•/.test(ln));   /* 소제목은 한 줄로 따로 */
       } else if(fresh || headOnly){
         close();
         cur = ln;
-        headOnly = atom || (isHeading(ln) && !/^•/.test(ln));
+        headOnly = atom || TBL_TOKEN.test(ln) || (isHeading(ln) && !/^•/.test(ln));
       } else {
         cur += " " + ln;
       }
@@ -373,29 +473,159 @@
     return blocks;
   }
 
-  function cleanText(raw, mode){
-    var lines = normalizeLines(raw);
-    if(mode === "mobile"){
-      var blocks = buildBlocks(lines);
-      var out = [];
-      for(var i=0;i<blocks.length;i++){
-        var b = blocks[i];
-        if(b.blank){ if(out.length && out[out.length-1] !== "") out.push(""); continue; }
-        var bullet = /^•\s/.test(b.text);
-        var body = bullet ? b.text.replace(/^•\s*/, "") : b.text;
-        var w = bullet ? 16 : 18;
-        var parts = wrapLine(body, w);
-        for(var k=0;k<parts.length;k++){
-          if(k === 0){ out.push((bullet ? "• " : "") + parts[k].trim()); }
-          else { out.push((bullet ? "  " : "") + parts[k].trim()); }
-        }
+  function mobileLines(lines){
+    var blocks = buildBlocks(lines);
+    var out = [];
+    for(var i=0;i<blocks.length;i++){
+      var b = blocks[i];
+      if(b.blank){ if(out.length && out[out.length-1] !== "") out.push(""); continue; }
+      var bullet = /^•\s/.test(b.text);
+      var body = bullet ? b.text.replace(/^•\s*/, "") : b.text;
+      var w = bullet ? 16 : 18;
+      var parts = wrapLine(body, w);
+      for(var k=0;k<parts.length;k++){
+        if(k === 0){ out.push((bullet ? "• " : "") + parts[k].trim()); }
+        else { out.push((bullet ? "  " : "") + parts[k].trim()); }
       }
-      while(out.length && out[out.length-1] === "") out.pop();
-      return out.join("\n").split(ATOMIC).join("");
     }
-    var joined = joinSentences(lines, true);
-    while(joined.length && joined[joined.length-1] === "") joined.pop();
-    return joined.join("\n").split(ATOMIC).join("");
+    while(out.length && out[out.length-1] === "") out.pop();
+    return out;
+  }
+
+  /* ============================================================
+     정리 결과 만들기 (표 목록 + 줄 목록)
+     ============================================================ */
+  function cleanAll(raw, mode){
+    var ex = extractTables(raw);
+    var lines = normalizeLines(ex.text);
+    var resLines = (mode === "mobile") ? mobileLines(lines) : joinSentences(lines, true);
+    while(resLines.length && resLines[resLines.length-1] === "") resLines.pop();
+    return {lines: resLines, tables: ex.tables, mode: (mode === "mobile" ? "mobile" : "pc")};
+  }
+
+  function lineText(s){
+    var atom = s.charAt(0) === ATOMIC;
+    return atom ? s.slice(1) : s;
+  }
+
+  /* 표 → 글자만 (텍스트 복사용) */
+  function tableText(tb){
+    var rows = [], i, c;
+    if(tb.header.join("").trim()) rows.push(tb.header);
+    for(i=0;i<tb.rows.length;i++) rows.push(tb.rows[i]);
+    var out = [];
+    for(i=0;i<rows.length;i++){
+      var cells = [];
+      for(c=0;c<tb.cols;c++) cells.push(rows[i][c] || "");
+      var line = cells.join(" | ").replace(/\s+$/, "");
+      if(line.replace(/[\s|]/g, "")) out.push(line);
+    }
+    return out;
+  }
+
+  /* 정리 결과 → 순수 텍스트 */
+  function toPlainText(res){
+    var out = [];
+    for(var i=0;i<res.lines.length;i++){
+      var s = lineText(res.lines[i]);
+      var m = s.match(TBL_TOKEN);
+      if(m){
+        var tb = res.tables[parseInt(m[1], 10)];
+        if(tb){
+          var tt = tableText(tb);
+          for(var k=0;k<tt.length;k++) out.push(tt[k]);
+        }
+        continue;
+      }
+      out.push(s);
+    }
+    return out.join("\n");
+  }
+
+  /* 정리 결과 → 네이버 블로그용 HTML (인라인 스타일) */
+  function escHtml(s){
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+  function escLine(s){
+    var m = String(s).match(/^ +/);
+    var lead = m ? m[0].length : 0;
+    var pad = "";
+    for(var i=0;i<lead;i++) pad += "&nbsp;";
+    return pad + escHtml(String(s).slice(lead));
+  }
+  function cellHtml(cell){
+    return escHtml(cell || "") || "&nbsp;";
+  }
+  function tableHtml(tb){
+    var cols = tb.cols, c, r;
+    var h = '<table style="border-collapse:collapse;width:100%;margin:16px 0;font-size:15px;line-height:1.6;' +
+            'border:1px solid #d1d5db;" cellspacing="0" cellpadding="0" border="1"><tbody>';
+    if(tb.header.join("").trim()){
+      h += "<tr>";
+      for(c=0;c<cols;c++){
+        h += '<th style="border:1px solid #d1d5db;padding:10px 14px;background:#f3f4f6;font-weight:700;' +
+             'text-align:' + (tb.align[c] || "center") + ";" +
+             ((c === 0 && cols === 2) ? "width:34%;" : "") + '">' +
+             cellHtml(tb.header[c]) + "</th>";
+      }
+      h += "</tr>";
+    }
+    for(r=0;r<tb.rows.length;r++){
+      h += "<tr>";
+      for(c=0;c<cols;c++){
+        h += '<td style="border:1px solid #d1d5db;padding:10px 14px;' +
+             'text-align:' + (tb.align[c] || "left") + ";" +
+             ((c === 0 && cols === 2) ? "width:34%;font-weight:600;background:#fafbfc;" : "") + '">' +
+             cellHtml(tb.rows[r][c]) + "</td>";
+      }
+      h += "</tr>";
+    }
+    h += "</tbody></table>";
+    return h;
+  }
+  function buildHtml(res){
+    var mobile = res.mode === "mobile";
+    var align = mobile ? "center" : "left";
+    var html = [];
+    var buf = [];
+    function flush(){
+      if(!buf.length) return;
+      html.push('<p style="margin:0 0 14px;line-height:1.85;text-align:' + align + ';">' + buf.join("<br>") + "</p>");
+      buf = [];
+    }
+    for(var i=0;i<res.lines.length;i++){
+      var rawLn = res.lines[i];
+      var atom = rawLn.charAt(0) === ATOMIC;
+      var s = atom ? rawLn.slice(1) : rawLn;
+      if(s === ""){ flush(); continue; }
+      var mt = s.match(TBL_TOKEN);
+      if(mt){
+        flush();
+        var tb = res.tables[parseInt(mt[1], 10)];
+        if(tb) html.push(tableHtml(tb));
+        continue;
+      }
+      var esc = escLine(s);
+      if(mobile){
+        buf.push(esc);
+      } else if(atom || isHeading(s)){
+        flush();
+        html.push('<p style="margin:24px 0 10px;line-height:1.7;text-align:left;">' +
+                  '<strong style="font-weight:800;font-size:1.06em;">' + esc + "</strong></p>");
+      } else {
+        flush();
+        html.push('<p style="margin:0 0 14px;line-height:1.85;text-align:left;">' + esc + "</p>");
+      }
+    }
+    flush();
+    return html.join("");
+  }
+
+  /* 옛 이름 유지 (자가 점검용): 글자만 돌려준다 */
+  function cleanText(raw, mode){
+    return toPlainText(cleanAll(raw, mode));
   }
 
   /* ============================================================
@@ -407,9 +637,11 @@
   var cWith   = document.getElementById("cWith");
   var cNo     = document.getElementById("cNo");
   var goalEl  = document.getElementById("goal");
+  var tblInfo = document.getElementById("tableInfo");
   var toastEl = document.getElementById("toast");
   var mode    = "pc";
   var lastResult = "";
+  var lastHtml   = "";
   var timer = null;
 
   function countText(t){
@@ -424,23 +656,30 @@
     inMeta.textContent = cnt.withSpace.toLocaleString("ko-KR") + "자";
 
     if(!raw.trim()){
-      lastResult = "";
+      lastResult = ""; lastHtml = "";
+      outEl.innerHTML = "";
       outEl.textContent = "붙여넣으면 여기에 정리된 글이 바로 나옵니다.";
       outEl.classList.add("empty");
       outEl.classList.remove("mobileview");
       cWith.textContent = "0"; cNo.textContent = "0";
       goalEl.textContent = "체험단 1,000자 기준";
       goalEl.classList.remove("ok");
+      tblInfo.textContent = "표 자동 인식";
+      tblInfo.classList.remove("ok");
       return;
     }
 
-    var result = cleanText(raw, mode);
-    lastResult = result;
-    outEl.textContent = result;
+    var res = cleanAll(raw, mode);
+    var plain = toPlainText(res);
+    var html = buildHtml(res);
+    lastResult = plain;
+    lastHtml = html;
+
+    outEl.innerHTML = html;
     outEl.classList.remove("empty");
     outEl.classList.toggle("mobileview", mode === "mobile");
 
-    var rc = countText(result);
+    var rc = countText(plain);
     cWith.textContent = rc.withSpace.toLocaleString("ko-KR");
     cNo.textContent = rc.noSpace.toLocaleString("ko-KR");
     if(rc.withSpace >= 1000){
@@ -449,6 +688,15 @@
     } else {
       goalEl.textContent = "체험단 1,000자까지 " + (1000 - rc.withSpace).toLocaleString("ko-KR") + "자";
       goalEl.classList.remove("ok");
+    }
+    if(res.tables.length){
+      var cellCount = 0;
+      for(var i=0;i<res.tables.length;i++) cellCount += res.tables[i].rows.length;
+      tblInfo.textContent = "📊 표 " + res.tables.length + "개 자동 인식 (행 " + cellCount + ")";
+      tblInfo.classList.add("ok");
+    } else {
+      tblInfo.textContent = "표 없음 → 문단 정리";
+      tblInfo.classList.remove("ok");
     }
   }
 
@@ -459,7 +707,11 @@
     toastEl.classList.toggle("warn", !!warn);
     toastEl.classList.add("show");
     clearTimeout(showToast._t);
-    showToast._t = setTimeout(function(){ toastEl.classList.remove("show"); }, 3200);
+    showToast._t = setTimeout(function(){ toastEl.classList.remove("show"); }, 3600);
+  }
+
+  function scrollDown(){
+    if(window.innerWidth < 880){ window.scrollTo({top: document.body.scrollHeight, behavior:"smooth"}); }
   }
 
   function legacyCopy(text){
@@ -489,17 +741,84 @@
     }
   }
 
-  function doCopy(text){
-    if(!text){
+  /* 서식(HTML)+글자(plain)를 한 번에 복사 */
+  function legacyRichCopy(html, text){
+    var div = document.createElement("div");
+    div.setAttribute("contenteditable", "true");
+    div.style.cssText = "position:fixed; top:-3000px; left:0; width:760px; opacity:0; " +
+                        "pointer-events:none; white-space:normal; font-size:15px; line-height:1.8;";
+    div.innerHTML = html;
+    document.body.appendChild(div);
+    var ok = false;
+    try {
+      var range = document.createRange();
+      range.selectNodeContents(div);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      ok = document.execCommand("copy");
+      sel.removeAllRanges();
+    } catch(e){ ok = false; }
+    try { document.body.removeChild(div); } catch(e){}
+    if(!ok && text){ ok = legacyCopy(text); }
+    return ok;
+  }
+
+  function copyRich(html, text, onDone){
+    var done = false;
+    function finish(ok){ if(done) return; done = true; onDone(ok); }
+    if(navigator.clipboard && navigator.clipboard.write && window.ClipboardItem && (window.isSecureContext !== false)){
+      try {
+        var item = new ClipboardItem({
+          "text/html": new Blob([html], {type: "text/html"}),
+          "text/plain": new Blob([text], {type: "text/plain"})
+        });
+        navigator.clipboard.write([item]).then(function(){ finish(true); },
+          function(){ finish(legacyRichCopy(html, text)); });
+        return;
+      } catch(e){}
+    }
+    finish(legacyRichCopy(html, text));
+  }
+
+  function selectOut(){
+    try {
+      var r = document.createRange();
+      r.selectNodeContents(outEl);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(r);
+    } catch(e){}
+  }
+
+  function doCopyRich(){
+    if(!lastResult){
       showToast("정리할 글이 없습니다", "먼저 ①번 칸에 글을 붙여넣어 주세요.", true);
       return;
     }
-    copyText(text, function(ok){
+    copyRich(lastHtml, lastResult, function(ok){
       if(ok){
-        showToast("✅ 복사 완료! 네이버 블로그에 붙여넣기(Ctrl+Shift+V 또는 길게 눌러 붙여넣기) 하세요");
-        if(window.innerWidth < 880){ window.scrollTo({top: document.body.scrollHeight, behavior:"smooth"}); }
+        showToast("✅ 서식 복사 완료! 네이버에 그냥 붙여넣기(Ctrl+V / 길게 눌러 붙여넣기)",
+          "표 테두리와 문단 줄바꿈이 그대로 들어갑니다.");
+        scrollDown();
       } else {
-        showToast("자동 복사가 막혔습니다", "왼쪽 ②번 칸 글을 길게 눌러 전체 선택 후 복사해 주세요.", true);
+        selectOut();
+        showToast("자동 복사가 막혔습니다", "②번 미리보기를 길게 눌러 전체 선택 후 복사해 주세요.", true);
+      }
+    });
+  }
+
+  function doCopyText(){
+    if(!lastResult){
+      showToast("정리할 글이 없습니다", "먼저 ①번 칸에 글을 붙여넣어 주세요.", true);
+      return;
+    }
+    copyText(lastResult, function(ok){
+      if(ok){
+        showToast("📄 텍스트만 복사 완료", "서식 없이 넣을 때는 Ctrl+Shift+V로 붙여넣으세요.");
+        scrollDown();
+      } else {
+        showToast("자동 복사가 막혔습니다", "②번 미리보기를 길게 눌러 전체 선택 후 복사해 주세요.", true);
       }
     });
   }
@@ -514,11 +833,15 @@
 
   document.getElementById("btnMain").addEventListener("click", function(){
     render();
-    doCopy(lastResult);
+    doCopyRich();
   });
   document.getElementById("copyMini").addEventListener("click", function(){
-    if(!lastResult) render();
-    doCopy(lastResult);
+    if(!lastHtml) render();
+    doCopyRich();
+  });
+  document.getElementById("btnText").addEventListener("click", function(){
+    render();
+    doCopyText();
   });
   document.getElementById("btnClear").addEventListener("click", function(){
     inputEl.value = "";
@@ -550,7 +873,13 @@
   });
 
   render();
-  window.cleanText = cleanText;   /* 자가 점검용 */
+
+  /* 자가 점검용 */
+  window.cleanText = cleanText;
+  window.blogClean = {
+    cleanAll: cleanAll, toPlainText: toPlainText, buildHtml: buildHtml,
+    getResult: function(){ return {text: lastResult, html: lastHtml}; }
+  };
 })();
 </script>
 </body>
