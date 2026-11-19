@@ -777,7 +777,10 @@ function kSummaryBar(top, barH){
       ctx.fillStyle = '#D51C24';
       ctx.fillText(priceText, px + priceW / 2, pAreaY + pAreaH / 2 + 1);
     } else {
-      const ls = wrapText(priceText, maxPW, 900, 34, -1, 2);
+      let ls;
+      const slash = priceText.split('/').map(function(s){ return s.trim(); }).filter(Boolean);
+      if (slash.length === 2) ls = slash;
+      else ls = wrapText(priceText, maxPW, 900, 34, -1, 2);
       const lh = 36;
       let ly = pAreaY + (pAreaH - ls.length * lh) / 2 + lh / 2 + 1;
       ctx.textAlign = 'center';
