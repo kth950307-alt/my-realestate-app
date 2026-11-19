@@ -842,18 +842,43 @@ function kSummaryBar(top, barH){
   });
 }
 
-/* 흰색으로 꽉 찬 공장 아이콘 — 작은 배지에서도 형태가 또렷하게 */
+/* 흰색으로 꽉 찬 공장 아이콘 — 창문을 뚫어 작은 배지에서도 건물로 읽히게 */
 function drawIconFactorySolid(x, y, s){
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(s / 24, s / 24);
-  ctx.fillStyle = '#FFFFFF';
   ctx.beginPath();
-  ctx.moveTo(3.5, 20); ctx.lineTo(3.5, 9); ctx.lineTo(9, 12.8); ctx.lineTo(9, 9);
-  ctx.lineTo(14.5, 12.8); ctx.lineTo(14.5, 4.5); ctx.lineTo(20.5, 4.5);
-  ctx.lineTo(20.5, 20); ctx.closePath();
-  ctx.fill();
+  ctx.moveTo(2.8, 20.6);
+  ctx.lineTo(2.8, 8.2);
+  ctx.lineTo(8.2, 12.1);
+  ctx.lineTo(8.2, 8.2);
+  ctx.lineTo(13.6, 12.1);
+  ctx.lineTo(13.6, 4.6);
+  ctx.lineTo(21.2, 4.6);
+  ctx.lineTo(21.2, 20.6);
+  ctx.closePath();
+  ctx.rect(5.2, 14.6, 3.2, 3.8);
+  ctx.rect(10.3, 14.6, 3.2, 3.8);
+  ctx.rect(15.5, 14.6, 3.4, 3.8);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fill('evenodd');
   ctx.restore();
+}
+
+/* 꽉 찬 수화기 아이콘 (작은 크기에서도 형태가 남) */
+const PHONE_PATH = 'M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z';
+function drawPhoneSolid(cx, cy, s, color){
+  try{
+    const p = new Path2D(PHONE_PATH);
+    ctx.save();
+    ctx.translate(cx - s / 2, cy - s / 2);
+    ctx.scale(s / 24, s / 24);
+    ctx.fillStyle = color;
+    ctx.fill(p);
+    ctx.restore();
+  } catch(e){
+    drawIcon('phone', cx - s / 2, cy - s / 2, s, color);
+  }
 }
 
 function kFooter(top){
@@ -899,7 +924,7 @@ function kFooter(top){
     ctx.fillStyle = ig;
     ctx.beginPath(); ctx.arc(icx, icy, ir, 0, 6.2832); ctx.fill();
     ctx.restore();
-    drawIcon('phone', icx - 11, icy - 11, 23, '#FFFFFF');
+    drawPhoneSolid(icx, icy + 1, 24, '#FFFFFF');
   }
   if (addr){
     const afs = fitSize(addr, 700, 420, 20, 13, 0);
