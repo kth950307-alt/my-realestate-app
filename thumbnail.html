@@ -247,10 +247,10 @@
 
       <div class="cardTitle" style="margin:14px 0 8px">하단 카드 4칸</div>
       <div class="specGrid">
-        <div class="specRow k"><input type="text" id="kSpecL0" maxlength="10"><input type="text" id="kSpecV0" maxlength="24"></div>
-        <div class="specRow k"><input type="text" id="kSpecL1" maxlength="10"><input type="text" id="kSpecV1" maxlength="24"></div>
-        <div class="specRow k"><input type="text" id="kSpecL2" maxlength="10"><input type="text" id="kSpecV2" maxlength="24"></div>
-        <div class="specRow k"><input type="text" id="kSpecL3" maxlength="10"><input type="text" id="kSpecV3" maxlength="24"></div>
+        <div class="specRow k"><input type="text" id="kSpecL0" maxlength="10" aria-label="카드1 항목" placeholder="항목"><input type="text" id="kSpecV0" maxlength="24" aria-label="카드1 값" placeholder="값 (예: 1,200평)"></div>
+        <div class="specRow k"><input type="text" id="kSpecL1" maxlength="10" aria-label="카드2 항목" placeholder="항목"><input type="text" id="kSpecV1" maxlength="24" aria-label="카드2 값" placeholder="값"></div>
+        <div class="specRow k"><input type="text" id="kSpecL2" maxlength="10" aria-label="카드3 항목" placeholder="항목"><input type="text" id="kSpecV2" maxlength="24" aria-label="카드3 값" placeholder="값 (예: 12.9m)"></div>
+        <div class="specRow k"><input type="text" id="kSpecL3" maxlength="10" aria-label="카드4 항목" placeholder="항목"><input type="text" id="kSpecV3" maxlength="24" aria-label="카드4 값" placeholder="값 (예: 설치 / 미설치)"></div>
       </div>
 
       <div class="row2">
@@ -277,11 +277,11 @@
 
       <div class="cardTitle" style="margin:14px 0 8px">하단 스펙 5칸</div>
       <div class="specGrid">
-        <div class="specRow"><input type="text" id="specL0" maxlength="10"><input type="text" id="specV0" maxlength="24"></div>
-        <div class="specRow"><input type="text" id="specL1" maxlength="10"><input type="text" id="specV1" maxlength="24"></div>
-        <div class="specRow"><input type="text" id="specL2" maxlength="10"><input type="text" id="specV2" maxlength="24"></div>
-        <div class="specRow"><input type="text" id="specL3" maxlength="10"><input type="text" id="specV3" maxlength="24"></div>
-        <div class="specRow"><input type="text" id="specL4" maxlength="10"><input type="text" id="specV4" maxlength="24"></div>
+        <div class="specRow"><input type="text" id="specL0" maxlength="10" aria-label="B카드1 항목"><input type="text" id="specV0" maxlength="24" aria-label="B카드1 값"></div>
+        <div class="specRow"><input type="text" id="specL1" maxlength="10" aria-label="B카드2 항목"><input type="text" id="specV1" maxlength="24" aria-label="B카드2 값"></div>
+        <div class="specRow"><input type="text" id="specL2" maxlength="10" aria-label="B카드3 항목"><input type="text" id="specV2" maxlength="24" aria-label="B카드3 값"></div>
+        <div class="specRow"><input type="text" id="specL3" maxlength="10" aria-label="B카드4 항목"><input type="text" id="specV3" maxlength="24" aria-label="B카드4 값"></div>
+        <div class="specRow"><input type="text" id="specL4" maxlength="10" aria-label="B카드5 항목"><input type="text" id="specV4" maxlength="24" aria-label="B카드5 값"></div>
       </div>
 
       <label class="f" style="margin-bottom:0"><span>맨 아래 연락처 줄</span>
@@ -1598,6 +1598,7 @@ function loadState(){
       /* 예전 저장값은 글씨만 살리고 스타일은 새 기본(김해 진영읍형)으로 */
       TEXT_IDS.forEach(function(id){
         if (typeof data[id] === 'string' && DEFAULTS[id] !== undefined) setVal(id, data[id]);
+        else if (DEFAULTS[id] !== undefined) setVal(id, DEFAULTS[id]);
       });
       setStyle('K'); setTrade(data.trade === 'sale' ? 'sale' : 'rent');
       return true;
@@ -1606,6 +1607,7 @@ function loadState(){
     const data = JSON.parse(raw);
     TEXT_IDS.forEach(function(id){
       if (typeof data[id] === 'string') setVal(id, data[id]);
+      else if (DEFAULTS[id] !== undefined) setVal(id, DEFAULTS[id]);
     });
     if (data.subMode) $('subMode').value = data.subMode;
     setStyle(data.style === 'A' || data.style === 'B' ? data.style : 'K');
