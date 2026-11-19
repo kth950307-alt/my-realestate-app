@@ -816,12 +816,12 @@ function kSummaryBar(top, barH){
     rr(cx, cardY, cw, cardH, 16);
     ctx.stroke();
 
-    drawIcon(icons[i % 4], cx + 14, cardY + 12, 24, '#1B3B6F');
+    drawIcon(icons[i % 4], cx + 14, cardY + 10, 26, '#1B3B6F');
 
     const innerW = cw - 28;
     if (sp.l){
-      const lfs = fitSize(sp.l, 700, innerW, 21, 14, 0);
-      plain(sp.l, cx + 14, cardY + 42, 700, lfs, '#6C7C93', 'left', 0.2);
+      const lfs = fitSize(sp.l, 700, innerW, 22, 14, 0);
+      plain(sp.l, cx + 14, cardY + 43, 700, lfs, '#5C6D86', 'left', 0.2);
     }
     if (sp.v){
       /* 괄호 부분은 작게 아래에 */
@@ -866,8 +866,8 @@ function kFooter(top){
   drawIcon('factory', lcx - 15, cy - 15, 30, '#F2C14E');
 
   const lx = lcx + r + 16;
-  plain('우리부동산 공인중개사사무소', lx, cy - 32, 800, 27, '#FFFFFF', 'left', -0.6);
-  plain('대표 김태형 · 공인중개사', lx, cy + 6, 600, 21, '#A9C0DF', 'left', 0);
+  plain('우리부동산 공인중개사사무소', lx, cy - 34, 800, 29, '#FFFFFF', 'left', -0.6);
+  plain('대표 김태형 · 공인중개사', lx, cy + 6, 600, 22, '#A9C0DF', 'left', 0);
 
   const phone = (S.phone || '').trim();
   const addr = (S.address || '').trim();
@@ -923,12 +923,12 @@ function drawK(){
   let y = 114;
   if (t1){
     const s = fitSize(t1, 900, maxW, 112, 54, -3);
-    kOutlined(t1, M, y, s, false);
+    kOutlined(clampText(t1, 900, s, maxW, -3), M, y, s, false);
     y += s + 2;
   }
   if (t2){
     const s = fitSize(t2, 900, maxW, 134, 54, -3);
-    kOutlined(t2, M, y, s, true);
+    kOutlined(clampText(t2, 900, s, maxW, -3), M, y, s, true);
     y += s;
   }
 
