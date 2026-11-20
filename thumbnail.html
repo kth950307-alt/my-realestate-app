@@ -214,7 +214,7 @@
     </div>
 
     <div class="card">
-      <div class="cardTitle">3. 큰 글씨</div>
+      <div class="cardTitle">3. 큰 글씨 <span class="tag">크기 조절</span></div>
       <label class="f"><span>지역 · 앞부분 (흰 글씨)</span>
         <input type="text" id="t1" maxlength="18" placeholder="예) 원창동">
       </label>
@@ -232,7 +232,17 @@
         </div>
         <input type="range" id="titleSize" min="70" max="140" step="2" value="104" aria-label="제목 글자 크기">
         <div class="fcScale"><span>작게</span><span>크게</span></div>
-        <p class="fcNow">노란 줄 기준 · 지금 미리보기 <b id="titleSizeNow">104px</b><br>글씨가 길면 가로 폭에 맞춰 자동으로 줄어듭니다.</p>
+        <p class="fcNow"><span id="titleSizeNote">노란 줄 기준</span> · 지금 미리보기 <b id="titleSizeNow">104px</b><br>글씨가 길면 가로 폭에 맞춰 자동으로 줄어듭니다.</p>
+      </div>
+
+      <div class="fontCtl" id="bodySizeBox">
+        <div class="fcTop">
+          <span class="fcName">본문(체크리스트) 글자 크기</span>
+          <span class="fcPx" id="bodySizeOut">34px</span>
+        </div>
+        <input type="range" id="bodySize" min="24" max="44" step="1" value="34" aria-label="본문 글자 크기">
+        <div class="fcScale"><span>작게</span><span>크게</span></div>
+        <p class="fcNow">지금 미리보기 <b id="bodySizeNow">34px</b><br>5줄을 넘거나 배지와 겹치면 박스에 맞춰 자동으로 줄어듭니다.</p>
       </div>
     </div>
 
@@ -261,16 +271,6 @@
       </label>
 
       <div class="cardTitle" style="margin:14px 0 8px">체크리스트 (최대 5줄)</div>
-
-      <div class="fontCtl" style="margin:0 0 11px; padding-top:0; border-top:0">
-        <div class="fcTop">
-          <span class="fcName">본문(체크리스트) 글자 크기</span>
-          <span class="fcPx" id="bodySizeOut">34px</span>
-        </div>
-        <input type="range" id="bodySize" min="24" max="44" step="1" value="34" aria-label="본문 글자 크기">
-        <div class="fcScale"><span>작게</span><span>크게</span></div>
-        <p class="fcNow">지금 미리보기 <b id="bodySizeNow">34px</b><br>5줄을 넘거나 배지와 겹치면 박스에 맞춰 자동으로 줄어듭니다.</p>
-      </div>
 
       <label class="f"><span>체크 1</span><input type="text" id="chk0" maxlength="34"></label>
       <label class="f"><span>체크 2</span><input type="text" id="chk1" maxlength="34"></label>
@@ -1854,6 +1854,9 @@ function updatePanels(){
   $('bPanel').hidden = S.style !== 'B';
   $('subPhotoBox').hidden = k;
   $('subPhotoNote').hidden = !k;
+  /* 사진만 쓰는 스타일 A에는 체크리스트가 없어 본문 크기 조절을 숨긴다 */
+  $('bodySizeBox').hidden = S.style === 'A';
+  $('titleSizeNote').textContent = k ? '노란 줄 기준' : '제목 기준';
   $('subLabel').textContent = k ? '흰 배지 · 핵심 스펙' : '부제 · 한 줄 설명';
   $('sub').placeholder = k ? '예) 대지 300평 · 층고 12.9m' : '예) 북항 초입 | 40m 대로변';
 }
