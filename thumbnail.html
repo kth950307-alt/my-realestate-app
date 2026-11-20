@@ -2062,9 +2062,12 @@ function buildLedgerItem(r){
     if (c.length < 5 || c.length > 34) continue;
     let sc = 0;
     for (let k = 0; k < KEYWORDS.length; k++){ if (c.indexOf(KEYWORDS[k]) >= 0) sc++; }
+    /* 제목을 그대로 되풀이하는 줄(동 이름이 들어가거나 임대/매매로 끝나는 줄)은 후순위 */
+    if (dong && c.indexOf(dong) >= 0) sc -= 1;
+    if (/(임대|매매)\s*$/.test(c)) sc -= 1;
     if (sc > bestScore){ bestScore = sc; best = c; }
   }
-  if (best) pushCheck(best);
+  if (best && bestScore >= 1) pushCheck(best);
 
   /* ② 진입도로 · ③ 층고·동력 · ④ 호이스트 · ⑤ 가격 */
   if (road) pushCheck(/진입|접안|대로|도로/.test(road) ? road : '차량 진입 ' + road);
