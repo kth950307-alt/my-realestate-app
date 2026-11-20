@@ -90,6 +90,18 @@
   .sliders{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:9px}
   .sliders label{font-size:11.5px; font-weight:700; color:var(--muted); display:block}
   input[type=range]{width:100%; margin:5px 0 0; accent-color:var(--navy2)}
+  .fontCtl{margin-top:11px; padding-top:10px; border-top:1px dashed #E1E7F0}
+  .fontCtl .fcTop{display:flex; align-items:center; justify-content:space-between; gap:8px}
+  .fontCtl .fcName{font-size:12px; font-weight:800; color:#1C2B41; letter-spacing:-.2px}
+  .fontCtl .fcPx{
+    font-size:11.5px; font-weight:800; color:var(--navy2); background:#E9F0FB;
+    border-radius:7px; padding:3px 8px; min-width:52px; text-align:center;
+    font-variant-numeric:tabular-nums; white-space:nowrap;
+  }
+  .fontCtl input[type=range]{margin:7px 0 1px}
+  .fontCtl .fcScale{display:flex; justify-content:space-between; font-size:10.5px; font-weight:700; color:#AEBBCC}
+  .fontCtl .fcNow{font-size:11px; color:#7B8A9E; margin:5px 0 0; line-height:1.5}
+  .fontCtl .fcNow b{color:var(--navy2); font-variant-numeric:tabular-nums}
   .specGrid{display:flex; flex-direction:column; gap:6px; margin:4px 0 10px}
   .specRow{display:grid; grid-template-columns:104px 1fr; gap:6px}
   .specRow input{font-size:14px; padding:8px 10px}
@@ -212,6 +224,16 @@
       <label class="f" style="margin-bottom:0"><span id="subLabel">흰 배지 · 핵심 스펙</span>
         <input type="text" id="sub" maxlength="44" placeholder="예) 대지 300평 · 층고 12.9m">
       </label>
+
+      <div class="fontCtl">
+        <div class="fcTop">
+          <span class="fcName">제목 글자 크기</span>
+          <span class="fcPx" id="titleSizeOut">104px</span>
+        </div>
+        <input type="range" id="titleSize" min="70" max="140" step="2" value="104" aria-label="제목 글자 크기">
+        <div class="fcScale"><span>작게</span><span>크게</span></div>
+        <p class="fcNow">노란 줄 기준 · 지금 미리보기 <b id="titleSizeNow">104px</b><br>글씨가 길면 가로 폭에 맞춰 자동으로 줄어듭니다.</p>
+      </div>
     </div>
 
     <div class="card">
@@ -239,6 +261,17 @@
       </label>
 
       <div class="cardTitle" style="margin:14px 0 8px">체크리스트 (최대 5줄)</div>
+
+      <div class="fontCtl" style="margin:0 0 11px; padding-top:0; border-top:0">
+        <div class="fcTop">
+          <span class="fcName">본문(체크리스트) 글자 크기</span>
+          <span class="fcPx" id="bodySizeOut">34px</span>
+        </div>
+        <input type="range" id="bodySize" min="24" max="44" step="1" value="34" aria-label="본문 글자 크기">
+        <div class="fcScale"><span>작게</span><span>크게</span></div>
+        <p class="fcNow">지금 미리보기 <b id="bodySizeNow">34px</b><br>5줄을 넘거나 배지와 겹치면 박스에 맞춰 자동으로 줄어듭니다.</p>
+      </div>
+
       <label class="f"><span>체크 1</span><input type="text" id="chk0" maxlength="34"></label>
       <label class="f"><span>체크 2</span><input type="text" id="chk1" maxlength="34"></label>
       <label class="f"><span>체크 3</span><input type="text" id="chk2" maxlength="34"></label>
@@ -355,7 +388,10 @@ const DEFAULTS = {
   contactLine: '우리부동산 공인중개사사무소  |  대표 김태형  |  등록번호 28260-2023-00082  |  032-576-2600 / 010-2660-8276',
   subMode: 'rect',
   focusX: '50',
-  focusY: '50'
+  focusY: '50',
+  /* 글씨 크기 (제목 = 노란 줄 기준 px, 본문 = 체크리스트 px) */
+  titleSize: '104',
+  bodySize: '34'
 };
 
 const TEXT_IDS = ['badge','t1','t2','sub','areaLabel','areaValue','priceLabel','price',
@@ -363,7 +399,8 @@ const TEXT_IDS = ['badge','t1','t2','sub','areaLabel','areaValue','priceLabel','
   'kSpecL0','kSpecV0','kSpecL1','kSpecV1','kSpecL2','kSpecV2','kSpecL3','kSpecV3',
   'chk0','chk1','chk2','chk3','chk4',
   'listingNo','checkTitle','contactLine',
-  'specL0','specV0','specL1','specV1','specL2','specV2','specL3','specV3','specL4','specV4'];
+  'specL0','specV0','specL1','specV1','specL2','specV2','specL3','specV3','specL4','specV4',
+  'titleSize','bodySize'];
 
 const S = {
   style: 'K',
@@ -394,6 +431,32 @@ function fitSize(text, weight, maxW, maxSize, minSize, spacing){
   let s = maxSize;
   while (s > minSize && tw(text, weight, s, spacing) > maxW) s -= 1;
   return s;
+}
+
+/* ------------------------------------------------- 글씨 크기 (제목 · 본문) */
+/* 제목 기본값: 흰 줄 87px / 노란 줄 104px — 예전(112 / 134px)보다 약 22% 작게.
+   예전에는 노란 줄이 가로 폭을 거의 다 채워 사진을 가렸다. */
+const K_T1_MAX = 87, K_T2_MAX = 104, K_TITLE_PX = 104;
+const drawn = { title: 0, body: 0 };
+
+function titlePx(){
+  const v = parseInt(val('titleSize'), 10);
+  return isFinite(v) ? Math.min(150, Math.max(60, v)) : K_TITLE_PX;
+}
+function bodyPx(){
+  const v = parseInt(val('bodySize'), 10);
+  return isFinite(v) ? Math.min(52, Math.max(20, v)) : 34;
+}
+function syncSizeOut(){
+  const to = $('titleSizeOut'), bo = $('bodySizeOut');
+  const tn = $('titleSizeNow'), bn = $('bodySizeNow');
+  const t = titlePx() + 'px', b = bodyPx() + 'px';
+  const td = (drawn.title ? Math.round(drawn.title) : titlePx()) + 'px';
+  const bd = (drawn.body ? Math.round(drawn.body) : bodyPx()) + 'px';
+  if (to && to.textContent !== t) to.textContent = t;
+  if (bo && bo.textContent !== b) bo.textContent = b;
+  if (tn && tn.textContent !== td) tn.textContent = td;
+  if (bn && bn.textContent !== bd) bn.textContent = bd;
 }
 function rr(x, y, w, h, r){
   const rad = Math.min(r, w / 2, h / 2);
@@ -976,17 +1039,20 @@ function drawK(){
   const badge = (S.badge || '').trim() || TPL[S.trade].badge;
   kRibbon(badge, M, 22, 78);
 
-  /* 제목 */
+  /* 제목 — 기본 크기를 줄이고(titleSize 슬라이더로 조절) 좌우 여백을 살린다 */
+  const tScale = titlePx() / K_TITLE_PX;
   const t1 = (S.t1 || '').trim(), t2 = (S.t2 || '').trim();
   const maxW = W - M * 2;
   let y = 114;
   if (t1){
-    const s = fitSize(t1, 900, maxW, 112, 54, -3);
+    const s = fitSize(t1, 900, maxW, K_T1_MAX * tScale, Math.max(26, 44 * tScale), -3);
+    drawn.title = Math.max(drawn.title, s);
     kOutlined(clampText(t1, 900, s, maxW, -3), M, y, s, false);
     y += s + 2;
   }
   if (t2){
-    const s = fitSize(t2, 900, maxW, 134, 54, -3);
+    const s = fitSize(t2, 900, maxW, K_T2_MAX * tScale, Math.max(26, 44 * tScale), -3);
+    drawn.title = Math.max(drawn.title, s);
     kOutlined(clampText(t2, 900, s, maxW, -3), M, y, s, true);
     y += s;
   }
@@ -996,37 +1062,54 @@ function drawK(){
   const specY = Math.max(y + 16, 344);
   if (sub) kSpecBadge(sub, M, specY, 70);
 
-  /* 체크리스트 박스 */
+  /* 체크리스트 박스 — bodySize 슬라이더가 줄 높이·점 크기까지 함께 조절 */
   const boxW = 646, boxX = W - M - boxW;
-  const lineH = 40, cfs = 34;
-  const textX = boxX + 74;
-  const maxTextW = boxW - 74 - 24;
   const items = [];
   for (let i = 0; i < 5; i++){
     const v = (S['chk' + i] || '').trim();
     if (v) items.push(v);
   }
-  const rows = [];
-  let cut = false;
-  for (let i = 0; i < items.length; i++){
-    const ls = wrapText(items[i], maxTextW, 800, cfs, -0.6, 2);
-    for (let j = 0; j < ls.length; j++){
-      if (rows.length >= 5){ cut = true; break; }
-      rows.push({ t: ls[j], first: j === 0 });
+
+  function layoutChecks(cfs){
+    const lineH = Math.max(20, Math.round(cfs * 40 / 34));
+    const r = Math.max(14, Math.min(21, Math.round(17 * cfs / 34)));
+    const textX = boxX + 26 + r * 2 + 14;
+    const maxTextW = boxW - (textX - boxX) - 24;
+    const rows = [];
+    let cut = false;
+    for (let i = 0; i < items.length; i++){
+      const ls = wrapText(items[i], maxTextW, 800, cfs, -0.6, 2);
+      for (let j = 0; j < ls.length; j++){
+        if (rows.length >= 5){ cut = true; break; }
+        rows.push({ t: ls[j], first: j === 0 });
+      }
+      if (rows.length >= 5 && i < items.length - 1) cut = true;
+      if (rows.length >= 5) break;
     }
-    if (rows.length >= 5 && i < items.length - 1) cut = true;
-    if (rows.length >= 5) break;
-  }
-  if (cut && rows.length){
-    let last = rows[rows.length - 1].t;
-    while (last.length > 1 && tw(last + '…', 800, cfs, -0.6) > maxTextW) last = last.slice(0, -1);
-    rows[rows.length - 1].t = last + '…';
+    if (cut && rows.length){
+      let last = rows[rows.length - 1].t;
+      while (last.length > 1 && tw(last + '…', 800, cfs, -0.6) > maxTextW) last = last.slice(0, -1);
+      rows[rows.length - 1].t = last + '…';
+    }
+    return { rows: rows, cfs: cfs, lineH: lineH, r: r, textX: textX };
   }
 
-  if (rows.length){
+  /* 요청한 본문 크기로 먼저 배치하고, 박스가 위 배지나 제목을 침범하면 1px씩 줄인다 */
+  const boxBottom = PHOTO_BOT - 14;
+  const limitTop = Math.max(sub ? specY + 70 + 12 : 0, y + 10);
+  let L = layoutChecks(bodyPx());
+  for (let guard = 0; guard < 40; guard++){
+    if (!L.rows.length || L.cfs <= 24) break;
+    const boxTop = boxBottom - (24 + L.rows.length * L.lineH + 22);
+    if (boxTop >= limitTop) break;
+    L = layoutChecks(L.cfs - 1);
+  }
+  drawn.body = L.cfs;
+
+  if (L.rows.length){
+    const rows = L.rows, lineH = L.lineH, cfs = L.cfs;
     const padT = 24, padB = 22;
     const boxH = padT + rows.length * lineH + padB;
-    const boxBottom = PHOTO_BOT - 14;
     const boxTop = boxBottom - boxH;
 
     ctx.save();
@@ -1046,13 +1129,15 @@ function drawK(){
     for (let i = 0; i < rows.length; i++){
       const r = rows[i];
       if (r.first){
-        const cx = boxX + 26 + 17, cyy = ly + lineH / 2;
+        const cx = boxX + 26 + L.r, cyy = ly + lineH / 2;
         ctx.beginPath();
-        ctx.arc(cx, cyy, 17, 0, 6.2832);
+        ctx.arc(cx, cyy, L.r, 0, 6.2832);
         ctx.fillStyle = '#E8211B';
         ctx.fill();
         ctx.save();
         ctx.translate(cx, cyy);
+        const k = L.r / 17;
+        ctx.scale(k, k);
         ctx.beginPath();
         ctx.moveTo(-8, 0.5);
         ctx.lineTo(-2.5, 6);
@@ -1068,7 +1153,7 @@ function drawK(){
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#13233C';
-      ctx.fillText(r.t, textX, ly + lineH / 2 + 1);
+      ctx.fillText(r.t, L.textX, ly + lineH / 2 + 1);
       ly += lineH;
     }
   }
@@ -1104,15 +1189,17 @@ function drawA(){
   /* emblem */
   drawEmblem(880, 120, 84);
 
-  /* title */
+  /* title — 제목 글자 크기 설정을 스타일 A에도 같은 비율로 적용 */
+  const TS = titlePx() / K_TITLE_PX;
   const t1 = S.t1.trim(), t2 = S.t2.trim();
   const maxTitleW = 1000 - P - 214;
   const spacing = -2.2;
   let y = 38;
 
   if (t1 && t2){
-    const oneSize = fitSize(t1 + ' ' + t2, 900, maxTitleW, 130, 62, spacing);
-    if (oneSize >= 90){
+    const oneSize = fitSize(t1 + ' ' + t2, 900, maxTitleW, 130 * TS, 62 * TS, spacing);
+    drawn.title = Math.max(drawn.title, oneSize);
+    if (oneSize >= 90 * TS){
       const a1 = clampText(t1, 900, oneSize, maxTitleW * 0.55, spacing);
       const a2 = clampText(t2, 900, oneSize, maxTitleW - tw(a1 + ' ', 900, oneSize, spacing), spacing);
       const w1 = tw(a1 + ' ', 900, oneSize, spacing);
@@ -1120,9 +1207,10 @@ function drawA(){
       outlined(a2, P + w1, y, { size: oneSize, weight: 900, spacing: spacing, fill: yellowGrad(y, oneSize) });
       y += oneSize * 1.02;
     } else {
-      const s1 = fitSize(t1, 900, maxTitleW, 104, 48, spacing);
-      const s2 = fitSize(t2, 900, maxTitleW, 120, 48, spacing);
+      const s1 = fitSize(t1, 900, maxTitleW, 104 * TS, 48 * TS, spacing);
+      const s2 = fitSize(t2, 900, maxTitleW, 120 * TS, 48 * TS, spacing);
       const sA = Math.min(s1, s2);
+      drawn.title = Math.max(drawn.title, sA, s2);
       outlined(clampText(t1, 900, sA, maxTitleW, spacing), P, y, { size: sA, weight: 900, spacing: spacing, fill: '#FFFFFF' });
       y += sA * 1.08;
       outlined(clampText(t2, 900, s2, maxTitleW, spacing), P, y, { size: s2, weight: 900, spacing: spacing, fill: yellowGrad(y, s2) });
@@ -1130,7 +1218,8 @@ function drawA(){
     }
   } else if (t1 || t2){
     const t = t1 || t2;
-    const s = fitSize(t, 900, maxTitleW, 130, 62, spacing);
+    const s = fitSize(t, 900, maxTitleW, 130 * TS, 62 * TS, spacing);
+    drawn.title = Math.max(drawn.title, s);
     outlined(clampText(t, 900, s, maxTitleW, spacing), P, y, { size: s, weight: 900, spacing: spacing, fill: t1 ? '#FFFFFF' : yellowGrad(y, s) });
     y += s * 1.02;
   }
@@ -1372,7 +1461,8 @@ function drawB(){
     ctx.fillText(noText, bx + bw / 2, by + 38);
   }
 
-  /* title */
+  /* title — 제목 글자 크기 설정을 스타일 B에도 같은 비율로 적용 */
+  const TS = titlePx() / K_TITLE_PX;
   const t1 = S.t1.trim(), t2 = S.t2.trim();
   const tx = 286;
   const tMaxW = (noText ? badgeX - 24 : W - 44) - tx;
@@ -1380,7 +1470,8 @@ function drawB(){
   let ty = 28;
   if (t1 || t2){
     const both = t1 && t2 ? t1 + ' ' + t2 : (t1 || t2);
-    let fs = fitSize(both, 900, tMaxW, 62, 30, -1.6);
+    let fs = fitSize(both, 900, tMaxW, 62 * TS, 30 * TS, -1.6);
+    drawn.title = Math.max(drawn.title, fs);
     setFont(900, fs, -1.6);
     ctx.textAlign = 'left'; ctx.textBaseline = 'top';
     let x = tx;
@@ -1458,27 +1549,33 @@ function drawB(){
   }
 
   const checks = [S.chk0, S.chk1, S.chk2, S.chk3, S.chk4].map(function(s){ return (s || '').trim(); }).filter(Boolean);
+  /* 본문 글자 크기(bodySize)를 스타일 B의 체크리스트에도 같은 비율로 적용 (기본 25px) */
+  const bCfs = Math.max(14, Math.min(42, Math.round(bodyPx() * 25 / 34)));
+  const bLine = Math.round(bCfs * 32 / 25);
+  const bBox = Math.round(bCfs * 26 / 25);
+  const bGap = Math.round(38 * bCfs / 25);
   const room = photoBot - 26 - cy;
-  const rowGap = checks.length ? Math.min(96, room / checks.length) : 0;
-  const blockH = checks.length ? (checks.length - 1) * rowGap + 50 : 0;
+  const rowGap = checks.length ? Math.min(Math.round(96 * bCfs / 25), room / checks.length) : 0;
+  const blockH = checks.length ? (checks.length - 1) * rowGap + Math.round(50 * bCfs / 25) : 0;
   const startY = cy + Math.max(0, (room - blockH) / 2);
+  if (checks.length) drawn.body = bCfs;
 
   checks.forEach(function(t, i){
     const yy = startY + i * rowGap;
-    const lines = wrapText(t, 332, 800, 25, 0, 2);
-    const boxSize = 26;
-    const midY = yy + (lines.length > 1 ? 15 : 14);
+    const lines = wrapText(t, 332, 800, bCfs, 0, 2);
+    const boxSize = bBox;
+    const midY = yy + (lines.length > 1 ? bLine / 2 : bLine * 0.44);
     ctx.save();
     ctx.fillStyle = '#F2C14E';
     rr(cx0, midY - boxSize / 2, boxSize, boxSize, 6);
     ctx.fill();
-    drawIcon('check', cx0 + 1.5, midY - boxSize / 2 + 1.5, 23, '#0A1B36');
+    drawIcon('check', cx0 + 1.5, midY - boxSize / 2 + 1.5, Math.round(boxSize * 23 / 26), '#0A1B36');
     ctx.restore();
     lines.forEach(function(l, j){
-      setFont(800, 25, 0);
+      setFont(800, bCfs, 0);
       ctx.textAlign = 'left'; ctx.textBaseline = 'top';
       ctx.fillStyle = '#E9F0FB';
-      ctx.fillText(l, cx0 + 38, yy + j * 32);
+      ctx.fillText(l, cx0 + bGap, yy + j * bLine);
     });
   });
 
@@ -1616,6 +1713,8 @@ function drawB(){
 /* ------------------------------------------------------------------ render */
 function readInputs(){
   TEXT_IDS.forEach(function(id){ S[id] = val(id); });
+  S.titleSize = titlePx();
+  S.bodySize = bodyPx();
   S.subMode = $('subMode').value;
   S.focusX = parseInt($('focusX').value, 10) / 100;
   S.focusY = parseInt($('focusY').value, 10) / 100;
@@ -1624,6 +1723,7 @@ function readInputs(){
 let raf = 0;
 function drawAll(){
   readInputs();
+  drawn.title = 0; drawn.body = 0;
   ctx.save();
   ctx.clearRect(0, 0, W, H);
   ctx.textAlign = 'left';
@@ -1632,6 +1732,7 @@ function drawAll(){
   else if (S.style === 'A') drawA();
   else drawK();
   ctx.restore();
+  syncSizeOut();
 }
 function render(){
   cancelAnimationFrame(raf);
@@ -1873,7 +1974,9 @@ function init(){
 init();
 
 /* 검증용 (개발 확인) */
-window.__thumb = { render: renderNow, state: S, setStyle: setStyle, setTrade: setTrade };
+window.__thumb = { render: renderNow, state: S, setStyle: setStyle, setTrade: setTrade,
+  setSize: function(t, b){ if (t != null) setVal('titleSize', t); if (b != null) setVal('bodySize', b); drawAll(); },
+  titlePx: titlePx, bodyPx: bodyPx };
 })();
 </script>
 </body>
