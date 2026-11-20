@@ -111,6 +111,33 @@
   .foot{font-size:11px; color:#9AA7B8; text-align:center; padding:6px 0 22px; line-height:1.6}
   .dlbar{display:flex; gap:8px}
   .dlbar button{flex:1; padding:13px 10px; font-size:15px}
+  /* --- 장부 매물 불러오기 --- */
+  .ledgerTop{display:flex; gap:6px; align-items:stretch}
+  .ledgerTop input{flex:1; min-width:0}
+  .ledgerTop button{padding:0 14px; font-size:16px; line-height:1}
+  .ledgerList{
+    margin-top:9px; border:1px solid #E1E7F0; border-radius:12px; background:#FBFCFE;
+    max-height:300px; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  }
+  .ledgerItem{
+    display:block; width:100%; text-align:left; background:transparent; border:0; border-radius:0;
+    border-bottom:1px solid #EDF1F6; padding:9px 11px; font-weight:700; font-size:13px;
+    color:#1C2B41; line-height:1.35;
+  }
+  .ledgerItem:last-child{border-bottom:0}
+  .ledgerItem .lTop{display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:800; color:#6B7A90}
+  .ledgerItem .lId{color:var(--navy2); letter-spacing:-.2px}
+  .ledgerItem .lDeal{padding:1px 6px; border-radius:5px; background:#E8F0FB; color:#123A70; font-size:10.5px}
+  .ledgerItem .lDeal.sale{background:#FDEAEA; color:#B0171E}
+  .ledgerItem .lTitle{
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    margin:2px 0 1px; font-size:12.5px; font-weight:700; color:#243349;
+  }
+  .ledgerItem .lPrice{display:block; font-size:11.5px; font-weight:700; color:#5C6D86}
+  .ledgerItem.on{background:#EDF4FD; box-shadow:inset 3px 0 0 var(--navy2)}
+  .ledgerMore{width:100%; border-radius:0; background:#F1F5FB; color:#41505F; font-size:12.5px; font-weight:700; padding:10px}
+  .ledgerEmpty{padding:16px 12px; text-align:center; font-size:12px; color:#8494A8; line-height:1.55}
+  .tag.gray{color:#6B7A90; background:#EEF1F6}
   @media (max-width:920px){
     main{display:block; padding:10px}
     .topbar{position:static}
@@ -127,6 +154,10 @@
     .brand small{display:none}
     button{padding:9px 11px; font-size:13.5px}
     input[type=text],select{font-size:16px}
+  }
+  /* 모바일: '가격 문구'가 반 칸에 눌려 잘리지 않도록 1열 전체 폭으로 */
+  @media (max-width:560px){
+    .row2.priceRow{grid-template-columns:1fr}
   }
 </style>
 </head>
@@ -157,6 +188,19 @@
   </section>
 
   <section class="controls">
+
+    <div class="card" id="ledgerCard">
+      <div class="cardTitle">장부 매물 불러오기 <span class="tag gray" id="ledgerBadge">불러오는 중…</span></div>
+      <div class="ledgerTop">
+        <input type="text" id="ledgerQuery" autocomplete="off" autocapitalize="characters" placeholder="매물번호 · 동 · 제목 검색 (예: W-261119 / 송림 / 창고)">
+        <button type="button" class="ghost" id="ledgerReload" title="장부 매물 새로고침" aria-label="장부 매물 새로고침">↻</button>
+      </div>
+      <div class="ledgerList" id="ledgerList"><div class="ledgerEmpty">장부 매물을 불러오는 중…</div></div>
+      <p class="hint" id="ledgerHint">
+        매물을 누르면 <b>제목 · 체크리스트 · 가격 · 스펙</b>이 자동으로 채워집니다. 채운 뒤에도 직접 고칠 수 있어요.<br>
+        사진은 <b>직접 올린 사진 그대로</b> 두어 PNG/JPG 저장이 항상 되도록 했습니다.
+      </p>
+    </div>
 
     <div class="card">
       <div class="cardTitle">1. 스타일</div>
@@ -252,7 +296,7 @@
         <button type="button" data-trade="rent" class="on">임대</button>
         <button type="button" data-trade="sale">매매</button>
       </div>
-      <div class="row2">
+      <div class="row2 priceRow">
         <label class="f" style="margin-bottom:0"><span>가격 카드 제목</span>
           <input type="text" id="priceLabel" maxlength="10" placeholder="매매가">
         </label>
@@ -1840,6 +1884,412 @@ function loadFile(file, which){
   img.src = url;
 }
 
+/* ================================================================== 장부 매물
+   공개 매물 시트(properties)를 GViz JSONP로 읽어 와서
+   매물번호 · 동 · 제목으로 찾아 큰 글씨·체크리스트·가격·스펙을 자동으로 채운다.
+   ※ 사진(대표사진)은 읽지도 그리지도 않는다 — 사용자가 올린 사진만 캔버스에 들어가
+     CORS 때문에 PNG/JPG 저장이 막히는 일이 없다. */
+const SHEET_ID  = '1OofGenPy_CCWUz4GVNrmUPEOXkEcaCoQxEoAiMLQS5w';
+const SHEET_TAB = 'properties';
+/* A~Y열(=등록일자 ~ 핵심특징). Z열 대표사진(base64)은 빼서 전송량을 줄인다. */
+const SHEET_COLS = 'A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y';
+const LEDGER_PAGE = 20;
+
+const LEDGER = { all: [], view: [], loaded: false, failed: false, sel: '', page: LEDGER_PAGE };
+
+/* ---------------------------------------------------------- 값 다듬기 도우미 */
+function cellOf(r, i){
+  const c = r && r.c && r.c[i];
+  if (!c || c.v === null || c.v === undefined) return '';
+  if (typeof c.f === 'string' && c.f.trim()) return c.f.trim();
+  const v = c.v;
+  if (typeof v === 'number' && Math.floor(v) === v) return String(v);
+  return String(v).trim();
+}
+function numOf(v){
+  const m = String(v == null ? '' : v).replace(/,/g, '').match(/-?\d+(?:\.\d+)?/);
+  return m ? parseFloat(m[0]) : 0;
+}
+function pyeongText(n){
+  if (!(n > 0)) return '';
+  return (Number.isInteger(n) ? n.toLocaleString('ko-KR') : String(n)) + '평';
+}
+function clip(s, n){
+  s = String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
+  if (s.length <= n) return s;
+  return s.slice(0, n - 1).replace(/[\s,·/\-]+$/, '') + '…';
+}
+/* 동 이름 — 권역이 '기타/인천전역'이면 제목에서 동을 찾는다 */
+function regionOf(v, title){
+  let s = String(v || '').trim();
+  if (!s || /기타|전역|인천시|인천광역/.test(s)){
+    const m = String(title || '').match(/([가-힣]{2,4}동)/);
+    if (m) s = m[1];
+  }
+  return clip(s, 18);
+}
+function floorOf(v){
+  let s = String(v || '').replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
+  if (/전체/.test(s)) return '건물 전체';
+  s = s.replace(/^지상\s*/, '').replace(/^지하\s*/, '지하 ').trim();
+  if (!/\d/.test(s)) return '';
+  return s.slice(0, 10);
+}
+function heightOf(v){
+  let s = String(v || '').trim();
+  if (!s || !/\d/.test(s)) return '';
+  if (!/m$/i.test(s)) s = s + 'm';
+  return s;
+}
+function powerOf(v){
+  let s = String(v || '').trim();
+  if (!s || !/\d/.test(s)) return '';
+  if (!/kw/i.test(s)) s = s + 'kW';
+  return s;
+}
+/* 호이스트 제원: '호이스트 2T (권리금 별도)' → '2T',  '2.8' → '2.8톤', '보유' → '' */
+function hoistSpecOf(v){
+  const s = String(v || '').trim();
+  if (!s || /^(없음|무|無|-|있음|보유|있음\s*\(.*\))$/.test(s)) return '';
+  const m = s.match(/(\d+(?:\.\d+)?)\s*(T|t|톤)?/);
+  if (!m) return '';
+  return m[1] + (m[2] ? m[2] : '톤');
+}
+function roadOf(v){
+  const s = String(v || '').replace(/\s+/g, ' ').trim();
+  if (!s) return '';
+  if (/확인필요/.test(s)){
+    const m = s.match(/\(([^)]+)\)/);
+    return m ? m[1].trim() : '';
+  }
+  return s;
+}
+
+/* 강조 제목 — 제목을 18자 안으로 다듬고, 길면 '층 · 평수 · 종류 · 임대/매매'로 만든다 */
+function keyTitleOf(rawTitle, dong, dealWord, floor, area){
+  let t = String(rawTitle || '').replace(/\s+/g, ' ').trim();
+  if (dong) t = t.split(dong).join(' ');
+  t = t.replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
+  t = t.split('+')[0];
+  t = t.replace(/단독|집합(공장)?|분양/g, ' ').replace(/\s+/g, ' ').trim();
+  t = t.replace(/^\d+(~\d+)?(,\s*\d+)*\s*층\s*/, '');
+  t = t.replace(/(임대|매매)/g, ' ').replace(/\s+/g, ' ').trim();
+  if (t){
+    const cand = (t + ' ' + dealWord).trim();
+    if (cand.length <= 18) return cand;
+  }
+  const types = ['공구상가', '집합공장', '단독공장', '창고', '상가', '사무실', '나대지', '토지'];
+  let type = '';
+  for (let i = 0; i < types.length; i++){
+    if (String(rawTitle || '').indexOf(types[i]) >= 0){ type = types[i]; break; }
+  }
+  const parts = [];
+  if (floor && floor !== '건물 전체') parts.push(floor);
+  if (area > 0) parts.push(pyeongText(area));
+  if (type) parts.push(type);
+  parts.push(dealWord);
+  return parts.join(' ').slice(0, 18).trim();
+}
+
+/* ---------------------------------------------------------------- 매물 1건 → 채울 값 */
+function buildLedgerItem(r){
+  const g = function(i){ return cellOf(r, i); };
+  const id = g(1).toUpperCase();
+  if (!/^(W|OLD)-/.test(id)) return null;
+  const status = g(5);
+  if (status && !/노출|공개/.test(status)) return null;
+
+  const rawDeal = g(2);
+  const deal = /매매|분양/.test(rawDeal) ? 'sale' : 'rent';
+  const dealWord = deal === 'sale' ? '매매' : '임대';
+  const title = g(6);
+  const dong = regionOf(g(3), title);
+  const floor = floorOf(g(4));
+  const area = numOf(g(10));
+  const office = numOf(g(11));
+  const height = heightOf(g(12));
+  const power = powerOf(g(13));
+  const hoistOn = /^(있|유|o|y|보유)/i.test(g(14)) && !/없|무/.test(g(14));
+  const hoistSpec = hoistSpecOf(g(15));
+  const road = roadOf(g(16));
+  const moveIn = g(17);
+  const industry = g(18);
+  const rawPrice = g(7);
+  const feature = g(24);
+
+  const landM = (title + ' ' + feature).match(/대지\s*([\d,]+(?:\.\d+)?)\s*평/);
+  const land = landM ? numOf(landM[1]) : 0;
+
+  /* 가격 카드 문구 — 괄호 안 부가설명은 빼고 짧게 */
+  const priceShort = clip(String(rawPrice || '').split(/[\(（]/)[0].split('·')[0], 30);
+
+  /* 흰 배지 · 핵심 스펙 */
+  const subParts = [];
+  if (area > 0) subParts.push('전용 ' + pyeongText(area));
+  if (height) subParts.push('층고 ' + height);
+  if (hoistOn) subParts.push('호이스트' + (hoistSpec ? ' ' + hoistSpec : ' 있음'));
+  let sub = '';
+  for (let i = 0; i < subParts.length; i++){
+    const cand = sub ? sub + ' · ' + subParts[i] : subParts[i];
+    if (cand.length <= 44) sub = cand;
+  }
+  if (!sub && office > 0) sub = '사무실 ' + pyeongText(office);
+
+  /* 체크리스트 4~5줄 */
+  const checks = [];
+  const pushCheck = function(v){
+    let s = String(v || '').replace(/\s+/g, ' ').trim();
+    if (!s) return;
+    s = clip(s, 34);
+    for (let i = 0; i < checks.length; i++){
+      if (checks[i] === s) return;
+      if (s.length > 6 && checks[i].indexOf(s.slice(0, 6)) === 0) return;   /* 앞부분이 겹치면 중복으로 본다 */
+    }
+    checks.push(s);
+  };
+
+  /* ① 특장점 — 핵심특징 문장 중 눈에 띄는 것 하나 */
+  const KEYWORDS = ['수익', '권리금', '주차', '도크', '대로', '코너', '마당', '에폭시', '캐노피', '신축', '리모델링', '승강기', '엘리베이터', '독립', '단독', '화물'];
+  const cands = String(feature || '').split(/[\n,·]/).map(function(s){ return s.trim(); }).filter(Boolean);
+  let best = '', bestScore = 0;
+  for (let i = 0; i < cands.length; i++){
+    const c = cands[i];
+    if (c.length < 5 || c.length > 34) continue;
+    let sc = 0;
+    for (let k = 0; k < KEYWORDS.length; k++){ if (c.indexOf(KEYWORDS[k]) >= 0) sc++; }
+    if (sc > bestScore){ bestScore = sc; best = c; }
+  }
+  if (best) pushCheck(best);
+
+  /* ② 진입도로 · ③ 층고·동력 · ④ 호이스트 · ⑤ 가격 */
+  if (road) pushCheck(/진입|접안|대로|도로/.test(road) ? road : '차량 진입 ' + road);
+  if (height && power) pushCheck('층고 ' + height + ' · 동력 ' + power);
+  else if (height) pushCheck('층고 ' + height);
+  else if (power) pushCheck('동력 ' + power);
+  if (hoistOn) pushCheck('호이스트' + (hoistSpec ? ' ' + hoistSpec : ' 구비'));
+  if (priceShort) pushCheck(priceShort);
+
+  /* ⑥ 4줄이 안 되면 대지면적 · 추천업종 · 입주시기로 채운다 */
+  if (checks.length < 4 && land > 0) pushCheck('대지 ' + pyeongText(land));
+  if (checks.length < 4 && industry) pushCheck(industry);
+  if (checks.length < 4 && moveIn) pushCheck('입주 ' + moveIn);
+
+  /* 하단 카드 4칸 (대지면적 · 건물면적 · 층고 · 호이스트 우선) */
+  const cards = [];
+  if (area > 0){
+    let v = '전용 ' + pyeongText(area);
+    if (office > 0) v += ' + ' + pyeongText(office);
+    cards.push({ l: '건물면적', v: clip(v, 24) });
+  }
+  if (land > 0) cards.push({ l: '대지면적', v: clip(pyeongText(land), 24) });
+  if (height) cards.push({ l: '층고', v: clip(height, 24) });
+  cards.push({ l: '호이스트', v: clip(hoistOn ? (hoistSpec || '있음') : '없음', 24) });
+  if (office > 0 && area > 0) cards.push({ l: '사무실', v: clip(pyeongText(office), 24) });
+  if (floor && floor !== '건물 전체') cards.push({ l: '층수', v: clip(floor, 24) });
+  if (power) cards.push({ l: '동력', v: clip(power, 24) });
+
+  /* 스타일 B용 스펙 */
+  let specV0 = '';
+  if (floor && floor !== '건물 전체') specV0 = floor + ' ';
+  specV0 = clip(specV0 + pyeongText(area), 24);
+
+  const date = g(0);
+  const tail = parseInt(String(id).split('-').pop(), 10);
+
+  return {
+    id: id, date: date, seq: isFinite(tail) ? tail : 0,
+    deal: deal, dealWord: dealWord, dong: dong, title: title, floor: floor,
+    priceRaw: rawPrice, price: priceShort,
+    t2: keyTitleOf(title, dong, dealWord, floor, area),
+    sub: sub,
+    checks: checks.slice(0, 5),
+    cards: cards.slice(0, 4),
+    specV0: specV0,
+    office: office, road: road, height: height, power: power
+  };
+}
+
+/* ---------------------------------------------------------------- 목록 그리기 */
+function ledgerMatches(it, q){
+  q = String(q || '').trim();
+  if (!q) return true;
+  const idFlat = it.id.replace(/-/g, '').toLowerCase();
+  const qFlat = q.replace(/[\s-]/g, '').toLowerCase();
+  if (qFlat && idFlat.indexOf(qFlat) >= 0) return true;
+  const hay = (it.dong + ' ' + it.title + ' ' + it.dealWord + ' ' + it.floor).toLowerCase();
+  const tokens = q.toLowerCase().split(/\s+/).filter(Boolean);
+  return tokens.every(function(t){
+    return hay.indexOf(t) >= 0 || idFlat.indexOf(t.replace(/-/g, '')) >= 0;
+  });
+}
+
+function renderLedgerList(){
+  const box = $('ledgerList');
+  if (!box) return;
+  box.textContent = '';
+
+  const empty = function(msg){
+    const p = document.createElement('div');
+    p.className = 'ledgerEmpty';
+    p.textContent = msg;
+    box.appendChild(p);
+  };
+
+  if (LEDGER.failed){ empty('장부를 불러오지 못했어요. ↻ 버튼으로 다시 시도해 주세요. (인터넷 연결 확인)'); return; }
+  if (!LEDGER.loaded){ empty('장부 매물을 불러오는 중…'); return; }
+
+  const qel = $('ledgerQuery');
+  const q = qel ? qel.value : '';
+  LEDGER.view = LEDGER.all.filter(function(it){ return ledgerMatches(it, q); });
+  if (!LEDGER.view.length){
+    empty('검색 결과가 없어요. 매물번호(W-261119-1611) · 동 이름 · 제목 키워드로 다시 찾아보세요.');
+    return;
+  }
+
+  const shown = LEDGER.view.slice(0, LEDGER.page);
+  shown.forEach(function(it){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ledgerItem' + (it.id === LEDGER.sel ? ' on' : '');
+
+    const top = document.createElement('span');
+    top.className = 'lTop';
+    const idS = document.createElement('span'); idS.className = 'lId'; idS.textContent = it.id;
+    const dealS = document.createElement('span'); dealS.className = 'lDeal' + (it.deal === 'sale' ? ' sale' : ''); dealS.textContent = it.dealWord;
+    const dongS = document.createElement('span'); dongS.textContent = it.dong;
+    top.appendChild(idS); top.appendChild(dealS); top.appendChild(dongS);
+
+    const tS = document.createElement('span'); tS.className = 'lTitle'; tS.textContent = it.title || it.t2;
+    const pS = document.createElement('span'); pS.className = 'lPrice'; pS.textContent = it.priceRaw || it.price;
+
+    b.appendChild(top); b.appendChild(tS); b.appendChild(pS);
+    b.addEventListener('click', function(){ fillFromLedger(it); });
+    box.appendChild(b);
+  });
+
+  if (LEDGER.view.length > LEDGER.page){
+    const m = document.createElement('button');
+    m.type = 'button';
+    m.className = 'ledgerMore';
+    m.textContent = '더 보기 (' + shown.length + ' / ' + LEDGER.view.length + '건)';
+    m.addEventListener('click', function(){ LEDGER.page += LEDGER_PAGE; renderLedgerList(); });
+    box.appendChild(m);
+  }
+}
+
+/* ---------------------------------------------------------------- 매물 → 입력칸 */
+function fillFromLedger(it){
+  const tpl = TPL[it.deal] || TPL.rent;
+
+  setTrade(it.deal);
+  setVal('badge', tpl.badge);
+  setVal('priceLabel', tpl.priceLabel);
+  setVal('price', it.price);
+  setVal('phone', tpl.phone);
+
+  setVal('t1', it.dong);
+  setVal('t2', it.t2);
+  setVal('sub', it.sub);
+
+  for (let i = 0; i < 5; i++) setVal('chk' + i, it.checks[i] || '');
+  for (let i = 0; i < 4; i++){
+    setVal('kSpecL' + i, it.cards[i] ? it.cards[i].l : '');
+    setVal('kSpecV' + i, it.cards[i] ? it.cards[i].v : '');
+  }
+
+  /* 스타일 B용 칸도 함께 */
+  setVal('listingNo', it.id);
+  setVal('specL0', '층수 · 평수'); setVal('specV0', it.specV0 || '-');
+  setVal('specL1', '사무실');     setVal('specV1', it.office > 0 ? pyeongText(it.office) : '없음');
+  setVal('specL2', '층고');       setVal('specV2', it.height || '확인필요');
+  setVal('specL3', '차량 진입');   setVal('specV3', clip(it.road || '확인필요', 24));
+  setVal('specL4', '거래 조건');   setVal('specV4', it.price || '-');
+  const cl = $('contactLine');
+  if (cl) cl.value = String(cl.value || DEFAULTS.contactLine).replace(/032-\d{3}-\d{4}/, tpl.phone);
+
+  LEDGER.sel = it.id;
+  renderLedgerList();
+  render();
+  saveState();
+
+  /* 모바일에서는 채워진 결과를 바로 볼 수 있게 미리보기로 올린다 */
+  if (window.innerWidth <= 920){
+    const pv = document.querySelector('.previewWrap');
+    if (pv && pv.scrollIntoView) pv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function ledgerFail(){
+  LEDGER.failed = true;
+  LEDGER.loaded = false;
+  const badge = $('ledgerBadge');
+  if (badge){ badge.textContent = '불러오기 실패'; badge.className = 'tag red'; }
+  renderLedgerList();
+}
+
+let ledgerSeq = 0;
+function loadLedger(){
+  const badge = $('ledgerBadge');
+  LEDGER.loaded = false;
+  LEDGER.failed = false;
+  LEDGER.page = LEDGER_PAGE;
+  if (badge){ badge.textContent = '불러오는 중…'; badge.className = 'tag gray'; }
+  renderLedgerList();
+
+  const seq = ++ledgerSeq;
+  const cbName = '__wooriLedgerCb' + seq;
+  const script = document.createElement('script');
+  let settled = false;
+  function stop(){
+    if (settled) return;
+    settled = true;
+    try { delete window[cbName]; } catch(e){ window[cbName] = undefined; }
+    if (script.parentNode) script.parentNode.removeChild(script);
+  }
+  window[cbName] = function(res){
+    if (seq !== ledgerSeq) return;
+    stop();
+    if (!res || !res.table || !res.table.rows){ ledgerFail(); return; }
+    const items = [];
+    for (let i = 0; i < res.table.rows.length; i++){
+      const it = buildLedgerItem(res.table.rows[i]);
+      if (it) items.push(it);
+    }
+    if (!items.length){ ledgerFail(); return; }
+    items.sort(function(a, b){
+      /* 새로 등록한 매물(W-)을 먼저, 이관분(OLD-)은 뒤로 — 홈페이지와 같은 순서 */
+      const am = /^OLD-/.test(a.id) ? 1 : 0;
+      const bm = /^OLD-/.test(b.id) ? 1 : 0;
+      if (am !== bm) return am - bm;
+      if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+      return b.seq - a.seq;
+    });
+    LEDGER.all = items;
+    LEDGER.view = items;
+    LEDGER.loaded = true;
+    LEDGER.failed = false;
+    if (badge){ badge.textContent = items.length + '건'; badge.className = 'tag'; }
+    renderLedgerList();
+  };
+  script.onerror = function(){ if (seq === ledgerSeq){ stop(); ledgerFail(); } };
+  script.src = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq' +
+    '?tqx=responseHandler:' + cbName + '&sheet=' + SHEET_TAB +
+    '&tq=' + encodeURIComponent('select ' + SHEET_COLS) + '&t=' + Date.now();
+  document.head.appendChild(script);
+  setTimeout(function(){
+    if (seq === ledgerSeq && !LEDGER.loaded && !LEDGER.failed){ stop(); ledgerFail(); }
+  }, 20000);
+}
+
+function initLedger(){
+  const q = $('ledgerQuery');
+  if (q) q.addEventListener('input', function(){ LEDGER.page = LEDGER_PAGE; renderLedgerList(); });
+  const r = $('ledgerReload');
+  if (r) r.addEventListener('click', loadLedger);
+  renderLedgerList();
+  loadLedger();
+}
+
 /* -------------------------------------------------------------------- UI */
 function setStyle(v){
   S.style = v;
@@ -1972,6 +2422,7 @@ function init(){
 
   updatePanels();
   renderNow();
+  initLedger();
 }
 
 init();
@@ -1979,7 +2430,17 @@ init();
 /* 검증용 (개발 확인) */
 window.__thumb = { render: renderNow, state: S, setStyle: setStyle, setTrade: setTrade,
   setSize: function(t, b){ if (t != null) setVal('titleSize', t); if (b != null) setVal('bodySize', b); drawAll(); },
-  titlePx: titlePx, bodyPx: bodyPx };
+  titlePx: titlePx, bodyPx: bodyPx,
+  ledger: {
+    load: loadLedger,
+    items: function(){ return LEDGER.all; },
+    fill: function(id){
+      const it = LEDGER.all.filter(function(x){ return x.id === id; })[0];
+      if (it) fillFromLedger(it);
+      return it || null;
+    },
+    build: buildLedgerItem
+  } };
 })();
 </script>
 </body>
