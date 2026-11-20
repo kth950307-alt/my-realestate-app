@@ -2021,7 +2021,12 @@ function buildLedgerItem(r){
   const land = landM ? numOf(landM[1]) : 0;
 
   /* 가격 카드 문구 — 괄호 안 부가설명은 빼고 짧게 */
-  const priceShort = clip(String(rawPrice || '').split(/[\(（]/)[0].split('·')[0], 30);
+  const priceLine = clip(String(rawPrice || '').split(/[\(（]/)[0].split('·')[0], 30);
+  /* 카드 위 제목이 '매매가'/'임대가'라 본문이 같은 말로 시작하면 겹치므로 한 번만 남긴다 */
+  const priceCard = (function(){
+    const t = priceLine.replace(/^(매매가|임대가|매매|임대|분양가)\s+/, '');
+    return t && t !== priceLine ? clip(t, 30) : priceLine;
+  })();
 
   /* 흰 배지 · 핵심 스펙 */
   const subParts = [];
@@ -2067,7 +2072,7 @@ function buildLedgerItem(r){
   else if (height) pushCheck('층고 ' + height);
   else if (power) pushCheck('동력 ' + power);
   if (hoistOn) pushCheck('호이스트' + (hoistSpec ? ' ' + hoistSpec : ' 구비'));
-  if (priceShort) pushCheck(priceShort);
+  if (priceLine) pushCheck(priceLine);
 
   /* ⑥ 4줄이 안 되면 대지면적 · 추천업종 · 입주시기로 채운다 */
   if (checks.length < 4 && land > 0) pushCheck('대지 ' + pyeongText(land));
@@ -2099,7 +2104,7 @@ function buildLedgerItem(r){
   return {
     id: id, date: date, seq: isFinite(tail) ? tail : 0,
     deal: deal, dealWord: dealWord, dong: dong, title: title, floor: floor,
-    priceRaw: rawPrice, price: priceShort,
+    priceRaw: rawPrice, price: priceCard, priceLine: priceLine,
     t2: keyTitleOf(title, dong, dealWord, floor, area),
     sub: sub,
     checks: checks.slice(0, 5),
@@ -2203,7 +2208,7 @@ function fillFromLedger(it){
   setVal('specL1', '사무실');     setVal('specV1', it.office > 0 ? pyeongText(it.office) : '없음');
   setVal('specL2', '층고');       setVal('specV2', it.height || '확인필요');
   setVal('specL3', '차량 진입');   setVal('specV3', clip(it.road || '확인필요', 24));
-  setVal('specL4', '거래 조건');   setVal('specV4', it.price || '-');
+  setVal('specL4', '거래 조건');   setVal('specV4', clip(it.priceLine || it.price || '-', 24));
   const cl = $('contactLine');
   if (cl) cl.value = String(cl.value || DEFAULTS.contactLine).replace(/032-\d{3}-\d{4}/, tpl.phone);
 
