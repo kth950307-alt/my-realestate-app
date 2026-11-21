@@ -137,6 +137,7 @@ h1,h2,h3{letter-spacing:-.02em}
 #courtLayer .wmark{font-size:5px;fill:#16244B;opacity:.032;text-anchor:middle;font-weight:900;letter-spacing:1.1px}
 
 #linesLayer line,#linesLayer path{pointer-events:none}
+#screenLayer line{pointer-events:none}
 #tempLayer line,#tempLayer path{pointer-events:none}
 #playersLayer .tok{cursor:grab;pointer-events:all}
 #playersLayer .tok.dragging{cursor:grabbing}
@@ -388,6 +389,7 @@ body.dragging #board{cursor:grabbing}
             <g id="courtLayer"></g>
             <g id="linesLayer"></g>
             <g id="playersLayer"></g>
+            <g id="screenLayer"></g>
             <g id="tempLayer"></g>
           </svg>
         </div>
@@ -795,7 +797,13 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
   }
 
   function renderLines() {
-    $('#linesLayer').innerHTML = state.lines.map(lineMarkup).join('');
+    const normal = [], screens = [];
+    state.lines.forEach(function (l) {
+      if (l.t === 'screen') screens.push(lineMarkup(l));
+      else normal.push(lineMarkup(l));
+    });
+    $('#linesLayer').innerHTML = normal.join('');
+    $('#screenLayer').innerHTML = screens.join('');
   }
 
   /* ──────────────────────────── 재생 / 프레임 ──────────────────────────── */
