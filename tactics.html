@@ -134,7 +134,7 @@ h1,h2,h3{letter-spacing:-.02em}
 #courtLayer .boardline{stroke:#16244B;stroke-width:.44;stroke-linecap:round}
 #courtLayer .hoop{fill:none;stroke:var(--orange);stroke-width:.28}
 #courtLayer .clabel{font-size:1.45px;fill:#AC8A5C;text-anchor:middle;font-weight:800;opacity:.72;letter-spacing:.02em}
-#courtLayer .wmark{font-size:6px;fill:#16244B;opacity:.055;text-anchor:middle;font-weight:900;letter-spacing:.9px}
+#courtLayer .wmark{font-size:5px;fill:#16244B;opacity:.032;text-anchor:middle;font-weight:900;letter-spacing:1.1px}
 
 #linesLayer line,#linesLayer path{pointer-events:none}
 #tempLayer line,#tempLayer path{pointer-events:none}
@@ -498,7 +498,7 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
   const STORE = 'doyak-tactics-v1';
 
   const BASE = {
-    G1: [16, 26], G2: [34, 26], F1: [8, 33], F2: [42, 33], C: [25, 39],
+    G1: [16, 26], G2: [34, 26], F1: [8, 33], F2: [42, 33], C: [26.5, 38.5],
     '1': [25, 16.5], '2': [41, 26], '3': [4.5, 44.4], '4': [9, 26], '5': [21, 41]
   };
   const BASE_BALL = [27.5, 15.3];
@@ -512,7 +512,7 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
       steps: [
         {
           t: '① 기본 대형', n: '앞선 가드 2명은 탑·엘보, 뒷선 3명은 코너·페인트를 나눠 맡는다.',
-          p: { G1: [16, 26], G2: [34, 26], F1: [8, 33], F2: [42, 33], C: [25, 39], '1': [25, 16.5], '2': [41, 26], '3': [4.5, 44.4], '4': [9, 26], '5': [21, 41] },
+          p: { G1: [16, 26], G2: [34, 26], F1: [8, 33], F2: [42, 33], C: [26.5, 38.5], '1': [25, 16.5], '2': [41, 26], '3': [4.5, 44.4], '4': [9, 26], '5': [21, 41] },
           b: [27.5, 15.3], l: []
         },
         {
@@ -690,7 +690,7 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
   function buildCourt() {
     const c = COURT[state.mode];
     const w = c.w, h = c.h;
-    board.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    board.setAttribute('viewBox', '-0.4 -0.4 ' + f2(w + 0.8) + ' ' + f2(h + 0.8));
     const parts = [];
     parts.push('<defs>'
       + '<pattern id="wood" width="' + w + '" height="4.6" patternUnits="userSpaceOnUse">'
