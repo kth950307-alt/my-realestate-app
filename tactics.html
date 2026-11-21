@@ -751,11 +751,20 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
     tokEls.ball = layer.querySelector('[data-id="ball"]');
   }
 
+  function tokScale() {
+    const c = COURT[state.mode];
+    const px = (board && board.getBoundingClientRect().width) || 600;
+    const pxPerFt = px / c.w;
+    const want = 22 / pxPerFt / 4.1;
+    return Math.max(1, Math.min(1.7, Math.round(want * 20) / 20));
+  }
+
   function place(id) {
     const el = tokEls[id];
     if (!el) return;
     const p = id === 'ball' ? state.ball : state.pos[id];
-    el.setAttribute('transform', 'translate(' + f2(p[0]) + ' ' + f2(p[1]) + ')');
+    const s = tokScale();
+    el.setAttribute('transform', 'translate(' + f2(p[0]) + ' ' + f2(p[1]) + ')' + (s !== 1 ? ' scale(' + s + ')' : ''));
   }
   function placeAll() {
     IDS.forEach(place);
@@ -1408,6 +1417,12 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
       if (e.key !== 'Enter' && e.key !== ' ') return;
       const chip = e.target.closest('[data-scene]');
       if (chip) { e.preventDefault(); pause(); state.track = 'custom'; applyFrame(+chip.dataset.scene, true); syncPresets(); syncScenes(); }
+    });
+
+    let rs = 0;
+    window.addEventListener('resize', function () {
+      clearTimeout(rs);
+      rs = setTimeout(function () { placeAll(); }, 180);
     });
 
     board.addEventListener('pointerdown', onDown);
