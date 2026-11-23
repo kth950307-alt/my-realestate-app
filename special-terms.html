@@ -441,7 +441,23 @@
         "갑구의 압류·가압류·경매개시결정 여부 확인 — 하나라도 있으면 계약 보류",
         "임대차는 확정일자·전입신고로 보증금 우선변제권 확보, 필요 시 임차권등기명령",
         "잔금일 말소 후 등기부등본을 다시 발급받아 직접 확인"
-      ]
+      ],
+      checksByDeal: {
+        lease: [
+          "등기부등본 을구의 채권최고액 합계와 시세 대비 비율 확인(70% 이상이면 주의)",
+          "근저당 말소·감액 시점(잔금일)과 비용 부담 주체를 계약서에 명시",
+          "갑구의 압류·가압류·경매개시결정 여부 확인 — 하나라도 있으면 계약 보류",
+          "임대차는 확정일자·전입신고로 보증금 우선변제권 확보, 필요 시 임차권등기명령",
+          "잔금일 말소 후 등기부등본을 다시 발급받아 직접 확인"
+        ],
+        sale: [
+          "등기부등본 을구의 채권최고액 합계와 시세 대비 비율 확인(70% 이상이면 주의)",
+          "근저당 말소·감액 시점(잔금일)과 비용 부담 주체를 계약서에 명시",
+          "갑구의 압류·가압류·경매개시결정 여부 확인 — 하나라도 있으면 계약 보류",
+          "국세·지방세 체납에 따른 압류·공매 진행 여부 확인",
+          "잔금 후 말소 등기 여부를 등기부등본으로 직접 확인"
+        ]
+      }
     },
     {
       id: "power",
@@ -643,7 +659,9 @@
 
     const condItems = [];
     CONDS.forEach((c) => {
-      if (state.conds.has(c.id)) c.checks.forEach((x) => condItems.push(x));
+      if (!state.conds.has(c.id)) return;
+      const items = (c.checksByDeal && c.checksByDeal[state.deal]) ? c.checksByDeal[state.deal] : c.checks;
+      items.forEach((x) => condItems.push(x));
     });
     if (condItems.length) groups.push({ label: "선택 조건 확인", items: condItems });
     return { groups: groups, deal: deal };
