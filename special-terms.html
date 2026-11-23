@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="공장·창고 임대차·매매 계약서에 바로 붙여넣는 맞춤 특약과 과태료·분쟁 방지 필수 확인사항을 업종·건물 조건 체크만으로 10초 만에 만들어 주는 우리부동산 실무 도구">
+<meta name="robots" content="noindex, nofollow">
+<title>우리부동산 계약 특약 10초 자동 생성기</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%93%9D%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --navy:#1e3a8a; --royal:#2563eb; --royal-dark:#1e40af;
+    --blue-soft:#eff6ff; --blue-line:#bfdbfe;
+    --gold:#f59e0b; --gold-soft:#fef3c7;
+    --ink:#1e293b; --ink2:#475569; --muted:#64748b;
+    --line:#e2e8f0; --bg:#faf8f5; --card:#ffffff;
+    --danger:#e11d48; --ok:#059669;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕","Noto Sans KR",system-ui,sans-serif;
+    font-size:16px; line-height:1.55; -webkit-text-size-adjust:100%;
+  }
+  a{color:inherit;}
+  .topbar{
+    position:sticky; top:0; z-index:30; display:flex; align-items:center; justify-content:space-between;
+    gap:10px; padding:10px 16px; background:#fff; border-bottom:1px solid var(--line);
+    box-shadow:0 2px 14px rgba(30,64,175,.05);
+  }
+  .brand{display:flex; align-items:center; gap:8px; font-weight:900; font-size:15px; letter-spacing:-.3px; color:var(--navy);}
+  .dot{width:9px; height:9px; border-radius:50%; background:var(--gold); box-shadow:0 0 0 3px rgba(245,158,11,.18);}
+  .brand small{font-weight:700; color:var(--muted); font-size:11.5px; letter-spacing:0;}
+  .toplink{
+    font-size:12.5px; font-weight:700; color:var(--ink2); text-decoration:none;
+    padding:7px 11px; border:1px solid var(--line); border-radius:9px; background:#fff; white-space:nowrap;
+  }
+  .toplink:active{background:#f1f5f9;}
+
+  .wrap{max-width:1240px; margin:0 auto; padding:18px 16px 40px;}
+  .hero{padding:4px 2px 14px;}
+  .hero .tag{
+    display:inline-block; background:#fff; border:1.5px solid var(--blue-line); color:var(--royal);
+    font-weight:900; font-size:12px; padding:4px 11px; border-radius:999px; margin-bottom:10px;
+    box-shadow:0 4px 12px rgba(37,99,235,.07);
+  }
+  .hero h1{font-size:23px; line-height:1.3; margin:0 0 8px; letter-spacing:-.6px; color:var(--navy);}
+  .hero p{margin:0; color:var(--ink2); font-size:14px; line-height:1.6; max-width:760px;}
+  .hero p b{color:var(--navy); font-weight:800;}
+
+  .layout{display:grid; grid-template-columns:minmax(0,1fr); gap:14px;}
+  .col{min-width:0; display:flex; flex-direction:column; gap:14px;}
+
+  .card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px;}
+  .card.pad0{padding:0; overflow:hidden;}
+  .sec-head{display:flex; align-items:center; gap:9px; margin:0 0 11px;}
+  .sec-head .n{
+    flex:0 0 23px; height:23px; border-radius:50%; background:var(--royal); color:#fff;
+    font-size:12.5px; font-weight:900; display:flex; align-items:center; justify-content:center;
+  }
+  .sec-head h2{font-size:15px; margin:0; letter-spacing:-.3px; font-weight:900; color:var(--navy);}
+  .sec-head .opt{margin-left:auto; font-size:11.5px; font-weight:700; color:var(--muted);}
+
+  .deals{display:grid; grid-template-columns:1fr 1fr; gap:9px;}
+  .deal{
+    background:#fff; border:2px solid var(--line); border-radius:14px; padding:12px 12px 11px;
+    text-align:left; font-family:inherit; color:var(--ink); cursor:pointer;
+    transition:border-color .12s, background .12s, box-shadow .12s;
+  }
+  .deal .t{display:flex; align-items:center; gap:6px; font-size:14.5px; font-weight:900; letter-spacing:-.3px; color:var(--navy);}
+  .deal small{display:block; margin-top:5px; font-size:12px; color:var(--muted); font-weight:600; line-height:1.4;}
+  .deal[aria-pressed="true"]{border-color:var(--royal); background:var(--blue-soft); box-shadow:0 0 0 3px rgba(37,99,235,.10);}
+  .deal[aria-pressed="true"] small{color:var(--ink2);}
+
+  .chips{display:flex; flex-wrap:wrap; gap:7px;}
+  .chip{
+    border:1.5px solid var(--line); background:#fff; color:var(--ink2); font-family:inherit;
+    font-size:13px; font-weight:800; letter-spacing:-.2px; padding:9px 12px; border-radius:11px; cursor:pointer;
+    transition:.12s; line-height:1.3;
+  }
+  .chip:active{transform:translateY(1px);}
+  .chip[aria-pressed="true"]{border-color:var(--royal); background:var(--royal); color:#fff; box-shadow:0 4px 12px rgba(37,99,235,.22);}
+
+  .cks{display:grid; grid-template-columns:1fr; gap:8px;}
+  .ck{
+    display:flex; gap:10px; align-items:flex-start; background:#fff; border:1.5px solid var(--line);
+    border-radius:13px; padding:11px 12px; cursor:pointer; transition:.12s;
+  }
+  .ck:active{background:#f8fafc;}
+  .ck input{
+    appearance:none; -webkit-appearance:none; flex:0 0 19px; width:19px; height:19px; margin:2px 0 0;
+    border:2px solid #cbd5e1; border-radius:5px; background:#fff; position:relative; cursor:pointer; transition:.12s;
+  }
+  .ck input:checked{background:var(--royal); border-color:var(--royal);}
+  .ck input:checked::after{
+    content:""; position:absolute; left:5px; top:1px; width:5px; height:10px;
+    border:solid #fff; border-width:0 2.4px 2.4px 0; transform:rotate(45deg);
+  }
+  .ck .txt{min-width:0;}
+  .ck .t{font-size:13.8px; font-weight:800; letter-spacing:-.25px; color:var(--ink); line-height:1.4;}
+  .ck .d{font-size:11.8px; color:var(--muted); font-weight:600; margin-top:2px; line-height:1.4;}
+  .ck:has(input:checked){border-color:var(--royal); background:var(--blue-soft); box-shadow:0 0 0 3px rgba(37,99,235,.07);}
+  .ck:has(input:checked) .d{color:var(--royal-dark);}
+
+  .memoWrap{margin-top:11px; padding-top:11px; border-top:1px dashed var(--line);}
+  .memoWrap label{display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:800; color:var(--ink2); margin-bottom:6px;}
+  .memoWrap label span{font-weight:600; color:var(--muted); font-size:11.5px;}
+  textarea.memo{
+    width:100%; min-height:74px; resize:vertical; border:1.5px solid var(--line); border-radius:11px;
+    padding:10px 12px; font-family:inherit; font-size:13.5px; line-height:1.6; color:var(--ink); background:#fff;
+  }
+  textarea.memo:focus{outline:2px solid var(--blue-line); border-color:var(--royal);}
+
+  .resultCol{min-width:0;}
+  .pane{background:var(--card); border:1px solid var(--line); border-radius:16px; overflow:hidden;}
+  .pane-head{
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    padding:11px 13px; border-bottom:1px solid var(--line); background:#fbfcfe;
+  }
+  .pane-head .label{font-size:13.5px; font-weight:900; letter-spacing:-.3px; color:var(--navy);}
+  .pane-head .meta{margin-left:auto; font-size:11.5px; font-weight:800; color:var(--muted); white-space:nowrap; background:#eef2f8; padding:3px 9px; border-radius:999px;}
+  textarea#clauses{
+    width:100%; min-height:300px; max-height:52vh; resize:vertical; border:0; outline:0;
+    padding:13px 14px; font-family:inherit; font-size:14.2px; line-height:1.8; color:var(--ink);
+    background:#fff; display:block;
+  }
+  .editHint{padding:8px 14px 11px; font-size:11.5px; color:var(--muted); background:#fbfcfe; border-top:1px dashed var(--line); line-height:1.5;}
+  .editHint b{color:var(--ink2);}
+
+  .checks{padding:12px 13px 13px; max-height:44vh; overflow:auto; -webkit-overflow-scrolling:touch;}
+  .cgroup + .cgroup{margin-top:12px; padding-top:11px; border-top:1px dashed var(--line);}
+  .cgroup h3{font-size:11.5px; font-weight:900; color:var(--royal); margin:0 0 7px; letter-spacing:-.1px; display:flex; align-items:center; gap:6px;}
+  .cgroup h3::before{content:""; width:3px; height:11px; border-radius:2px; background:var(--royal); display:inline-block;}
+  .ci{display:flex; gap:8px; align-items:flex-start; padding:5px 0; cursor:pointer; font-size:12.8px; line-height:1.55; color:var(--ink2); font-weight:600;}
+  .ci input{
+    appearance:none; -webkit-appearance:none; flex:0 0 16px; width:16px; height:16px; margin:2.5px 0 0;
+    border:1.7px solid #cbd5e1; border-radius:4px; background:#fff; position:relative; cursor:pointer;
+  }
+  .ci input:checked{background:var(--ok); border-color:var(--ok);}
+  .ci input:checked::after{
+    content:""; position:absolute; left:4px; top:0.5px; width:4px; height:8px;
+    border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg);
+  }
+  .ci:has(input:checked){color:#94a3b8; text-decoration:line-through; text-decoration-color:#cbd5e1;}
+  .emptyChecks{padding:16px; text-align:center; font-size:12.5px; color:var(--muted); font-weight:600;}
+
+  .actions{display:flex; gap:9px; flex-wrap:wrap;}
+  .btn{
+    font-family:inherit; cursor:pointer; border:0; border-radius:13px; font-weight:800; letter-spacing:-.3px;
+    padding:13px 14px; font-size:14px; transition:.12s; white-space:nowrap;
+  }
+  .btn:active{transform:scale(.99);}
+  .btn-main{background:var(--royal); color:#fff; box-shadow:0 6px 16px rgba(37,99,235,.24); flex:1 1 200px;}
+  .btn-main:active{background:var(--royal-dark);}
+  .btn-sub{background:#fff; border:1.5px solid var(--blue-line); color:var(--royal-dark); flex:1 1 200px;}
+  .btn-sub:active{background:var(--blue-soft);}
+  .btn-reset{background:#fff; border:1.5px solid #fecdd3; color:var(--danger); flex:0 1 auto;}
+
+  .hint{font-size:12.2px; color:var(--muted); margin:10px 2px 0; line-height:1.65;}
+  .hint b{color:var(--ink2); font-weight:800;}
+  .note{
+    background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:10px 12px;
+    font-size:12.2px; color:#92400e; font-weight:600; line-height:1.6; margin-top:12px;
+  }
+
+  .toast{
+    position:fixed; left:50%; bottom:104px; transform:translate(-50%,14px); opacity:0; pointer-events:none;
+    transition:opacity .18s, transform .18s; z-index:60; background:#0f172a; color:#fff;
+    font-size:13.5px; font-weight:800; line-height:1.5; padding:13px 17px; border-radius:13px;
+    max-width:min(92vw,460px); text-align:center; box-shadow:0 10px 26px rgba(0,0,0,.22);
+  }
+  .toast.show{opacity:1; transform:translate(-50%,0);}
+  .toast.warn{background:#9f1239;}
+  .toast small{display:block; font-weight:600; font-size:12px; color:#cbd5e1; margin-top:4px;}
+
+  footer{
+    margin-top:22px; padding-top:14px; border-top:1px solid var(--line);
+    font-size:12px; color:var(--muted); display:flex; gap:10px 14px; flex-wrap:wrap; justify-content:space-between; line-height:1.7;
+  }
+  footer .links{display:flex; gap:12px; flex-wrap:wrap;}
+  footer a{text-decoration:none; border-bottom:1px dotted #cbd5e1;}
+
+  @media (min-width:760px){
+    .cks{grid-template-columns:1fr 1fr;}
+    .hero h1{font-size:28px;}
+    .hero p{font-size:14.8px;}
+  }
+  @media (min-width:1040px){
+    .wrap{padding:26px 22px 60px;}
+    .layout{grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr); gap:18px; align-items:start;}
+    .resultCol{
+      position:sticky; top:66px; max-height:calc(100vh - 80px); overflow-y:auto;
+      overscroll-behavior:contain; padding-right:3px;
+    }
+    .checks{max-height:none;}
+    .actions{margin-top:14px;}
+    textarea#clauses{min-height:300px;}
+  }
+  @media (max-width:1039px){
+    .actions{
+      position:fixed; left:0; right:0; bottom:0; margin:0; gap:7px;
+      padding:9px 12px calc(10px + env(safe-area-inset-bottom));
+      background:rgba(255,255,255,.97); border-top:1px solid var(--line);
+      box-shadow:0 -6px 18px rgba(15,23,42,.07); z-index:50;
+    }
+    .btn{padding:12px 8px; font-size:13px; border-radius:11px;}
+    .btn-main{flex:1 1 100%; font-size:14.5px;}
+    .btn-sub{flex:1 1 0; min-width:0;}
+    .btn-reset{flex:0 0 auto; padding:12px 11px;}
+    body{padding-bottom:150px;}
+    .toast{bottom:146px;}
+    .checks{max-height:none;}
+    textarea#clauses{max-height:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="dot"></span> 우리부동산 <small>계약 특약 생성기</small></div>
+  <a class="toplink" href="index.html">홈페이지</a>
+</div>
+
+<div class="wrap">
+  <header class="hero">
+    <span class="tag">공장·창고 계약 실무</span>
+    <h1>우리부동산 계약 특약 10초 자동 생성기</h1>
+    <p>업종과 건물 조건만 체크하면 <b>계약서 복붙용 맞춤 특약</b>과 <b>필수 확인사항</b>이 바로 완성됩니다.</p>
+  </header>
+
+  <div class="layout">
+    <!-- ── 입력 ───────────────────────────────────────── -->
+    <div class="col">
+      <section class="card">
+        <div class="sec-head"><span class="n">1</span><h2>거래 유형</h2></div>
+        <div class="deals" role="group" aria-label="거래 유형">
+          <button type="button" class="deal" id="dealLease" data-deal="lease" aria-pressed="true">
+            <span class="t">공장·창고 임대차</span>
+            <small>보증금·월세, 원상복구, 시설 인수</small>
+          </button>
+          <button type="button" class="deal" id="dealSale" data-deal="sale" aria-pressed="false">
+            <span class="t">공장·창고 매매</span>
+            <small>잔금·소유권 이전, 하자·권리관계</small>
+          </button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="sec-head"><span class="n">2</span><h2>업종</h2><span class="opt">하나 선택</span></div>
+        <div class="chips" id="industryChips" role="group" aria-label="업종"></div>
+      </section>
+
+      <section class="card">
+        <div class="sec-head"><span class="n">3</span><h2>건물·계약 조건</h2><span class="opt">여러 개 선택</span></div>
+        <div class="cks" id="condList"></div>
+
+        <div class="memoWrap">
+          <label for="memo">추가 메모 <span>건물주·임차인 요청사항 (특약 맨 뒤에 붙습니다)</span></label>
+          <textarea id="memo" class="memo" placeholder="예) 옥상 통신 안테나는 잔금 전 임대인이 철거 / 3년차부터 월 차임 5% 인상 / 주차장 2면 지정"></textarea>
+        </div>
+      </section>
+    </div>
+
+    <!-- ── 결과 ───────────────────────────────────────── -->
+    <div class="col resultCol">
+      <section class="pane">
+        <div class="pane-head">
+          <span class="label">📝 계약서 복붙용 맞춤 특약</span>
+          <span class="meta" id="clauseMeta">기본 특약</span>
+        </div>
+        <textarea id="clauses" spellcheck="false" aria-label="생성된 특약 문구"></textarea>
+        <div class="editHint">✏️ 여기서 <b>직접 고쳐도 됩니다.</b> 조건을 바꾸면 새로 만들어지니 마지막에 손보세요.</div>
+      </section>
+
+      <section class="pane">
+        <div class="pane-head">
+          <span class="label">✅ 과태료·분쟁 방지 필수 확인사항</span>
+          <span class="meta" id="checkMeta">0개</span>
+        </div>
+        <div class="checks" id="checkList"></div>
+      </section>
+
+      <div class="actions">
+        <button type="button" class="btn btn-main" id="btnCopyClauses">📋 특약 문구 복사</button>
+        <button type="button" class="btn btn-sub" id="btnCopyAll">📄 확인사항까지 전체 복사</button>
+        <button type="button" class="btn btn-reset" id="btnReset">🗑️ 선택 초기화</button>
+      </div>
+
+      <p class="hint"><b>○ 표시</b>는 실제 금액·날짜·용량으로 바꿔 넣으세요. 확인사항은 하나씩 눌러 체크할 수 있습니다.</p>
+      <div class="note">이 도구는 중개 실무 보조용입니다. 최종 계약서 문구는 거래 당사자 합의와 법무사·변호사 검토를 거쳐 확정하세요.</div>
+    </div>
+  </div>
+
+  <footer>
+    <span>우리부동산 공인중개사사무소 · 매매상담 032-582-6200 · 임대상담 032-576-2600</span>
+    <span class="links">
+      <a href="index.html">매물 홈페이지</a>
+      <a href="blog-clean.html">블로그 정리기</a>
+      <a href="thumbnail.html">썸네일 생성기</a>
+    </span>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ───────────── 데이터: 거래 유형별 기본 특약 ───────────── */
+  const DEALS = {
+    lease: {
+      label: "공장·창고 임대차",
+      a: "임대인", b: "임차인",
+      base: [
+        "임차인은 목적물을 공장·창고용으로만 사용하며, 임대인의 사전 서면 동의 없이 용도를 변경하거나 제3자에게 전대·임대할 수 없다.",
+        "임차인은 목적물의 구조·설비를 변경하거나 증설할 경우 사전에 임대인의 서면 동의를 받아야 하며, 무단 변경 시 임대인은 원상복구를 요구할 수 있다.",
+        "목적물의 주요 구조부(지붕·외벽·기둥) 및 기본 설비(주요 배관·수전설비 등)의 대수선은 임대인이, 임차인의 사용으로 발생하는 소규모 수선·소모품 교체는 임차인이 부담한다.",
+        "월 차임은 매월 ○일까지 임대인이 지정한 계좌에 입금하며, 임차인이 2기 이상의 차임을 연체한 경우 임대인은 계약을 해지할 수 있다.",
+        "임대차 기간 만료 또는 해지 시 임차인은 목적물을 원상복구하여 명도하고, 임대인은 보증금을 반환한다. 원상복구 범위와 보증금 반환 시점(명도 확인 후 ○일 이내)은 상호 협의하여 정한다."
+      ]
+    },
+    sale: {
+      label: "공장·창고 매매",
+      a: "매도인", b: "매수인",
+      base: [
+        "매수인은 목적물을 현황대로 인수하며, 매도인은 계약 체결 시 목적물의 하자·권리관계·행정처분 이력을 성실히 고지한다. 매도인이 고지하지 않은 중대한 하자(누수·구조 결함·토양오염 등)에 대해서는 매도인이 책임을 진다.",
+        "매도인은 잔금일에 소유권이전등기에 필요한 서류 일체(등기필증·인감증명서·매도용 인감계·신분증 사본 등)를 교부하고 소유권이전등기 절차에 협조한다.",
+        "잔금일 이전에 발생한 재산세·공과금·관리비는 매도인이, 잔금일 이후에 발생한 것은 매수인이 부담하며, 잔금일 기준으로 일할 계산하여 정산한다.",
+        "매도인은 잔금일까지 목적물을 명도하고 열쇠·시설물 목록을 인도하며, 잔금일 현재 매수인 이외의 점유자·임차인이 있을 경우 매도인이 명도 책임을 진다.",
+        "계약금은 매매대금의 10%로 하며, 매수인의 귀책으로 계약이 해제된 경우 계약금은 매도인에게 귀속되고, 매도인의 귀책으로 해제된 경우 매도인은 계약금의 배액을 배상한다."
+      ]
+    }
+  };
+
+  /* ───────────── 데이터: 업종별 특약·확인사항 ───────────── */
+  const INDUSTRIES = [
+    {
+      id: "mfg", label: "일반 제조·조립",
+      lease: "임차인은 제조·조립 공정에서 발생하는 소음·진동·분진이 관련 법령의 배출·소음 기준 이내가 되도록 방음·집진 시설을 갖추고, 대기·수질 배출시설 설치 신고 등 인허가를 임차인 명의로 이행한다. 인허가 미비로 인한 행정처분·과태료는 임차인이 부담한다.",
+      sale: "매수인은 목적물을 제조·조립 용도로 사용할 예정이며, 매도인은 기존 배출시설 신고 내역, 소방시설·전기 용량 현황과 인허가 이력을 잔금일까지 제공한다.",
+      checks: [
+        "건축물대장 용도가 공장(또는 제조업소)이고 용도지역상 해당 제조업종이 허용되는지 확인",
+        "계약전력(kW)·수전설비 용량과 한전 승압 가능 여부 확인",
+        "대기·수질 배출시설 설치 신고 대상 여부(지자체 환경과) 확인",
+        "소방시설(스프링클러·소화기)과 피난 통로, 방화구획 유지 상태",
+        "바닥 허용 적재하중(kg/㎡)과 설치 장비 중량·진동 대비 확인",
+        "폐수·폐기물 배출 신고 및 처리 업체 계약 여부"
+      ]
+    },
+    {
+      id: "food", label: "식품공장 (HACCP·위생)",
+      lease: "임차인은 식품제조가공업 영업허가를 임차인 명의로 취득한 후 가동하며, 식품위생법 및 HACCP 기준에 따른 시설(구획 분리·방충방서·손씻기·바닥 배수)을 임차인 비용으로 갖춘다. 오폐수는 하수처리구역 여부에 맞게 적법하게 처리하고 그리스트랩·유수분리기의 설치·청소는 임차인이 부담한다. 임대차 종료 시 식품설비는 임차인이 철거·원상복구한다.",
+      sale: "매수인은 식품제조가공업 용도로 사용할 예정이며, 매도인은 건축물대장 용도, 정화조·배수관 용량, 기존 배출시설 신고 내역을 잔금일까지 제공한다. 영업허가 및 HACCP 시설 공사는 매수인 부담으로 한다.",
+      checks: [
+        "건축물대장 용도 '공장' 및 식품제조가공업 영업허가 가능 여부(지자체 위생과 사전 확인)",
+        "하수처리구역 여부·오폐수 배출시설 신고·방류 기준 확인",
+        "그리스트랩·유수분리기 용량과 배관 구경, 청소 접근 가능 여부",
+        "HACCP 의무 적용 대상 여부와 시설 기준(구획·배수 경사·방충방서)",
+        "화장실·탈의실·손씻기 시설 위치, 방충망·에어커튼 설치 상태",
+        "냉장·냉동 온도 관리 설비, 폐기물 보관장·악취·해충 민원 이력",
+        "식품위생법상 영업허가·신고는 반드시 임차인 명의로 이행"
+      ]
+    },
+    {
+      id: "logi", label: "물류·창고",
+      lease: "임차인은 창고·물류 용도로 사용하며, 적재 하중과 랙 설치 높이가 건물 구조상 허용 범위를 넘지 않도록 한다. 소방법상 창고 용도에 맞는 방화구획·소방시설을 유지하고, 적재물 화재에 대비한 보험은 임차인이 가입한다. 물류창고업 등록이 필요한 경우 임차인이 이행한다.",
+      sale: "매수인은 창고·물류 용도로 사용할 예정이며, 매도인은 바닥 적재하중·층고·도크(하역장) 수·소방시설 현황과 관련 도면을 잔금일까지 제공한다.",
+      checks: [
+        "바닥 허용 적재하중(kg/㎡)·층고와 랙 상부 적재 안전 확인",
+        "소방법상 창고 용도 분류·스프링클러·방화구획 설치 상태",
+        "5톤 이상 차량 진입로 폭·회전반경·도크 수·야적 공간 실측",
+        "물류창고업 등록 대상 여부(물류정책기본법)와 시설 기준",
+        "냉장·냉동 창고 여부와 냉동설비 전력·건축물 용도 확인",
+        "화재보험·적재물 보험 가입 조건(임대인 요구 여부) 확인"
+      ]
+    },
+    {
+      id: "foodcourt", label: "음식점·구내식당",
+      lease: "임차인은 구내식당(휴게음식점·일반음식점) 영업에 필요한 건축물 용도 적합 여부를 확인하고, 위생·소방 기준에 따른 주방 배기·급배수·주방 자동소화장치를 임차인 비용으로 설치한다. 조리 폐수·폐식용유 처리는 임차인이 책임지며, 임대차 종료 시 주방 설비를 원상복구한다.",
+      sale: "매수인은 음식점·구내식당 용도로 사용할 예정이며, 매도인은 건축물대장 용도(근린생활시설 등)와 정화조·급배수·가스 인입 현황을 고지한다.",
+      checks: [
+        "건축물대장 용도가 '제2종 근린생활시설(휴게·일반음식점)' 등 영업 가능 용도인지 확인",
+        "정화조 용량·그리스트랩·배수관 구경, 유지(기름) 분리 처리",
+        "도시가스·LPG 인입 용량과 주방 환기(후드·덕트) 설비 상태",
+        "주방 자동소화장치·배기덕트 청소 이력, 소방 완비 여부",
+        "위생교육·영업신고(임차인 명의) 및 급식 인원 대비 좌석·설비",
+        "공장 내 구내식당은 용도 변경·증축 위반 여부 반드시 확인"
+      ]
+    },
+    {
+      id: "auto", label: "자동차 정비·수리",
+      lease: "임차인은 자동차정비업 등록에 필요한 시설·설비 기준을 갖추고 등록을 임차인 명의로 이행하며, 폐유·폐배터리·세차 폐수는 관련 법령에 따라 적법하게 처리한다. 정비 작업 중 발생한 오염·화재는 임차인이 책임지고, 임대차 종료 시 유수분리기·폐유 보관시설을 포함하여 원상복구한다.",
+      sale: "매수인은 자동차정비업 용도로 사용할 예정이며, 매도인은 정비업 등록 이력, 지하 유류탱크 유무, 토양오염 검사 결과(있는 경우)를 잔금일까지 제공한다.",
+      checks: [
+        "건축물대장 용도·용도지역이 자동차정비업 시설 기준에 맞는지 확인",
+        "자동차관리법상 정비업 등록 요건(작업장 면적·설비·기술인력) 사전 확인",
+        "폐유·폐배터리 보관시설과 폐기물 배출자 신고 여부",
+        "유수분리기·오수처리시설, 세차 폐수 처리 방법",
+        "지하 유류저장탱크 유무와 누유 검사 결과(토양오염 이력)",
+        "도장·용접 작업 환기·소방, 스프레이부스 설치 가능 여부",
+        "대기 차량 공간과 인근 주민 소음·진동 민원 이력"
+      ]
+    },
+    {
+      id: "recycle", label: "재활용·자원순환",
+      lease: "임차인은 폐기물 처리·재활용 관련 허가·신고를 임차인 명의로 이행한 후 가동하며, 폐기물 보관시설(바닥·지붕·침출수 방지)을 법령 기준에 맞게 설치한다. 야적·반입 과정의 악취·분진·소음과 화재 예방은 임차인이 책임지고, 임대차 종료 시 폐기물을 전량 반출·처리한 후 원상복구한다.",
+      sale: "매수인은 재활용·자원순환 용도로 사용할 예정이며, 매도인은 폐기물 보관·야적 이력과 토양오염 검사 결과(있는 경우)를 고지한다. 매매 후 인허가 취득 및 오염 정화 책임은 매수인이 부담한다.",
+      checks: [
+        "폐기물처리업(수집·운반·재활용) 허가·신고 가능 여부와 용도지역 확인",
+        "폐기물 보관시설 기준(바닥·지붕·침출수 방지)과 야적장 면적",
+        "토양오염 이력·검사 결과(특정토양오염유발시설 해당 여부)",
+        "폐지·플라스틱류 화재 위험 대비 소방시설·방화구획",
+        "악취·분진·소음 민원 이력과 인근 주거지 거리",
+        "폐기물 반입·반출 차량 통행 시간·도로 조건"
+      ]
+    },
+    {
+      id: "etc", label: "기타",
+      lease: "", sale: "",
+      checks: [
+        "건축물대장 용도와 실제 사용 용도가 일치하는지, 사업자등록 가능 업종인지 확인",
+        "용도지역·행위제한으로 해당 업종이 허용되는지 토지이음에서 확인",
+        "계약전력·수도·가스 용량과 증설 가능 여부",
+        "소방시설·피난 통로·방화구획 상태",
+        "인근 주민·다른 임차인과의 소음·악취·민원 이력"
+      ]
+    }
+  ];
+
+  /* ───────────── 데이터: 조건별 특약·확인사항 ───────────── */
+  const CONDS = [
+    {
+      id: "mortgage",
+      title: "근저당·선순위 채권 있음",
+      desc: "잔금일 말소·감액 또는 보증금 보호 문구",
+      lease: "목적물에 설정된 근저당권 등 선순위 채권(채권최고액 합계 금 ○○원)이 있음을 임차인이 인지하며, 임대인은 잔금일(보증금 지급일)까지 등기부등본상 채권최고액을 금 ○○원 이하로 감액하거나 전액 말소한다. 임대인이 이를 이행하지 못할 경우 임차인은 계약을 해제할 수 있고 임대인은 보증금 전액을 즉시 반환한다. 또한 임대인의 채무불이행으로 목적물에 경매가 개시될 경우 임대인은 임차인의 보증금 반환채권 보호(확정일자·배당요구·임차권등기명령 등)에 필요한 절차에 협조한다.",
+      sale: "목적물에 설정된 근저당권·선순위 채권(채권최고액 합계 금 ○○원)은 매도인이 잔금일까지 전액 말소(또는 금 ○○원으로 감액)하며, 말소에 필요한 비용은 매도인이 부담한다. 잔금일 현재 등기부등본상 말소되지 않은 압류·가압류·경매개시결정 등이 있을 경우 매수인은 계약을 해제할 수 있고, 매도인은 매매대금의 10%를 위약금으로 배상한다.",
+      checks: [
+        "등기부등본 을구의 채권최고액 합계와 시세 대비 비율 확인(70% 이상이면 주의)",
+        "근저당 말소·감액 시점(잔금일)과 비용 부담 주체를 계약서에 명시",
+        "갑구의 압류·가압류·경매개시결정 여부 확인 — 하나라도 있으면 계약 보류",
+        "임대차는 확정일자·전입신고로 보증금 우선변제권 확보, 필요 시 임차권등기명령",
+        "잔금일 말소 후 등기부등본을 다시 발급받아 직접 확인"
+      ]
+    },
+    {
+      id: "power",
+      title: "계약전력 부족·승압(증설) 필요",
+      desc: "공사비·한전 불입금 부담, 원상복구 예외",
+      lease: "목적물의 현재 계약전력은 ○kW이며, 임차인의 생산설비 가동에 부족할 경우 임차인은 한국전력공사에 승압(증설)을 신청할 수 있고 임대인은 이에 필요한 동의·서류 제공 등에 협조한다. 승압 공사비와 한전 불입금은 임차인이 부담하되, 임대인의 귀책 사유(수전설비 노후·용량 부족 등)로 발생한 추가 비용은 임대인이 부담한다. 임대차 종료 시 승압 설비의 원상복구 여부는 협의하여 정하고, 임대인이 이를 인수할 경우 임차인은 공사비 일부를 청구할 수 있다.",
+      sale: "목적물의 현재 계약전력은 ○kW이며, 매수인이 승압(증설)을 추진할 경우 매도인은 관련 서류와 한전 협의 이력을 제공하고 협조한다. 승압 공사비·한전 불입금은 매수인 부담으로 하며, 매도인은 잔금일까지 전기·수도·가스 사용량을 정산한다.",
+      checks: [
+        "한전 계약전력(kW)과 수전설비 용량 확인, 승압 가능 여부를 한전(123)에 사전 문의",
+        "증설 공사비·한전 불입금 견적 확인 — 수천만 원대일 수 있어 계약 전 필수",
+        "변압기·배전반의 소유·위치와 증설 후 원상복구 범위 합의",
+        "공장 증설 시 건축물대장·전기설비 검사(사용전 검사) 대상 여부"
+      ]
+    },
+    {
+      id: "hoist",
+      title: "호이스트·크레인 설치 또는 인수",
+      desc: "현황 인수·안전검사·유지보수·원상복구 기준",
+      lease: "목적물에 설치된 호이스트·크레인(정격하중 ○t)을 임차인이 현황대로 인수한다. 임대인은 계약 시 안전검사증 사본과 최근 유지보수 이력을 교부하며, 임차 기간 중 정기 안전검사·일상 보수 비용은 임차인이, 주행빔·기둥 등 고정 구조물의 중대한 보수는 임대인이 부담한다. 임차인이 추가로 설치한 호이스트·크레인은 임대차 종료 시 임차인이 철거·원상복구하며, 임대인이 인수를 원할 경우 인수 금액을 별도 협의한다.",
+      sale: "목적물에 설치된 호이스트·크레인(정격하중 ○t)은 매수인이 현황대로 인수하며, 매도인은 잔금일까지 유효한 안전검사증과 최근 3년 유지보수 이력을 교부한다. 안전검사 미필·불합격으로 인한 사용중지·보완 비용은 매도인이 부담하고, 잔금일 이후 발생한 검사·보수 비용은 매수인이 부담한다.",
+      checks: [
+        "호이스트·크레인 정격하중과 안전검사증 유효기간 확인(산업안전보건법 정기검사)",
+        "설치 신고·유지보수 이력, 와이어·후크 등 주요 부품 교체 시기",
+        "철거·이전 비용 견적과 원상복구 범위를 사진으로 남기기",
+        "호이스트 하중을 받는 기둥·보 구조 안전 확인(구조검토 여부)"
+      ]
+    },
+    {
+      id: "illegal",
+      title: "가설건축물·위반건축물 포함",
+      desc: "현황 인지·이행강제금·철거 책임 귀속",
+      lease: "목적물 중 가설건축물(축조신고 여부: ○) 및 건축물대장상 위반건축물 표기 부분이 포함되어 있음을 임차인이 인지하고 인수한다. 위반건축물에 대한 이행강제금·철거·시정명령 등 행정처분은 임대인이 부담하며, 임차인의 무단 증축·용도변경으로 새로 발생한 위반은 임차인이 부담한다. 시정·철거로 목적물의 사용이 사실상 불가능해진 경우 임차인은 계약을 해지할 수 있고 임대인은 보증금을 반환한다.",
+      sale: "목적물 중 가설건축물·위반건축물(건축물대장 표기)이 포함되어 있음을 매수인이 인지하고 인수하며, 매도인은 계약 시 이행강제금 부과·납부 이력과 시정명령 상태를 고지한다. 매매대금 지급 전 발생한 이행강제금·철거 비용은 매도인이 부담하고, 매매 후 매수인의 무단 증축 등으로 발생한 위반은 매수인이 정리한다.",
+      checks: [
+        "건축물대장 위반건축물 표기, 이행강제금 부과·미납 이력 확인",
+        "가설건축물 축조신고증과 존치기간(사용 기간) 확인",
+        "시정·철거 명령 진행 상태 확인 — 명령 이행 중이면 계약 보류",
+        "위반 부분의 소방·전기 안전 점검 및 보험 가입 가능 여부"
+      ]
+    },
+    {
+      id: "equip",
+      title: "냉장·냉동·배수·집진기 등 특수 설비",
+      desc: "설치·철거·보강 비용 범위와 원상복구",
+      lease: "임차인은 목적물에 냉장·냉동설비, 오폐수 배관, 집진기, 유수분리기 등 특수 설비를 설치할 수 있되, 설치 전 임대인의 서면 동의를 받고 구조 변경을 수반하는 경우 관련 법령에 따른 허가·신고를 이행한다. 설치·유지 비용은 임차인이 부담하며, 임대차 종료 시 임차인이 철거·원상복구한다. 다만 임대인이 인수를 원하는 설비는 인수 조건을 별도 협의하고, 설비로 인한 누수·침하·오염 방지를 위한 보강 비용은 임차인이 부담한다.",
+      sale: "매수인이 매매 후 냉장·냉동·배수·집진기 등 특수 설비를 설치할 계획임을 매도인이 인지하며, 매도인은 기존 설비의 용량·배관 경로·전기 용량 등 현황 자료를 잔금일까지 제공한다. 기존 설비의 철거가 필요한 경우 그 비용과 범위는 잔금 전 협의하여 정산한다.",
+      checks: [
+        "설치 예정 설비의 전기·배관 용량과 건물 구조 허용 범위 확인",
+        "폐수·냉매·집진 관련 인허가(배출시설 신고·냉매 관리) 확인",
+        "원상복구 범위를 사진·견적으로 계약 전 합의",
+        "바닥 방수·배수 경사와 누수 시 하층 피해 대비"
+      ]
+    },
+    {
+      id: "preoccupy",
+      title: "잔금 전 선입주 / 사전 설비·인테리어 공사",
+      desc: "선입주 기간·공과금·사고 책임",
+      lease: "임차인은 잔금일 이전 ○일(○○년 ○월 ○일)부터 목적물에 선입주하여 시설·인테리어 공사를 진행할 수 있으며 임대인은 이에 협조한다. 선입주 기간의 전기·수도·가스 등 공과금은 임차인이 부담하고, 공사 중 발생한 사고·화재·훼손은 임차인이 책임진다. 선입주 기간에 대한 차임은 금 ○○원으로 정산하며, 계약이 해제될 경우 임차인은 공사 부분을 원상복구하고 퇴거한다.",
+      sale: "매수인은 잔금일 이전 ○일(○○년 ○월 ○일)부터 목적물에서 설비·인테리어 공사를 진행할 수 있으며, 매도인은 현장 출입과 전기·수도 사용에 협조한다. 공사 중 발생한 사고·화재·훼손은 매수인이 책임지고, 계약이 해제될 경우 매수인은 원상복구 후 퇴거한다. 공사로 목적물의 가액이 감소한 경우 매도인은 잔금에서 이를 정산할 수 있다.",
+      checks: [
+        "선입주 기간·공사 범위·원상복구 기준을 서면 특약으로 명시",
+        "공사 중 화재·사고 대비 보험과 책임 범위 확인",
+        "전기·수도 계량기 검침일과 기준 수치를 사진으로 기록",
+        "공사 업체 출입·자재 반입 시간을 건물주와 합의"
+      ]
+    },
+    {
+      id: "precompletion",
+      title: "준공·사용승인 전 계약",
+      desc: "지연 시 해제·위약금 기준",
+      lease: "목적물은 준공(사용승인) 전으로 ○○년 ○월 ○일 준공 예정이며, 임대인은 준공·사용승인을 책임지고 완료한다. 준공이 예정일로부터 30일을 초과하여 지연될 경우 임차인은 계약을 해제할 수 있고 임대인은 보증금 전액을 반환한다. 준공 전 현장 확인·설비 공정 협의를 위한 출입은 상호 협의하여 진행하며, 준공 전 발생한 안전사고는 임대인이 책임진다.",
+      sale: "목적물은 준공 전으로 ○○년 ○월 ○일 사용승인 예정이며, 매도인은 사용승인을 완료한 후 소유권이전등기에 필요한 서류를 교부한다. 사용승인이 예정일로부터 30일을 초과하여 지연될 경우 매수인은 계약을 해제할 수 있고, 매도인은 매매대금 전액과 위약금(매매대금의 10%)을 지급한다. 준공 지연에 따른 과태료·이행강제금은 매도인이 부담한다.",
+      checks: [
+        "건축허가·착공신고 내용과 현재 공정률 확인",
+        "준공 예정일과 사용승인 조건(도로·상하수도·소방 완비) 확인",
+        "지연 시 해제·위약금 기준 명시(30일 기준 권장)",
+        "공사 대금 지급 조건과 시공사 이행보증(보증보험) 확인",
+        "준공 전 계약금은 가급적 소액으로, 잔금은 사용승인 후 지급"
+      ]
+    },
+    {
+      id: "vehicle",
+      title: "대형차량(5톤↑) 진입·야적·주차",
+      desc: "사용 범위·시간·보수 책임",
+      lease: "임차인의 5톤 이상 대형 화물차량은 목적물 전면 마당 및 ○○구역에서 진입·회전·야적·주차할 수 있으며, 진입 가능 시간은 ○시부터 ○시까지로 한다. 임차인은 진입 경로와 시간을 준수하고, 대형차량 진입으로 인한 포장 균열·도로 훼손 및 인근 민원은 임차인이 보수·해결한다. 다만 공용 진입로의 주요 보수는 임대인과 협의하여 부담한다.",
+      sale: "매수인이 5톤 이상 대형 화물차량의 진입·야적·주차를 목적으로 목적물을 인수함을 매도인이 인지하며, 매도인은 진입로 폭·회전반경·지반(포장 두께) 현황을 고지한다. 잔금일 이후 진입로 보수·확장과 관련 인허가(도로점용 등)는 매수인이 부담한다.",
+      checks: [
+        "진입로 폭·회전반경·지반(포장 두께)을 5톤 차량 기준으로 실측",
+        "진입 시간·소음·야적 관련 인근 민원 이력 확인",
+        "공용도로 점용·야적 허가 필요 여부(지자체 도로과) 확인",
+        "상하차 도크 높이·경사로와 차량 높이 제한(지붕·차단기) 확인"
+      ]
+    },
+    {
+      id: "vat",
+      title: "부가세 별도·관리비·공과금 정산",
+      desc: "과세 구분·포함 항목·일할 정산",
+      lease: "월 차임은 금 ○○원(부가가치세 별도)으로 하며 임차인은 부가가치세를 별도 부담한다. 관리비는 월 금 ○○원으로 하되 포함 항목(경비·청소·공용 전기 등)을 별도 합의하고, 전기·수도·가스 등 공과금은 계량기 기준으로 임차인이 부담한다. 임대차 종료 시 마지막 달의 차임·관리비·공과금은 일할 계산하여 정산한다.",
+      sale: "매매대금은 금 ○○원으로 하며, 건물분 부가가치세의 과세·면세 구분과 부담 주체를 명시한다. 잔금일 기준 재산세·공과금·관리비는 일할 계산하여 정산하고, 취득세·등록면허세 등 매수인 부담 세금은 매수인이, 양도소득세는 매도인이 부담한다.",
+      checks: [
+        "건물·토지의 부가세 과세 구분과 취득세 부담 주체 확인",
+        "상가건물임대차보호법 적용 시 차임 증액 5% 상한 등 법령 확인",
+        "관리비 포함 항목과 계량기 위치·검침 방식 확인",
+        "마지막 달 일할 정산 기준(잔금일·명도일) 명시",
+        "임대료 원천징수·세금계산서 발행 주기 확인"
+      ]
+    }
+  ];
+
+  /* ───────────── 데이터: 기본 확인사항 ───────────── */
+  const BASE_CHECKS = {
+    lease: [
+      "등기부등본(갑구·을구)으로 소유자·근저당·압류 확인 — 계약 당일 발급본으로",
+      "건축물대장 용도·면적·위반 표기와 토지이용계획확인원(용도지역·행위제한) 확인",
+      "현장 사진(외관·내부·설비·계량기) 촬영 후 계약서에 첨부 — 원상복구 분쟁 예방",
+      "임차인 사업자등록 가능 여부(용도·업종) 확인",
+      "계약 후 확정일자 받기 — 보증금 우선변제권 확보",
+      "임대인의 신분증·등기부상 소유자 일치 확인(대리인은 위임장·인감증명)"
+    ],
+    sale: [
+      "등기부등본(갑구·을구)으로 소유자·근저당·압류·가압류 확인",
+      "건축물대장 용도·면적·위반 표기와 토지이용계획확인원(용도지역·행위제한) 확인",
+      "현장 사진(외관·내부·설비·균열·누수) 촬영 후 계약서에 첨부",
+      "잔금일 매도인 서류(등기필증·인감증명·매도용 인감계·신분증) 확인",
+      "국세·지방세 완납증명서와 공과금·관리비 미납 여부 확인",
+      "매도인 신분증과 등기부상 소유자 일치 확인(법인은 법인등기부·법인인감)"
+    ]
+  };
+
+  /* ───────────── 상태 ───────────── */
+  const state = { deal: "lease", industry: "mfg", conds: new Set(), memo: "" };
+  const ticked = new Set();     // 확인사항 체크 상태
+  let lastGenerated = "";
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+  /* ───────────── 화면 구성 ───────────── */
+  function buildChips(){
+    const box = $("industryChips");
+    box.innerHTML = INDUSTRIES.map((it) =>
+      '<button type="button" class="chip" data-ind="' + it.id + '" aria-pressed="' + (it.id === state.industry) + '">' + esc(it.label) + "</button>"
+    ).join("");
+    box.querySelectorAll(".chip").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.industry = btn.dataset.ind;
+        box.querySelectorAll(".chip").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.ind === state.industry)));
+        render();
+      });
+    });
+  }
+
+  function buildConds(){
+    const box = $("condList");
+    box.innerHTML = CONDS.map((c) =>
+      '<label class="ck">' +
+        '<input type="checkbox" data-cond="' + c.id + '">' +
+        '<span class="txt"><span class="t">' + esc(c.title) + '</span><span class="d">' + esc(c.desc) + "</span></span>" +
+      "</label>"
+    ).join("");
+    box.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+      cb.addEventListener("change", () => {
+        if (cb.checked) state.conds.add(cb.dataset.cond);
+        else state.conds.delete(cb.dataset.cond);
+        render();
+      });
+    });
+  }
+
+  /* ───────────── 특약 문구 조립 ───────────── */
+  function buildClauses(){
+    const deal = DEALS[state.deal];
+    const list = deal.base.slice();
+
+    const ind = INDUSTRIES.find((i) => i.id === state.industry);
+    if (ind && ind[state.deal]) list.push(ind[state.deal]);
+
+    CONDS.forEach((c) => {
+      if (state.conds.has(c.id) && c[state.deal]) list.push(c[state.deal]);
+    });
+
+    const memo = state.memo.trim();
+    if (memo) {
+      const lines = memo.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+      list.push(deal.a + "과 " + deal.b + "은 위 특약 외에 다음 사항을 추가로 합의한다.\n" +
+        lines.map((l) => "  - " + l).join("\n"));
+    }
+
+    return list.map((t, i) => (i + 1) + ". " + t).join("\n\n");
+  }
+
+  /* ───────────── 확인사항 조립 ───────────── */
+  function buildCheckGroups(){
+    const deal = DEALS[state.deal];
+    const ind = INDUSTRIES.find((i) => i.id === state.industry);
+    const groups = [];
+    groups.push({ label: "기본 확인", items: BASE_CHECKS[state.deal].slice() });
+    if (ind && ind.checks.length) groups.push({ label: "업종 확인 · " + ind.label, items: ind.checks.slice() });
+
+    const condItems = [];
+    CONDS.forEach((c) => {
+      if (state.conds.has(c.id)) c.checks.forEach((x) => condItems.push(x));
+    });
+    if (condItems.length) groups.push({ label: "선택 조건 확인", items: condItems });
+    return { groups: groups, deal: deal };
+  }
+
+  /* ───────────── 렌더 ───────────── */
+  function render(){
+    const clauses = buildClauses();
+    const ta = $("clauses");
+    ta.value = clauses;
+    lastGenerated = clauses;
+    autoGrow(ta);
+
+    const n = clauses ? clauses.split("\n\n").length : 0;
+    const picked = state.conds.size;
+    $("clauseMeta").textContent = picked
+      ? n + "개 조항 · 조건 " + picked + "개"
+      : n + "개 조항 · 기본 특약";
+
+    const { groups } = buildCheckGroups();
+    let total = 0;
+    const box = $("checkList");
+    box.innerHTML = groups.map((g) => {
+      total += g.items.length;
+      return '<div class="cgroup"><h3>' + esc(g.label) + "</h3>" +
+        g.items.map((text, idx) => {
+          const key = g.label + "|" + idx + "|" + text;
+          return '<label class="ci"><input type="checkbox" data-key="' + encodeURIComponent(key) + '"' +
+            (ticked.has(key) ? " checked" : "") + "><span>" + esc(text) + "</span></label>";
+        }).join("") + "</div>";
+    }).join("");
+    $("checkMeta").textContent = total + "개";
+
+    box.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+      cb.addEventListener("change", () => {
+        const key = decodeURIComponent(cb.dataset.key);
+        if (cb.checked) ticked.add(key); else ticked.delete(key);
+      });
+    });
+  }
+
+  function autoGrow(ta){
+    ta.style.height = "auto";
+    const h = Math.max(ta.scrollHeight, 300);
+    ta.style.height = h + "px";
+  }
+
+  /* ───────────── 복사 ───────────── */
+  function toast(msg, warn){
+    const el = $("toast");
+    el.classList.toggle("warn", !!warn);
+    el.innerHTML = msg;
+    el.classList.add("show");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => el.classList.remove("show"), 2400);
+  }
+
+  function copyText(text, doneMsg){
+    const fail = () => {
+      const t = document.createElement("textarea");
+      t.value = text;
+      t.setAttribute("readonly", "");
+      t.style.position = "fixed";
+      t.style.top = "-1000px";
+      t.style.opacity = "0";
+      document.body.appendChild(t);
+      t.select();
+      t.setSelectionRange(0, text.length);
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      document.body.removeChild(t);
+      if (ok) toast(doneMsg);
+      else toast("자동 복사가 안 됐어요.<br><small>특약 칸을 길게 눌러 직접 복사해 주세요.</small>", true);
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => toast(doneMsg)).catch(fail);
+    } else {
+      fail();
+    }
+  }
+
+  function buildAllText(){
+    const deal = DEALS[state.deal];
+    const ind = INDUSTRIES.find((i) => i.id === state.industry);
+    const body = ($("clauses").value || "").trim();
+    const { groups } = buildCheckGroups();
+
+    const head = "■ " + deal.label + " · " + (ind ? ind.label : "");
+    const checkText = groups.map((g) =>
+      "[" + g.label + "]\n" + g.items.map((x) => "□ " + x).join("\n")
+    ).join("\n\n");
+
+    return head + "\n\n■ 특약사항\n" + body + "\n\n■ 과태료·분쟁 방지 필수 확인사항\n" + checkText;
+  }
+
+  /* ───────────── 초기화 ───────────── */
+  function resetAll(){
+    const has = state.conds.size > 0 || state.memo.trim() !== "" || state.industry !== "mfg" || state.deal !== "lease";
+    if (has && !confirm("선택한 조건과 입력한 메모를 모두 지우고 처음 상태로 돌아갈까요?")) return;
+    state.deal = "lease";
+    state.industry = "mfg";
+    state.conds.clear();
+    state.memo = "";
+    ticked.clear();
+    $("memo").value = "";
+    document.querySelectorAll(".deal").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.deal === "lease")));
+    document.querySelectorAll("#industryChips .chip").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.ind === "mfg")));
+    document.querySelectorAll('#condList input[type="checkbox"]').forEach((cb) => { cb.checked = false; });
+    render();
+    toast("처음 상태로 돌아왔어요.");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /* ───────────── 이벤트 연결 ───────────── */
+  document.querySelectorAll(".deal").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.deal = btn.dataset.deal;
+      document.querySelectorAll(".deal").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.deal === state.deal)));
+      render();
+    });
+  });
+
+  $("memo").addEventListener("input", (e) => {
+    state.memo = e.target.value;
+    render();
+  });
+
+  $("clauses").addEventListener("input", (e) => autoGrow(e.target));
+
+  $("btnCopyClauses").addEventListener("click", () => {
+    const text = ($("clauses").value || "").trim();
+    if (!text) { toast("먼저 조건을 선택해 주세요.", true); return; }
+    copyText(text, "특약 문구를 복사했어요.<br><small>계약서에 그대로 붙여넣으면 됩니다.</small>");
+  });
+
+  $("btnCopyAll").addEventListener("click", () => {
+    copyText(buildAllText(), "특약과 확인사항을 함께 복사했어요.<br><small>메모장이나 카톡에 붙여넣어 확인하세요.</small>");
+  });
+
+  $("btnReset").addEventListener("click", resetAll);
+
+  buildChips();
+  buildConds();
+  render();
+})();
+</script>
+</body>
+</html>
