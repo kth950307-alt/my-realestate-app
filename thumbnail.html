@@ -839,7 +839,7 @@ function kSummaryBar(top, barH){
   const cardY = top + 12;
   const cardH = barH - 24;
   const px = 20;
-  const priceW = 396;
+  const priceW = 412;
   const gap = 12;
   const sx = px + priceW + gap;
   const sW = W - px - sx;
@@ -874,15 +874,15 @@ function kSummaryBar(top, barH){
   if (plab) plain(plab, px + priceW / 2, cardY + 6, 800, 21, '#FFFFFF', 'center', 0.8);
 
   const priceText = (S.price || '').trim();
-  const maxPW = priceW - 44;
+  const maxPW = priceW - 64;
   const ay = cardY + rh;
   const ah = cardH - rh;
   if (priceText){
     /* "보증금 1,800만 / 월 180만" 처럼 슬래시가 있으면 두 줄로 큼직하게 */
     const bits = priceText.split('/').map(function(s){ return s.trim(); }).filter(Boolean);
     if (bits.length >= 2){
-      let fs = 46;
-      for (let i = 0; i < 2; i++) fs = Math.min(fs, fitSize(bits[i], 900, maxPW, 46, 22, -1));
+      let fs = 44;
+      for (let i = 0; i < 2; i++) fs = Math.min(fs, fitSize(bits[i], 900, maxPW, 44, 22, -1));
       const lh = fs;
       let ly = ay + (ah - lh * 2) / 2 + lh / 2;
       ctx.textAlign = 'center';
@@ -941,7 +941,7 @@ function kSummaryBar(top, barH){
     return;
   }
 
-  const LV = 56, LL = 33, LD = 30, VL = -0.9, LLG = 0.4;
+  const LV = 52, LL = 32, LD = 30, VL = -0.9, LLG = 0.4;
 
   function groupW(list, k){
     let sum = 0;
