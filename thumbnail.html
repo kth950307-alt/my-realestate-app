@@ -332,11 +332,11 @@
       <div class="fontCtl">
         <div class="fcTop">
           <span class="fcName">하단 가격(임대가) 글자 크기</span>
-          <span class="fcPx" id="sumPriceSizeOut">60px</span>
+          <span class="fcPx" id="sumPriceSizeOut">64px</span>
         </div>
-        <input type="range" id="sumPriceSize" min="40" max="92" step="1" value="60" aria-label="하단 임대가 글자 크기">
+        <input type="range" id="sumPriceSize" min="40" max="92" step="1" value="64" aria-label="하단 임대가 글자 크기">
         <div class="fcScale"><span>작게</span><span>크게</span></div>
-        <p class="fcNow">지금 미리보기 <b id="sumPriceSizeNow">60px</b><br>1단 가격 줄 전체 폭에 맞춰 크게 들어갑니다. 문구가 길면 칸 폭에 맞춰 자동으로 줄어듭니다.</p>
+        <p class="fcNow">지금 미리보기 <b id="sumPriceSizeNow">64px</b><br>1단 가격 줄 전체 폭에 맞춰 크게 들어갑니다. 문구가 길면 칸 폭에 맞춰 자동으로 줄어듭니다.</p>
       </div>
 
       <div class="fontCtl">
@@ -456,7 +456,7 @@ const DEFAULTS = {
   titleSize: '104',
   bodySize: '34',
   /* 하단 2단 글씨 크기 (가격 한 줄 px, 면적·층고 바 px) */
-  sumPriceSize: '60',
+  sumPriceSize: '64',
   specSize: '38'
 };
 
@@ -484,8 +484,8 @@ const TPL = {
 
 const LS_KEY = 'woori_thumb_v2';
 const LS_OLD = 'woori_thumb_v1';
-/* 저장 형식 버전 — 3: 하단 2단(가격 한 줄 + 면적·층고 바) 기본값 */
-const LS_VER = 3;
+/* 저장 형식 버전 — 4: 하단 2단(가격 한 줄 64px + 면적·층고 바 38px) 기본값 */
+const LS_VER = 4;
 
 /* ------------------------------------------------------------- tiny utils */
 function setFont(weight, size, spacing){
@@ -744,7 +744,7 @@ function placeholder(x, y, w, h, note){
    ========================================================================= */
 const K_FOOT_H = 78;
 /* 하단 2단(① 전체 폭 가격 한 줄 ② 얇은 면적·층고 바) 기본 글씨 크기와 여백 */
-const K_PRICE_PX = 60, K_SPEC_PX = 38;
+const K_PRICE_PX = 64, K_SPEC_PX = 38;
 const K_PAD = 20, K_ROW_GAP = 8, K_BAR_PT = 12, K_BAR_PB = 12;
 const K_CARD_MIN_H = 92, K_SPEC_MIN_H = 58;
 /* 스펙 바 글씨 비율 — 값 글씨 52 기준으로 라벨·구분점을 함께 줄인다 */
@@ -1114,12 +1114,15 @@ function kSummaryBar(top, barH){
   }
 
   if (plan.mode === 'one'){
-    groupDraw(plan.lines[0].list, plan.lines[0].k, inX, cy);
+    const ln = plan.lines[0];
+    const gw = kSpecGroupW(ln.list, ln.k);
+    groupDraw(ln.list, ln.k, inX + Math.max(0, (kSpecInW() - gw) / 2), cy);
     return;
   }
   const lineH = kSpecLineH(plan);
   plan.lines.forEach(function(ln, i){
-    groupDraw(ln.list, ln.k, inX, cy - lineH / 2 + lineH * i);
+    const gw = kSpecGroupW(ln.list, ln.k);
+    groupDraw(ln.list, ln.k, inX + Math.max(0, (kSpecInW() - gw) / 2), cy - lineH / 2 + lineH * i);
   });
 }
 
