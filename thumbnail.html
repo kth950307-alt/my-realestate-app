@@ -918,12 +918,12 @@ function kSpecPlan(){
   if (kSpecGroupW(specs, k0) <= inW) return { mode: 'one', lines: [{ list: specs, k: k0 }] };
   if (specs.length === 1){
     let k = k0;
-    while (k > k0 * 0.62 && kSpecGroupW(specs, k) > inW) k -= 0.02;
+    while (k > Math.min(k0, 0.62) && kSpecGroupW(specs, k) > inW) k -= 0.02;
     return { mode: 'one', lines: [{ list: specs, k: k }] };
   }
   const lines = specs.map(function(sp){
     let k = k0;
-    while (k > k0 * 0.62 && kSpecGroupW([sp], k) > inW) k -= 0.02;
+    while (k > Math.min(k0, 0.62) && kSpecGroupW([sp], k) > inW) k -= 0.02;
     return { list: [sp], k: k };
   });
   return { mode: 'two', lines: lines };
@@ -1013,7 +1013,8 @@ function kSummaryBar(top, barH){
     const bits = kPriceBits();
     if (bits.length >= 2){
       let fs = pf;
-      for (let i = 0; i < 2; i++) fs = Math.min(fs, fitSize(bits[i], 900, maxPW, pf, Math.max(16, Math.round(pf * 0.5)), -1));
+      const pfMin = Math.max(14, Math.min(22, pf));
+      for (let i = 0; i < 2; i++) fs = Math.min(fs, fitSize(bits[i], 900, maxPW, pf, pfMin, -1));
       drawn.price = fs;
       const lh = fs + 2;
       let ly = ay + (ah - lh * 2) / 2 + lh / 2 - 1;
@@ -1026,7 +1027,7 @@ function kSummaryBar(top, barH){
         ly += lh;
       }
     } else {
-      const fs = fitSize(priceText, 900, maxPW, Math.round(68 * pf / K_PRICE_PX), Math.max(18, Math.round(24 * pf / K_PRICE_PX)), -1);
+      const fs = fitSize(priceText, 900, maxPW, Math.round(68 * pf / K_PRICE_PX), Math.max(14, Math.min(24, pf)), -1);
       drawn.price = fs;
       setFont(900, fs, -1);
       ctx.textAlign = 'center';
