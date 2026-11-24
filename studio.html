@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>우리부동산 사장님 작업실</title>
+<meta name="description" content="공개 홈페이지·썸네일 만들기·글 정리·매물 추출·계약 특약을 한 화면에서 바로 쓰는 우리부동산 업무 도구 모음">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%9B%A0%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --navy:#1e3a8a; --royal:#2563eb; --royal-dark:#1e40af;
+    --blue-soft:#eff6ff; --blue-line:#bfdbfe;
+    --gold:#f59e0b; --gold-soft:#fef3c7;
+    --ink:#1e293b; --ink2:#475569; --muted:#64748b;
+    --line:#e2e8f0; --bg:#f6f8fc; --card:#ffffff;
+    --ok:#059669;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0; height:100%;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕","Noto Sans KR",system-ui,sans-serif;
+    -webkit-text-size-adjust:100%;
+    display:flex; flex-direction:column; height:100vh; height:100dvh;
+    overflow:hidden;
+  }
+  a{color:inherit; text-decoration:none;}
+
+  /* ───────── 상단 바 ───────── */
+  .topbar{
+    flex:0 0 auto; display:flex; align-items:center; gap:12px;
+    padding:10px 16px; background:#fff; border-bottom:1px solid var(--line);
+    box-shadow:0 2px 14px rgba(30,64,175,.05); position:relative; z-index:5;
+  }
+  .brand{display:flex; align-items:center; gap:10px; min-width:0;}
+  .logo{
+    flex:0 0 auto; width:36px; height:36px; border-radius:11px;
+    background:linear-gradient(140deg,#3B82F6,#1D4ED8);
+    display:flex; align-items:center; justify-content:center;
+    font-size:19px; box-shadow:0 4px 12px rgba(37,99,235,.28);
+  }
+  .brandText{min-width:0;}
+  .brandText h1{
+    margin:0; font-size:16px; line-height:1.25; letter-spacing:-.5px;
+    font-weight:900; color:var(--navy); white-space:nowrap;
+  }
+  .brandText p{
+    margin:2px 0 0; font-size:11.5px; font-weight:600; color:var(--muted);
+    letter-spacing:-.1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .topActions{display:flex; align-items:center; gap:7px; margin-left:auto;}
+  .btn{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:inherit; font-size:12.5px; font-weight:800; letter-spacing:-.2px;
+    padding:9px 12px; border-radius:10px; border:1px solid var(--line);
+    background:#fff; color:var(--ink2); cursor:pointer; white-space:nowrap;
+    transition:background .12s, border-color .12s, color .12s;
+  }
+  .btn:hover{background:#f8fafc; border-color:#cbd5e1;}
+  .btn:active{transform:translateY(1px);}
+  .btn.primary{
+    background:linear-gradient(140deg,#3B82F6,#1D4ED8); color:#fff; border-color:#1D4ED8;
+    box-shadow:0 4px 12px rgba(37,99,235,.24);
+  }
+  .btn.primary:hover{background:linear-gradient(140deg,#2f74e8,#1a45c2);}
+  .btn .ico{font-size:13px; line-height:1;}
+
+  /* ───────── 탭 ───────── */
+  .tabbar{
+    flex:0 0 auto; background:#fff; border-bottom:1px solid var(--line);
+    padding:0 8px; position:relative; z-index:4;
+  }
+  .tabs{
+    display:flex; gap:4px; max-width:1400px; margin:0 auto;
+    overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none;
+    scroll-behavior:smooth;
+  }
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{
+    flex:0 0 auto; position:relative; display:flex; align-items:center; gap:7px;
+    font-family:inherit; font-size:13.5px; font-weight:800; letter-spacing:-.3px;
+    color:#5b6b82; background:transparent; border:0; cursor:pointer;
+    padding:13px 14px 12px; border-radius:12px 12px 0 0; white-space:nowrap;
+    transition:color .12s, background .12s;
+  }
+  .tab .em{font-size:15px; line-height:1;}
+  .tab:hover{color:var(--royal-dark); background:var(--blue-soft);}
+  .tab[aria-selected="true"]{color:var(--navy); background:var(--blue-soft);}
+  .tab[aria-selected="true"]::after{
+    content:""; position:absolute; left:10px; right:10px; bottom:0; height:3px;
+    border-radius:3px 3px 0 0; background:linear-gradient(90deg,#3B82F6,#1D4ED8);
+  }
+  .tab .hint{
+    font-size:10.5px; font-weight:700; color:#94a3b8; letter-spacing:0;
+  }
+  .tab[aria-selected="true"] .hint{color:#3b82f6;}
+
+  /* ───────── 작업 화면 ───────── */
+  .stage{
+    flex:1 1 auto; position:relative; min-height:0; background:var(--bg);
+    display:flex; flex-direction:column;
+  }
+  .frameWrap{flex:1 1 auto; min-height:0; position:relative;}
+  .frameWrap iframe{
+    position:absolute; inset:0; width:100%; height:100%; border:0; background:#fff;
+    opacity:0; transition:opacity .14s ease;
+  }
+  .frameWrap iframe.on{opacity:1; z-index:1;}
+  iframe.loading{
+    background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ccircle cx='20' cy='20' r='14' fill='none' stroke='%23bfdbfe' stroke-width='4'/%3E%3C/svg%3E") center no-repeat;
+  }
+  .loadingNote{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:700; color:#94a3b8; z-index:0; letter-spacing:-.2px;
+  }
+  .stageStatus{
+    position:absolute; right:12px; bottom:10px; z-index:6;
+    font-size:10.5px; font-weight:800; color:#94a3b8;
+    background:rgba(255,255,255,.9); border:1px solid var(--line);
+    padding:3px 8px; border-radius:999px; pointer-events:none;
+    opacity:0; transition:opacity .2s;
+  }
+  .stageStatus.show{opacity:1;}
+
+  /* ───────── 작은 화면 ───────── */
+  @media (max-width:720px){
+    .topbar{padding:8px 11px; gap:8px;}
+    .logo{width:32px; height:32px; border-radius:10px; font-size:17px;}
+    .brandText h1{font-size:14.5px;}
+    .brandText p{font-size:10.5px;}
+    .btn{padding:8px 10px; font-size:11.5px; gap:4px;}
+    .btn .label{display:none;}
+    .btn.primary .label{display:inline;}
+    .tabs{gap:2px;}
+    .tab{font-size:12.5px; padding:11px 10px 10px; gap:5px;}
+    .tab .hint{display:none;}
+    .tab .em{font-size:14px;}
+  }
+  @media (max-width:380px){
+    .tab .txt{font-size:12px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo" aria-hidden="true">🛠️</div>
+    <div class="brandText">
+      <h1>우리부동산 사장님 작업실</h1>
+      <p>블로그·매물·계약 도구를 한 화면에서 바로</p>
+    </div>
+  </div>
+  <div class="topActions">
+    <button type="button" class="btn" id="btnReload" title="지금 화면 새로 고침">
+      <span class="ico">↻</span><span class="label">새로 고침</span>
+    </button>
+    <button type="button" class="btn primary" id="btnNewWindow" title="지금 도구를 새 창(새 탭)에서 크게 열기">
+      <span class="ico">↗</span><span class="label">새 창에서 크게 열기</span>
+    </button>
+  </div>
+</header>
+
+<nav class="tabbar" aria-label="작업 도구 선택">
+  <div class="tabs" role="tablist" id="tabs">
+    <button type="button" class="tab" role="tab" data-key="home" data-src="./index.html">
+      <span class="em">🏠</span><span class="txt">공개 홈페이지</span>
+    </button>
+    <button type="button" class="tab" role="tab" data-key="thumb" data-src="./thumbnail.html">
+      <span class="em">🖼️</span><span class="txt">썸네일 만들기</span>
+    </button>
+    <button type="button" class="tab" role="tab" data-key="clean" data-src="./blog-clean.html">
+      <span class="em">✂️</span><span class="txt">글 줄바꿈 정리</span>
+    </button>
+    <button type="button" class="tab" role="tab" data-key="extract" data-src="./naver-extract.html">
+      <span class="em">📍</span><span class="txt">네이버 매물 추출</span>
+    </button>
+    <button type="button" class="tab" role="tab" data-key="terms" data-src="./special-terms.html">
+      <span class="em">📝</span><span class="txt">계약 특약 생성</span>
+    </button>
+  </div>
+</nav>
+
+<main class="stage">
+  <div class="frameWrap" id="frameWrap">
+    <div class="loadingNote" id="loadingNote">도구를 불러오고 있어요…</div>
+    <div class="stageStatus" id="stageStatus">불러오는 중…</div>
+  </div>
+</main>
+
+<script>
+(function(){
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  var wrap = document.getElementById('frameWrap');
+  var loadingNote = document.getElementById('loadingNote');
+  var statusEl = document.getElementById('stageStatus');
+  var frames = {};              /* key → iframe (한 번 연 도구는 그대로 살려 둠) */
+  var current = null;
+  var statusTimer = null;
+
+  function tabByKey(k){
+    for (var i = 0; i < tabs.length; i++) if (tabs[i].dataset.key === k) return tabs[i];
+    return null;
+  }
+
+  function showStatus(text){
+    statusEl.textContent = text;
+    statusEl.classList.add('show');
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(function(){ statusEl.classList.remove('show'); }, 1600);
+  }
+
+  function makeFrame(tab){
+    var key = tab.dataset.key;
+    var f = document.createElement('iframe');
+    f.title = tab.querySelector('.txt').textContent + ' 화면';
+    f.setAttribute('loading', 'eager');
+    f.dataset.baseSrc = tab.dataset.src;
+    f.className = 'loading';
+    f.addEventListener('load', function(){
+      f.classList.remove('loading');
+      if (frames[current] === f) {
+        loadingNote.style.display = 'none';
+        showStatus('준비 완료');
+      }
+    });
+    frames[key] = f;
+    wrap.appendChild(f);
+    f.src = tab.dataset.src;
+    return f;
+  }
+
+  function activate(key, opts){
+    opts = opts || {};
+    var tab = tabByKey(key) || tabs[0];
+    key = tab.dataset.key;
+
+    tabs.forEach(function(t){
+      var on = t === tab;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.setAttribute('tabindex', on ? '0' : '-1');
+    });
+
+    Object.keys(frames).forEach(function(k){
+      frames[k].classList.toggle('on', k === key);
+    });
+
+    if (!frames[key]) {
+      loadingNote.style.display = 'flex';
+      makeFrame(tab);
+    } else {
+      loadingNote.style.display = 'none';
+    }
+
+    current = key;
+    if (tab.scrollIntoView) {
+      try { tab.scrollIntoView({block:'nearest', inline:'center', behavior:'smooth'}); } catch(e){}
+    }
+    if (!opts.silent && location.hash !== '#' + key) {
+      try { history.replaceState(null, '', '#' + key); } catch(e) { location.hash = key; }
+    }
+  }
+
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){ activate(t.dataset.key); });
+    t.addEventListener('keydown', function(e){
+      var i = tabs.indexOf(t), next = null;
+      if (e.key === 'ArrowRight') next = tabs[(i + 1) % tabs.length];
+      if (e.key === 'ArrowLeft')  next = tabs[(i - 1 + tabs.length) % tabs.length];
+      if (e.key === 'Home') next = tabs[0];
+      if (e.key === 'End')  next = tabs[tabs.length - 1];
+      if (next) {
+        e.preventDefault();
+        activate(next.dataset.key);
+        next.focus();
+      }
+    });
+  });
+
+  document.getElementById('btnNewWindow').addEventListener('click', function(){
+    var tab = tabByKey(current) || tabs[0];
+    window.open(tab.dataset.src, '_blank', 'noopener');
+  });
+
+  document.getElementById('btnReload').addEventListener('click', function(){
+    var f = frames[current];
+    if (!f) { activate(current, {silent:true}); return; }
+    loadingNote.style.display = 'none';
+    showStatus('새로 고침');
+    f.classList.add('loading');
+    f.src = f.dataset.baseSrc || f.src;
+  });
+
+  /* 처음 열 때: 주소 끝(#thumb 등)에 적힌 도구, 없으면 공개 홈페이지 */
+  var startKey = (location.hash || '').replace('#', '') || 'home';
+  activate(startKey, {silent:true});
+
+  window.addEventListener('hashchange', function(){
+    var k = (location.hash || '').replace('#', '');
+    if (k && k !== current) activate(k, {silent:true});
+  });
+})();
+</script>
+</body>
+</html>
