@@ -126,6 +126,11 @@
   .stageStatus.show{opacity:1;}
 
   /* ───────── 작은 화면 ───────── */
+  @media (max-width:520px){
+    .brandText p{display:none;}
+    .brandText h1{font-size:13.5px;}
+    .btn{padding:7px 9px; font-size:11px;}
+  }
   @media (max-width:720px){
     .topbar{padding:8px 11px; gap:8px;}
     .logo{width:32px; height:32px; border-radius:10px; font-size:17px;}
@@ -159,7 +164,7 @@
       <span class="ico">↻</span><span class="label">새로 고침</span>
     </button>
     <button type="button" class="btn primary" id="btnNewWindow" title="지금 도구를 새 창(새 탭)에서 크게 열기">
-      <span class="ico">↗</span><span class="label">새 창에서 크게 열기</span>
+      <span class="ico">↗</span><span class="label">크게 열기</span>
     </button>
   </div>
 </header>
