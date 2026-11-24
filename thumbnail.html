@@ -322,31 +322,31 @@
       <label class="f"><span>체크 4</span><input type="text" id="chk3" maxlength="34"></label>
       <label class="f"><span>체크 5</span><input type="text" id="chk4" maxlength="34"></label>
 
-      <div class="cardTitle" style="margin:14px 0 8px">하단 큰 글씨 2칸 (핵심 스펙)</div>
+      <div class="cardTitle" style="margin:14px 0 8px">하단 얇은 바 — 면적·층고 (핵심 스펙)</div>
       <div class="specGrid">
         <div class="specRow k"><input type="text" id="kSpecL0" maxlength="10" aria-label="핵심1 항목" placeholder="항목 (예: 건물면적)"><input type="text" id="kSpecV0" maxlength="24" aria-label="핵심1 값" placeholder="값 (예: 60평)"></div>
         <div class="specRow k"><input type="text" id="kSpecL1" maxlength="10" aria-label="핵심2 항목" placeholder="항목 (예: 층고)"><input type="text" id="kSpecV1" maxlength="24" aria-label="핵심2 값" placeholder="값 (예: 5m)"></div>
       </div>
-      <p class="hint">하단은 <b>왼쪽 가격 + 오른쪽 핵심 스펙</b> 두 칸입니다. 위에 적은 항목·값이 오른쪽에 <b>큰 글씨</b>로 들어가고, 장부에서 불러오면 면적·층고 같은 핵심 값이 자동으로 채워집니다.</p>
+      <p class="hint">하단은 <b>① 가격 한 줄(전체 폭)</b> + <b>② 얇은 면적·층고 바</b> 2단입니다. 위에 적은 항목·값이 아래 얇은 바에 큰 글씨로 들어가고, 장부에서 불러오면 면적·층고가 자동으로 채워집니다.</p>
 
       <div class="fontCtl">
         <div class="fcTop">
-          <span class="fcName">하단 임대가 글자 크기</span>
-          <span class="fcPx" id="sumPriceSizeOut">44px</span>
+          <span class="fcName">하단 가격(임대가) 글자 크기</span>
+          <span class="fcPx" id="sumPriceSizeOut">60px</span>
         </div>
-        <input type="range" id="sumPriceSize" min="32" max="60" step="1" value="44" aria-label="하단 임대가 글자 크기">
+        <input type="range" id="sumPriceSize" min="40" max="92" step="1" value="60" aria-label="하단 임대가 글자 크기">
         <div class="fcScale"><span>작게</span><span>크게</span></div>
-        <p class="fcNow">지금 미리보기 <b id="sumPriceSizeNow">44px</b><br>위 빨간 칸의 <b>임대가(매매가)</b> 제목도 같이 커지고 작아집니다. 칸 폭보다 길면 자동으로 줄어듭니다.</p>
+        <p class="fcNow">지금 미리보기 <b id="sumPriceSizeNow">60px</b><br>1단 가격 줄 전체 폭에 맞춰 크게 들어갑니다. 문구가 길면 칸 폭에 맞춰 자동으로 줄어듭니다.</p>
       </div>
 
       <div class="fontCtl">
         <div class="fcTop">
           <span class="fcName">하단 면적·층고 글자 크기</span>
-          <span class="fcPx" id="specSizeOut">52px</span>
+          <span class="fcPx" id="specSizeOut">38px</span>
         </div>
-        <input type="range" id="specSize" min="36" max="80" step="1" value="52" aria-label="하단 면적·층고 글자 크기">
+        <input type="range" id="specSize" min="22" max="56" step="1" value="38" aria-label="하단 면적·층고 글자 크기">
         <div class="fcScale"><span>작게</span><span>크게</span></div>
-        <p class="fcNow">지금 미리보기 <b id="specSizeNow">52px</b><br><b>면적</b>·<b>층고</b> 같은 항목 이름도 같은 비율로 따라 바뀝니다. 글씨를 키우면 하단 칸이 그만큼 높아집니다.</p>
+        <p class="fcNow">지금 미리보기 <b id="specSizeNow">38px</b><br><b>면적</b>·<b>층고</b> 같은 항목 이름도 같은 비율로 따라 바뀝니다. 글씨를 키우면 얇은 바가 그만큼 높아집니다.</p>
       </div>
 
       <div class="row2">
@@ -455,9 +455,9 @@ const DEFAULTS = {
   /* 글씨 크기 (제목 = 노란 줄 기준 px, 본문 = 체크리스트 px) */
   titleSize: '104',
   bodySize: '34',
-  /* 하단 2칸 글씨 크기 (임대가 px, 면적·층고 px) */
-  sumPriceSize: '44',
-  specSize: '52'
+  /* 하단 2단 글씨 크기 (가격 한 줄 px, 면적·층고 바 px) */
+  sumPriceSize: '60',
+  specSize: '38'
 };
 
 const TEXT_IDS = ['badge','t1','t2','sub','areaLabel','areaValue','priceLabel','price',
@@ -472,7 +472,9 @@ const S = {
   style: 'K',
   trade: 'rent',
   mainImg: null, subImg: null,
-  mainName: '', subName: ''
+  mainName: '', subName: '',
+  /* 사진 위 흰 배지를 사용자가 직접 적었는지 (김해 진영읍형에서 기본은 숨김) */
+  subManual: false
 };
 
 const TPL = {
@@ -482,6 +484,8 @@ const TPL = {
 
 const LS_KEY = 'woori_thumb_v2';
 const LS_OLD = 'woori_thumb_v1';
+/* 저장 형식 버전 — 3: 하단 2단(가격 한 줄 + 면적·층고 바) 기본값 */
+const LS_VER = 3;
 
 /* ------------------------------------------------------------- tiny utils */
 function setFont(weight, size, spacing){
@@ -513,14 +517,14 @@ function bodyPx(){
   const v = parseInt(val('bodySize'), 10);
   return isFinite(v) ? Math.min(52, Math.max(20, v)) : 34;
 }
-/* 하단 2칸 글씨 크기 — 슬라이더 값(px)이 기준 크기가 된다 */
+/* 하단 2단 글씨 크기 — 슬라이더 값(px)이 기준 크기가 된다 */
 function sumPricePx(){
   const v = parseInt(val('sumPriceSize'), 10);
-  return isFinite(v) ? Math.min(70, Math.max(28, v)) : K_PRICE_PX;
+  return isFinite(v) ? Math.min(92, Math.max(34, v)) : K_PRICE_PX;
 }
 function specPx(){
   const v = parseInt(val('specSize'), 10);
-  return isFinite(v) ? Math.min(96, Math.max(28, v)) : K_SPEC_PX;
+  return isFinite(v) ? Math.min(64, Math.max(20, v)) : K_SPEC_PX;
 }
 function syncSizeOut(){
   const to = $('titleSizeOut'), bo = $('bodySizeOut');
@@ -738,11 +742,13 @@ function placeholder(x, y, w, h, note){
 /* =========================================================================
    STYLE K — 김해 진영읍형 (기본)
    ========================================================================= */
-const K_FOOT_H = 78, K_BAR_H = 152;
-/* 하단 2칸(임대가 · 면적/층고) 기본 글씨 크기와 칸 비율 */
-const K_PRICE_PX = 44, K_SPEC_PX = 52;
-const K_BAR_PX = 20, K_PRICE_W = 412, K_SPEC_GAP = 12, K_CARD_MIN_H = 128;
-const K_SPEC_LV = 52, K_SPEC_LL = 32, K_SPEC_LD = 30;
+const K_FOOT_H = 78;
+/* 하단 2단(① 전체 폭 가격 한 줄 ② 얇은 면적·층고 바) 기본 글씨 크기와 여백 */
+const K_PRICE_PX = 60, K_SPEC_PX = 38;
+const K_PAD = 20, K_ROW_GAP = 8, K_BAR_PT = 12, K_BAR_PB = 12;
+const K_CARD_MIN_H = 92, K_SPEC_MIN_H = 58;
+/* 스펙 바 글씨 비율 — 값 글씨 52 기준으로 라벨·구분점을 함께 줄인다 */
+const K_SPEC_BASE = 52, K_SPEC_LV = 52, K_SPEC_LL = 31, K_SPEC_LD = 30;
 
 function kOutlined(text, x, y, size, yellow){
   setFont(900, size, -3);
@@ -873,16 +879,46 @@ function kSpecBadge(text, x, y, h){
   kMixedText(text, x + 37, y + h / 2 + 2, fs, w - 74);
 }
 
-function kPriceHeadH(pf){
-  return Math.min(46, Math.max(24, Math.round(32 * pf / K_PRICE_PX)));
-}
 function kPriceBits(){
   return (S.price || '').trim().split('/').map(function(s){ return s.trim(); }).filter(Boolean);
 }
-/* 오른쪽 칸 안쪽 폭 */
+/* 가격 줄 한 줄 문구 — 슬래시는 가운데 점으로 잇고, 두 가지 이상이면 '보증금'을 '보증'으로 줄인다 */
+function kPriceText(){
+  const bits = kPriceBits();
+  if (!bits.length) return '';
+  let t = bits.join(' · ');
+  if (bits.length > 1) t = t.replace(/^보증금\s+/, '보증 ');
+  return t;
+}
+/* 숫자·단위는 빨강, 나머지 글자는 남색 — kSpecBadge와 같은 결 */
+function kPriceToks(text){
+  return String(text || '').split(/(\d[\d,.]*\s*(?:억|만|천|원|평|㎡|m|kW|톤|%|개|층)?)/);
+}
+function kPriceW(text, fs){
+  const toks = kPriceToks(text);
+  setFont(900, fs, -1.2);
+  let w = 0;
+  for (let i = 0; i < toks.length; i++){ if (toks[i]) w += ctx.measureText(toks[i]).width; }
+  return w;
+}
+function kDrawPrice(text, x, cy, fs){
+  const toks = kPriceToks(text);
+  setFont(900, fs, -1.2);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  let cx = x;
+  const dy = Math.round(fs * 0.03);
+  for (let i = 0; i < toks.length; i++){
+    const t = toks[i];
+    if (!t) continue;
+    ctx.fillStyle = /^\d/.test(t) ? '#D51C24' : '#0F2A55';
+    ctx.fillText(t, cx, cy + dy);
+    cx += ctx.measureText(t).width;
+  }
+}
+/* 스펙 바 안쪽 폭 (양옆 여백 + 왼쪽 파란 띠) */
 function kSpecInW(){
-  const sx = K_BAR_PX + K_PRICE_W + K_SPEC_GAP;
-  return (W - K_BAR_PX - sx) - 62;
+  return W - K_PAD * 2 - 74;
 }
 function kSpecList(){
   const out = [];
@@ -898,11 +934,11 @@ function kSpecGroupW(list, k){
   list.forEach(function(sp, i){
     if (i){
       setFont(900, K_SPEC_LD * k, 0);
-      sum += ctx.measureText('·').width + 40 * k;
+      sum += ctx.measureText('·').width + 36 * k;
     }
     if (sp.l){
       setFont(800, K_SPEC_LL * k, 0.4);
-      sum += ctx.measureText(sp.l).width + 14 * k;
+      sum += ctx.measureText(sp.l).width + 12 * k;
     }
     setFont(900, K_SPEC_LV * k, -0.9);
     sum += ctx.measureText(sp.v).width;
@@ -914,16 +950,17 @@ function kSpecPlan(){
   const specs = kSpecList();
   if (!specs.length) return null;
   const inW = kSpecInW();
-  const k0 = specPx() / K_SPEC_PX;
+  const k0 = specPx() / K_SPEC_BASE;
+  const kMin = Math.min(k0, 0.55);
   if (kSpecGroupW(specs, k0) <= inW) return { mode: 'one', lines: [{ list: specs, k: k0 }] };
   if (specs.length === 1){
     let k = k0;
-    while (k > Math.min(k0, 0.62) && kSpecGroupW(specs, k) > inW) k -= 0.02;
+    while (k > kMin && kSpecGroupW(specs, k) > inW) k -= 0.02;
     return { mode: 'one', lines: [{ list: specs, k: k }] };
   }
   const lines = specs.map(function(sp){
     let k = k0;
-    while (k > Math.min(k0, 0.62) && kSpecGroupW([sp], k) > inW) k -= 0.02;
+    while (k > kMin && kSpecGroupW([sp], k) > inW) k -= 0.02;
     return { list: [sp], k: k };
   });
   return { mode: 'two', lines: lines };
@@ -934,179 +971,155 @@ function kSpecMaxK(plan){
   return k;
 }
 function kSpecLineH(plan){
-  return Math.round(K_SPEC_LV * kSpecMaxK(plan) * 1.12);
+  return Math.round(K_SPEC_LV * kSpecMaxK(plan) * 1.14);
 }
-/* 글씨가 커지면 하단바도 그만큼 높아져 사진을 덜 가리지 않는다 */
+/* 1단 가격 줄 높이 — 글씨를 키우면 줄도 같이 높아진다 */
+function kPriceRowH(){
+  return Math.max(K_CARD_MIN_H, Math.round(sumPricePx() * 1.34));
+}
+/* 2단 얇은 스펙 바 높이 */
+function kSpecRowH(plan){
+  if (!plan) return K_SPEC_MIN_H;
+  const need = plan.mode === 'two'
+    ? 2 * kSpecLineH(plan) + 28
+    : Math.round(K_SPEC_LV * kSpecMaxK(plan) * 1.18) + 24;
+  return Math.max(K_SPEC_MIN_H, need);
+}
 function kBarH(){
-  const pf = sumPricePx();
-  const rh = kPriceHeadH(pf);
-  const bits = kPriceBits();
-  const priceNeed = bits.length >= 2
-    ? rh + 2 * (pf + 2) + 4
-    : rh + Math.round(68 * pf / K_PRICE_PX * 1.06) + 6;
-  const plan = kSpecPlan();
-  let specNeed = 0;
-  if (plan){
-    specNeed = plan.mode === 'two'
-      ? 2 * kSpecLineH(plan) + 12
-      : Math.round(K_SPEC_LV * kSpecMaxK(plan) * 1.06) + 20;
-  }
-  const card = Math.max(K_CARD_MIN_H, priceNeed, specNeed);
-  return Math.max(K_BAR_H, card + 24);
+  return K_BAR_PT + kPriceRowH() + K_ROW_GAP + kSpecRowH(kSpecPlan()) + K_BAR_PB;
 }
 
 function kSummaryBar(top, barH){
   const bg = ctx.createLinearGradient(0, top, 0, top + barH);
   bg.addColorStop(0, '#FFFFFF');
-  bg.addColorStop(1, '#E9EEF6');
+  bg.addColorStop(1, '#E7EDF6');
   ctx.fillStyle = bg;
   ctx.fillRect(0, top, W, barH);
   ctx.fillStyle = '#0F2A55';
   ctx.fillRect(0, top, W, 4);
 
-  const cardY = top + 12;
-  const cardH = barH - 24;
-  const px = K_BAR_PX;
-  const priceW = K_PRICE_W;
-  const gap = K_SPEC_GAP;
-  const sx = px + priceW + gap;
-  const sW = W - px - sx;
+  const x = K_PAD, w = W - K_PAD * 2;
+  const priceH = kPriceRowH();
+  const py = top + K_BAR_PT;
 
-  const pf = sumPricePx();
-  const rh = kPriceHeadH(pf);
-  const labFs = Math.round(21 * pf / K_PRICE_PX);
-
-  /* ---------------- 왼쪽: 붉은 가격 카드 ---------------- */
+  /* ---------------- 1단: 전체 폭 가격 한 줄 ---------------- */
   ctx.save();
-  ctx.shadowColor = 'rgba(16,27,46,.16)';
-  ctx.shadowBlur = 12;
-  ctx.shadowOffsetY = 4;
+  ctx.shadowColor = 'rgba(16,27,46,.18)';
+  ctx.shadowBlur = 14;
+  ctx.shadowOffsetY = 5;
   ctx.fillStyle = '#FFFFFF';
-  rr(px, cardY, priceW, cardH, 18);
+  rr(x, py, w, priceH, 18);
   ctx.fill();
   ctx.restore();
-
-  ctx.save();
-  rr(px, cardY, priceW, cardH, 18);
-  ctx.clip();
-  const rg = ctx.createLinearGradient(px, cardY, px, cardY + rh);
-  rg.addColorStop(0, '#E8241D');
-  rg.addColorStop(1, '#B01217');
-  ctx.fillStyle = rg;
-  ctx.fillRect(px, cardY, priceW, rh);
-  ctx.restore();
-
-  ctx.strokeStyle = '#D9E0EB';
-  ctx.lineWidth = 1.5;
-  rr(px, cardY, priceW, cardH, 18);
-  ctx.stroke();
 
   const plab = (S.priceLabel || '').trim();
-  if (plab) plain(plab, px + priceW / 2, cardY + Math.round(rh * 0.19), 800, labFs, '#FFFFFF', 'center', 0.8);
+  const pf = sumPricePx();
+  const labFs = Math.max(20, Math.round(pf * 0.46));
+  const chipW = plab
+    ? Math.min(Math.round(w * 0.30), Math.max(124, Math.round(tw(plab, 900, labFs, 0.6) + 58)))
+    : 0;
 
-  const priceText = (S.price || '').trim();
-  const maxPW = priceW - 64;
-  const ay = cardY + rh;
-  const ah = cardH - rh;
-  if (priceText){
-    /* "보증금 1,800만 / 월 180만" 처럼 슬래시가 있으면 두 줄로 큼직하게 */
-    const bits = kPriceBits();
-    if (bits.length >= 2){
-      let fs = pf;
-      const pfMin = Math.max(14, Math.min(22, pf));
-      for (let i = 0; i < 2; i++) fs = Math.min(fs, fitSize(bits[i], 900, maxPW, pf, pfMin, -1));
-      drawn.price = fs;
-      const lh = fs + 2;
-      let ly = ay + (ah - lh * 2) / 2 + lh / 2 - 1;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#D51C24';
-      for (let i = 0; i < 2; i++){
-        setFont(900, fs, -1);
-        ctx.fillText(bits[i], px + priceW / 2, ly);
-        ly += lh;
-      }
-    } else {
-      const fs = fitSize(priceText, 900, maxPW, Math.round(68 * pf / K_PRICE_PX), Math.max(14, Math.min(24, pf)), -1);
-      drawn.price = fs;
-      setFont(900, fs, -1);
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#D51C24';
-      ctx.fillText(priceText, px + priceW / 2, ay + ah / 2 + 1);
-    }
+  if (chipW > 0){
+    ctx.save();
+    rr(x, py, w, priceH, 18);
+    ctx.clip();
+    const rg = ctx.createLinearGradient(x, py, x, py + priceH);
+    rg.addColorStop(0, '#E8241D');
+    rg.addColorStop(1, '#B01217');
+    ctx.fillStyle = rg;
+    ctx.fillRect(x, py, chipW, priceH);
+    ctx.restore();
+
+    setFont(900, labFs, 0.6);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(plab, x + chipW / 2, py + priceH / 2 + 1);
   }
 
-  /* ---------------- 오른쪽: 핵심 요약 한 칸 ---------------- */
-  ctx.save();
-  ctx.shadowColor = 'rgba(16,27,46,.10)';
-  ctx.shadowBlur = 10;
-  ctx.shadowOffsetY = 3;
-  ctx.fillStyle = '#FFFFFF';
-  rr(sx, cardY, sW, cardH, 18);
-  ctx.fill();
-  ctx.restore();
-  ctx.strokeStyle = '#DCE3EE';
+  ctx.strokeStyle = '#D6DEEA';
   ctx.lineWidth = 1.5;
-  rr(sx, cardY, sW, cardH, 18);
+  rr(x, py, w, priceH, 18);
+  ctx.stroke();
+
+  const ptext = kPriceText();
+  if (ptext){
+    const areaX = x + chipW + (chipW ? 26 : 30);
+    const areaW = x + w - 28 - areaX;
+    let fs = pf;
+    const fsMin = Math.max(24, Math.round(pf * 0.5));
+    while (fs > fsMin && kPriceW(ptext, fs) > areaW) fs -= 1;
+    const pw = kPriceW(ptext, fs);
+    drawn.price = fs;
+    kDrawPrice(ptext, areaX + Math.max(0, (areaW - pw) / 2), py + priceH / 2, fs);
+  }
+
+  /* ---------------- 2단: 얇은 면적·층고 바 ---------------- */
+  const plan = kSpecPlan();
+  const sy = py + priceH + K_ROW_GAP;
+  const sh = kSpecRowH(plan);
+
+  ctx.fillStyle = '#F1F5FC';
+  rr(x, sy, w, sh, 14);
+  ctx.fill();
+  ctx.strokeStyle = '#D8E2F0';
+  ctx.lineWidth = 1.5;
+  rr(x, sy, w, sh, 14);
   ctx.stroke();
 
   ctx.save();
-  rr(sx, cardY, sW, cardH, 18);
+  rr(x, sy, w, sh, 14);
   ctx.clip();
   ctx.fillStyle = '#1D4ED8';
-  ctx.fillRect(sx, cardY, 7, cardH);
+  ctx.fillRect(x, sy, 7, sh);
   ctx.restore();
 
-  const inX = sx + 32;
-  const cy = cardY + cardH / 2;
-  const plan = kSpecPlan();
+  const inX = x + 30;
+  const cy = sy + sh / 2;
 
   if (!plan){
-    plain('면적 · 층고 같은 핵심 스펙', inX, cy - 16, 800, 31, '#A3B2C6', 'left', 0);
+    plain('면적 · 층고 같은 핵심 스펙', inX, cy - 15, 800, Math.max(20, Math.round(specPx() * 0.72)), '#A3B2C6', 'left', 0);
+    drawn.spec = 0;
     return;
   }
 
-  function groupDraw(list, k, x0, baseY){
+  drawn.spec = Math.round(K_SPEC_LV * kSpecMaxK(plan));
+
+  function groupDraw(list, k, x0, y0){
     let cx2 = x0;
     list.forEach(function(sp, i){
       if (i){
         setFont(900, K_SPEC_LD * k, 0);
         ctx.textAlign = 'left';
-        ctx.textBaseline = 'alphabetic';
-        ctx.fillStyle = '#AEBCCE';
-        ctx.fillText('·', cx2 + 20 * k, baseY);
-        cx2 += ctx.measureText('·').width + 40 * k;
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#B7C3D4';
+        ctx.fillText('·', cx2 + 18 * k, y0);
+        cx2 += ctx.measureText('·').width + 36 * k;
       }
       if (sp.l){
         setFont(800, K_SPEC_LL * k, 0.4);
         ctx.textAlign = 'left';
-        ctx.textBaseline = 'alphabetic';
+        ctx.textBaseline = 'middle';
         ctx.fillStyle = '#5C6D86';
-        ctx.fillText(sp.l, cx2, baseY);
-        cx2 += ctx.measureText(sp.l).width + 14 * k;
+        ctx.fillText(sp.l, cx2, y0);
+        cx2 += ctx.measureText(sp.l).width + 12 * k;
       }
       setFont(900, K_SPEC_LV * k, -0.9);
       ctx.textAlign = 'left';
-      ctx.textBaseline = 'alphabetic';
+      ctx.textBaseline = 'middle';
       ctx.fillStyle = '#10233F';
-      ctx.fillText(sp.v, cx2, baseY);
+      ctx.fillText(sp.v, cx2, y0 + Math.round(K_SPEC_LV * k * 0.03));
       cx2 += ctx.measureText(sp.v).width;
     });
   }
 
-  drawn.spec = Math.round(K_SPEC_LV * kSpecMaxK(plan));
-
   if (plan.mode === 'one'){
-    const k = plan.lines[0].k;
-    groupDraw(plan.lines[0].list, k, inX, cy + K_SPEC_LV * k * 0.36);
+    groupDraw(plan.lines[0].list, plan.lines[0].k, inX, cy);
     return;
   }
-  /* 한 줄로는 작아지므로 스펙별로 두 줄에 크게 */
   const lineH = kSpecLineH(plan);
   plan.lines.forEach(function(ln, i){
-    const baseY = cy - lineH + lineH * (i + 0.5) + K_SPEC_LV * ln.k * 0.36;
-    groupDraw(ln.list, ln.k, inX, baseY);
+    groupDraw(ln.list, ln.k, inX, cy - lineH / 2 + lineH * i);
   });
 }
 
@@ -1949,7 +1962,7 @@ function renderNow(){ drawAll(); }
 /* ---------------------------------------------------------------- storage */
 function saveState(){
   try {
-    const data = { style: S.style, trade: S.trade, subMode: $('subMode').value };
+    const data = { v: LS_VER, style: S.style, trade: S.trade, subMode: $('subMode').value, subManual: !!S.subManual };
     TEXT_IDS.forEach(function(id){ data[id] = val(id); });
     localStorage.setItem(LS_KEY, JSON.stringify(data));
   } catch(e){}
@@ -1966,6 +1979,11 @@ function loadState(){
         if (typeof data[id] === 'string' && DEFAULTS[id] !== undefined) setVal(id, data[id]);
         else if (DEFAULTS[id] !== undefined) setVal(id, DEFAULTS[id]);
       });
+      /* 김해 진영읍형은 사진 위 흰 배지를 기본으로 비운다(하단 가격과 겹치지 않게) */
+      setVal('sub', '');
+      setVal('sumPriceSize', DEFAULTS.sumPriceSize);
+      setVal('specSize', DEFAULTS.specSize);
+      S.subManual = false;
       setStyle('K'); setTrade(data.trade === 'sale' ? 'sale' : 'rent');
       return true;
     }
@@ -1976,6 +1994,15 @@ function loadState(){
       else if (DEFAULTS[id] !== undefined) setVal(id, DEFAULTS[id]);
     });
     if (data.subMode) $('subMode').value = data.subMode;
+    if (data.v === LS_VER){
+      S.subManual = !!data.subManual;
+    } else {
+      /* 예전 하단 2칸 시절 저장값 → 새 2단 기본 크기로 맞추고 사진 위 배지 문구는 비운다 */
+      setVal('sumPriceSize', DEFAULTS.sumPriceSize);
+      setVal('specSize', DEFAULTS.specSize);
+      setVal('sub', '');
+      S.subManual = false;
+    }
     setStyle(data.style === 'A' || data.style === 'B' ? data.style : 'K');
     setTrade(data.trade === 'sale' ? 'sale' : 'rent');
     return true;
@@ -1983,6 +2010,9 @@ function loadState(){
 }
 function fillDefaults(){
   TEXT_IDS.forEach(function(id){ setVal(id, DEFAULTS[id] || ''); });
+  /* 김해 진영읍형은 사진 위 흰 배지를 비워 사진을 넓게 쓴다 (직접 적으면 나온다) */
+  if (S.style === 'K') setVal('sub', '');
+  S.subManual = false;
   /* 거래구분에 맞는 배지·가격·전화로 맞춰 준다 */
   const t = TPL[S.trade] || TPL.rent;
   setVal('badge', t.badge);
@@ -2359,7 +2389,9 @@ function fillFromLedger(it){
 
   setVal('t1', it.dong);
   setVal('t2', it.t2);
-  setVal('sub', it.sub);
+  /* 김해 진영읍형은 면적·층고를 하단 바가 맡으므로 사진 위 배지는 비운다 */
+  setVal('sub', S.style === 'K' ? '' : it.sub);
+  S.subManual = false;
 
   for (let i = 0; i < 5; i++) setVal('chk' + i, it.checks[i] || '');
   for (let i = 0; i < 4; i++){
@@ -2462,7 +2494,10 @@ function initLedger(){
 
 /* -------------------------------------------------------------------- UI */
 function setStyle(v){
+  const wasK = S.style === 'K';
   S.style = v;
+  /* 김해 진영읍형으로 돌아올 때, 직접 적은 적 없는 배지 문구는 비워 둔다 */
+  if (v === 'K' && !wasK && !S.subManual) setVal('sub', '');
   Array.prototype.forEach.call(document.querySelectorAll('#styleSeg button'), function(b){
     b.classList.toggle('on', b.dataset.style === v);
   });
@@ -2477,8 +2512,8 @@ function updatePanels(){
   /* 사진만 쓰는 스타일 A에는 체크리스트가 없어 본문 크기 조절을 숨긴다 */
   $('bodySizeBox').hidden = S.style === 'A';
   $('titleSizeNote').textContent = k ? '노란 줄 기준' : '제목 기준';
-  $('subLabel').textContent = k ? '흰 배지 · 핵심 스펙' : '부제 · 한 줄 설명';
-  $('sub').placeholder = k ? '예) 대지 300평 · 층고 12.9m' : '예) 북항 초입 | 40m 대로변';
+  $('subLabel').textContent = k ? '사진 위 흰 배지 (비우면 안 나옴)' : '부제 · 한 줄 설명';
+  $('sub').placeholder = k ? '적으면 사진 위에 흰 배지가 나옵니다' : '예) 북항 초입 | 40m 대로변';
 }
 function setTrade(v){
   S.trade = v;
@@ -2537,7 +2572,10 @@ function init(){
 
   TEXT_IDS.forEach(function(id){
     const el = $(id);
-    if (el) el.addEventListener('input', function(){ render(); saveState(); });
+    if (el) el.addEventListener('input', function(){
+      if (id === 'sub') S.subManual = true;
+      render(); saveState();
+    });
   });
   $('subMode').addEventListener('change', function(){ render(); saveState(); });
   $('focusX').addEventListener('input', render);
