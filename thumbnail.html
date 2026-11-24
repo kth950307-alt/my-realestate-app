@@ -883,8 +883,8 @@ function kSummaryBar(top, barH){
     if (bits.length >= 2){
       let fs = 44;
       for (let i = 0; i < 2; i++) fs = Math.min(fs, fitSize(bits[i], 900, maxPW, 44, 22, -1));
-      const lh = fs;
-      let ly = ay + (ah - lh * 2) / 2 + lh / 2;
+      const lh = fs + 2;
+      let ly = ay + (ah - lh * 2) / 2 + lh / 2 - 1;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#D51C24';
