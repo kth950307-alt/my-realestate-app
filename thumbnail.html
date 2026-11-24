@@ -322,13 +322,12 @@
       <label class="f"><span>체크 4</span><input type="text" id="chk3" maxlength="34"></label>
       <label class="f"><span>체크 5</span><input type="text" id="chk4" maxlength="34"></label>
 
-      <div class="cardTitle" style="margin:14px 0 8px">하단 카드 4칸</div>
+      <div class="cardTitle" style="margin:14px 0 8px">하단 큰 글씨 2칸 (핵심 스펙)</div>
       <div class="specGrid">
-        <div class="specRow k"><input type="text" id="kSpecL0" maxlength="10" aria-label="카드1 항목" placeholder="항목"><input type="text" id="kSpecV0" maxlength="24" aria-label="카드1 값" placeholder="값 (예: 1,200평)"></div>
-        <div class="specRow k"><input type="text" id="kSpecL1" maxlength="10" aria-label="카드2 항목" placeholder="항목"><input type="text" id="kSpecV1" maxlength="24" aria-label="카드2 값" placeholder="값"></div>
-        <div class="specRow k"><input type="text" id="kSpecL2" maxlength="10" aria-label="카드3 항목" placeholder="항목"><input type="text" id="kSpecV2" maxlength="24" aria-label="카드3 값" placeholder="값 (예: 12.9m)"></div>
-        <div class="specRow k"><input type="text" id="kSpecL3" maxlength="10" aria-label="카드4 항목" placeholder="항목"><input type="text" id="kSpecV3" maxlength="24" aria-label="카드4 값" placeholder="값 (예: 설치 / 미설치)"></div>
+        <div class="specRow k"><input type="text" id="kSpecL0" maxlength="10" aria-label="핵심1 항목" placeholder="항목 (예: 건물면적)"><input type="text" id="kSpecV0" maxlength="24" aria-label="핵심1 값" placeholder="값 (예: 60평)"></div>
+        <div class="specRow k"><input type="text" id="kSpecL1" maxlength="10" aria-label="핵심2 항목" placeholder="항목 (예: 층고)"><input type="text" id="kSpecV1" maxlength="24" aria-label="핵심2 값" placeholder="값 (예: 5m)"></div>
       </div>
+      <p class="hint">하단은 <b>왼쪽 가격 + 오른쪽 핵심 스펙</b> 두 칸입니다. 위에 적은 항목·값이 오른쪽에 <b>큰 글씨</b>로 들어가고, 장부에서 불러오면 면적·층고 같은 핵심 값이 자동으로 채워집니다.</p>
 
       <div class="row2">
         <label class="f"><span>대표 전화</span>
@@ -413,10 +412,10 @@ const DEFAULTS = {
   price: '보증금 5억 / 월 4,500만',
   phone: '032-576-2600',
   address: '인천 서구 건지로 167 (석남동)',
-  kSpecL0: '대지면적', kSpecV0: '1,200평',
-  kSpecL1: '건물면적', kSpecV1: '1,035평',
-  kSpecL2: '층고',     kSpecV2: '7~9m',
-  kSpecL3: '호이스트', kSpecV3: '설치',
+  kSpecL0: '건물면적', kSpecV0: '882평',
+  kSpecL1: '층고',     kSpecV1: '7~9m',
+  kSpecL2: '',       kSpecV2: '',
+  kSpecL3: '',       kSpecV3: '',
   chk0: '북항 초입 · 40m 대로변',
   chk1: '1층 882평 + 사무동 153평',
   chk2: '층고 7~9m · 동력 20kW',
@@ -697,7 +696,7 @@ function placeholder(x, y, w, h, note){
 /* =========================================================================
    STYLE K — 김해 진영읍형 (기본)
    ========================================================================= */
-const K_FOOT_H = 112, K_BAR_H = 158;
+const K_FOOT_H = 78, K_BAR_H = 152;
 
 function kOutlined(text, x, y, size, yellow){
   setFont(900, size, -3);
@@ -837,115 +836,174 @@ function kSummaryBar(top, barH){
   ctx.fillStyle = '#0F2A55';
   ctx.fillRect(0, top, W, 4);
 
-  const cardY = top + 16;
-  const cardH = barH - 32;
-  const priceW = 256;
-  const gap = 9;
-
-  /* --- 가격 카드 --- */
+  const cardY = top + 12;
+  const cardH = barH - 24;
   const px = 20;
+  const priceW = 396;
+  const gap = 12;
+  const sx = px + priceW + gap;
+  const sW = W - px - sx;
+
+  /* ---------------- 왼쪽: 붉은 가격 카드 ---------------- */
   ctx.save();
   ctx.shadowColor = 'rgba(16,27,46,.16)';
   ctx.shadowBlur = 12;
   ctx.shadowOffsetY = 4;
   ctx.fillStyle = '#FFFFFF';
-  rr(px, cardY, priceW, cardH, 16);
+  rr(px, cardY, priceW, cardH, 18);
   ctx.fill();
   ctx.restore();
+
+  const rh = 32;
   ctx.save();
-  rr(px, cardY, priceW, cardH, 16);
+  rr(px, cardY, priceW, cardH, 18);
   ctx.clip();
-  const rg = ctx.createLinearGradient(px, cardY, px, cardY + 48);
+  const rg = ctx.createLinearGradient(px, cardY, px, cardY + rh);
   rg.addColorStop(0, '#E8241D');
   rg.addColorStop(1, '#B01217');
   ctx.fillStyle = rg;
-  ctx.fillRect(px, cardY, priceW, 48);
+  ctx.fillRect(px, cardY, priceW, rh);
   ctx.restore();
+
   ctx.strokeStyle = '#D9E0EB';
   ctx.lineWidth = 1.5;
-  rr(px, cardY, priceW, cardH, 16);
+  rr(px, cardY, priceW, cardH, 18);
   ctx.stroke();
 
   const plab = (S.priceLabel || '').trim();
-  if (plab){
-    plain(plab, px + priceW / 2, cardY + 13, 800, 27, '#FFFFFF', 'center', 1);
-  }
+  if (plab) plain(plab, px + priceW / 2, cardY + 6, 800, 21, '#FFFFFF', 'center', 0.8);
 
   const priceText = (S.price || '').trim();
-  const pAreaY = cardY + 52;
-  const pAreaH = cardH - 56;
+  const maxPW = priceW - 44;
+  const ay = cardY + rh;
+  const ah = cardH - rh;
   if (priceText){
-    const maxPW = priceW - 28;
-    let oneLine = fitSize(priceText, 900, maxPW, 58, 24, -1);
-    if (oneLine > 30){
-      setFont(900, oneLine, -1);
+    /* "보증금 1,800만 / 월 180만" 처럼 슬래시가 있으면 두 줄로 큼직하게 */
+    const bits = priceText.split('/').map(function(s){ return s.trim(); }).filter(Boolean);
+    if (bits.length >= 2){
+      let fs = 46;
+      for (let i = 0; i < 2; i++) fs = Math.min(fs, fitSize(bits[i], 900, maxPW, 46, 22, -1));
+      const lh = fs;
+      let ly = ay + (ah - lh * 2) / 2 + lh / 2;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#D51C24';
-      ctx.fillText(priceText, px + priceW / 2, pAreaY + pAreaH / 2 + 1);
-    } else {
-      let ls;
-      const slash = priceText.split('/').map(function(s){ return s.trim(); }).filter(Boolean);
-      if (slash.length === 2) ls = slash;
-      else ls = wrapText(priceText, maxPW, 900, 34, -1, 2);
-      const lh = 36;
-      let ly = pAreaY + (pAreaH - ls.length * lh) / 2 + lh / 2 + 1;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#D51C24';
-      ls.forEach(function(l){
-        setFont(900, 34, -1);
-        ctx.fillText(l, px + priceW / 2, ly);
+      for (let i = 0; i < 2; i++){
+        setFont(900, fs, -1);
+        ctx.fillText(bits[i], px + priceW / 2, ly);
         ly += lh;
-      });
-    }
-  }
-
-  /* --- 스펙 카드 --- */
-  const specs = [];
-  for (let i = 0; i < 4; i++){
-    const l = (S['kSpecL' + i] || '').trim(), v = (S['kSpecV' + i] || '').trim();
-    if (l || v) specs.push({ l: l, v: v });
-  }
-  const n = Math.max(specs.length, 1);
-  const cw = (W - 40 - priceW - gap - (n - 1) * gap) / n;
-  let cx = px + priceW + gap;
-  const icons = ['land', 'layer', 'height', 'lift'];
-
-  specs.forEach(function(sp, i){
-    ctx.save();
-    ctx.shadowColor = 'rgba(16,27,46,.10)';
-    ctx.shadowBlur = 10;
-    ctx.shadowOffsetY = 3;
-    ctx.fillStyle = '#FFFFFF';
-    rr(cx, cardY, cw, cardH, 16);
-    ctx.fill();
-    ctx.restore();
-    ctx.strokeStyle = '#DCE3EE';
-    ctx.lineWidth = 1.5;
-    rr(cx, cardY, cw, cardH, 16);
-    ctx.stroke();
-
-    drawIcon(icons[i % 4], cx + 14, cardY + 10, 26, '#1B3B6F');
-
-    const innerW = cw - 28;
-    if (sp.l){
-      const lfs = fitSize(sp.l, 700, innerW, 22, 14, 0);
-      plain(sp.l, cx + 14, cardY + 43, 700, lfs, '#5C6D86', 'left', 0.2);
-    }
-    if (sp.v){
-      /* 괄호 부분은 작게 아래에 */
-      let main = sp.v, paren = '';
-      const m = sp.v.match(/^(.*?)\s*(\(.*\))\s*$/);
-      if (m && m[1]){ main = m[1].trim(); paren = m[2].replace(/^\(|\)$/g, '').trim(); }
-      const vfs = fitSize(main, 900, innerW, 34, 19, -0.8);
-      plain(main, cx + 14, cardY + 64, 900, vfs, '#10233F', 'left', -0.8);
-      if (paren){
-        const pfs = fitSize(paren, 700, innerW, 19, 13, 0);
-        plain(paren, cx + 14, cardY + 64 + vfs + 4, 700, pfs, '#64748B', 'left', 0);
       }
+    } else {
+      const fs = fitSize(priceText, 900, maxPW, 68, 24, -1);
+      setFont(900, fs, -1);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#D51C24';
+      ctx.fillText(priceText, px + priceW / 2, ay + ah / 2 + 1);
     }
-    cx += cw + gap;
+  }
+
+  /* ---------------- 오른쪽: 핵심 요약 한 칸 ---------------- */
+  ctx.save();
+  ctx.shadowColor = 'rgba(16,27,46,.10)';
+  ctx.shadowBlur = 10;
+  ctx.shadowOffsetY = 3;
+  ctx.fillStyle = '#FFFFFF';
+  rr(sx, cardY, sW, cardH, 18);
+  ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle = '#DCE3EE';
+  ctx.lineWidth = 1.5;
+  rr(sx, cardY, sW, cardH, 18);
+  ctx.stroke();
+
+  ctx.save();
+  rr(sx, cardY, sW, cardH, 18);
+  ctx.clip();
+  ctx.fillStyle = '#1D4ED8';
+  ctx.fillRect(sx, cardY, 7, cardH);
+  ctx.restore();
+
+  /* 입력된 스펙 중 앞의 1~2개만 큼직하게 */
+  const specs = [];
+  for (let i = 0; i < 4 && specs.length < 2; i++){
+    const l = (S['kSpecL' + i] || '').trim();
+    const v = (S['kSpecV' + i] || '').trim();
+    if (v) specs.push({ l: l, v: v });
+  }
+
+  const inX = sx + 32;
+  const inW = sW - 62;
+  const cy = cardY + cardH / 2;
+
+  if (!specs.length){
+    plain('면적 · 층고 같은 핵심 스펙', inX, cy - 16, 800, 31, '#A3B2C6', 'left', 0);
+    return;
+  }
+
+  const LV = 56, LL = 33, LD = 30, VL = -0.9, LLG = 0.4;
+
+  function groupW(list, k){
+    let sum = 0;
+    list.forEach(function(sp, i){
+      if (i){
+        setFont(900, LD * k, 0);
+        sum += ctx.measureText('·').width + 40 * k;
+      }
+      if (sp.l){
+        setFont(800, LL * k, LLG);
+        sum += ctx.measureText(sp.l).width + 14 * k;
+      }
+      setFont(900, LV * k, VL);
+      sum += ctx.measureText(sp.v).width;
+    });
+    return sum;
+  }
+  function groupDraw(list, k, x0, baseY){
+    let cx2 = x0;
+    list.forEach(function(sp, i){
+      if (i){
+        setFont(900, LD * k, 0);
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = '#AEBCCE';
+        ctx.fillText('·', cx2 + 20 * k, baseY);
+        cx2 += ctx.measureText('·').width + 40 * k;
+      }
+      if (sp.l){
+        setFont(800, LL * k, LLG);
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = '#5C6D86';
+        ctx.fillText(sp.l, cx2, baseY);
+        cx2 += ctx.measureText(sp.l).width + 14 * k;
+      }
+      setFont(900, LV * k, VL);
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = '#10233F';
+      ctx.fillText(sp.v, cx2, baseY);
+      cx2 += ctx.measureText(sp.v).width;
+    });
+  }
+
+  if (groupW(specs, 1) <= inW){
+    groupDraw(specs, 1, inX, cy + LV * 0.36);
+    return;
+  }
+  if (specs.length === 1){
+    let k = 1;
+    while (k > 0.62 && groupW(specs, k) > inW) k -= 0.02;
+    groupDraw(specs, k, inX, cy + LV * k * 0.36);
+    return;
+  }
+  /* 한 줄로는 작아지므로 스펙별로 두 줄에 크게 */
+  const lineH = 58;
+  specs.forEach(function(sp, i){
+    let k = 1;
+    while (k > 0.62 && groupW([sp], k) > inW) k -= 0.02;
+    const baseY = cy - lineH + lineH * (i + 0.5) + LV * k * 0.36;
+    groupDraw([sp], k, inX, baseY);
   });
 }
 
@@ -1011,16 +1069,16 @@ function kFooter(top){
   /* 오른쪽: 대표 전화(로열블루) + 주소 */
   let pw = 0;
   if (phone){
-    const pfs = fitSize(phone, 900, 330, 45, 26, -0.5);
+    const pfs = fitSize(phone, 900, 360, 40, 24, -0.5);
     setFont(900, pfs, -0.5);
     pw = ctx.measureText(phone).width;
     ctx.textAlign = 'right';
     ctx.textBaseline = 'top';
     ctx.fillStyle = '#1D4ED8';
-    ctx.fillText(phone, rx, cy - 36);
+    ctx.fillText(phone, rx, cy - 31);
 
     /* 파란 원형 전화 아이콘 */
-    const ir = 18, icy = cy - 36 + pfs * 0.38, icx = rx - pw - 12 - ir;
+    const ir = 16, icy = cy - 31 + pfs * 0.38, icx = rx - pw - 10 - ir;
     ctx.save();
     ctx.shadowColor = 'rgba(37,99,235,.32)';
     ctx.shadowBlur = 8;
@@ -1031,15 +1089,15 @@ function kFooter(top){
     ctx.fillStyle = ig;
     ctx.beginPath(); ctx.arc(icx, icy, ir, 0, 6.2832); ctx.fill();
     ctx.restore();
-    drawPhoneSolid(icx, icy - 0.5, 28, '#FFFFFF');
+    drawPhoneSolid(icx, icy - 0.5, 25, '#FFFFFF');
   }
   if (addr){
-    const afs = fitSize(addr, 700, 420, 20, 13, 0);
-    plain(addr, rx, cy + 13, 700, afs, '#475569', 'right', 0);
+    const afs = fitSize(addr, 700, 430, 19, 12, 0);
+    plain(addr, rx, cy + 9, 700, afs, '#475569', 'right', 0);
   }
 
   /* 왼쪽: 로열블루 라운드 배지 + 흰색 공장 아이콘 */
-  const bs = 64, bx = 26, by = cy - bs / 2;
+  const bs = 50, bx = 26, by = cy - bs / 2;
   ctx.save();
   ctx.shadowColor = 'rgba(37,99,235,.28)';
   ctx.shadowBlur = 12;
@@ -1051,15 +1109,15 @@ function kFooter(top){
   rr(bx, by, bs, bs, 18);
   ctx.fill();
   ctx.restore();
-  drawIconFactorySolid(bx + 14, by + 12, 38);
+  drawIconFactorySolid(bx + 11, by + 10, 30);
 
   /* 상호 · 대표 */
   const lx = bx + bs + 16;
-  const rightEdge = phone ? rx - pw - 12 - 34 - 18 : rx - 18;
+  const rightEdge = phone ? rx - pw - 10 - 32 - 16 : rx - 18;
   const nameMax = Math.max(180, rightEdge - lx - 14);
-  const nfs = fitSize('우리부동산 공인중개사사무소', 900, nameMax, 29, 21, -0.6);
-  plain('우리부동산 공인중개사사무소', lx, cy - 30, 900, nfs, '#0F172A', 'left', -0.6);
-  plain('대표 김태형 · 공인중개사', lx, cy + 8, 700, 21, '#475569', 'left', 0);
+  const nfs = fitSize('우리부동산 공인중개사사무소', 900, nameMax, 27, 20, -0.6);
+  plain('우리부동산 공인중개사사무소', lx, cy - 25, 900, nfs, '#0F172A', 'left', -0.6);
+  plain('대표 김태형 · 공인중개사', lx, cy + 4, 700, 18, '#475569', 'left', 0);
 }
 
 function drawK(){
