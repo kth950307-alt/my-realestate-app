@@ -131,6 +131,11 @@
   .countLine{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 10px; flex-wrap:wrap}
   .countLine h2{margin:0; font-size:14px; font-weight:900; color:#1c2b41; letter-spacing:-.3px}
   .countLine .cnt{font-size:11.5px; font-weight:800; color:var(--royal-dark); background:#e9f0fb; padding:4px 9px; border-radius:999px}
+  @media (max-width:900px){
+    .ph .btns{flex-wrap:wrap; gap:5px}
+    .ph .btns button{flex:1 1 0; min-width:34px; padding:9px 0}
+    .ph .btns button.save{flex:1 1 100%; order:9; margin-top:1px}
+  }
   /* ── 미리보기 제목 ── */
   .secT{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 10px}
   .secT h2{margin:0; font-size:14.5px; font-weight:900; color:var(--navy); letter-spacing:-.4px}
@@ -485,6 +490,7 @@ function renderGrid(){
   const grid = $('grid');
   const jobs = buildPlan();
   grid.textContent = '';
+  syncSaveBtns();
 
   $('empty').hidden = ST.items.length > 0;
   if (!ST.items.length){
@@ -759,6 +765,11 @@ function syncOutputs(){
     b.classList.toggle('on', b.dataset.fmt === ST.fmt);
   });
   $('pairOptBox').hidden = ST.mode !== 'pair';
+  syncSaveBtns();
+}
+
+/* 사진이 있을 때만 저장 버튼이 눌리게 (사진을 올린 직후에도 바로) */
+function syncSaveBtns(){
   const has = ST.items.length > 0;
   [$('btnZip'), $('btnZipTop'), $('btnZipM')].forEach(function(b){ if (b) b.disabled = !has; });
 }
