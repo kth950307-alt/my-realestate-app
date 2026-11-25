@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>우리부동산 사진 워터마크 · 2분할 합치기</title>
+<meta name="description" content="현장 사진 여러 장에 우리부동산 워터마크를 한 번에 넣고, 두 장씩 가로로 합쳐 저장하는 도구">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" defer></script>
+<style>
+  :root{
+    --navy:#1e3a8a; --royal:#2563eb; --royal-dark:#1e40af;
+    --gold:#f59e0b; --gold-soft:#fef3c7;
+    --ink:#1e293b; --ink2:#475569; --muted:#64748b;
+    --line:#e2e8f0; --bg:#f6f8fc; --card:#fff; --ok:#059669;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  [hidden]{display:none !important}
+  html,body{margin:0; padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+    -webkit-text-size-adjust:100%;
+  }
+  button{font-family:inherit; cursor:pointer;}
+  /* ── 상단 바 ── */
+  .topbar{
+    position:sticky; top:0; z-index:30; display:flex; align-items:center; gap:10px;
+    padding:10px 16px; background:#fff; border-bottom:1px solid var(--line);
+    box-shadow:0 2px 14px rgba(30,64,175,.05); flex-wrap:wrap;
+  }
+  .logo{
+    flex:0 0 auto; width:34px; height:34px; border-radius:11px;
+    background:linear-gradient(140deg,#3B82F6,#1D4ED8);
+    display:flex; align-items:center; justify-content:center; font-size:18px;
+    box-shadow:0 4px 12px rgba(37,99,235,.26);
+  }
+  .brandT{min-width:0}
+  .brandT h1{margin:0; font-size:15.5px; font-weight:900; color:var(--navy); letter-spacing:-.5px; line-height:1.25}
+  .brandT p{margin:2px 0 0; font-size:11.5px; font-weight:600; color:var(--muted)}
+  .topBtns{margin-left:auto; display:flex; gap:7px}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    font-size:13px; font-weight:800; letter-spacing:-.2px; padding:10px 14px;
+    border-radius:11px; border:1px solid var(--line); background:#fff; color:var(--ink2);
+    white-space:nowrap; transition:.12s;
+  }
+  .btn:hover{background:#f8fafc}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{background:linear-gradient(140deg,#3B82F6,#1D4ED8); color:#fff; border-color:#1D4ED8; box-shadow:0 4px 12px rgba(37,99,235,.24)}
+  .btn.gold{background:var(--gold); border-color:#e0a008; color:#3a2a00}
+  .btn.ghost{background:#fff}
+  .btn:disabled{opacity:.45; cursor:not-allowed; box-shadow:none}
+  /* ── 레이아웃 ── */
+  main{
+    display:grid; grid-template-columns:minmax(0,1fr) 404px; gap:18px;
+    max-width:1360px; margin:0 auto; padding:16px; align-items:start;
+  }
+  .panel{display:flex; flex-direction:column; gap:12px; min-width:0}
+  .card{background:#fff; border:1px solid var(--line); border-radius:15px; padding:14px}
+  .cardT{
+    display:flex; align-items:center; gap:8px; margin:0 0 11px;
+    font-size:13.5px; font-weight:900; color:#1c2b41; letter-spacing:-.3px;
+  }
+  .tag{font-size:10.5px; font-weight:800; color:var(--royal-dark); background:#e8f0fb; padding:3px 7px; border-radius:6px}
+  .tag.gray{color:var(--muted); background:#eef1f6}
+  label.f{display:block; margin-bottom:10px}
+  label.f>span{display:block; font-size:11.5px; font-weight:700; color:var(--muted); margin-bottom:5px}
+  input[type=text],select{
+    width:100%; padding:11px 12px; border:1px solid #dce2ec; border-radius:10px;
+    font-family:inherit; font-size:15px; background:#fff; color:var(--ink);
+  }
+  input[type=text]:focus,select:focus{outline:2px solid #BFD4F2; border-color:#8FB2E3}
+  .seg{display:flex; gap:5px; background:#eef2f8; padding:4px; border-radius:12px}
+  .seg button{
+    flex:1; background:transparent; border:0; color:#5a6a80; font-size:13.5px; font-weight:800;
+    padding:11px 6px; border-radius:9px; line-height:1.25;
+  }
+  .seg button.on{background:#fff; color:var(--navy); box-shadow:0 1px 4px rgba(16,27,46,.10)}
+  .seg.col4{gap:4px}
+  .seg.col4 button{font-size:12.5px; padding:10px 4px}
+  .chk{display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; color:#41505f; padding:6px 0 2px; cursor:pointer}
+  .chk input{width:19px; height:19px; accent-color:var(--royal); margin:0}
+  .hint{font-size:11.5px; color:#8494a8; line-height:1.55; margin:8px 0 0}
+  .hint b{color:#41505f}
+  .rangeRow{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:2px}
+  .rangeRow span{font-size:11.5px; font-weight:700; color:var(--muted)}
+  .rangeRow b{
+    font-size:11.5px; font-weight:800; color:var(--royal-dark); background:#e9f0fb;
+    border-radius:7px; padding:3px 8px; min-width:50px; text-align:center; font-variant-numeric:tabular-nums;
+  }
+  input[type=range]{width:100%; margin:4px 0 10px; accent-color:var(--royal)}
+  /* ── 올리기 ── */
+  .dropBig{
+    border:2px dashed #c9d3e2; border-radius:16px; background:#fff; padding:26px 16px;
+    text-align:center; cursor:pointer; transition:.14s; margin-bottom:14px;
+  }
+  .dropBig:hover,.dropBig.drag{border-color:var(--royal); background:#eef4fc}
+  .dropBig .ic{font-size:30px; line-height:1}
+  .dropBig b{display:block; font-size:16px; font-weight:900; color:#243349; margin-top:6px; letter-spacing:-.4px}
+  .dropBig i{display:block; font-style:normal; font-size:12px; color:#8494a8; margin-top:4px}
+  .dropBig.mini{padding:15px 14px; margin-bottom:12px}
+  .dropBig.mini .ic{font-size:20px}
+  .dropBig.mini b{font-size:14px; margin-top:2px}
+  /* ── 사진 그리드 ── */
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px}
+  .ph{background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; box-shadow:0 4px 14px rgba(16,27,46,.05)}
+  .ph .cvBox{background:#0e1b2e; display:flex; align-items:center; justify-content:center; min-height:120px}
+  .ph canvas{display:block; width:100%; height:auto}
+  .ph .foot{padding:8px 9px 9px}
+  .ph .nm{
+    display:block; font-size:11.5px; font-weight:700; color:#41505f; line-height:1.35;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .ph .nm small{display:block; font-size:10.5px; font-weight:600; color:#94a3b8}
+  .ph .btns{display:flex; gap:4px; margin-top:7px}
+  .ph .btns button{
+    border:1px solid var(--line); background:#f8fafc; color:#475569; border-radius:8px;
+    font-size:12px; font-weight:800; padding:7px 0; flex:1; min-width:0;
+  }
+  .ph .btns button.save{background:var(--royal); border-color:var(--royal); color:#fff; flex:1.7}
+  .ph .btns button.del{color:#b91c1c; flex:.7}
+  .ph .btns button:disabled{opacity:.35}
+  .empty{
+    border:1px dashed #cfd9e8; border-radius:16px; padding:34px 18px; text-align:center;
+    font-size:13px; color:#8fa0b6; line-height:1.7; background:#fbfcfe;
+  }
+  .empty b{display:block; font-size:15px; color:#41505f; margin-bottom:4px}
+  .countLine{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 10px; flex-wrap:wrap}
+  .countLine h2{margin:0; font-size:14px; font-weight:900; color:#1c2b41; letter-spacing:-.3px}
+  .countLine .cnt{font-size:11.5px; font-weight:800; color:var(--royal-dark); background:#e9f0fb; padding:4px 9px; border-radius:999px}
+  /* ── 미리보기 제목 ── */
+  .secT{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 10px}
+  .secT h2{margin:0; font-size:14.5px; font-weight:900; color:var(--navy); letter-spacing:-.4px}
+  .secT span{font-size:11px; font-weight:700; color:var(--muted)}
+  /* ── 토스트 ── */
+  .toast{
+    position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(12px);
+    background:rgba(15,23,42,.94); color:#fff; font-size:13px; font-weight:700;
+    padding:12px 18px; border-radius:12px; z-index:80; opacity:0; pointer-events:none;
+    transition:opacity .2s, transform .2s; max-width:88vw; text-align:center; line-height:1.45;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+  /* ── 하단 고정 저장(모바일) ── */
+  .mobar{display:none}
+  @media (max-width:900px){
+    main{display:flex; flex-direction:column; padding:10px; gap:12px}
+    .gridWrap{order:1; width:100%}
+    .panel{order:2; width:100%}
+    .topbar{padding:9px 12px}
+    .brandT h1{font-size:14px}
+    .brandT p{display:none}
+    .btn{padding:9px 11px; font-size:12.5px}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:9px}
+    .ph .btns button{font-size:11.5px; padding:8px 0}
+    body{padding-bottom:78px}
+    .mobar{
+      display:flex; position:fixed; left:0; right:0; bottom:0; z-index:40; gap:8px;
+      padding:9px 12px calc(9px + env(safe-area-inset-bottom)); background:rgba(255,255,255,.97);
+      border-top:1px solid var(--line); box-shadow:0 -4px 18px rgba(16,27,46,.08);
+    }
+    .mobar .btn{flex:1; padding:13px 10px; font-size:14.5px}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo" aria-hidden="true">📸</div>
+  <div class="brandT">
+    <h1>사진 워터마크 · 2분할 합치기</h1>
+    <p>현장 사진 여러 장을 한 번에 — 워터마크 넣고, 두 장씩 합쳐서 저장</p>
+  </div>
+  <div class="topBtns">
+    <button type="button" class="btn ghost" id="btnClearAll">모두 지우기</button>
+    <button type="button" class="btn primary" id="btnZipTop">일괄 저장</button>
+  </div>
+</div>
+
+<main>
+  <section class="gridWrap">
+    <div class="dropBig" id="dropBig">
+      <input type="file" id="fileInput" accept="image/*" multiple hidden>
+      <div class="ic">＋</div>
+      <b>사진 올리기 (여러 장 한 번에)</b>
+      <i>눌러서 선택 · 끌어다 놓기 · 붙여넣기(Ctrl+V)</i>
+    </div>
+
+    <div class="secT">
+      <h2>결과 미리보기</h2>
+      <span id="planInfo">사진을 올리면 바로 보여요</span>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty">
+      <b>아직 사진이 없어요</b>
+      위 칸을 눌러 현장 사진을 올려 주세요.<br>워터마크만 넣기 / 두 장씩 가로로 합치기 중에서 고르면 바로 결과가 나옵니다.
+    </div>
+  </section>
+
+  <aside class="panel">
+
+    <div class="card">
+      <div class="cardT">1. 작업 방법</div>
+      <div class="seg" id="modeSeg">
+        <button type="button" data-mode="wm" class="on">💧 워터마크만</button>
+        <button type="button" data-mode="pair">🖼️ 2장 가로 합치기</button>
+      </div>
+      <div id="pairOptBox" hidden>
+        <label class="f" style="margin-top:11px; margin-bottom:6px"><span>합친 사진 비율</span>
+          <select id="ratioSel">
+            <option value="169">가로 와이드 (16:9) · 1600×900</option>
+            <option value="43">가로 4:3 · 1600×1200</option>
+            <option value="11">정사각 1:1 · 1400×1400</option>
+          </select>
+        </label>
+        <label class="chk"><input type="checkbox" id="wmOnPair" checked> 합친 사진에도 워터마크 넣기</label>
+        <p class="hint">사진은 올린 <b>순서대로 두 장씩</b> 짝이 됩니다. 홀수로 남은 마지막 사진은 한 장 그대로 저장됩니다.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardT">2. 워터마크 <span class="tag">글자·위치</span></div>
+      <label class="f"><span>워터마크 문구</span>
+        <input type="text" id="wmText" maxlength="40" placeholder="우리부동산 032-576-2600">
+      </label>
+      <div class="seg col4" id="posSeg">
+        <button type="button" data-pos="br" class="on">우측 하단</button>
+        <button type="button" data-pos="diag">중앙 대각선</button>
+        <button type="button" data-pos="bar">하단 바</button>
+      </div>
+      <div style="height:12px"></div>
+      <div class="rangeRow"><span>진하기(투명도)</span><b id="opOut">55%</b></div>
+      <input type="range" id="opRange" min="10" max="100" step="5" value="55">
+      <div class="rangeRow"><span>글자 크기</span><b id="szOut">4.0%</b></div>
+      <input type="range" id="szRange" min="1.5" max="12" step="0.5" value="4">
+      <p class="hint">문구를 <b>비우면</b> 워터마크 없이 사진만 저장됩니다.</p>
+    </div>
+
+    <div class="card">
+      <div class="cardT">3. 저장 설정</div>
+      <div class="seg" id="fmtSeg" style="margin-bottom:10px">
+        <button type="button" data-fmt="jpg" class="on">JPG (용량 작음)</button>
+        <button type="button" data-fmt="png">PNG (원본 화질)</button>
+      </div>
+      <label class="f" style="margin-bottom:0"><span>저장 크기</span>
+        <select id="sizeSel">
+          <option value="1600">블로그용 · 긴 변 1600px</option>
+          <option value="1200">블로그용 · 긴 변 1200px</option>
+          <option value="0">원본 크기 그대로</option>
+        </select>
+      </label>
+      <p class="hint" id="saveHint">사진 카드의 <b>저장</b> 버튼으로 한 장씩, <b>일괄 저장</b>으로 전부 한 번에 받을 수 있어요.</p>
+    </div>
+
+    <div class="card">
+      <div class="cardT">4. 한 번에 저장</div>
+      <button type="button" class="btn primary" id="btnZip" style="width:100%; padding:14px; font-size:15px">전체 일괄 저장 (ZIP)</button>
+      <p class="hint">휴대폰에서는 <b>파일 앱 → 다운로드</b> 폴더에 ZIP이 받아집니다. 압축이 안 되면 사진을 한 장씩 저장해 주세요.</p>
+    </div>
+
+    <div class="card">
+      <div class="cardT">사진 관리</div>
+      <div class="dropBig mini" id="dropMini">
+        <div class="ic">＋</div>
+        <b>사진 더 올리기</b>
+      </div>
+      <button type="button" class="btn ghost" id="btnClear" style="width:100%">사진 모두 지우기</button>
+    </div>
+
+    <p class="hint" style="text-align:center; padding:2px 0 18px">
+      우리부동산 공인중개사사무소 · 김태형<br>사진은 이 브라우저 안에서만 처리되고 어디에도 올라가지 않습니다.
+    </p>
+  </aside>
+</main>
+
+<div class="mobar">
+  <button type="button" class="btn ghost" id="btnClearM">지우기</button>
+  <button type="button" class="btn primary" id="btnZipM">전체 일괄 저장</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+const $ = id => document.getElementById(id);
+const FF = '"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif';
+const PREVIEW_MAX = 520;
+
+/* --------------------------------------------------------------- 상태 */
+const ST = {
+  items: [],                    /* {key, name, img, w, h, url} */
+  mode: 'wm',                   /* wm | pair */
+  ratio: '169',
+  wmOnPair: true,
+  text: '우리부동산 032-576-2600',
+  pos: 'br',
+  opacity: 55,
+  size: 4,
+  fmt: 'jpg',
+  maxSide: 1600
+};
+let seq = 0;
+
+const LS_KEY = 'woori_photo_tool_v1';
+
+function saveState(){
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      mode: ST.mode, ratio: ST.ratio, wmOnPair: ST.wmOnPair,
+      text: ST.text, pos: ST.pos, opacity: ST.opacity, size: ST.size,
+      fmt: ST.fmt, maxSide: ST.maxSide
+    }));
+  } catch(e){}
+}
+function loadState(){
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    if (d.mode === 'pair' || d.mode === 'wm') ST.mode = d.mode;
+    if (d.ratio) ST.ratio = d.ratio;
+    if (typeof d.wmOnPair === 'boolean') ST.wmOnPair = d.wmOnPair;
+    if (typeof d.text === 'string' && d.text.trim()) ST.text = d.text;
+    if (d.pos) ST.pos = d.pos;
+    if (isFinite(d.opacity)) ST.opacity = Math.min(100, Math.max(10, d.opacity));
+    if (isFinite(d.size)) ST.size = Math.min(12, Math.max(1.5, d.size));
+    if (d.fmt) ST.fmt = d.fmt;
+    if (isFinite(d.maxSide)) ST.maxSide = d.maxSide;
+  } catch(e){}
+}
+
+/* --------------------------------------------------------------- 그리기 도구 */
+function setFont(c, weight, size, spacing){
+  c.font = weight + ' ' + size + 'px ' + FF;
+  try { c.letterSpacing = (spacing || 0) + 'px'; } catch(e){}
+}
+function textW(c, text, weight, size, spacing){
+  setFont(c, weight, size, spacing);
+  return c.measureText(text).width;
+}
+function fitFont(c, text, weight, maxW, maxSize, minSize){
+  let s = maxSize;
+  while (s > minSize && textW(c, text, weight, s, 0) > maxW) s -= 1;
+  return s;
+}
+/* 사진을 칸에 꽉 차게(잘라서) 그리기 */
+function drawCover(c, img, x, y, w, h){
+  if (!img || !img.naturalWidth){ return; }
+  const iw = img.naturalWidth, ih = img.naturalHeight;
+  const s = Math.max(w / iw, h / ih);
+  const dw = iw * s, dh = ih * s;
+  c.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+}
+
+function drawWatermark(c, w, h){
+  const text = String(ST.text || '').trim();
+  if (!text) return;
+  const op = Math.min(1, Math.max(0.05, ST.opacity / 100));
+  const base = Math.max(w, h);
+  let fs = Math.max(11, base * ST.size / 100);
+
+  if (ST.pos === 'bar'){
+    const barH = Math.round(fs * 2.1);
+    c.save();
+    c.globalAlpha = op;
+    c.fillStyle = 'rgba(8,16,28,.72)';
+    c.fillRect(0, h - barH, w, barH);
+    fs = fitFont(c, text, '800', w * 0.9, fs, Math.round(fs * 0.5));
+    setFont(c, '800', fs, -fs * 0.01);
+    c.fillStyle = '#fff';
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText(text, w / 2, h - barH / 2 + fs * 0.03);
+    c.restore();
+    return;
+  }
+
+  if (ST.pos === 'diag'){
+    c.save();
+    c.translate(w / 2, h / 2);
+    c.rotate(-Math.PI / 6);
+    const maxW = Math.sqrt(w * w + h * h) * 0.78;
+    fs = fitFont(c, text, '900', maxW, fs * 1.7, Math.round(fs * 0.6));
+    setFont(c, '900', fs, -fs * 0.01);
+    c.globalAlpha = op;
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.shadowColor = 'rgba(0,0,0,.5)';
+    c.shadowBlur = fs * 0.4;
+    c.fillStyle = '#fff';
+    c.fillText(text, 0, 0);
+    c.restore();
+    return;
+  }
+
+  /* 우측 하단 */
+  c.save();
+  const pad = Math.round(base * 0.024);
+  fs = fitFont(c, text, '800', w * 0.86, fs, Math.round(fs * 0.5));
+  setFont(c, '800', fs, -fs * 0.015);
+  c.globalAlpha = op;
+  c.textAlign = 'right';
+  c.textBaseline = 'bottom';
+  c.shadowColor = 'rgba(0,0,0,.62)';
+  c.shadowBlur = fs * 0.45;
+  c.shadowOffsetY = fs * 0.05;
+  c.fillStyle = '#fff';
+  c.fillText(text, w - pad, h - pad);
+  c.restore();
+}
+
+/* --------------------------------------------------------------- 작업 목록 */
+const RATIOS = {
+  '169': { w: 1600, h: 900 },
+  '43':  { w: 1600, h: 1200 },
+  '11':  { w: 1400, h: 1400 }
+};
+
+function fitted(iw, ih){
+  const maxSide = ST.maxSide;
+  if (!maxSide) return { w: iw, h: ih };
+  if (Math.max(iw, ih) <= maxSide) return { w: iw, h: ih };
+  const s = maxSide / Math.max(iw, ih);
+  return { w: Math.max(1, Math.round(iw * s)), h: Math.max(1, Math.round(ih * s)) };
+}
+
+/* 결과 1건 = 사진 1장(워터마크만) 또는 사진 2장(가로 합치기) */
+function buildPlan(){
+  const list = ST.items;
+  const jobs = [];
+  if (ST.mode === 'wm'){
+    list.forEach(function(it){
+      const d = fitted(it.w, it.h);
+      jobs.push({ type: 'single', items: [it], w: d.w, h: d.h, wm: true });
+    });
+    return jobs;
+  }
+  const r = RATIOS[ST.ratio] || RATIOS['169'];
+  for (let i = 0; i < list.length; i += 2){
+    if (i + 1 >= list.length){
+      const it = list[i];
+      const d = fitted(it.w, it.h);
+      jobs.push({ type: 'single', items: [it], w: d.w, h: d.h, wm: ST.wmOnPair });
+      break;
+    }
+    jobs.push({ type: 'pair', items: [list[i], list[i + 1]], w: r.w, h: r.h, wm: ST.wmOnPair, pairIndex: i / 2 });
+  }
+  return jobs;
+}
+
+function paint(job, canvas){
+  const w = job.w, h = job.h;
+  const scale = canvas.width / w;
+  canvas.height = Math.max(1, Math.round(h * scale));
+  const c = canvas.getContext('2d');
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.clearRect(0, 0, canvas.width, canvas.height);
+  c.setTransform(scale, 0, 0, scale, 0, 0);
+  c.fillStyle = '#0e1b2e';
+  c.fillRect(0, 0, w, h);
+  if (job.type === 'pair'){
+    const half = w / 2;
+    drawCover(c, job.items[0].img, 0, 0, half, h);
+    drawCover(c, job.items[1].img, half, 0, w - half, h);
+    c.fillStyle = 'rgba(255,255,255,.85)';
+    c.fillRect(half - 1, 0, 2, h);
+  } else {
+    drawCover(c, job.items[0].img, 0, 0, w, h);
+  }
+  if (job.wm) drawWatermark(c, w, h);
+}
+
+/* --------------------------------------------------------------- 미리보기 */
+let rafId = 0;
+function scheduleRender(){
+  if (rafId) cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(function(){ rafId = 0; renderGrid(); });
+}
+
+function renderGrid(){
+  const grid = $('grid');
+  const jobs = buildPlan();
+  grid.textContent = '';
+
+  $('empty').hidden = ST.items.length > 0;
+  if (!ST.items.length){
+    $('planInfo').textContent = '사진을 올리면 바로 보여요';
+  } else {
+    $('planInfo').textContent = jobs.length + '장 만들어짐 · 사진 ' + ST.items.length + '장';
+  }
+
+  jobs.forEach(function(job, idx){
+    const card = document.createElement('div');
+    card.className = 'ph';
+
+    const cvBox = document.createElement('div');
+    cvBox.className = 'cvBox';
+    const cv = document.createElement('canvas');
+    const pw = Math.min(PREVIEW_MAX, job.w);
+    cv.width = pw;
+    cvBox.appendChild(cv);
+    paint(job, cv);
+    card.appendChild(cvBox);
+
+    const foot = document.createElement('div');
+    foot.className = 'foot';
+
+    const nm = document.createElement('span');
+    nm.className = 'nm';
+    if (job.type === 'pair'){
+      nm.textContent = (idx + 1) + '. 가로 합치기';
+      const s = document.createElement('small');
+      s.textContent = shortName(job.items[0].name) + ' ＋ ' + shortName(job.items[1].name);
+      nm.appendChild(s);
+    } else {
+      nm.textContent = (idx + 1) + '. ' + shortName(job.items[0].name);
+      const s = document.createElement('small');
+      s.textContent = job.w + ' × ' + job.h + 'px';
+      nm.appendChild(s);
+    }
+    foot.appendChild(nm);
+
+    const btns = document.createElement('div');
+    btns.className = 'btns';
+
+    if (job.type === 'pair'){
+      btns.appendChild(mkBtn('◀', '앞 짝과 자리 바꾸기', function(){ movePair(job.pairIndex, -1); }, job.pairIndex === 0));
+      btns.appendChild(mkBtn('⇄', '두 사진 순서 바꾸기', function(){ swapPair(job.pairIndex); }));
+      btns.appendChild(mkBtn('▶', '뒤 짝과 자리 바꾸기', function(){ movePair(job.pairIndex, 1); }, job.pairIndex * 2 + 3 >= ST.items.length));
+    } else {
+      const it = job.items[0];
+      const pos = ST.items.indexOf(it);
+      btns.appendChild(mkBtn('◀', '앞으로', function(){ moveItem(pos, -1); }, pos === 0));
+      btns.appendChild(mkBtn('▶', '뒤로', function(){ moveItem(pos, 1); }, pos === ST.items.length - 1 || ST.mode === 'pair'));
+    }
+
+    const saveBtn = document.createElement('button');
+    saveBtn.type = 'button';
+    saveBtn.className = 'save';
+    saveBtn.textContent = '저장';
+    saveBtn.addEventListener('click', function(){ saveOne(job, idx); });
+    btns.appendChild(saveBtn);
+
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'del';
+    delBtn.textContent = '✕';
+    delBtn.addEventListener('click', function(){ removeJob(job); });
+    btns.appendChild(delBtn);
+
+    foot.appendChild(btns);
+    card.appendChild(foot);
+    grid.appendChild(card);
+  });
+}
+
+function mkBtn(label, title, fn, disabled){
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.textContent = label;
+  b.title = title;
+  b.disabled = !!disabled;
+  b.addEventListener('click', fn);
+  return b;
+}
+function shortName(n){
+  const s = String(n || '사진').replace(/\.[^.]+$/, '');
+  return s.length > 20 ? s.slice(0, 19) + '…' : s;
+}
+
+/* --------------------------------------------------------------- 순서·삭제 */
+function moveItem(from, dir){
+  const to = from + dir;
+  if (to < 0 || to >= ST.items.length) return;
+  const a = ST.items.splice(from, 1)[0];
+  ST.items.splice(to, 0, a);
+  scheduleRender();
+}
+function swapPair(pairIndex){
+  const a = pairIndex * 2;
+  if (a + 1 >= ST.items.length) return;
+  const t = ST.items[a];
+  ST.items[a] = ST.items[a + 1];
+  ST.items[a + 1] = t;
+  scheduleRender();
+}
+function movePair(pairIndex, dir){
+  const a = pairIndex * 2;
+  const next = a + (dir < 0 ? -2 : 2);
+  if (next < 0 || next + 1 >= ST.items.length) return;
+  const moved = ST.items.splice(a, 2);
+  ST.items.splice(next, 0, moved[0], moved[1]);
+  scheduleRender();
+}
+function removeJob(job){
+  job.items.forEach(function(it){
+    const i = ST.items.indexOf(it);
+    if (i >= 0) ST.items.splice(i, 1);
+    if (it.url) { try { URL.revokeObjectURL(it.url); } catch(e){} }
+  });
+  scheduleRender();
+  toast(job.items.length > 1 ? '두 장을 지웠어요' : '사진을 지웠어요');
+}
+
+/* --------------------------------------------------------------- 파일 읽기 */
+function addFiles(files){
+  const list = Array.prototype.slice.call(files || []);
+  const imgs = list.filter(function(f){ return f && /^image\//.test(f.type); });
+  if (!imgs.length){ toast('사진 파일(JPG · PNG)만 올릴 수 있어요'); return; }
+  let added = 0, failed = 0;
+  imgs.forEach(function(file){
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = function(){
+      if (!img.naturalWidth){ failed++; done(); return; }
+      ST.items.push({ key: 'p' + (++seq), name: file.name || 'photo.jpg', img: img, url: url,
+        w: img.naturalWidth, h: img.naturalHeight });
+      added++;
+      done();
+    };
+    img.onerror = function(){
+      failed++;
+      try { URL.revokeObjectURL(url); } catch(e){}
+      done();
+    };
+    img.src = url;
+  });
+  function done(){
+    if (added + failed < imgs.length) { scheduleRender(); return; }
+    scheduleRender();
+    if (failed) toast(failed + '장은 열 수 없어 건너뛰었어요 (JPG·PNG로 저장 후 다시 올려 주세요)');
+    else toast(added + '장 올렸어요');
+  }
+}
+
+/* --------------------------------------------------------------- 저장 */
+function ext(){
+  return ST.fmt === 'png' ? 'png' : 'jpg';
+}
+function mime(){
+  return ST.fmt === 'png' ? 'image/png' : 'image/jpeg';
+}
+function jobFileName(job, idx){
+  const d = new Date();
+  const stamp = '' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+  const safe = s => String(s || '').replace(/[\\/:*?"<>|\s]+/g, '').slice(0, 26);
+  if (job.type === 'pair'){
+    return '가로합치기_' + String(idx + 1).padStart(2, '0') + '_' + stamp + '.' + ext();
+  }
+  const base = safe(shortName(job.items[0].name).replace(/…/g, '')) || '사진';
+  return base + '_워터마크_' + stamp + '.' + ext();
+}
+function jobCanvas(job){
+  const cv = document.createElement('canvas');
+  cv.width = job.w;
+  paint(job, cv);
+  return cv;
+}
+function canvasBlob(cv){
+  return new Promise(function(resolve){
+    if (cv.toBlob) cv.toBlob(function(b){ resolve(b); }, mime(), 0.92);
+    else {
+      try {
+        const data = cv.toDataURL(mime(), 0.92).split(',')[1];
+        const bin = atob(data), arr = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        resolve(new Blob([arr], { type: mime() }));
+      } catch(e){ resolve(null); }
+    }
+  });
+}
+function downloadBlob(blob, name){
+  if (!blob){ toast('저장에 실패했어요. 다시 시도해 주세요.'); return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+}
+async function saveOne(job, idx){
+  const cv = jobCanvas(job);
+  const blob = await canvasBlob(cv);
+  downloadBlob(blob, jobFileName(job, idx));
+  toast('저장했어요 · ' + (ST.fmt === 'png' ? 'PNG' : 'JPG'));
+}
+
+let zipping = false;
+async function saveAll(){
+  if (zipping) return;
+  const jobs = buildPlan();
+  if (!jobs.length){ toast('먼저 사진을 올려 주세요'); return; }
+  zipping = true;
+  const btns = [$('btnZip'), $('btnZipTop'), $('btnZipM')];
+  btns.forEach(function(b){ if (b) b.disabled = true; });
+  try {
+    if (window.JSZip){
+      const zip = new JSZip();
+      for (let i = 0; i < jobs.length; i++){
+        toast('만드는 중… ' + (i + 1) + ' / ' + jobs.length);
+        const blob = await canvasBlob(jobCanvas(jobs[i]));
+        if (blob) zip.file(jobFileName(jobs[i], i), blob);
+      }
+      toast('ZIP으로 묶는 중…');
+      const out = await zip.generateAsync({ type: 'blob' });
+      const d = new Date();
+      const stamp = '' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+      downloadBlob(out, '우리부동산_사진_' + stamp + '_' + jobs.length + '장.zip');
+      toast(jobs.length + '장을 ZIP으로 저장했어요');
+    } else {
+      /* 압축 도구를 못 불러오면 한 장씩 차례로 저장 */
+      for (let i = 0; i < jobs.length; i++){
+        toast('저장 중… ' + (i + 1) + ' / ' + jobs.length);
+        const blob = await canvasBlob(jobCanvas(jobs[i]));
+        downloadBlob(blob, jobFileName(jobs[i], i));
+        await new Promise(function(r){ setTimeout(r, 450); });
+      }
+      toast(jobs.length + '장을 차례로 저장했어요');
+    }
+  } catch(e){
+    toast('일괄 저장이 막혔어요. 사진 카드의 저장 버튼을 하나씩 눌러 주세요.');
+  } finally {
+    zipping = false;
+    btns.forEach(function(b){ if (b) b.disabled = false; });
+  }
+}
+
+/* --------------------------------------------------------------- 알림 */
+let toastTimer = 0;
+function toast(msg){
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 2600);
+}
+
+/* --------------------------------------------------------------- 입력 연결 */
+function syncOutputs(){
+  $('opOut').textContent = ST.opacity + '%';
+  $('szOut').textContent = ST.size.toFixed(1) + '%';
+  $('wmText').value = ST.text;
+  $('opRange').value = ST.opacity;
+  $('szRange').value = ST.size;
+  $('ratioSel').value = ST.ratio;
+  $('wmOnPair').checked = ST.wmOnPair;
+  $('sizeSel').value = String(ST.maxSide);
+  Array.prototype.forEach.call(document.querySelectorAll('#modeSeg button'), function(b){
+    b.classList.toggle('on', b.dataset.mode === ST.mode);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#posSeg button'), function(b){
+    b.classList.toggle('on', b.dataset.pos === ST.pos);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#fmtSeg button'), function(b){
+    b.classList.toggle('on', b.dataset.fmt === ST.fmt);
+  });
+  $('pairOptBox').hidden = ST.mode !== 'pair';
+  const has = ST.items.length > 0;
+  [$('btnZip'), $('btnZipTop'), $('btnZipM')].forEach(function(b){ if (b) b.disabled = !has; });
+}
+
+function bind(){
+  $('dropBig').addEventListener('click', function(e){
+    if (e.target && e.target.id === 'fileInput') return;
+    $('fileInput').click();
+  });
+  $('dropMini').addEventListener('click', function(){ $('fileInput').click(); });
+  $('fileInput').addEventListener('change', function(){
+    addFiles($('fileInput').files);
+    $('fileInput').value = '';
+  });
+  ['dragenter', 'dragover'].forEach(function(ev){
+    document.addEventListener(ev, function(e){
+      if (!e.dataTransfer) return;
+      const types = e.dataTransfer.types || [];
+      if (Array.prototype.indexOf.call(types, 'Files') < 0) return;
+      e.preventDefault();
+      $('dropBig').classList.add('drag');
+    });
+  });
+  ['dragleave', 'dragend', 'drop'].forEach(function(ev){
+    document.addEventListener(ev, function(e){
+      if (ev === 'drop'){
+        e.preventDefault();
+        $('dropBig').classList.remove('drag');
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length){
+          addFiles(e.dataTransfer.files);
+        }
+        return;
+      }
+      if (ev === 'dragleave' && e.relatedTarget) return;
+      $('dropBig').classList.remove('drag');
+    });
+  });
+  document.addEventListener('paste', function(e){
+    const items = (e.clipboardData && e.clipboardData.items) || [];
+    const files = [];
+    for (let i = 0; i < items.length; i++){
+      if (items[i].type && items[i].type.indexOf('image') === 0){
+        const f = items[i].getAsFile();
+        if (f) files.push(f);
+      }
+    }
+    if (files.length){ e.preventDefault(); addFiles(files); }
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('#modeSeg button'), function(b){
+    b.addEventListener('click', function(){
+      ST.mode = b.dataset.mode;
+      syncOutputs(); scheduleRender(); saveState();
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#posSeg button'), function(b){
+    b.addEventListener('click', function(){
+      ST.pos = b.dataset.pos;
+      syncOutputs(); scheduleRender(); saveState();
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#fmtSeg button'), function(b){
+    b.addEventListener('click', function(){
+      ST.fmt = b.dataset.fmt;
+      syncOutputs(); saveState();
+    });
+  });
+
+  $('wmText').addEventListener('input', function(){
+    ST.text = $('wmText').value;
+    scheduleRender(); saveState();
+  });
+  $('opRange').addEventListener('input', function(){
+    ST.opacity = parseInt($('opRange').value, 10) || 55;
+    syncOutputs(); scheduleRender(); saveState();
+  });
+  $('szRange').addEventListener('input', function(){
+    ST.size = parseFloat($('szRange').value) || 4;
+    syncOutputs(); scheduleRender(); saveState();
+  });
+  $('ratioSel').addEventListener('change', function(){
+    ST.ratio = $('ratioSel').value;
+    scheduleRender(); saveState();
+  });
+  $('wmOnPair').addEventListener('change', function(){
+    ST.wmOnPair = $('wmOnPair').checked;
+    scheduleRender(); saveState();
+  });
+  $('sizeSel').addEventListener('change', function(){
+    ST.maxSide = parseInt($('sizeSel').value, 10);
+    if (!isFinite(ST.maxSide)) ST.maxSide = 1600;
+    scheduleRender(); saveState();
+  });
+
+  const clearAll = function(){
+    if (!ST.items.length){ toast('지울 사진이 없어요'); return; }
+    if (!confirm('올린 사진 ' + ST.items.length + '장을 모두 지울까요?\n(원본 사진은 그대로 남아 있습니다)')) return;
+    ST.items.forEach(function(it){ if (it.url) { try { URL.revokeObjectURL(it.url); } catch(e){} } });
+    ST.items = [];
+    renderGrid(); syncOutputs();
+    toast('모두 지웠어요');
+  };
+  $('btnClearAll').addEventListener('click', clearAll);
+  $('btnClear').addEventListener('click', clearAll);
+  $('btnClearM').addEventListener('click', clearAll);
+
+  $('btnZip').addEventListener('click', saveAll);
+  $('btnZipTop').addEventListener('click', saveAll);
+  $('btnZipM').addEventListener('click', saveAll);
+}
+
+/* --------------------------------------------------------------- 시작 */
+loadState();
+syncOutputs();
+bind();
+renderGrid();
+
+/* 글꼴이 늦게 준비되면 미리보기를 다시 그린다 */
+if (document.fonts && document.fonts.ready){
+  document.fonts.ready.then(function(){ scheduleRender(); }).catch(function(){});
+}
+
+/* 확인용 */
+window.__photoTool = { state: ST, plan: buildPlan, add: addFiles, render: renderGrid };
+})();
+</script>
+</body>
+</html>

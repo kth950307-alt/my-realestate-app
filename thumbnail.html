@@ -159,6 +159,50 @@
   @media (max-width:560px){
     .row2.priceRow{grid-template-columns:1fr}
   }
+
+  /* ───────── 상단 모드 전환 (공장 매물형 ↔ 소식·맛집 임팩트형) ───────── */
+  .modebar{
+    background:#0f1c33; border-bottom:1px solid #0a1424; padding:8px 16px;
+    display:flex; justify-content:center; position:sticky; top:0; z-index:29;
+  }
+  .modeSeg{
+    display:flex; gap:6px; background:rgba(255,255,255,.08); padding:5px; border-radius:13px;
+    width:100%; max-width:540px;
+  }
+  .modeSeg button{
+    flex:1; background:transparent; border:0; border-radius:9px; color:#c7d2e4;
+    font-family:inherit; font-size:13.5px; font-weight:800; letter-spacing:-.3px;
+    padding:10px 8px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;
+    line-height:1.2;
+  }
+  .modeSeg button.on{background:#fff; color:#0f2a55; box-shadow:0 2px 8px rgba(0,0,0,.22)}
+  .modeSeg .em{font-size:15px; line-height:1}
+
+  /* ───────── 임팩트형 설정 칸 ───────── */
+  .swSeg{display:flex; gap:5px; margin:0 0 10px}
+  .swSeg button{
+    flex:1; font-family:inherit; font-size:12.5px; font-weight:800; padding:9px 4px; border-radius:9px;
+    border:1px solid var(--line); background:#fff; color:#5a6a80; cursor:pointer;
+  }
+  .swSeg button.on{background:var(--navy2); border-color:var(--navy2); color:#fff}
+  .impRow{display:grid; grid-template-columns:96px 1fr; gap:6px; margin-bottom:6px}
+  .impRow input{font-size:14px; padding:8px 10px}
+  .bgSeg{display:flex; gap:6px; margin:0 0 10px}
+  .bgSeg button{
+    flex:1; height:46px; border-radius:10px; border:2px solid transparent; cursor:pointer;
+    font-family:inherit; font-size:10.5px; font-weight:800; color:#fff; letter-spacing:-.2px;
+    text-shadow:0 1px 3px rgba(0,0,0,.65); padding:0;
+  }
+  .bgSeg button.on{border-color:var(--gold); box-shadow:0 0 0 2px rgba(242,193,78,.3)}
+  @media (max-width:520px){
+    .modeSeg button{font-size:12px; padding:9px 4px; gap:4px}
+    .modeSeg .em{font-size:13px}
+    .modebar{padding:7px 10px}
+  }
+  @media (max-width:920px){
+    /* 모바일에서는 미리보기가 화면 위에 붙으므로 모드 바는 따라다니지 않는다 */
+    .modebar{position:static}
+  }
 </style>
 </head>
 <body>
@@ -173,6 +217,13 @@
     <button type="button" class="ghost" id="btnReset">처음 값으로</button>
     <button type="button" class="primary" id="btnPng">PNG 저장</button>
     <button type="button" class="gold" id="btnJpg">JPG 저장</button>
+  </div>
+</div>
+
+<div class="modebar">
+  <div class="modeSeg" id="modeSeg" role="tablist" aria-label="썸네일 종류">
+    <button type="button" role="tab" data-mode="K" class="on"><span class="em">🏭</span>공장 매물형</button>
+    <button type="button" role="tab" data-mode="I"><span class="em">🔥</span>소식·맛집 임팩트형</button>
   </div>
 </div>
 
@@ -202,7 +253,7 @@
       </p>
     </div>
 
-    <div class="card">
+    <div class="card" id="styleCard">
       <div class="cardTitle">1. 스타일</div>
       <div class="seg" id="styleSeg">
         <button type="button" data-style="K" class="on k">김해 진영읍형</button>
@@ -211,7 +262,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" id="photoCard">
       <div class="cardTitle">2. 사진</div>
 
       <div class="drop" id="mainDrop">
@@ -257,7 +308,7 @@
       <p class="hint" id="subPhotoNote" hidden>김해 진영읍형은 <b>대표 사진 한 장</b>만 씁니다. (동그라미 사진 없음)</p>
     </div>
 
-    <div class="card">
+    <div class="card" id="titleCard">
       <div class="cardTitle">3. 큰 글씨 <span class="tag">크기 조절</span></div>
       <label class="f"><span>지역 · 앞부분 (흰 글씨)</span>
         <input type="text" id="t1" maxlength="18" placeholder="예) 원창동">
@@ -290,7 +341,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" id="priceCard">
       <div class="cardTitle">4. 가격 · 거래구분</div>
       <div class="seg" id="tradeSeg" style="margin-bottom:9px">
         <button type="button" data-trade="rent" class="on">임대</button>
@@ -385,8 +436,125 @@
       </label>
     </div>
 
-    <div class="card">
-      <div class="cardTitle">6. 저장</div>
+    <!-- ===================== 소식·맛집 임팩트형 전용 칸 ===================== -->
+    <div class="card" id="impBadgeCard" hidden>
+      <div class="cardTitle">🏷️ 위쪽 배지 (알약 모양) <span class="tag">두 개까지</span></div>
+      <label class="f"><span>배지 1 — 왼쪽</span>
+        <input type="text" id="impPill1" maxlength="16" placeholder="예) 11/25 오늘의 소식">
+      </label>
+      <div class="swSeg" id="pill1Seg">
+        <button type="button" data-v="red">🔴 빨강</button>
+        <button type="button" data-v="yellow">🟡 노랑</button>
+        <button type="button" data-v="blue">🔵 파랑</button>
+        <button type="button" data-v="mint">🟢 민트</button>
+      </div>
+      <input type="hidden" id="impPill1Color" value="red">
+
+      <label class="f"><span>배지 2 — 오른쪽 (비우면 배지 하나만)</span>
+        <input type="text" id="impPill2" maxlength="16" placeholder="예) 인천 청라">
+      </label>
+      <div class="swSeg" id="pill2Seg">
+        <button type="button" data-v="red">🔴 빨강</button>
+        <button type="button" data-v="yellow">🟡 노랑</button>
+        <button type="button" data-v="blue">🔵 파랑</button>
+        <button type="button" data-v="mint">🟢 민트</button>
+      </div>
+      <input type="hidden" id="impPill2Color" value="blue">
+    </div>
+
+    <div class="card" id="impTitleCard" hidden>
+      <div class="cardTitle">✍️ 큰 글씨 <span class="tag red">임팩트형</span></div>
+      <label class="f"><span>제목 1줄 (흰색)</span>
+        <input type="text" id="impT1" maxlength="24" placeholder="예) 청라 한식당 점심">
+      </label>
+      <label class="f"><span>강조 제목 (포인트 색 · 노란색 등)</span>
+        <input type="text" id="impT2" maxlength="20" placeholder="예) 웨이팅 20분 각오!">
+      </label>
+      <div class="swSeg" id="accentSeg">
+        <button type="button" data-v="yellow">노랑</button>
+        <button type="button" data-v="red">빨강</button>
+        <button type="button" data-v="blue">파랑</button>
+        <button type="button" data-v="mint">민트</button>
+      </div>
+      <input type="hidden" id="impAccent" value="yellow">
+
+      <label class="f"><span>짧은 부제 (흰색 굵게)</span>
+        <input type="text" id="impSub" maxlength="30" placeholder="예) 12시 전에 가면 바로 앉아요">
+      </label>
+      <label class="f" style="margin-bottom:4px"><span>작은 설명 (회색 · 비워도 됨)</span>
+        <input type="text" id="impSmall" maxlength="40" placeholder="예) 주차 · 가격 · 메뉴 한 번에 정리">
+      </label>
+
+      <div class="fontCtl">
+        <div class="fcTop">
+          <span class="fcName">글씨 크기</span>
+          <span class="fcPx" id="impScaleOut">100%</span>
+        </div>
+        <input type="range" id="impScale" min="70" max="140" step="5" value="100" aria-label="임팩트형 글씨 크기">
+        <div class="fcScale"><span>작게</span><span>크게</span></div>
+      </div>
+    </div>
+
+    <div class="card" id="impBoxCard" hidden>
+      <div class="cardTitle">📊 하단 3칸 요약 박스</div>
+      <div class="impRow">
+        <input type="text" id="impBox1L" maxlength="10" placeholder="위치" aria-label="1칸 항목">
+        <input type="text" id="impBox1V" maxlength="16" placeholder="청라 카페거리" aria-label="1칸 값">
+      </div>
+      <div class="impRow">
+        <input type="text" id="impBox2L" maxlength="10" placeholder="대표 메뉴" aria-label="2칸 항목">
+        <input type="text" id="impBox2V" maxlength="16" placeholder="갈치조림 12,000원" aria-label="2칸 값">
+      </div>
+      <div class="impRow">
+        <input type="text" id="impBox3L" maxlength="10" placeholder="주차" aria-label="3칸 항목">
+        <input type="text" id="impBox3V" maxlength="16" placeholder="건물 뒤 3대" aria-label="3칸 값">
+      </div>
+      <div class="swSeg" id="boxHiSeg" style="margin-top:6px">
+        <button type="button" data-v="none">강조 없음</button>
+        <button type="button" data-v="1">1번</button>
+        <button type="button" data-v="2">2번</button>
+        <button type="button" data-v="3">3번</button>
+      </div>
+      <input type="hidden" id="impBoxHi" value="2">
+      <p class="hint">강조한 칸의 값만 <b>포인트 색</b>으로 나옵니다. 청약이면 <b>청약일 · 경쟁률 · 발표일</b>처럼 세 칸을 쪼개 쓰세요.</p>
+    </div>
+
+    <div class="card" id="impBgCard" hidden>
+      <div class="cardTitle">🌄 배경</div>
+      <div class="bgSeg" id="bgSeg">
+        <button type="button" data-v="navy" style="background:linear-gradient(160deg,#0B1524,#172A44)">딥네이비</button>
+        <button type="button" data-v="char" style="background:linear-gradient(160deg,#14161A,#2A2E36)">차콜</button>
+        <button type="button" data-v="green" style="background:linear-gradient(160deg,#0A1D18,#173D2C)">다크그린</button>
+        <button type="button" data-v="wine" style="background:linear-gradient(160deg,#200A12,#41171F)">버건디</button>
+      </div>
+      <input type="hidden" id="impBg" value="navy">
+
+      <div class="drop small" id="impBgDrop">
+        <input type="file" id="impBgFile" accept="image/*" hidden>
+        <div class="dropInner">
+          <span class="ic">＋</span>
+          <b>배경 사진 (선택)</b>
+          <i>없으면 위 색 배경으로 나옵니다</i>
+        </div>
+        <img id="impBgThumb" class="thumb" alt="">
+      </div>
+      <div class="row">
+        <button type="button" class="ghost" id="impBgClear">배경 사진 지우기</button>
+      </div>
+
+      <div class="fontCtl">
+        <div class="fcTop">
+          <span class="fcName">배경 어둡게 (사진 위 글씨가 잘 보이게)</span>
+          <span class="fcPx" id="impOverlayOut">55%</span>
+        </div>
+        <input type="range" id="impOverlay" min="0" max="95" step="5" value="55" aria-label="배경 어둡게 정도">
+        <div class="fcScale"><span>밝게</span><span>어둡게</span></div>
+      </div>
+      <p class="hint">배경 사진은 <b>가운데를 기준으로</b> 꽉 채워 넣고, 그 위에 글씨를 얹습니다.</p>
+    </div>
+
+    <div class="card" id="saveCard">
+      <div class="cardTitle">💾 저장</div>
       <div class="dlbar">
         <button type="button" class="primary" id="btnPng2">PNG로 저장</button>
         <button type="button" class="gold" id="btnJpg2">JPG로 저장</button>
@@ -457,7 +625,25 @@ const DEFAULTS = {
   bodySize: '34',
   /* 하단 2단 글씨 크기 (가격 한 줄 px, 면적·층고 바 px) */
   sumPriceSize: '64',
-  specSize: '38'
+  specSize: '38',
+
+  /* ── 소식·맛집 임팩트형 (예시 문구 — 쓰면서 바꾸세요) ── */
+  impPill1: '오늘 다녀온 곳',
+  impPill1Color: 'red',
+  impPill2: '인천 청라',
+  impPill2Color: 'blue',
+  impT1: '청라 한식당 점심',
+  impT2: '웨이팅 20분 각오!',
+  impSub: '12시 전에 가면 바로 앉아요',
+  impSmall: '주차 · 가격 · 메뉴 한 번에 정리',
+  impAccent: 'yellow',
+  impScale: '100',
+  impBox1L: '위치', impBox1V: '청라 카페거리',
+  impBox2L: '대표 메뉴', impBox2V: '갈치조림 12,000원',
+  impBox3L: '주차', impBox3V: '건물 뒤 3대',
+  impBoxHi: '2',
+  impBg: 'navy',
+  impOverlay: '55'
 };
 
 const TEXT_IDS = ['badge','t1','t2','sub','areaLabel','areaValue','priceLabel','price',
@@ -466,12 +652,17 @@ const TEXT_IDS = ['badge','t1','t2','sub','areaLabel','areaValue','priceLabel','
   'chk0','chk1','chk2','chk3','chk4',
   'listingNo','checkTitle','contactLine',
   'specL0','specV0','specL1','specV1','specL2','specV2','specL3','specV3','specL4','specV4',
-  'titleSize','bodySize','sumPriceSize','specSize'];
+  'titleSize','bodySize','sumPriceSize','specSize',
+  'impPill1','impPill1Color','impPill2','impPill2Color',
+  'impT1','impT2','impSub','impSmall','impAccent','impScale',
+  'impBox1L','impBox1V','impBox2L','impBox2V','impBox3L','impBox3V','impBoxHi',
+  'impBg','impOverlay'];
 
 const S = {
   style: 'K',
+  lastStyle: 'K',
   trade: 'rent',
-  mainImg: null, subImg: null,
+  mainImg: null, subImg: null, impImg: null,
   mainName: '', subName: '',
   /* 사진 위 흰 배지를 사용자가 직접 적었는지 (김해 진영읍형에서 기본은 숨김) */
   subManual: false
@@ -1932,6 +2123,210 @@ function drawB(){
   }
 }
 
+/* ===================================================== 소식·맛집 임팩트형
+   어제(11-24) 대장동·인천철도 스타일 — 짙은 배경 + 상단 필 배지 + 굵은 제목
+   + 하단 3칸 요약 박스. 공장 매물형(drawK)과 완전히 분리해서 그린다. */
+const IMP_PILL = {
+  red:    { bg:'#E03131', fg:'#FFFFFF' },
+  yellow: { bg:'#F5C518', fg:'#2A2000' },
+  blue:   { bg:'#2563EB', fg:'#FFFFFF' },
+  mint:   { bg:'#12B886', fg:'#04271C' }
+};
+const IMP_ACCENT = { yellow:'#FFD24A', red:'#FF6B6B', blue:'#6BA8FF', mint:'#3BE0A8' };
+const IMP_BG = {
+  navy:  ['#0B1524', '#172A44'],
+  char:  ['#14161A', '#2A2E36'],
+  green: ['#0A1D18', '#173D2C'],
+  wine:  ['#200A12', '#41171F']
+};
+
+function impShadow(size){
+  ctx.shadowColor = 'rgba(0,0,0,.55)';
+  ctx.shadowBlur = size * 0.5;
+  ctx.shadowOffsetY = size * 0.06;
+}
+
+/* 상단 필(알약) 배지 — 그림 폭을 돌려준다 */
+function impPill(text, x, y, h, colorKey){
+  const t = String(text || '').trim();
+  if (!t) return 0;
+  const col = IMP_PILL[colorKey] || IMP_PILL.red;
+  let fs = Math.round(h * 0.46);
+  const padX = Math.round(h * 0.42);
+  while (fs > 12 && tw(t, '900', fs, -0.3) + padX * 2 > 470) fs -= 1;
+  const w = Math.round(tw(t, '900', fs, -0.3) + padX * 2);
+  ctx.save();
+  ctx.fillStyle = col.bg;
+  rr(x, y, w, h, h / 2);
+  ctx.fill();
+  ctx.fillStyle = col.fg;
+  setFont('900', fs, -0.3);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(t, x + padX, y + h / 2 + fs * 0.04);
+  ctx.restore();
+  return w;
+}
+
+/* 배경: 색 프리셋 → (사진이 있으면) 사진 + 어둡게 → 은은한 격자 */
+function drawImpactBg(){
+  const key = val('impBg') || 'navy';
+  const pair = IMP_BG[key] || IMP_BG.navy;
+  const g = ctx.createLinearGradient(0, 0, W * 0.35, H);
+  g.addColorStop(0, pair[0]);
+  g.addColorStop(1, pair[1]);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  if (S.impImg){
+    drawCover(S.impImg, 0, 0, W, H, 0.5, 0.5);
+    const ov = Math.min(95, Math.max(0, parseInt(val('impOverlay'), 10) || 0)) / 100;
+    ctx.fillStyle = 'rgba(0,0,0,' + ov + ')';
+    ctx.fillRect(0, 0, W, H);
+    /* 위·아래 글씨가 사진에 묻히지 않게 */
+    const gg = ctx.createLinearGradient(0, 0, 0, H);
+    gg.addColorStop(0, 'rgba(0,0,0,.45)');
+    gg.addColorStop(.4, 'rgba(0,0,0,0)');
+    gg.addColorStop(.75, 'rgba(0,0,0,.12)');
+    gg.addColorStop(1, 'rgba(0,0,0,.5)');
+    ctx.fillStyle = gg;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,.05)';
+  ctx.lineWidth = 1;
+  for (let x = 62; x < W; x += 62){ ctx.beginPath(); ctx.moveTo(x + .5, 0); ctx.lineTo(x + .5, H); ctx.stroke(); }
+  for (let y = 62; y < H; y += 62){ ctx.beginPath(); ctx.moveTo(0, y + .5); ctx.lineTo(W, y + .5); ctx.stroke(); }
+  ctx.restore();
+}
+
+/* 하단 3칸 요약 박스 */
+function drawImpBox(boxY, boxH, accent){
+  const PAD = 56, boxX = PAD, boxW = W - PAD * 2;
+  const labels = [val('impBox1L'), val('impBox2L'), val('impBox3L')];
+  const values = [val('impBox1V'), val('impBox2V'), val('impBox3V')];
+  const hi = String(val('impBoxHi') || 'none');
+
+  ctx.save();
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = 'rgba(13,20,33,.9)';
+  rr(boxX, boxY, boxW, boxH, 26);
+  ctx.fill();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = accent;
+  ctx.stroke();
+
+  const colW = boxW / 3;
+  for (let i = 0; i < 3; i++){
+    const cx = boxX + colW * (i + 0.5);
+    const lab = String(labels[i] || '').trim();
+    const v = String(values[i] || '').trim();
+    if (lab){
+      const lf = fitSize(lab, '700', colW - 34, 27, 14, -0.2);
+      setFont('700', lf, -0.2);
+      ctx.fillStyle = '#AEBACD';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(lab, cx, boxY + 42);
+    }
+    if (v){
+      const vf = fitSize(v, '900', colW - 34, 41, 18, -0.6);
+      setFont('900', vf, -0.6);
+      ctx.fillStyle = (hi === String(i + 1)) ? accent : '#FFFFFF';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(v, cx, boxY + 92);
+    }
+    if (i > 0){
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(255,255,255,.16)';
+      ctx.lineWidth = 2;
+      ctx.moveTo(boxX + colW * i, boxY + 34);
+      ctx.lineTo(boxX + colW * i, boxY + boxH - 34);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+function drawImpact(){
+  const PAD = 56;
+  const accent = IMP_ACCENT[val('impAccent')] || IMP_ACCENT.yellow;
+  const sc = Math.min(140, Math.max(70, parseInt(val('impScale'), 10) || 100)) / 100;
+
+  drawImpactBg();
+
+  /* ① 위쪽 필 배지 */
+  const pillH = 62, pillY = PAD + 2;
+  let px = PAD;
+  const pw1 = impPill(val('impPill1'), px, pillY, pillH, val('impPill1Color'));
+  if (pw1) px += pw1 + 14;
+  impPill(val('impPill2'), px, pillY, pillH, val('impPill2Color'));
+
+  /* ② 큰 글씨 — 넘치면 전체를 줄여 하단 박스 위에 들어오게 */
+  const maxW = W - PAD * 2;
+  const boxH = 190;
+  const boxY = H - PAD - boxH;
+  const t1 = String(val('impT1') || '').trim();
+  const t2 = String(val('impT2') || '').trim();
+  const sub = String(val('impSub') || '').trim();
+  const small = String(val('impSmall') || '').trim();
+  const top = pillY + pillH + 78;
+  const avail = boxY - 30 - top;
+
+  let k = 1, fs1 = 0, fs2 = 0, fss = 0, fsq = 0, total = 0;
+  for (let pass = 0; pass < 14; pass++){
+    fs1 = t1 ? fitSize(t1, '900', maxW, 54 * sc * k, 24, -0.6) : 0;
+    fs2 = t2 ? fitSize(t2, '900', maxW, 96 * sc * k, 40, -1.2) : 0;
+    fss = sub ? fitSize(sub, '800', maxW, 47 * sc * k, 22, -0.6) : 0;
+    fsq = small ? fitSize(small, '700', maxW, 29 * sc * k, 16, -0.3) : 0;
+    total = (fs1 ? fs1 * 1.22 : 0) + (fs2 ? fs2 * 1.16 + 8 : 0)
+          + (fss ? fss * 1.3 + 24 : 0) + (fsq ? fsq * 1.35 + 12 : 0);
+    if (total <= avail || k <= 0.6) break;
+    k -= 0.05;
+  }
+
+  let y = top;
+  ctx.save();
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  if (fs1){
+    impShadow(fs1);
+    setFont('900', fs1, -0.6);
+    ctx.fillStyle = '#F3F6FB';
+    ctx.fillText(t1, PAD, y);
+    y += fs1 * 1.22;
+  }
+  if (fs2){
+    impShadow(fs2);
+    setFont('900', fs2, -1.2);
+    ctx.fillStyle = accent;
+    ctx.fillText(t2, PAD, y + 8);
+    y += fs2 * 1.16 + 8;
+  }
+  if (fss){
+    y += 24;
+    impShadow(fss);
+    setFont('800', fss, -0.6);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(sub, PAD, y);
+    y += fss * 1.3;
+  }
+  if (fsq){
+    y += 12;
+    impShadow(fsq);
+    setFont('700', fsq, -0.3);
+    ctx.fillStyle = '#C6D0DF';
+    ctx.fillText(small, PAD, y);
+  }
+  ctx.restore();
+
+  /* ③ 하단 3칸 박스 */
+  drawImpBox(boxY, boxH, accent);
+}
+
 /* ------------------------------------------------------------------ render */
 function readInputs(){
   TEXT_IDS.forEach(function(id){ S[id] = val(id); });
@@ -1950,11 +2345,13 @@ function drawAll(){
   ctx.clearRect(0, 0, W, H);
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
-  if (S.style === 'B') drawB();
+  if (S.style === 'I') drawImpact();
+  else if (S.style === 'B') drawB();
   else if (S.style === 'A') drawA();
   else drawK();
   ctx.restore();
   syncSizeOut();
+  syncImpactSegs();
 }
 function render(){
   cancelAnimationFrame(raf);
@@ -2006,7 +2403,7 @@ function loadState(){
       setVal('sub', '');
       S.subManual = false;
     }
-    setStyle(data.style === 'A' || data.style === 'B' ? data.style : 'K');
+    setStyle(data.style === 'A' || data.style === 'B' || data.style === 'I' ? data.style : 'K');
     setTrade(data.trade === 'sale' ? 'sale' : 'rent');
     return true;
   } catch(e){ return false; }
@@ -2064,6 +2461,10 @@ function loadFile(file, which){
       $('mainThumb').src = url;
       $('mainDrop').classList.add('has');
       $('focusBox').hidden = false;
+    } else if (which === 'bg'){
+      S.impImg = img;
+      $('impBgThumb').src = url;
+      $('impBgDrop').classList.add('has');
     } else {
       S.subImg = img;
       S.subName = file.name || 'sub';
@@ -2498,25 +2899,63 @@ function initLedger(){
 /* -------------------------------------------------------------------- UI */
 function setStyle(v){
   const wasK = S.style === 'K';
+  /* 공장 매물형 안의 K·A·B 중 마지막으로 쓰던 것을 기억해 둔다 */
+  if (v !== 'I') S.lastStyle = v;
   S.style = v;
   /* 김해 진영읍형으로 돌아올 때, 직접 적은 적 없는 배지 문구는 비워 둔다 */
   if (v === 'K' && !wasK && !S.subManual) setVal('sub', '');
   Array.prototype.forEach.call(document.querySelectorAll('#styleSeg button'), function(b){
     b.classList.toggle('on', b.dataset.style === v);
   });
+  Array.prototype.forEach.call(document.querySelectorAll('#modeSeg button'), function(b){
+    b.classList.toggle('on', b.dataset.mode === (v === 'I' ? 'I' : 'K'));
+  });
   updatePanels();
 }
+
+/* 임팩트형 색 선택 버튼(빨강·노랑·파랑·민트) 표시 맞추기 */
+function syncImpactSegs(){
+  const groups = [['impPill1Color', '#pill1Seg'], ['impPill2Color', '#pill2Seg'],
+                  ['impAccent', '#accentSeg'], ['impBoxHi', '#boxHiSeg'], ['impBg', '#bgSeg']];
+  groups.forEach(function(g){
+    const box = document.querySelector(g[1]);
+    if (!box) return;
+    const v = String(val(g[0]) || '');
+    Array.prototype.forEach.call(box.querySelectorAll('button'), function(b){
+      const on = String(b.dataset.v) === v;
+      if (b.classList.contains('on') !== on) b.classList.toggle('on', on);
+    });
+  });
+  const so = $('impScaleOut'), oo = $('impOverlayOut');
+  const sTxt = (parseInt(val('impScale'), 10) || 100) + '%';
+  const oTxt = (parseInt(val('impOverlay'), 10) || 0) + '%';
+  if (so && so.textContent !== sTxt) so.textContent = sTxt;
+  if (oo && oo.textContent !== oTxt) oo.textContent = oTxt;
+}
+
 function updatePanels(){
   const k = S.style === 'K';
+  const isI = S.style === 'I';
   $('kPanel').hidden = !k;
   $('bPanel').hidden = S.style !== 'B';
-  $('subPhotoBox').hidden = k;
+  $('subPhotoBox').hidden = k || isI;
   $('subPhotoNote').hidden = !k;
   /* 사진만 쓰는 스타일 A에는 체크리스트가 없어 본문 크기 조절을 숨긴다 */
-  $('bodySizeBox').hidden = S.style === 'A';
+  $('bodySizeBox').hidden = S.style === 'A' || isI;
   $('titleSizeNote').textContent = k ? '노란 줄 기준' : '제목 기준';
   $('subLabel').textContent = k ? '사진 위 흰 배지 (비우면 안 나옴)' : '부제 · 한 줄 설명';
   $('sub').placeholder = k ? '적으면 사진 위에 흰 배지가 나옵니다' : '예) 북항 초입 | 40m 대로변';
+
+  /* 임팩트형: 공장 매물용 칸은 모두 감추고 자기 칸만 보여 준다 */
+  ['ledgerCard', 'styleCard', 'photoCard', 'titleCard', 'priceCard'].forEach(function(id){
+    const el = $(id);
+    if (el) el.hidden = isI;
+  });
+  ['impBadgeCard', 'impTitleCard', 'impBoxCard', 'impBgCard'].forEach(function(id){
+    const el = $(id);
+    if (el) el.hidden = !isI;
+  });
+  syncImpactSegs();
 }
 function setTrade(v){
   S.trade = v;
@@ -2532,7 +2971,8 @@ function download(type){
   const name = (S.t2 || S.t1 || '썸네일').replace(/[\\/:*?"<>|\s]+/g, '');
   const d = new Date();
   const stamp = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
-  const filename = '우리부동산_' + S.style + '_' + name + '_' + stamp + '.' + ext;
+  const tag = S.style === 'I' ? '임팩트' : S.style;
+  const filename = '우리부동산_' + tag + '_' + name + '_' + stamp + '.' + ext;
 
   const done = function(blob){
     if (!blob){ alert('저장에 실패했어요. 다시 시도해 주세요.'); return; }
@@ -2554,6 +2994,30 @@ function init(){
   Array.prototype.forEach.call(document.querySelectorAll('#styleSeg button'), function(b){
     b.addEventListener('click', function(){ setStyle(b.dataset.style); render(); saveState(); });
   });
+
+  /* 상단 모드 전환: 공장 매물형 ↔ 소식·맛집 임팩트형 */
+  Array.prototype.forEach.call(document.querySelectorAll('#modeSeg button'), function(b){
+    b.addEventListener('click', function(){
+      /* 공장 매물형으로 돌아갈 때는 그 안에서 마지막에 쓰던 스타일(K·A·B)로 */
+      setStyle(b.dataset.mode === 'I' ? 'I' : (S.lastStyle || 'K'));
+      render(); saveState();
+    });
+  });
+
+  /* 임팩트형 색 선택 버튼 → 숨은 입력칸에 값을 넣고 다시 그린다 */
+  [['pill1Seg', 'impPill1Color'], ['pill2Seg', 'impPill2Color'], ['accentSeg', 'impAccent'],
+   ['boxHiSeg', 'impBoxHi'], ['bgSeg', 'impBg']].forEach(function(p){
+    const box = $(p[0]);
+    if (!box) return;
+    Array.prototype.forEach.call(box.querySelectorAll('button'), function(b){
+      b.addEventListener('click', function(){
+        const hid = $(p[1]);
+        if (hid) hid.value = b.dataset.v;
+        syncImpactSegs();
+        render(); saveState();
+      });
+    });
+  });
   Array.prototype.forEach.call(document.querySelectorAll('#tradeSeg button'), function(b){
     b.addEventListener('click', function(){
       const oldT = TPL[S.trade], newT = TPL[b.dataset.trade];
@@ -2572,6 +3036,16 @@ function init(){
 
   bindDrop($('mainDrop'), $('mainFile'), $('mainThumb'), function(f){ loadFile(f, 'main'); });
   bindDrop($('subDrop'), $('subFile'), $('subThumb'), function(f){ loadFile(f, 'sub'); });
+  bindDrop($('impBgDrop'), $('impBgFile'), $('impBgThumb'), function(f){ loadFile(f, 'bg'); });
+
+  const clearImpBg = function(){
+    S.impImg = null;
+    $('impBgThumb').removeAttribute('src');
+    $('impBgDrop').classList.remove('has');
+    $('impBgFile').value = '';
+    render();
+  };
+  $('impBgClear').addEventListener('click', clearImpBg);
 
   TEXT_IDS.forEach(function(id){
     const el = $(id);
@@ -2613,7 +3087,7 @@ function init(){
     for (let i = 0; i < items.length; i++){
       if (items[i].type && items[i].type.indexOf('image') === 0){
         const f = items[i].getAsFile();
-        if (f){ e.preventDefault(); loadFile(f, 'main'); return; }
+        if (f){ e.preventDefault(); loadFile(f, S.style === 'I' ? 'bg' : 'main'); return; }
       }
     }
   });
