@@ -389,7 +389,7 @@ function drawWatermark(c, w, h){
     c.translate(w / 2, h / 2);
     c.rotate(-Math.PI / 6);
     const maxW = Math.sqrt(w * w + h * h) * 0.78;
-    fs = fitFont(c, text, '900', maxW, fs * 1.7, Math.round(fs * 0.6));
+    fs = fitFont(c, text, '900', maxW, fs * 1.35, Math.round(fs * 0.6));
     setFont(c, '900', fs, -fs * 0.01);
     c.globalAlpha = op;
     c.textAlign = 'center';
