@@ -1776,6 +1776,15 @@
             return HOME_URL + '#' + encodeURIComponent(p.id);
         }
 
+        // 카드 스펙칸에 넣을 짧은 도로 표기 ("대로변 (40ft 츄레라 진입가능)" → "대로변")
+        function kkShortRoad(p) {
+            const raw = kkRoad(p);
+            if (!raw || raw === '확인문의') return raw || '확인문의';
+            const beforeParen = raw.split('(')[0].trim();
+            const base = beforeParen || raw;
+            return kkOneLine(base, 9);
+        }
+
         function buildKakaoSummary(p) {
             const isSale = p.deal === '매매';
             const kind = isSale ? '매매' : (p.deal === '분양' ? '분양' : '임대');
@@ -1788,7 +1797,7 @@
             out.push(`· 면적 : 전용 ${p.areaNum}평${p.landInfo && String(p.landInfo).indexOf('전용') < 0 ? ' (' + p.landInfo + ')' : ''}`);
             out.push(`· 층고/전력 : ${kkHeight(p)} / ${propPowerLabel(p)}`);
             out.push(`· 호이스트 : ${hoistText(p)}`);
-            out.push(`· 도로 : ${kkRoad(p)} (${kkTrailer(p)})`);
+            out.push(`· 도로 : ${kkRoad(p)}${/[츄레라|톤|진입]/.test(kkRoad(p)) ? '' : ' (' + kkTrailer(p) + ')'}`);
             const feat = kkFeature(p);
             if (feat) out.push(`· 특징 : ${feat}`);
             out.push('');
@@ -1951,7 +1960,7 @@
                 ['면적', `전용 ${p.areaNum}평`],
                 ['층고', kkHeight(p)],
                 ['전력', propPowerLabel(p)],
-                ['도로', kkOneLine(kkRoad(p), 9)]
+                ['도로', kkShortRoad(p)]
             ];
             const gap = 16, cw = (PW - gap * 3) / 4, cy = 774, ch = 96;
             cells.forEach((c, i) => {
