@@ -1,0 +1,1155 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>CSV 지번변환·누적 엑셀 정리기 | 우리부동산</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%93%8A%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --navy:#12294d; --ink:#1e293b; --ink2:#475569; --muted:#64748b;
+    --line:#e2e8f0; --bg:#f4f7fb; --card:#fff;
+    --blue:#2563eb; --blue-d:#1d4ed8; --blue-soft:#eff6ff;
+    --green:#0b7a43; --green-d:#075e34; --green-soft:#e8f5ee;
+    --gold:#f59e0b; --red:#dc2626; --teal:#0f766e;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+    font-size:15px; line-height:1.6; -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:1180px; margin:0 auto; padding:0 16px 90px;}
+  header.top{
+    background:linear-gradient(150deg,#1e3a8a,#1d4ed8 60%,#2563eb);
+    color:#fff; padding:26px 16px 24px;
+  }
+  header.top .in{max-width:1180px; margin:0 auto;}
+  header.top .tag{
+    display:inline-block; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.32);
+    border-radius:999px; padding:3px 12px; font-size:12.5px; font-weight:700; margin-bottom:10px;
+  }
+  header.top h1{margin:0 0 6px; font-size:24px; letter-spacing:-.6px; font-weight:900;}
+  header.top p{margin:0; font-size:14px; opacity:.9;}
+
+  .card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px; margin:16px 0; box-shadow:0 2px 10px rgba(15,30,60,.04);}
+  .card h2{margin:0 0 4px; font-size:16.5px; font-weight:900; letter-spacing:-.3px; display:flex; align-items:center; gap:8px;}
+  .card h2 .n{display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:var(--blue); color:#fff; font-size:13px; font-weight:800; flex:0 0 auto;}
+  .card .lead{margin:0 0 14px; font-size:13.5px; color:var(--muted);}
+  .row{display:flex; flex-wrap:wrap; gap:10px; align-items:center;}
+  .grow{flex:1 1 auto;}
+
+  .btn{
+    display:inline-flex; align-items:center; gap:7px; font-family:inherit;
+    font-size:14px; font-weight:800; letter-spacing:-.2px; padding:11px 16px; border-radius:11px;
+    border:1px solid #cfd9e6; background:#fff; color:var(--ink2); cursor:pointer; white-space:nowrap;
+    transition:background .12s, border-color .12s, opacity .12s;
+  }
+  .btn:hover{background:#f8fafc; border-color:#b9c6d6;}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .btn.pri{background:linear-gradient(140deg,#3b82f6,#1d4ed8); border-color:#1d4ed8; color:#fff; box-shadow:0 4px 12px rgba(37,99,235,.24);}
+  .btn.pri:hover{background:linear-gradient(140deg,#2f74e8,#1a45c2);}
+  .btn.green{background:linear-gradient(140deg,#0e8a4d,#075e34); border-color:#075e34; color:#fff; box-shadow:0 4px 12px rgba(11,122,67,.22);}
+  .btn.green:hover{background:linear-gradient(140deg,#0d7f47,#064f2c);}
+  .btn.danger{color:#b91c1c; border-color:#f1c9c9;}
+  .btn.danger:hover{background:#fef2f2;}
+  .btn.sm{padding:7px 11px; font-size:12.5px; border-radius:9px;}
+
+  /* 파일 올리기 */
+  .drop{
+    border:2.5px dashed #b9cbe4; border-radius:16px; background:linear-gradient(180deg,#f8fbff,#eef5ff);
+    padding:30px 18px; text-align:center; cursor:pointer; transition:.15s;
+  }
+  .drop:hover{border-color:#7ba6e0; background:#eef5ff;}
+  .drop.over{border-color:var(--blue); background:#e3eefe;}
+  .drop .big{font-size:30px; line-height:1;}
+  .drop .t{margin-top:10px; font-size:16px; font-weight:900; color:var(--blue-d);}
+  .drop .s{margin-top:4px; font-size:13px; color:var(--muted);}
+  .filelist{margin-top:10px; font-size:13px; color:var(--ink2);}
+  .filelist b{color:var(--green-d);}
+
+  /* 요약 통계 */
+  .stats{display:flex; flex-wrap:wrap; gap:8px;}
+  .stat{background:#f8fafc; border:1px solid var(--line); border-radius:11px; padding:9px 14px; min-width:104px;}
+  .stat .k{display:block; font-size:11.5px; font-weight:800; color:var(--muted);}
+  .stat .v{font-size:19px; font-weight:900; letter-spacing:-.5px;}
+  .stat.rent .v{color:var(--teal);}
+  .stat.sale .v{color:var(--blue-d);}
+  .stat.jibun .v{color:var(--green-d);}
+
+  /* 진행 */
+  .bar{height:10px; border-radius:99px; background:#e6edf6; overflow:hidden; margin:12px 0 8px;}
+  .bar > i{display:block; height:100%; width:0%; background:linear-gradient(90deg,#3b82f6,#0e8a4d); transition:width .2s;}
+  .pmsg{font-size:13px; color:var(--ink2); font-weight:700;}
+
+  /* 표 */
+  .tablebox{overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--line); border-radius:12px;}
+  table.grid{width:100%; border-collapse:separate; border-spacing:0; font-size:13px; min-width:980px;}
+  table.grid th{
+    position:sticky; top:0; z-index:2; background:#f1f5f9; color:var(--ink2);
+    font-size:12px; font-weight:800; text-align:left; padding:9px 8px; border-bottom:1px solid var(--line); white-space:nowrap;
+  }
+  table.grid td{padding:7px 8px; border-bottom:1px solid #eef2f6; vertical-align:middle;}
+  table.grid tr:hover td{background:#fbfdff;}
+  table.grid tr.sec td{
+    background:#e8f0fb; color:var(--navy); font-weight:900; font-size:13px; padding:9px 12px;
+    border-bottom:1px solid #cfdcf0;
+  }
+  table.grid tr.sec.sale td{background:#e8f5ee; color:var(--green-d);}
+  table.grid tr.sec.other td{background:#f1f5f9;}
+  table.grid tr.sec td span{font-weight:800; color:var(--muted); font-size:12px; margin-left:6px;}
+  table.grid input.cell{
+    width:100%; min-width:130px; font-family:inherit; font-size:13px; padding:6px 8px;
+    border:1px solid #dbe3ec; border-radius:8px; background:#fff; color:var(--ink);
+  }
+  table.grid input.cell:focus{outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+  table.grid input.cell.changed{border-color:#8fd3b6; background:#f6fdf9;}
+  table.grid input.owner{min-width:88px;}
+  .mono{font-variant-numeric:tabular-nums; font-feature-settings:"tnum";}
+  .tprice{font-weight:800; color:var(--ink); white-space:nowrap;}
+  .tid{font-size:11.5px; color:var(--muted); white-space:nowrap;}
+  .tname{max-width:190px;}
+  .tname .nm{display:block; font-weight:800; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .tname .sm{display:block; font-size:11.5px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .links{display:flex; gap:4px;}
+  .lnk{display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:8px; border:1px solid #dbe3ec; background:#fff; text-decoration:none; font-size:13px;}
+  .lnk:hover{background:#f1f6ff; border-color:#b9cbe4;}
+  .del{border:1px solid #f1c9c9; background:#fff; color:#dc2626; width:28px; height:28px; border-radius:8px; cursor:pointer; font-size:13px;}
+  .del:hover{background:#fef2f2;}
+  .empty{text-align:center; color:var(--muted); padding:34px 12px !important;}
+  .badge{display:inline-block; padding:2px 7px; border-radius:999px; font-size:11px; font-weight:800; white-space:nowrap;}
+  .b-rent{background:#e6f6f4; color:#0f766e;}
+  .b-sale{background:#e7edfd; color:#1d4ed8;}
+  .b-etc{background:#eef2f6; color:#64748b;}
+
+  details.keybox{margin-top:12px; border:1px solid var(--line); border-radius:12px; background:#fbfcfe; padding:0 14px;}
+  details.keybox summary{cursor:pointer; font-weight:800; font-size:13.5px; color:var(--ink2); padding:12px 0; list-style:none;}
+  details.keybox summary::-webkit-details-marker{display:none;}
+  details.keybox summary::before{content:"▸ "; color:var(--blue);}
+  details.keybox[open] summary::before{content:"▾ ";}
+  details.keybox .body{padding:0 0 14px; font-size:13px; color:var(--ink2);}
+  details.keybox .body ol{margin:6px 0 10px; padding-left:20px;}
+  details.keybox .body li{margin:2px 0;}
+  .keyrow{display:flex; gap:8px; flex-wrap:wrap;}
+  .keyrow input{flex:1 1 260px; font-family:Consolas,monospace; font-size:12.5px; padding:9px 10px; border:1px solid #dbe3ec; border-radius:9px;}
+  .note{font-size:12.5px; color:var(--muted); margin:8px 0 0; line-height:1.6;}
+  .warn{background:#fffbeb; border:1px solid #fde68a; color:#92400e; border-radius:10px; padding:9px 12px; font-size:12.5px; margin-top:10px;}
+
+  .ownerbar{display:flex; flex-wrap:wrap; gap:10px; align-items:center;}
+  .ownerbar input[type=text]{flex:1 1 200px; padding:11px 12px; border:1px solid #dbe3ec; border-radius:11px; font-family:inherit; font-size:14px;}
+  .fname{font-size:13px; color:var(--ink2); background:#f1f5f9; border:1px dashed #cbd5e1; border-radius:9px; padding:8px 12px; font-weight:800;}
+  .fname b{color:var(--blue-d);}
+
+  .stickybar{
+    position:fixed; left:0; right:0; bottom:0; z-index:30; background:rgba(255,255,255,.96);
+    border-top:1px solid var(--line); box-shadow:0 -4px 18px rgba(15,30,60,.07);
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+    display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap;
+    backdrop-filter:blur(6px);
+  }
+  .stickybar .sum{font-size:13px; font-weight:800; color:var(--ink2); margin-right:auto;}
+  footer.meta{text-align:center; color:#93a1b3; font-size:12px; margin-top:22px; line-height:1.7;}
+
+  #toast{
+    position:fixed; left:50%; bottom:86px; transform:translateX(-50%) translateY(14px);
+    background:#12294d; color:#fff; font-size:14px; font-weight:800; letter-spacing:-.2px;
+    padding:12px 20px; border-radius:12px; box-shadow:0 10px 28px rgba(0,0,0,.28);
+    opacity:0; pointer-events:none; transition:opacity .18s, transform .18s; z-index:60; max-width:88vw; text-align:center;
+  }
+  #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  @media (max-width:640px){
+    header.top h1{font-size:20px;}
+    .card{padding:14px;}
+    .stat{min-width:88px; padding:7px 11px;}
+    .stat .v{font-size:17px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="in">
+    <div class="tag">우리부동산 김소장 전용 도구</div>
+    <h1>📊 CSV → 지번 변환 · 누적 엑셀 정리기</h1>
+    <p>네이버에서 뽑은 CSV를 올리면 <b>지번을 자동으로 채우고</b>, <b>월세는 위 · 매매는 아래</b>로 묶어서 엑셀(.xlsx)로 저장합니다.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- 1. 파일 올리기 -->
+  <section class="card">
+    <h2><span class="n">1</span>CSV · 엑셀 파일 올리기</h2>
+    <p class="lead">네이버 추출기에서 받은 <b>naver_listings_날짜.csv</b>를 끌어다 놓으면 됩니다. 여러 개를 한 번에 올려도 되고, 예전에 저장한 <b>.xlsx</b>를 올리면 그 목록에 이어서 쌓입니다.</p>
+    <div class="drop" id="drop">
+      <div class="big">📥</div>
+      <div class="t">여기에 파일을 끌어다 놓세요 (또는 눌러서 고르기)</div>
+      <div class="s">.csv · .xlsx · .xls / 여러 개 동시 선택 가능</div>
+    </div>
+    <input type="file" id="fileInput" accept=".csv,.xlsx,.xls,text/csv" multiple style="display:none">
+    <div class="filelist" id="filelist"></div>
+    <div class="warn" id="importWarn" style="display:none"></div>
+  </section>
+
+  <!-- 2. 현황 + 저장 -->
+  <section class="card">
+    <h2><span class="n">2</span>지금 쌓인 목록</h2>
+    <p class="lead">브라우저에 자동 저장됩니다. 창을 닫아도 남아 있으니, 며칠씩 모아서 한 번에 엑셀로 받으면 됩니다.</p>
+    <div class="stats" id="stats">
+      <div class="stat"><span class="k">전체</span><span class="v" id="st-all">0</span></div>
+      <div class="stat rent"><span class="k">월세·전세</span><span class="v" id="st-rent">0</span></div>
+      <div class="stat sale"><span class="k">매매</span><span class="v" id="st-sale">0</span></div>
+      <div class="stat jibun"><span class="k">지번 채움</span><span class="v" id="st-jibun">0</span></div>
+    </div>
+  </section>
+
+  <!-- 3. 지번 자동 채우기 -->
+  <section class="card">
+    <h2><span class="n">3</span>지번 자동 채우기</h2>
+    <p class="lead">CSV에 담긴 위도·경도를 실제 주소로 바꿔 <b>건물지번</b> 칸을 채웁니다. 한 번 찾은 곳은 기억해 두었다가 다음에 다시 쓰지 않습니다.</p>
+    <div class="row">
+      <button class="btn green" id="btnGeo">🏠 지번 자동 채우기</button>
+      <button class="btn" id="btnGeoStop" style="display:none">■ 멈추기</button>
+      <label class="row" style="gap:6px; font-size:13px; color:var(--ink2); font-weight:700;">
+        <input type="checkbox" id="chkForce"> 지번이 있어도 다시 찾기
+      </label>
+      <span class="grow"></span>
+      <span class="pmsg" id="geoModeNote"></span>
+    </div>
+    <div class="bar"><i id="geobar"></i></div>
+    <div class="pmsg" id="geomsg">아직 실행하지 않았습니다.</div>
+
+    <details class="keybox" id="keybox">
+      <summary>정확 지번 모드 — 카카오 무료 키 넣기 (선택)</summary>
+      <div class="body">
+        <p style="margin:0 0 6px;">키 없이도 <b>동 이름·도로명</b>까지는 자동으로 채워집니다. <b>번지(123-4)까지 정확히</b> 채우고 싶으면 카카오 키를 한 번만 넣어 두세요. (무료, 하루 30만 건)</p>
+        <ol>
+          <li><b>developers.kakao.com</b> 접속 → 카카오 계정 로그인</li>
+          <li><b>내 애플리케이션 → 애플리케이션 추가하기</b> (이름은 아무거나, 예: 우리부동산)</li>
+          <li>만들어진 앱 → <b>앱 키</b> 화면의 <b>REST API 키</b>를 복사</li>
+          <li>같은 앱의 <b>카카오맵</b> 항목을 <b>ON</b>으로 바꾸기 (이게 꺼져 있으면 주소가 안 나옵니다)</li>
+          <li>아래 칸에 붙여넣고 <b>저장</b></li>
+        </ol>
+        <div class="keyrow">
+          <input type="password" id="kakaoKey" placeholder="REST API 키 붙여넣기 (예: 1a2b3c4d5e...)" autocomplete="off">
+          <button class="btn sm pri" id="btnSaveKey">저장</button>
+          <button class="btn sm danger" id="btnClearKey">지우기</button>
+        </div>
+        <p class="note">키는 <b>이 브라우저에만</b> 저장되고 홈페이지 파일에는 들어가지 않습니다. 다른 컴퓨터에서 쓰시면 그 컴퓨터에서 한 번만 다시 넣으면 됩니다.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- 4. 소유자명 + 저장 -->
+  <section class="card">
+    <h2><span class="n">4</span>소유자명 · 엑셀 저장</h2>
+    <p class="lead">소유자명을 넣으면 파일 이름이 <b>주소_소유자.xlsx</b>로, 비워 두면 <b>주소.xlsx</b>로 저장됩니다. 매물마다 다르면 아래 표의 소유자 칸에 하나씩 적으세요.</p>
+    <div class="ownerbar">
+      <input type="text" id="ownerAll" placeholder="소유자명 전체 적용 (예: 김철수) — 매물마다 다르면 비워 두세요">
+      <span class="fname">파일명 <b id="fnamePreview">주소.xlsx</b></span>
+    </div>
+    <p class="note">✔ 엑셀에는 <b>■ 월세·전세 매물</b> 구역이 먼저, <b>■ 매매 매물</b> 구역이 아래에 구분 줄과 함께 들어갑니다.</p>
+    <div class="row" style="margin-top:12px;">
+      <button class="btn pri" id="btnXlsx">📥 엑셀(.xlsx)로 저장</button>
+      <button class="btn" id="btnCsv">📄 CSV로도 저장</button>
+      <span class="grow"></span>
+      <button class="btn danger" id="btnClear">🗑️ 목록 전부 비우기</button>
+    </div>
+  </section>
+
+  <!-- 5. 표 -->
+  <section class="card">
+    <h2><span class="n">5</span>매물 표 — 지번·소유자는 칸에서 바로 고치기</h2>
+    <p class="lead">지번이 조금 틀리면 칸을 눌러 직접 고치면 됩니다. 고친 값은 바로 저장됩니다.</p>
+    <div class="tablebox">
+      <table class="grid">
+        <thead>
+          <tr>
+            <th style="width:92px;">거래</th>
+            <th style="width:210px;">가격</th>
+            <th style="width:250px;">건물지번 (수정 가능)</th>
+            <th style="width:120px;">소유자명</th>
+            <th>매물명 · 동</th>
+            <th style="width:150px;">중개사</th>
+            <th style="width:76px;">지도·매물</th>
+            <th style="width:40px;"></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="meta">
+    우리부동산 공인중개사사무소 · 인천 서구 건지로 167 (석남역 인근)<br>
+    매매 032-582-6200 · 임대 032-576-2600 · 직통 010-2660-8276
+  </footer>
+</div>
+
+<div class="stickybar">
+  <span class="sum" id="stickySum">총 0건</span>
+  <button class="btn pri" id="btnXlsx2">📥 엑셀 저장</button>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
+<script>
+(function(){
+  'use strict';
+
+  var LS_ROWS = 'woori.csvorg.rows.v2';
+  var LS_GEO  = 'woori.csvorg.geo.v2';
+  var LS_KEY  = 'woori.csvorg.kakaokey.v2';
+  var LS_OWN  = 'woori.csvorg.owner.v2';
+
+  var EXPORT_HEAD = ['매물번호','거래구분','가격','건물지번','도로명주소','소유자명','동','매물명','용도','사용승인(연차)','대지면적(㎡)','연면적(㎡)','층','중개사','구분','확인일','중복등록','설명','위도','경도','지도링크','매물URL'];
+
+  var state = { rows: [], ownerAll: '' };
+  var geoCache = {};
+  var geoRunning = false;
+  var geoCancelled = false;
+
+  function $(id){ return document.getElementById(id); }
+  function text(v){ return (v === null || v === undefined) ? '' : String(v).trim(); }
+  function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+
+  var toastTimer = null;
+  function toast(msg){
+    var el = $('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 2400);
+  }
+
+  function loadJSON(key, def){
+    try { var raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : def; } catch(e){ return def; }
+  }
+  function saveJSON(key, val){
+    try { localStorage.setItem(key, JSON.stringify(val)); return true; }
+    catch(e){ toast('저장 공간이 부족합니다. 엑셀로 저장한 뒤 목록을 비워 주세요.'); return false; }
+  }
+
+  /* ───────── 저장/불러오기 ───────── */
+  function loadState(){
+    var saved = loadJSON(LS_ROWS, null);
+    if (saved && saved.rows && saved.rows.length !== undefined) {
+      state.rows = saved.rows.map(function(r){ return normalizeRow(r); });
+      state.ownerAll = text(saved.ownerAll);
+    }
+    geoCache = loadJSON(LS_GEO, {}) || {};
+  }
+  var saveTimer = null;
+  function saveState(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){
+      saveJSON(LS_ROWS, { rows: state.rows, ownerAll: state.ownerAll });
+    }, 350);
+  }
+  function saveStateNow(){
+    clearTimeout(saveTimer);
+    saveJSON(LS_ROWS, { rows: state.rows, ownerAll: state.ownerAll });
+  }
+
+  function normalizeRow(r){
+    var o = {
+      key: text(r.key),
+      id: text(r.id),
+      trade: text(r.trade),
+      price: text(r.price),
+      dong: text(r.dong),
+      name: text(r.name),
+      use: text(r.use),
+      built: text(r.built),
+      land: text(r.land),
+      floorArea: text(r.floorArea),
+      floor: text(r.floor),
+      broker: text(r.broker),
+      kind: text(r.kind),
+      date: text(r.date),
+      dup: text(r.dup),
+      naverOwner: text(r.naverOwner),
+      desc: text(r.desc),
+      lat: text(r.lat),
+      lng: text(r.lng),
+      mapUrl: text(r.mapUrl),
+      url: text(r.url),
+      jibun: text(r.jibun),
+      road: text(r.road),
+      ownerName: text(r.ownerName),
+      geo: text(r.geo),
+      ownerRow: !!r.ownerRow,
+      addedAt: Number(r.addedAt) || Date.now()
+    };
+    if (!o.key) o.key = makeKey(o);
+    return o;
+  }
+
+  function makeKey(r){
+    if (r.id) return r.id;
+    return 'X-' + [r.dong, r.name, r.price, r.land, r.floorArea, r.floor].join('|');
+  }
+
+  /* ───────── CSV 파싱 ───────── */
+  function parseCSV(str){
+    var s = String(str).replace(/^\uFEFF/, '');
+    var rows = [], row = [], cur = '', q = false;
+    for (var i = 0; i < s.length; i++) {
+      var ch = s[i];
+      if (q) {
+        if (ch === '"') {
+          if (s[i+1] === '"') { cur += '"'; i++; } else { q = false; }
+        } else { cur += ch; }
+      } else {
+        if (ch === '"') { q = true; }
+        else if (ch === ',') { row.push(cur); cur = ''; }
+        else if (ch === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+        else if (ch === '\r') { /* skip */ }
+        else { cur += ch; }
+      }
+    }
+    if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+    return rows;
+  }
+
+  /* ───────── 헤더 이름 매칭 ───────── */
+  var HEAD_ALIAS = {
+    id: ['매물번호','매물번호(id)','번호','매물no','매물번호*'],
+    trade: ['거래구분','거래유형','거래종류','거래','구분(거래)'],
+    price: ['가격','금액','매매가/보증금','가격(만원)'],
+    jibun: ['건물지번','지번','지번주소','상세지번','건물지번(자동)'],
+    road: ['도로명주소','도로명','도로명주소(자동)'],
+    ownerName: ['소유자명','건물주','건물주명','소유자(성명)','건물주성함'],
+    dong: ['동','법정동','동명'],
+    name: ['매물명','제목','건물명','상호'],
+    use: ['용도','용도지역','매물용도'],
+    built: ['사용승인(연차)','사용승인','준공일'],
+    land: ['대지면적(㎡)','대지면적','대지'],
+    floorArea: ['연면적(㎡)','연면적','건물면적'],
+    floor: ['층','해당층'],
+    broker: ['중개사','중개사무소','부동산'],
+    kind: ['구분','매물구분'],
+    date: ['확인일','등록일','확인일자'],
+    dup: ['중복등록','중복'],
+    naverOwner: ['소유자','소유자여부'],
+    desc: ['설명','메모','특징'],
+    lat: ['위도','lat','latitude'],
+    lng: ['경도','lng','lon','longitude'],
+    mapUrl: ['지도링크','지도','카카오링크'],
+    url: ['매물url','매물링크','url','링크']
+  };
+
+  function normHead(h){
+    return text(h).toLowerCase().replace(/\s+/g,'').replace(/[()\[\]{}]/g,'').replace(/㎡/g,'');
+  }
+  var FIELD_BY_NORM = (function(){
+    var map = {};
+    Object.keys(HEAD_ALIAS).forEach(function(f){
+      HEAD_ALIAS[f].forEach(function(alias){
+        var n = alias.toLowerCase().replace(/\s+/g,'').replace(/[()\[\]{}]/g,'').replace(/㎡/g,'');
+        map[n] = f;
+      });
+    });
+    return map;
+  })();
+
+  function detectHeader(rowArr){
+    var found = {}, count = 0;
+    (rowArr || []).forEach(function(h, idx){
+      var f = FIELD_BY_NORM[normHead(h)];
+      if (f && found[f] === undefined) { found[f] = idx; count++; }
+    });
+    return count >= 2 ? found : null;
+  }
+
+  function aoaToRows(aoa){
+    var headerIdx = -1, map = null;
+    for (var i = 0; i < Math.min(aoa.length, 8); i++) {
+      var m = detectHeader(aoa[i]);
+      if (m) { headerIdx = i; map = m; break; }
+    }
+    if (headerIdx < 0) return { rows: [], headerFound: false };
+
+    var out = [];
+    for (var r = headerIdx + 1; r < aoa.length; r++) {
+      var line = aoa[r] || [];
+      // 구분 줄(■ ...) 과 빈 줄은 건너뛴다
+      var joined = line.join('').replace(/\s/g,'');
+      if (!joined) continue;
+      if (/^■/.test(text(line[0]))) continue;
+
+      var o = {};
+      Object.keys(map).forEach(function(f){ o[f] = text(line[map[f]]); });
+      if (!o.id && !o.name && !o.price) continue;
+      o.addedAt = Date.now();
+      var nr = normalizeRow(o);
+      nr.key = makeKey(nr);
+      out.push(nr);
+    }
+    return { rows: out, headerFound: true };
+  }
+
+  /* ───────── 병합 ───────── */
+  function mergeRows(incoming){
+    var added = 0, updated = 0;
+    incoming.forEach(function(nr){
+      var cur = null;
+      for (var i = 0; i < state.rows.length; i++) {
+        if (state.rows[i].key === nr.key) { cur = state.rows[i]; break; }
+      }
+      if (!cur) {
+        state.rows.push(nr);
+        added++;
+        return;
+      }
+      Object.keys(nr).forEach(function(f){
+        if (f === 'key') return;
+        var v = nr[f];
+        if (v === '' || v === null || v === undefined) return;   // 새 파일이 비어 있으면 기존 값 유지
+        if (f === 'addedAt') return;
+        cur[f] = v;
+      });
+      updated++;
+    });
+    return { added: added, updated: updated };
+  }
+
+  /* ───────── 파일 읽기 ───────── */
+  function readFile(file){
+    return new Promise(function(resolve, reject){
+      var name = String(file.name || '').toLowerCase();
+      var reader = new FileReader();
+      if (/\.(xlsx|xls)$/.test(name)) {
+        reader.onload = function(e){
+          try {
+            if (typeof XLSX === 'undefined') { reject(new Error('엑셀 읽기 도구를 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로 고침 해 주세요.')); return; }
+            var wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+            var all = [];
+            var headerFound = false;
+            wb.SheetNames.forEach(function(sn){
+              var aoa = XLSX.utils.sheet_to_json(wb.Sheets[sn], { header: 1, defval: '', raw: false });
+              var res = aoaToRows(aoa);
+              if (res.headerFound) headerFound = true;
+              all = all.concat(res.rows);
+            });
+            if (!headerFound) { reject(new Error('이 엑셀에서는 매물 표(머리글)를 찾지 못했습니다.')); return; }
+            resolve(all);
+          } catch(err){ reject(err); }
+        };
+        reader.onerror = function(){ reject(new Error('파일을 읽지 못했습니다.')); };
+        reader.readAsArrayBuffer(file);
+      } else {
+        reader.onload = function(e){
+          try {
+            var res = aoaToRows(parseCSV(e.target.result));
+            if (!res.headerFound) { reject(new Error('CSV에서 머리글(매물번호·가격 등)을 찾지 못했습니다. 네이버 추출기로 받은 파일인지 확인해 주세요.')); return; }
+            resolve(res.rows);
+          } catch(err){ reject(err); }
+        };
+        reader.onerror = function(){ reject(new Error('파일을 읽지 못했습니다.')); };
+        reader.readAsText(file, 'utf-8');
+      }
+    });
+  }
+
+  function handleFiles(files){
+    var list = Array.prototype.slice.call(files || []);
+    if (!list.length) return;
+    $('filelist').innerHTML = list.map(function(f){ return '· ' + f.name; }).join('<br>');
+    var totalAdded = 0, totalUpdated = 0, fails = [];
+
+    var chain = Promise.resolve();
+    list.forEach(function(f){
+      chain = chain.then(function(){
+        return readFile(f).then(function(rows){
+          var res = mergeRows(rows);
+          totalAdded += res.added;
+          totalUpdated += res.updated;
+        }, function(err){
+          fails.push(f.name + ': ' + (err && err.message ? err.message : '읽기 실패'));
+        });
+      });
+    });
+
+    chain.then(function(){
+      saveStateNow();
+      renderAll();
+      var msg = '새로 ' + totalAdded + '건 추가';
+      if (totalUpdated) msg += ' · 기존 ' + totalUpdated + '건 갱신';
+      $('filelist').innerHTML = '<b>' + msg + '</b> (총 ' + state.rows.length + '건)';
+      var w = $('importWarn');
+      if (fails.length) { w.style.display = 'block'; w.innerHTML = '⚠️ ' + fails.join('<br>'); }
+      else { w.style.display = 'none'; }
+      if (totalAdded || totalUpdated) toast(msg + ' 되었습니다');
+      else toast('새로 추가된 매물이 없습니다 (이미 있는 매물)');
+    });
+  }
+
+  /* ───────── 거래 구분 ───────── */
+  function tradeKind(r){
+    var t = text(r.trade);
+    var p = text(r.price);
+    var all = t + ' ' + p;
+    if (/월세|단기/.test(t) || (!t && /월세|단기/.test(p))) return 'month';
+    if (/전세/.test(t) || (!t && /전세/.test(p))) return 'jeonse';
+    if (/매매/.test(t) || (!t && /매매/.test(p))) return 'sale';
+    if (/월세|단기/.test(all)) return 'month';
+    if (/전세/.test(all)) return 'jeonse';
+    if (/매매/.test(all)) return 'sale';
+    return 'other';
+  }
+  function tradeLabel(r){
+    var k = tradeKind(r);
+    if (k === 'month') return '월세';
+    if (k === 'jeonse') return '전세';
+    if (k === 'sale') return '매매';
+    return text(r.trade) || '기타';
+  }
+
+  function cmpRows(a, b){
+    var ka = text(a.jibun) || (text(a.dong) + ' ' + text(a.name));
+    var kb = text(b.jibun) || (text(b.dong) + ' ' + text(b.name));
+    var c = ka.localeCompare(kb, 'ko');
+    if (c) return c;
+    return String(b.id).localeCompare(String(a.id));
+  }
+
+  function groupRows(rows){
+    var g = { month: [], jeonse: [], sale: [], other: [] };
+    rows.forEach(function(r){ g[tradeKind(r)].push(r); });
+    Object.keys(g).forEach(function(k){ g[k].sort(cmpRows); });
+    var out = [];
+    var rent = g.month.concat(g.jeonse);
+    if (rent.length) out.push({ title: '■ 월세·전세 (임대) 매물', cls: '', rows: rent });
+    if (g.sale.length) out.push({ title: '■ 매매 매물', cls: 'sale', rows: g.sale });
+    if (g.other.length) out.push({ title: '■ 거래구분 미상', cls: 'other', rows: g.other });
+    return out;
+  }
+
+  /* ───────── 지번 역변환 ───────── */
+  function kakaoKey(){ return text(loadJSON(LS_KEY, '') || ''); }
+
+  function cacheKeyOf(r){
+    var la = Number(r.lat), lo = Number(r.lng);
+    if (!isFinite(la) || !isFinite(lo) || !la || !lo) return '';
+    return la.toFixed(5) + ',' + lo.toFixed(5);
+  }
+
+  function buildNominatimAddress(a){
+    a = a || {};
+    var city = text(a.city) || text(a.state) || text(a.province) || '';
+    var gu = text(a.borough) || text(a.city_district) || text(a.county) || '';
+    var dong = text(a.quarter) || text(a.village) || text(a.suburb) || text(a.neighbourhood) || '';
+    var parts = [];
+    if (city) parts.push(city);
+    if (gu && gu !== city) parts.push(gu);
+    if (dong) parts.push(dong);
+    var road = text(a.road);
+    if (road && text(a.house_number)) road += ' ' + text(a.house_number);
+    return { jibun: parts.join(' '), road: road };
+  }
+
+  function requestJSON(url, opts, tries){
+    tries = tries || 0;
+    return fetch(url, opts).then(function(res){
+      if (!res.ok) {
+        var err = new Error('HTTP ' + res.status);
+        err.status = res.status;
+        throw err;
+      }
+      return res.json();
+    }).catch(function(err){
+      if (tries < 1 && (!err.status || err.status >= 500 || err.status === 429)) {
+        return sleep(1200).then(function(){ return requestJSON(url, opts, tries + 1); });
+      }
+      throw err;
+    });
+  }
+
+  function lookupOne(r, mode, key){
+    var ck = cacheKeyOf(r);
+    if (!ck) return Promise.resolve({ status: 'no_coord' });
+    if (geoCache[ck] && geoCache[ck].status === 'ok') return Promise.resolve(geoCache[ck]);
+
+    if (mode === 'kakao') {
+      var url = 'https://dapi.kakao.com/v2/local/geo/coord2address.json?x=' + encodeURIComponent(r.lng) + '&y=' + encodeURIComponent(r.lat) + '&input_coord=WGS84';
+      return requestJSON(url, { headers: { Authorization: 'KakaoAK ' + key } }).then(function(j){
+        var d = (j && j.documents && j.documents[0]) || null;
+        if (!d) return { status: 'fail' };
+        var jibun = text(d.address && d.address.address_name);
+        var road = text(d.road_address && d.road_address.address_name);
+        var out = { status: jibun ? 'ok' : 'fail', jibun: jibun, road: road };
+        if (out.status === 'ok') geoCache[ck] = out;
+        return out;
+      }).catch(function(err){
+        if (err && (err.status === 401 || err.status === 403)) {
+          var e2 = new Error('카카오 키가 거부되었습니다 (401). 키와 [카카오맵] 사용 설정을 확인해 주세요.');
+          e2.fatal = true;
+          throw e2;
+        }
+        throw err;
+      });
+    }
+
+    var nurl = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=' + encodeURIComponent(r.lat) + '&lon=' + encodeURIComponent(r.lng) + '&zoom=18&addressdetails=1&accept-language=ko';
+    return requestJSON(nurl, { headers: { 'Accept': 'application/json' } }).then(function(j){
+      var built = buildNominatimAddress(j && j.address);
+      var out = { status: built.jibun ? 'ok' : 'fail', jibun: built.jibun, road: built.road, mode: 'nominatim' };
+      if (out.status === 'ok') geoCache[ck] = out;
+      return out;
+    });
+  }
+
+  function setProgress(done, total, label){
+    var pct = total ? Math.round(done / total * 100) : 0;
+    $('geobar').style.width = pct + '%';
+    if (label) $('geomsg').textContent = label;
+  }
+
+  function startGeo(force){
+    if (geoRunning) return;
+    var key = kakaoKey();
+    var mode = key ? 'kakao' : 'nominatim';
+    var targets = state.rows.filter(function(r){
+      if (!cacheKeyOf(r)) return false;
+      if (force) return true;
+      return !text(r.jibun);
+    });
+
+    var noCoord = state.rows.filter(function(r){ return !cacheKeyOf(r); }).length;
+
+    if (!state.rows.length) { toast('먼저 CSV 파일을 올려 주세요'); return; }
+    if (!targets.length) {
+      toast(noCoord ? ('좌표가 있는 매물의 지번은 이미 다 채워져 있습니다') : '위도·경도가 있는 매물이 없습니다. 지번 칸에 직접 적어 주세요.');
+      return;
+    }
+
+    geoRunning = true;
+    geoCancelled = false;
+    $('btnGeo').disabled = true;
+    $('btnGeoStop').style.display = 'inline-flex';
+    $('geomsg').textContent = (mode === 'kakao' ? '카카오로' : '무료 주소 서비스로') + ' 지번을 찾는 중...';
+
+    var done = 0, ok = 0, fail = 0;
+    var gap = mode === 'kakao' ? 260 : 1150;
+
+    function step(){
+      if (geoCancelled) return Promise.resolve('cancelled');
+      if (done >= targets.length) return Promise.resolve('done');
+      var r = targets[done];
+      setProgress(done, targets.length, '지번 찾는 중 ' + (done + 1) + ' / ' + targets.length + ' · 찾음 ' + ok + '건');
+      return lookupOne(r, mode, key).then(function(res){
+        done++;
+        if (res && res.status === 'ok') {
+          r.jibun = res.jibun || '';
+          if (res.road) r.road = res.road;
+          r.geo = mode === 'kakao' ? '카카오' : '자동';
+          ok++;
+        } else if (res && res.status === 'no_coord') {
+          r.geo = '좌표없음';
+        } else {
+          r.geo = '실패';
+          fail++;
+        }
+        if (done % 5 === 0) { saveStateNow(); updateStats(); }
+        return sleep(gap).then(step);
+      }, function(err){
+        done++;
+        r.geo = '실패';
+        fail++;
+        if (err && err.fatal) {
+          return Promise.resolve('fatal:' + err.message);
+        }
+        return sleep(gap).then(step);
+      });
+    }
+
+    step().then(function(result){
+      geoRunning = false;
+      $('btnGeo').disabled = false;
+      $('btnGeoStop').style.display = 'none';
+      saveStateNow();
+      saveJSON(LS_GEO, geoCache);
+      renderTable();
+      updateStats();
+
+      if (result === 'cancelled') {
+        setProgress(done, targets.length, '멈췄습니다 · ' + ok + '건 채움 (다시 누르면 이어서 합니다)');
+        toast('지번 찾기를 멈췄습니다 · ' + ok + '건 저장');
+      } else if (typeof result === 'string' && result.indexOf('fatal:') === 0) {
+        setProgress(done, targets.length, '키 문제로 멈췄습니다');
+        toast(result.slice(6));
+      } else {
+        setProgress(targets.length, targets.length, '끝났습니다 · 지번 ' + ok + '건 채움' + (fail ? ' · ' + fail + '건 실패' : ''));
+        toast('지번 ' + ok + '건을 채웠습니다' + (fail ? (' (실패 ' + fail + '건은 직접 입력)') : ''));
+      }
+      if (noCoord) {
+        setTimeout(function(){ toast('위도·경도가 없는 ' + noCoord + '건은 지번을 직접 써 주세요'); }, 2600);
+      }
+    });
+  }
+
+  /* ───────── 표 그리기 ───────── */
+  function badgeClass(r){
+    var k = tradeKind(r);
+    if (k === 'sale') return 'b-sale';
+    if (k === 'month' || k === 'jeonse') return 'b-rent';
+    return 'b-etc';
+  }
+
+  function rowEl(r){
+    var tr = document.createElement('tr');
+    tr.dataset.key = r.key;
+
+    var tdTrade = document.createElement('td');
+    var b = document.createElement('span');
+    b.className = 'badge ' + badgeClass(r);
+    b.textContent = tradeLabel(r);
+    tdTrade.appendChild(b);
+    tr.appendChild(tdTrade);
+
+    var tdPrice = document.createElement('td');
+    tdPrice.className = 'tprice';
+    tdPrice.textContent = r.price || '-';
+    tr.appendChild(tdPrice);
+
+    var tdJibun = document.createElement('td');
+    var inJ = document.createElement('input');
+    inJ.className = 'cell' + (r.jibun ? ' changed' : '');
+    inJ.type = 'text';
+    inJ.value = r.jibun || '';
+    inJ.placeholder = r.geo === '좌표없음' ? '좌표 없음 · 직접 입력' : '동 이름까지 자동 · 번지는 직접';
+    inJ.addEventListener('input', function(){
+      r.jibun = inJ.value;
+      inJ.classList.toggle('changed', !!text(inJ.value));
+      updateStats();
+      saveState();
+    });
+    tdJibun.appendChild(inJ);
+    tr.appendChild(tdJibun);
+
+    var tdOwner = document.createElement('td');
+    var inO = document.createElement('input');
+    inO.className = 'cell owner';
+    inO.type = 'text';
+    inO.value = r.ownerName || '';
+    inO.placeholder = '성명';
+    inO.addEventListener('input', function(){
+      r.ownerName = inO.value;
+      r.ownerRow = !!text(inO.value);
+      updateFilename();
+      saveState();
+    });
+    tdOwner.appendChild(inO);
+    tr.appendChild(tdOwner);
+
+    var tdName = document.createElement('td');
+    tdName.className = 'tname';
+    var nm = document.createElement('span');
+    nm.className = 'nm';
+    nm.textContent = r.name || '(이름 없음)';
+    nm.title = r.name || '';
+    var sm = document.createElement('span');
+    sm.className = 'sm';
+    sm.textContent = [r.dong, r.id, r.floor ? r.floor + '층' : ''].filter(Boolean).join(' · ');
+    tdName.appendChild(nm);
+    tdName.appendChild(sm);
+    tr.appendChild(tdName);
+
+    var tdBroker = document.createElement('td');
+    tdBroker.style.fontSize = '12px';
+    tdBroker.style.color = 'var(--ink2)';
+    tdBroker.textContent = r.broker || '-';
+    tdBroker.title = r.broker || '';
+    tr.appendChild(tdBroker);
+
+    var tdLinks = document.createElement('td');
+    var links = document.createElement('div');
+    links.className = 'links';
+    var mapHref = r.mapUrl || (r.lat && r.lng ? ('https://map.kakao.com/link/map/' + encodeURIComponent(r.name || '매물') + ',' + r.lat + ',' + r.lng) : '');
+    if (mapHref) {
+      var a1 = document.createElement('a');
+      a1.className = 'lnk';
+      a1.href = mapHref;
+      a1.target = '_blank';
+      a1.rel = 'noopener';
+      a1.title = '지도에서 위치 보기';
+      a1.textContent = '📍';
+      links.appendChild(a1);
+    }
+    if (r.url) {
+      var a2 = document.createElement('a');
+      a2.className = 'lnk';
+      a2.href = r.url;
+      a2.target = '_blank';
+      a2.rel = 'noopener';
+      a2.title = '네이버 매물 페이지 열기';
+      a2.textContent = '🏠';
+      links.appendChild(a2);
+    }
+    if (!links.childNodes.length) links.textContent = '-';
+    tdLinks.appendChild(links);
+    tr.appendChild(tdLinks);
+
+    var tdDel = document.createElement('td');
+    var btn = document.createElement('button');
+    btn.className = 'del';
+    btn.type = 'button';
+    btn.title = '이 매물 지우기';
+    btn.textContent = '✕';
+    btn.addEventListener('click', function(){
+      state.rows = state.rows.filter(function(x){ return x.key !== r.key; });
+      saveStateNow();
+      renderAll();
+      toast('1건 지웠습니다');
+    });
+    tdDel.appendChild(btn);
+    tr.appendChild(tdDel);
+
+    return tr;
+  }
+
+  function renderTable(){
+    var tbody = $('tbody');
+    tbody.innerHTML = '';
+    if (!state.rows.length) {
+      var tr = document.createElement('tr');
+      var td = document.createElement('td');
+      td.colSpan = 8;
+      td.className = 'empty';
+      td.innerHTML = '아직 매물이 없습니다.<br>위의 <b>1번</b> 칸에 네이버 추출기 CSV를 끌어다 놓으면 여기에 쌓입니다.';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+    groupRows(state.rows).forEach(function(g){
+      var tr = document.createElement('tr');
+      tr.className = 'sec' + (g.cls ? ' ' + g.cls : '');
+      var td = document.createElement('td');
+      td.colSpan = 8;
+      td.textContent = g.title + ' ';
+      var sp = document.createElement('span');
+      sp.textContent = g.rows.length + '건';
+      td.appendChild(sp);
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      g.rows.forEach(function(r){ tbody.appendChild(rowEl(r)); });
+    });
+  }
+
+  function updateStats(){
+    var all = state.rows.length;
+    var rent = 0, sale = 0, jibun = 0;
+    state.rows.forEach(function(r){
+      var k = tradeKind(r);
+      if (k === 'sale') sale++;
+      else if (k === 'month' || k === 'jeonse') rent++;
+      if (text(r.jibun)) jibun++;
+    });
+    $('st-all').textContent = all;
+    $('st-rent').textContent = rent;
+    $('st-sale').textContent = sale;
+    $('st-jibun').textContent = jibun + ' / ' + all;
+    $('stickySum').textContent = '총 ' + all + '건 · 지번 ' + jibun + '건';
+    $('btnXlsx').disabled = !all;
+    $('btnXlsx2').disabled = !all;
+    $('btnCsv').disabled = !all;
+    $('btnClear').disabled = !all;
+    updateFilename();
+  }
+
+  function anyOwner(){
+    if (text(state.ownerAll)) return true;
+    return state.rows.some(function(r){ return text(r.ownerName); });
+  }
+
+  function updateFilename(){
+    $('fnamePreview').textContent = anyOwner() ? '주소_소유자.xlsx' : '주소.xlsx';
+  }
+
+  function renderAll(){
+    renderTable();
+    updateStats();
+    var note = kakaoKey() ? '정확 지번 모드 (카카오 키 사용 중)' : '기본 모드 · 동·도로명까지 자동 (번지까지는 아래 카카오 키)';
+    $('geoModeNote').textContent = note;
+    $('kakaoKey').value = kakaoKey();
+    $('ownerAll').value = state.ownerAll || '';
+  }
+
+  // 전체 소유자명을 바꿀 때 표 전체를 다시 그리지 않고 입력칸 값만 바꾼다
+  function syncOwnerInputs(){
+    var trs = document.querySelectorAll('#tbody tr[data-key]');
+    Array.prototype.forEach.call(trs, function(tr){
+      var key = tr.dataset.key;
+      var row = null;
+      for (var i = 0; i < state.rows.length; i++) { if (state.rows[i].key === key) { row = state.rows[i]; break; } }
+      if (!row || row.ownerRow) return;
+      var inp = tr.querySelector('input.owner');
+      if (inp && inp.value !== (row.ownerName || '')) inp.value = row.ownerName || '';
+    });
+  }
+
+  /* ───────── 엑셀 / CSV 내보내기 ───────── */
+  function exportAoa(){
+    var aoa = [EXPORT_HEAD.slice()];
+    groupRows(state.rows).forEach(function(g){
+      var head = new Array(EXPORT_HEAD.length).fill('');
+      head[0] = g.title + ' ' + g.rows.length + '건';
+      aoa.push(head);
+      g.rows.forEach(function(r){
+        aoa.push([
+          r.id, tradeLabel(r), r.price, r.jibun, r.road, r.ownerName, r.dong, r.name, r.use, r.built,
+          r.land, r.floorArea, r.floor, r.broker, r.kind, r.date, r.dup, r.desc, r.lat, r.lng, r.mapUrl, r.url
+        ]);
+      });
+    });
+    return aoa;
+  }
+
+  function ensureXLSX(){
+    if (typeof XLSX !== 'undefined') return Promise.resolve(XLSX);
+    return new Promise(function(resolve, reject){
+      var s = document.createElement('script');
+      s.src = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+      s.onload = function(){ typeof XLSX !== 'undefined' ? resolve(XLSX) : reject(new Error('엑셀 도구를 불러오지 못했습니다')); };
+      s.onerror = function(){ reject(new Error('엑셀 도구를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.')); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function downloadBlob(blob, name){
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 5000);
+  }
+
+  function exportXlsx(){
+    if (!state.rows.length) { toast('내보낼 매물이 없습니다'); return; }
+    var fname = anyOwner() ? '주소_소유자.xlsx' : '주소.xlsx';
+    ensureXLSX().then(function(lib){
+      var aoa = exportAoa();
+      var ws = lib.utils.aoa_to_sheet(aoa);
+      ws['!cols'] = [
+        { wch: 15 }, { wch: 8 }, { wch: 20 }, { wch: 30 }, { wch: 30 }, { wch: 11 },
+        { wch: 9 }, { wch: 26 }, { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 12 },
+        { wch: 8 }, { wch: 20 }, { wch: 8 }, { wch: 10 }, { wch: 9 }, { wch: 30 },
+        { wch: 11 }, { wch: 11 }, { wch: 30 }, { wch: 30 }
+      ];
+      // 구분 줄(■ ...)은 한 줄로 합쳐 보기 좋게
+      var merges = [];
+      aoa.forEach(function(line, i){
+        if (i > 0 && /^■/.test(text(line[0]))) {
+          merges.push({ s: { r: i, c: 0 }, e: { r: i, c: EXPORT_HEAD.length - 1 } });
+        }
+      });
+      if (merges.length) ws['!merges'] = merges;
+      var wb = lib.utils.book_new();
+      lib.utils.book_append_sheet(wb, ws, '매물정리');
+      var out = lib.write(wb, { bookType: 'xlsx', type: 'array' });
+      downloadBlob(new Blob([out], { type: 'application/octet-stream' }), fname);
+      toast(fname + ' 저장했습니다');
+    }).catch(function(err){
+      toast(err && err.message ? err.message : '엑셀 저장에 실패했습니다');
+    });
+  }
+
+  function exportCsv(){
+    if (!state.rows.length) { toast('내보낼 매물이 없습니다'); return; }
+    var esc = function(v){
+      var s = (v === null || v === undefined) ? '' : String(v);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+    var lines = exportAoa().map(function(line){ return line.map(esc).join(','); });
+    var blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    var fname = anyOwner() ? '주소_소유자.csv' : '주소.csv';
+    downloadBlob(blob, fname);
+    toast(fname + ' 저장했습니다');
+  }
+
+  /* ───────── 이벤트 연결 ───────── */
+  function bind(){
+    var drop = $('drop');
+    var input = $('fileInput');
+
+    drop.addEventListener('click', function(){ input.click(); });
+    input.addEventListener('change', function(){ handleFiles(input.files); input.value = ''; });
+
+    ['dragenter','dragover'].forEach(function(ev){
+      drop.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); drop.classList.add('over'); });
+    });
+    ['dragleave','drop'].forEach(function(ev){
+      drop.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); drop.classList.remove('over'); });
+    });
+    drop.addEventListener('drop', function(e){
+      if (e.dataTransfer && e.dataTransfer.files) handleFiles(e.dataTransfer.files);
+    });
+    // 페이지 아무 데나 떨어뜨려도 받는다 (실수로 빗나가는 것 방지)
+    window.addEventListener('dragover', function(e){ e.preventDefault(); });
+    window.addEventListener('drop', function(e){
+      e.preventDefault();
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+    });
+
+    $('btnGeo').addEventListener('click', function(){ startGeo($('chkForce').checked); });
+    $('btnGeoStop').addEventListener('click', function(){ geoCancelled = true; });
+
+    $('btnSaveKey').addEventListener('click', function(){
+      var v = text($('kakaoKey').value);
+      if (!v) { toast('키를 붙여넣어 주세요'); return; }
+      saveJSON(LS_KEY, v);
+      renderAll();
+      toast('카카오 키를 저장했습니다 · 이제 정확한 번지까지 나옵니다');
+    });
+    $('btnClearKey').addEventListener('click', function(){
+      localStorage.removeItem(LS_KEY);
+      $('kakaoKey').value = '';
+      renderAll();
+      toast('키를 지웠습니다 (기본 모드로 동작)');
+    });
+
+    $('ownerAll').addEventListener('input', function(){
+      state.ownerAll = $('ownerAll').value;
+      state.rows.forEach(function(r){
+        if (r.ownerRow) return;      // 표에서 직접 쓴 이름은 건드리지 않는다
+        r.ownerName = state.ownerAll;
+      });
+      updateFilename();
+      syncOwnerInputs();
+      saveState();
+    });
+
+    $('btnXlsx').addEventListener('click', exportXlsx);
+    $('btnXlsx2').addEventListener('click', exportXlsx);
+    $('btnCsv').addEventListener('click', exportCsv);
+
+    $('btnClear').addEventListener('click', function(){
+      if (!state.rows.length) return;
+      if (!confirm('쌓아 둔 매물 ' + state.rows.length + '건을 모두 지웁니다.\n엑셀로 저장한 뒤 비우는 것을 권합니다. 계속할까요?')) return;
+      state.rows = [];
+      saveStateNow();
+      renderAll();
+      toast('목록을 비웠습니다');
+    });
+  }
+
+  loadState();
+  bind();
+  renderAll();
+  if (state.rows.length) {
+    setProgress(0, 1, '저장된 매물 ' + state.rows.length + '건을 불러왔습니다');
+    $('geobar').style.width = '0%';
+  }
+})();
+</script>
+</body>
+</html>

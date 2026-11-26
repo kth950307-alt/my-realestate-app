@@ -350,6 +350,33 @@
             .sort-btn { padding: 10px 4px; font-size: 12.5px; }
             .btn-load-more { width: 100%; padding: 14px 10px; font-size: 14.5px; }
         }
+
+        /* ── 📋 카톡 요약 복사 · 🖼️ 카톡 카드 이미지 저장 ── */
+        .kk-share { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 20px; }
+        .kk-btn {
+            flex: 1 1 210px; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+            font-family: inherit; font-size: 14.5px; font-weight: 900; letter-spacing: -.3px;
+            padding: 13px 14px; border-radius: 12px; cursor: pointer; border: 1.5px solid transparent;
+            transition: transform .1s, background .12s, box-shadow .12s;
+        }
+        .kk-btn:active { transform: translateY(1px); }
+        .kk-btn[disabled] { opacity: .6; cursor: progress; }
+        .kk-copy { background: #fff7d6; border-color: #fde68a; color: #92400e; }
+        .kk-copy:hover { background: #fef3c7; }
+        .kk-card { background: linear-gradient(140deg, #3b82f6, #1d4ed8); border-color: #1d4ed8; color: #fff; box-shadow: 0 4px 12px rgba(37,99,235,.24); }
+        .kk-card:hover { background: linear-gradient(140deg, #2f74e8, #1a45c2); }
+        #kk-toast {
+            position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%) translateY(12px);
+            background: #0f172a; color: #fff; font-size: 14px; font-weight: 800; letter-spacing: -.2px;
+            padding: 12px 20px; border-radius: 12px; box-shadow: 0 10px 28px rgba(0,0,0,.3);
+            opacity: 0; pointer-events: none; transition: opacity .18s, transform .18s; z-index: 4000;
+            max-width: 86vw; text-align: center;
+        }
+        #kk-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        @media (max-width: 520px) {
+            .kk-share { margin-bottom: 16px; }
+            .kk-btn { font-size: 13px; padding: 12px 10px; flex: 1 1 100%; }
+        }
     </style>
 </head>
 <body>
@@ -1278,6 +1305,7 @@
                 if (badge) badge.innerText = `🟢 ${sheetItems.length}건` + (remainingBase.length ? ` + 기본 ${remainingBase.length}` : '');
                 updateZoneCounts();
                 renderProperties();
+                openPropertyFromHash();
             } else {
                 updateZoneCounts();
                 if (badge) badge.innerText = `🟢 ${properties.length}건`;
@@ -1651,7 +1679,12 @@
                 ${secretModalBox}
                 <div style="font-size:14px; font-weight:800; color:var(--accent); margin-bottom:4px;">📍 인천광역시 서구 ${p.region} · ${p.zone} (상세 지번은 보안상 유선 안내)</div>
                 <h2 style="font-size:22px; font-weight:900; margin-bottom:8px;">${p.title}</h2>
-                <div style="font-size:24px; font-weight:900; color:var(--danger); margin-bottom:20px;">${p.price}</div>
+                <div style="font-size:24px; font-weight:900; color:var(--danger); margin-bottom:14px;">${p.price}</div>
+
+                <div class="kk-share">
+                    <button type="button" class="kk-btn kk-copy" onclick="copyKakaoSummary(${idx})">📋 카톡 요약 복사</button>
+                    <button type="button" class="kk-btn kk-card" onclick="saveKakaoCard(${idx}, this)">🖼️ 카톡 카드 이미지 저장</button>
+                </div>
 
                 <table class="spec-table">
                     <tr>
@@ -1692,6 +1725,312 @@
         function closeDetailModal() { document.getElementById('detail-modal').classList.remove('open'); }
         function closeAdminModal() { document.getElementById('admin-modal').classList.remove('open'); }
         function closeModalOnBg(evt, id) { if (evt.target.id === id) document.getElementById(id).classList.remove('open'); }
+
+        /* ═════════ 카톡 전송용: 요약 복사 & 카드 이미지 저장 ═════════ */
+        const HOME_URL = 'https://kth950307-alt.github.io/my-realestate-app/';
+
+        function kkToast(msg) {
+            let el = document.getElementById('kk-toast');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'kk-toast';
+                document.body.appendChild(el);
+            }
+            el.textContent = msg;
+            el.classList.add('show');
+            clearTimeout(window.__kkToastTimer);
+            window.__kkToastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+        }
+
+        function kkOneLine(s, max) {
+            const t = String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
+            if (!t) return '';
+            const arr = Array.from(t);
+            return arr.length > max ? arr.slice(0, max).join('') + '…' : t;
+        }
+
+        function kkRoad(p) {
+            const raw = String(p.roadRaw || '').trim();
+            if (!raw) return roadLabel(p.road);
+            return roadLabel(raw);
+        }
+
+        function kkHeight(p) {
+            const h = String(p.height == null ? '' : p.height).trim();
+            return (!h || h === '-') ? '확인문의' : heightLabel(h);
+        }
+
+        function kkTrailer(p) {
+            if (p.hasTrailer === 'YES') return '40ft 츄레라 진입가능';
+            if (p.hasTrailer === 'WING') return '11톤/5톤 진입가능';
+            return '진입 확인문의';
+        }
+
+        function kkFeature(p) {
+            if (!p.desc) return '';
+            const first = String(p.desc).split('\n').map(s => s.replace(/^[•\-\s]+/, '').trim()).filter(Boolean)[0] || '';
+            return kkOneLine(first, 80);
+        }
+
+        function propertyLink(p) {
+            return HOME_URL + '#' + encodeURIComponent(p.id);
+        }
+
+        function buildKakaoSummary(p) {
+            const isSale = p.deal === '매매';
+            const kind = isSale ? '매매' : (p.deal === '분양' ? '분양' : '임대');
+            const out = [];
+            out.push(`[우리부동산] ${kind} 매물 | ${p.id}`);
+            out.push('');
+            out.push(`■ ${p.title}`);
+            out.push(`· 위치 : 인천 서구 ${p.region}${p.zone ? ' (' + p.zone + ')' : ''}`);
+            out.push(`· 가격 : ${p.price || '금액 협의'}`);
+            out.push(`· 면적 : 전용 ${p.areaNum}평${p.landInfo && String(p.landInfo).indexOf('전용') < 0 ? ' (' + p.landInfo + ')' : ''}`);
+            out.push(`· 층고/전력 : ${kkHeight(p)} / ${propPowerLabel(p)}`);
+            out.push(`· 호이스트 : ${hoistText(p)}`);
+            out.push(`· 도로 : ${kkRoad(p)} (${kkTrailer(p)})`);
+            const feat = kkFeature(p);
+            if (feat) out.push(`· 특징 : ${feat}`);
+            out.push('');
+            out.push('☎ 매매상담 032-582-6200');
+            out.push('☎ 임대상담 032-576-2600');
+            out.push('📱 김소장 직통 010-2660-8276');
+            out.push(`🔗 ${propertyLink(p)}`);
+            return out.join('\n');
+        }
+
+        function copyKakaoSummary(idx) {
+            const p = properties[idx];
+            if (!p) return;
+            const msg = buildKakaoSummary(p);
+            const done = () => kkToast('복사되었습니다!');
+            const fallback = () => {
+                const ta = document.createElement('textarea');
+                ta.value = msg;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); done(); }
+                catch (e) { kkToast('복사가 되지 않았습니다. 상세 내용을 직접 선택해 복사해 주세요.'); }
+                document.body.removeChild(ta);
+            };
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(msg).then(done).catch(fallback);
+            } else {
+                fallback();
+            }
+        }
+
+        function kkFont(w, s) {
+            return `${w} ${s}px "Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif`;
+        }
+
+        function kkRoundRect(ctx, x, y, w, h, r) {
+            const rr = Math.min(r, w / 2, h / 2);
+            ctx.beginPath();
+            ctx.moveTo(x + rr, y);
+            ctx.arcTo(x + w, y, x + w, y + h, rr);
+            ctx.arcTo(x + w, y + h, x, y + h, rr);
+            ctx.arcTo(x, y + h, x, y, rr);
+            ctx.arcTo(x, y, x + w, y, rr);
+            ctx.closePath();
+        }
+
+        function kkFitText(ctx, str, maxW) {
+            let s = String(str == null ? '' : str);
+            if (ctx.measureText(s).width <= maxW) return s;
+            const chars = Array.from(s);
+            while (chars.length > 1 && ctx.measureText(chars.join('') + '…').width > maxW) chars.pop();
+            return chars.join('') + '…';
+        }
+
+        function kkLoadImage(src) {
+            return new Promise(resolve => {
+                if (!src) { resolve(null); return; }
+                let settled = false;
+                const finish = v => { if (!settled) { settled = true; resolve(v); } };
+                const img = new Image();
+                if (!/^data:/i.test(src)) img.crossOrigin = 'anonymous';
+                img.onload = () => finish(img.naturalWidth ? img : null);
+                img.onerror = () => finish(null);
+                img.src = src;
+                setTimeout(() => finish(null), 8000);
+            });
+        }
+
+        // 카톡에 바로 보내는 1080×1080 카드 이미지
+        async function buildKakaoCardCanvas(p) {
+            if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) {} }
+            const W = 1080, H = 1080, PX = 40, PW = 1000;
+            const cv = document.createElement('canvas');
+            cv.width = W; cv.height = H;
+            const ctx = cv.getContext('2d');
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, W, H);
+            ctx.textBaseline = 'alphabetic';
+            ctx.textAlign = 'left';
+
+            // 상단 띠
+            const grad = ctx.createLinearGradient(0, 0, W, 124);
+            grad.addColorStop(0, '#1e3a8a');
+            grad.addColorStop(1, '#2563eb');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, 124);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = kkFont(900, 42);
+            ctx.fillText('우리부동산', PX + 4, 58);
+            ctx.font = kkFont(700, 22);
+            ctx.fillStyle = 'rgba(255,255,255,.9)';
+            ctx.fillText('인천 공장·창고 전문 김소장', PX + 4, 94);
+            ctx.textAlign = 'right';
+            ctx.font = kkFont(700, 19);
+            ctx.fillStyle = 'rgba(255,255,255,.75)';
+            ctx.fillText('매물번호', 1036, 44);
+            ctx.font = kkFont(900, 30);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(kkFitText(ctx, p.id, 420), 1036, 84);
+            ctx.textAlign = 'left';
+
+            // 사진 (실패하면 그라데이션 대체 화면)
+            const img = await kkLoadImage((p.imgs && p.imgs[0]) || '');
+            const PY = 148, PH = 428;
+            ctx.save();
+            kkRoundRect(ctx, PX, PY, PW, PH, 26);
+            ctx.clip();
+            if (img) {
+                const br = PW / PH;
+                let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
+                if (sw / sh > br) { sw = sh * br; sx = (img.naturalWidth - sw) / 2; }
+                else { sh = sw / br; sy = (img.naturalHeight - sh) / 2; }
+                ctx.drawImage(img, sx, sy, sw, sh, PX, PY, PW, PH);
+            } else {
+                const g2 = ctx.createLinearGradient(PX, PY, PX + PW, PY + PH);
+                g2.addColorStop(0, '#1e3a8a');
+                g2.addColorStop(1, '#0f766e');
+                ctx.fillStyle = g2;
+                ctx.fillRect(PX, PY, PW, PH);
+                ctx.textAlign = 'center';
+                ctx.fillStyle = 'rgba(255,255,255,.95)';
+                ctx.font = kkFont(900, 62);
+                ctx.fillText('공장 · 창고', PX + PW / 2, PY + PH / 2 - 6);
+                ctx.font = kkFont(700, 25);
+                ctx.fillStyle = 'rgba(255,255,255,.82)';
+                ctx.fillText('현장 사진은 상담 주시면 바로 보내드립니다', PX + PW / 2, PY + PH / 2 + 48);
+                ctx.textAlign = 'left';
+            }
+            ctx.restore();
+
+            // 사진 위 거래 배지
+            const isSale = p.deal === '매매';
+            const badgeText = isSale ? '매매' : (p.deal === '분양' ? '분양' : '임대');
+            ctx.font = kkFont(900, 28);
+            const bw = ctx.measureText(badgeText).width + 44;
+            ctx.fillStyle = isSale ? '#1d4ed8' : '#0f766e';
+            kkRoundRect(ctx, PX + 22, PY + 22, bw, 54, 27);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(badgeText, PX + 22 + 22, PY + 22 + 37);
+
+            // 제목 · 가격 · 위치
+            ctx.fillStyle = '#0f172a';
+            ctx.font = kkFont(900, 46);
+            ctx.fillText(kkFitText(ctx, p.title || '', PW), PX, 636);
+
+            ctx.fillStyle = '#dc2626';
+            ctx.font = kkFont(900, 60);
+            ctx.fillText(kkFitText(ctx, p.price || '금액 협의', PW), PX, 706);
+
+            ctx.fillStyle = '#475569';
+            ctx.font = kkFont(700, 25);
+            ctx.fillText(kkFitText(ctx, `인천 서구 ${p.region} · ${p.zone || '공장·창고'}`, PW), PX, 750);
+
+            // 핵심 스펙 4칸
+            const cells = [
+                ['면적', `전용 ${p.areaNum}평`],
+                ['층고', kkHeight(p)],
+                ['전력', propPowerLabel(p)],
+                ['도로', kkOneLine(kkRoad(p), 9)]
+            ];
+            const gap = 16, cw = (PW - gap * 3) / 4, cy = 774, ch = 96;
+            cells.forEach((c, i) => {
+                const cx = PX + i * (cw + gap);
+                ctx.fillStyle = '#f8fafc';
+                kkRoundRect(ctx, cx, cy, cw, ch, 16);
+                ctx.fill();
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.fillStyle = '#64748b';
+                ctx.font = kkFont(800, 19);
+                ctx.fillText(c[0], cx + 16, cy + 32);
+                ctx.fillStyle = '#0f172a';
+                ctx.font = kkFont(900, 27);
+                ctx.fillText(kkFitText(ctx, String(c[1]), cw - 30), cx + 16, cy + 72);
+            });
+
+            // 하단 상담 띠
+            ctx.fillStyle = '#12294d';
+            kkRoundRect(ctx, PX, 892, PW, 148, 22);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = kkFont(900, 29);
+            ctx.fillText('매매상담 032-582-6200  ·  임대상담 032-576-2600', PX + 32, 948);
+            ctx.fillStyle = 'rgba(255,255,255,.85)';
+            ctx.font = kkFont(700, 24);
+            ctx.fillText('김소장 직통 010-2660-8276   |   인천 서구 건지로 167', PX + 32, 994);
+
+            return cv;
+        }
+
+        function kkDownload(blob, name) {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = name;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 5000);
+        }
+
+        async function saveKakaoCard(idx, btn) {
+            const p = properties[idx];
+            if (!p) return;
+            const label = btn ? btn.innerHTML : '';
+            if (btn) { btn.disabled = true; btn.innerHTML = '🖼️ 만드는 중…'; }
+            try {
+                const cv = await buildKakaoCardCanvas(p);
+                const fname = `카톡카드_${p.id}.png`;
+                if (cv.toBlob) {
+                    cv.toBlob(blob => {
+                        if (!blob) { kkToast('이미지를 만들지 못했습니다. 다시 눌러 주세요.'); return; }
+                        kkDownload(blob, fname);
+                        kkToast('카톡 카드 이미지를 저장했습니다 (내려받기 폴더)');
+                    }, 'image/png');
+                } else {
+                    const a = document.createElement('a');
+                    a.href = cv.toDataURL('image/png');
+                    a.download = fname;
+                    a.click();
+                    kkToast('카톡 카드 이미지를 저장했습니다');
+                }
+            } catch (e) {
+                kkToast('카드 이미지를 만들지 못했습니다: ' + (e && e.message ? e.message : e));
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerHTML = label; }
+            }
+        }
+
+        // 매물 링크(#W-...)로 들어오면 그 매물 상세를 바로 연다
+        function openPropertyFromHash() {
+            let h = location.hash || '';
+            if (!h || h === '#') return;
+            try { h = decodeURIComponent(h.replace('#', '')); } catch (e) { h = h.replace('#', ''); }
+            if (!h) return;
+            const idx = properties.findIndex(p => String(p.id) === h);
+            if (idx >= 0) openDetailModal(idx);
+        }
 
         function openAdminModal() {
             document.getElementById('admin-modal-title').innerText = "➕ 새 매물 등록 및 비밀메모 입력";
@@ -1851,6 +2190,8 @@
         syncHeaderHeight();
         updateZoneCounts();
         renderProperties();
+        openPropertyFromHash();
+        window.addEventListener('hashchange', openPropertyFromHash);
         syncFromGoogleSheet();
     </script>
 </body>
