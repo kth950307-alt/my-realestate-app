@@ -1810,7 +1810,8 @@
             out.push(`· 면적 : 전용 ${p.areaNum}평${p.landInfo && String(p.landInfo).indexOf('전용') < 0 ? ' (' + p.landInfo + ')' : ''}`);
             out.push(`· 층고/전력 : ${kkHeight(p)} / ${propPowerLabel(p)}`);
             out.push(`· 호이스트 : ${hoistText(p)}`);
-            out.push(`· 도로 : ${kkRoad(p)}${/[츄레라|톤|진입]/.test(kkRoad(p)) ? '' : ' (' + kkTrailer(p) + ')'}`);
+            const roadTxt = kkRoad(p);
+            out.push(`· 도로 : ${roadTxt}${/츄레라|톤|진입/.test(roadTxt) ? '' : ' (' + kkTrailer(p) + ')'}`);
             const feat = kkFeature(p);
             if (feat) out.push(`· 특징 : ${feat}`);
             out.push('');
