@@ -333,37 +333,35 @@
     return ctx.measureText(text).width;
   }
 
-  // 한 줄에 들어가도록 글자 단위로 줄바꿈
+  // 띄어쓰기 단위로 줄바꿈 (한 단어가 너무 길면 글자 단위로 나눈다)
   function wrapLines(text, weight, size, maxW){
     var out = [];
-    var t = String(text || '').trim();
-    if (!t) return out;
+    var raw = String(text == null ? '' : text);
+    if (!raw.trim()) return out;
     ctx.font = font(weight, size);
-    var line = '';
-    for (var i = 0; i < t.length; i++){
-      var ch = t.charAt(i);
-      if (ch === '\n'){ out.push(line); line = ''; continue; }
-      var test = line + ch;
-      if (ctx.measureText(test).width > maxW && line){
-        out.push(line);
-        line = ch;
-      } else {
-        line = test;
-      }
-    }
-    if (line) out.push(line);
+    raw.split('\n').forEach(function(par){
+      par = par.replace(/\s+/g, ' ').trim();
+      if (!par) return;
+      var line = '';
+      par.split(' ').forEach(function(w){
+        if (ctx.measureText(w).width > maxW){
+          if (line){ out.push(line); line = ''; }
+          var chunk = '';
+          for (var i = 0; i < w.length; i++){
+            var ch = w.charAt(i);
+            if (chunk && ctx.measureText(chunk + ch).width > maxW){ out.push(chunk); chunk = ch; }
+            else chunk += ch;
+          }
+          line = chunk;
+          return;
+        }
+        var test = line ? line + ' ' + w : w;
+        if (line && ctx.measureText(test).width > maxW){ out.push(line); line = w; }
+        else line = test;
+      });
+      if (line) out.push(line);
+    });
     return out;
-  }
-
-  // 제목 크기 자동 맞춤
-  function fitTitleSize(lines, maxW, startSize, minSize){
-    var size = startSize;
-    while (size > minSize){
-      var ok = lines.every(function(l){ return measure(l, 900, size) <= maxW; });
-      if (ok) break;
-      size -= 2;
-    }
-    return size;
   }
 
   function roundRect(c, x, y, w, h, r){
@@ -463,13 +461,21 @@
 
     // 텍스트 줄바꿈 준비
     var kickLines = data.kicker ? wrapLines(data.kicker, 600, 33, MAXW) : [];
-    var titleSrc = [];
-    data.titles.forEach(function(t, i){
-      wrapLines(t, 900, 96, MAXW).forEach(function(l){ titleSrc.push({ text: l, accent: i === 1 }); });
-    });
 
-    // 1080 안에 들어오도록 제목·항목 크기를 줄여가며 맞춘다
-    var tSize = fitTitleSize(titleSrc.map(function(l){ return l.text; }), MAXW, 104, 52);
+    // 제목: 최대 크기에서 시작해 한 줄에 다 들어오도록 크기를 줄이며 줄바꿈
+    var tSize = 104, titleSrc = [];
+    for (var it = 0; it < 30; it++){
+      titleSrc = [];
+      data.titles.forEach(function(t, i){
+        wrapLines(t, 900, tSize, MAXW).forEach(function(l){ titleSrc.push({ text: l, accent: i === 1 }); });
+      });
+      var widest = 0;
+      titleSrc.forEach(function(l){ widest = Math.max(widest, measure(l.text, 900, tSize)); });
+      if (widest <= MAXW || tSize <= 52) break;
+      tSize -= 3;
+    }
+
+    // 1080 안에 들어오도록 항목 크기를 줄여가며 맞춘다
     var rowSize = 30, rowGap = 16, cardPadY = 34, geo = null;
     for (var guard = 0; guard < 30; guard++){
       geo = layoutAll(tSize, rowSize, rowGap, cardPadY, kickLines, titleSrc, data, MAXW, RIGHT, PAD);
