@@ -823,8 +823,8 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>진입도로 상세 설명</label>
-                            <input type="text" id="add-road" value="40ft 츄레라 진입 수월" required>
+                            <label>진입도로 상세 설명 <span style="font-weight:600; color:#64748b; font-size:11px;">(모르면 비워두세요 → 홈페이지에 '확인문의'로 표시)</span></label>
+                            <input type="text" id="add-road" value="" placeholder="예: 40ft 츄레라 진입 수월 / 5톤 화물차 진입">
                         </div>
                         <div class="form-group">
                             <label>🏗️ 호이스트 유무 선택</label>
@@ -838,8 +838,8 @@
                             <input type="text" id="add-hoist" value="5톤 1기" required>
                         </div>
                         <div class="form-group">
-                            <label>⚡ 계약전력 (숫자만 입력, kW)</label>
-                            <input type="number" id="add-power-num" value="75" required>
+                            <label>⚡ 계약전력 (숫자만 입력, kW) <span style="font-weight:600; color:#64748b; font-size:11px;">(모르면 비워두세요 → '확인문의')</span></label>
+                            <input type="text" inputmode="numeric" id="add-power-num" value="" placeholder="예: 75">
                         </div>
                         <div class="form-group">
                             <label>건축물 층고 (처마 높이)</label>
@@ -1035,6 +1035,51 @@
             return m ? parseFloat(m[0]) : defVal;
         }
 
+        // 🔎 시트에 '미기재' 또는 '확인필요'로 들어온 값을 판별한다.
+        //    (예전에는 전력 공란 → 50kW, 도로 공란 → 5톤 화물차 진입 처럼 기본값으로 덮어써서 오표시가 났음)
+        function isSpecMissing(val) {
+            const s = String(val == null ? "" : val).replace(/\s+/g, " ").trim();
+            if (!s || s === "-" || s === "—" || s === "/") return true;
+            if (!/\d/.test(s) && /확인\s*필요|확인\s*문의|확인\s*요망|미확인|미기재|미정|미입력|미상|모름|없음\?|tbd|\?\?/i.test(s)) return true;
+            return false;
+        }
+
+        // ⚡ 전력 표시: 실제 수치가 있으면 '50kW', 공란·'확인필요'면 '확인문의'
+        function powerLabel(val) {
+            if (isSpecMissing(val)) return "확인문의";
+            const n = extractNum(val, NaN);
+            return Number.isFinite(n) ? `${n}kW` : "확인문의";
+        }
+
+        // 🚛 도로조건 표시: 공란이면 '확인문의', '확인필요'는 '확인문의'로 바꾸되 뒤에 붙은 현장 메모는 살린다
+        function roadLabel(val) {
+            const s = String(val == null ? "" : val).replace(/\s+/g, " ").trim();
+            if (!s || s === "-" || s === "—" || s === "/") return "확인문의";
+            return s.replace(/확인\s*필요/g, "확인문의");
+        }
+
+        // 🚛 츄레라 진입 판정: 도로조건이 미기재·확인필요면 진입 여부를 단정하지 않고 UNKNOWN
+        function roadTrailerState(raw) {
+            if (isSpecMissing(raw)) return "UNKNOWN";
+            const s = String(raw);
+            return (s.includes("츄레라") || s.includes("40ft") || s.includes("25톤")) ? "YES" : "WING";
+        }
+
+        // 기존에 저장된 매물(powerNum 숫자만 있는 경우)까지 포함해 전력 표시값을 구한다
+        function propPowerLabel(p) {
+            if (p && p.powerText) return p.powerText;
+            const n = Number(p && p.powerNum);
+            return Number.isFinite(n) && n > 0 ? `${n}kW` : "확인문의";
+        }
+
+        // ⚡ 전력/층고 한 칸 표시: 둘 다 미기재면 '확인문의' 한 마디로 정리
+        function powerHeightLabel(p) {
+            const pw = propPowerLabel(p);
+            const h = String(p && p.height != null ? p.height : "").trim();
+            const hTxt = (!h || h === "-") ? "확인문의" : h;
+            return (pw === "확인문의" && hTxt === "확인문의") ? "확인문의" : `${pw} / ${hTxt}`;
+        }
+
         function normalizeDeal(raw) {
             const s = String(raw || "").trim();
             if (s.includes("분양")) return "분양";
@@ -1135,14 +1180,16 @@
                     const idStr = c1 || ("W-" + (200 + idx));
                     const areaVal = extractNum(c(10), 60);
                     const subArea = extractNum(c(11), 0);
-                    const powerVal = extractNum(c(13), 50);
+                    const powerRaw = c(13);
+                    const powerVal = extractNum(powerRaw, 0);
                     const hoistOx = c(14);
                     const hoistSpec = c(15);
                     const hasH = judgeHoist(hoistOx, hoistSpec);
                     const hoistToneTxt = (hoistSpec && !/^(없음|무|無|-)$/.test(hoistSpec.trim()))
                         ? hoistSpec
                         : (!/^(있음|유|有|yes|y|o|보유)$/i.test(hoistOx) ? hoistOx : "");
-                    const roadStr = c(16) || "5톤 화물차 진입";
+                    const roadRaw = c(16);
+                    const roadStr = roadLabel(roadRaw);
                     const rawImg = c(25);
                     const validImg = (rawImg.startsWith("http") || rawImg.startsWith("data:image"))
                         ? rawImg
@@ -1166,12 +1213,14 @@
                         areaNum: areaVal,
                         landInfo: subArea > 0 ? `전용 ${areaVal}평 / 사무실 ${subArea}평` : `전용 ${areaVal}평`,
                         zone: c(22) || "일반공업지역",
-                        hasTrailer: (roadStr.includes("츄레라") || roadStr.includes("40ft") || roadStr.includes("25톤")) ? "YES" : "WING",
+                        hasTrailer: roadTrailerState(roadRaw),
                         road: roadStr,
+                        roadRaw: roadRaw,
                         hasHoist: hasH,
                         hoist: hasH === "YES" ? (hoistToneTxt || "호이스트 보유") : "없음",
                         powerNum: powerVal,
-                        height: c(12) ? (c(12).includes("m") ? c(12) : c(12) + "m") : "-",
+                        powerText: powerLabel(powerRaw),
+                        height: c(12) ? (c(12).includes("m") ? c(12) : c(12) + "m") : "확인문의",
                         isDone: c5.includes("완료") || c(6).includes("계약완료"),
                         imgs: [validImg],
                         desc: c(24) ? `• ${c(24)}\n• 입주시기: ${c(17) || "즉시/협의"} / 추천업종: ${c(18) || "제조·물류"}` : `• 인천 서구 ${c3} 현장 확인된 실매물입니다.\n• 진입도로: ${roadStr}`,
@@ -1198,12 +1247,14 @@
                         areaNum: areaOld,
                         landInfo: `전용 ${areaOld}평`,
                         zone: c(16) || "일반공업지역",
-                        hasTrailer: (c(13) || "").includes("츄레라") ? "YES" : "WING",
-                        road: c(13) || "화물차 진입 수월",
+                        hasTrailer: roadTrailerState(c(13)),
+                        road: roadLabel(c(13)),
+                        roadRaw: c(13),
                         hasHoist: hasH,
                         hoist: hoistRaw,
-                        powerNum: extractNum(c(11), 30),
-                        height: c(10) || "7m",
+                        powerNum: extractNum(c(11), 0),
+                        powerText: powerLabel(c(11)),
+                        height: c(10) || "확인문의",
                         isDone: false,
                         imgs: ["https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80"],
                         desc: c(20) || "• 현장 실사 완료된 우수 매물입니다.",
@@ -1416,7 +1467,7 @@
                             <div class="spec-mini-grid">
                                 <div class="spec-cell"><span class="spec-key">📐 면적</span><span class="spec-val">${p.landInfo}</span></div>
                                 <div class="spec-cell"><span class="spec-key">🏗️ 호이스트</span><span class="spec-val ${p.hasHoist === 'YES' ? 'hoist-val-yes' : 'hoist-val-no'}">${hoistCell}</span></div>
-                                <div class="spec-cell"><span class="spec-key">⚡ 전력/층고</span><span class="spec-val">${p.powerNum}kW / ${p.height}</span></div>
+                                <div class="spec-cell"><span class="spec-key">⚡ 전력/층고</span><span class="spec-val">${powerHeightLabel(p)}</span></div>
                                 <div class="spec-cell"><span class="spec-key">🚛 차량진입</span><span class="spec-val">${p.road}</span></div>
                             </div>
                             ${secretHtml}
@@ -1605,12 +1656,12 @@
                         <th>용도지역</th><td>${p.zone}</td>
                     </tr>
                     <tr>
-                        <th>🚛 츄레라 진입</th><td>${p.hasTrailer === 'YES' ? '⭕ 40ft 츄레라 진입가능' : '11톤/5톤 진입 (' + p.road + ')'}</td>
-                        <th>진입도로 조건</th><td>${p.road}</td>
+                        <th>🚛 츄레라 진입</th><td>${p.hasTrailer === 'YES' ? '⭕ 40ft 츄레라 진입가능' : (p.hasTrailer === 'WING' ? '11톤/5톤 진입 (' + roadLabel(p.road) + ')' : '⏳ 확인문의 (현장 실측 후 안내)')}</td>
+                        <th>진입도로 조건</th><td>${roadLabel(p.road)}</td>
                     </tr>
                     <tr>
                         <th>🏗️ 호이스트 설비</th><td>${p.hasHoist === 'YES' ? '⭕ ' + hoistText(p) : '호이스트 없음'}</td>
-                        <th>⚡ 전력 / 층고</th><td>동력 ${p.powerNum}kW / 층고 ${p.height}</td>
+                        <th>⚡ 전력 / 층고</th><td>${powerHeightLabel(p)}</td>
                     </tr>
                 </table>
 
@@ -1663,11 +1714,11 @@
             document.getElementById('add-area').value = p.areaNum;
             document.getElementById('add-land').value = p.landInfo;
             document.getElementById('add-zone').value = p.zone;
-            document.getElementById('add-has-trailer').value = p.hasTrailer;
-            document.getElementById('add-road').value = p.road;
+            document.getElementById('add-has-trailer').value = (p.hasTrailer === 'YES') ? 'YES' : 'WING';
+            document.getElementById('add-road').value = isSpecMissing(p.roadRaw || p.road) ? "" : String(p.roadRaw || p.road);
             document.getElementById('add-has-hoist').value = p.hasHoist;
             document.getElementById('add-hoist').value = p.hoist;
-            document.getElementById('add-power-num').value = p.powerNum;
+            document.getElementById('add-power-num').value = (propPowerLabel(p) === '확인문의') ? '' : p.powerNum;
             document.getElementById('add-height').value = p.height;
             document.getElementById('add-desc').value = p.desc;
             document.getElementById('add-secret-addr').value = p.secretAddr || "";
@@ -1692,11 +1743,13 @@
                     areaNum: Number(document.getElementById('add-area').value),
                     landInfo: document.getElementById('add-land').value,
                     zone: document.getElementById('add-zone').value,
-                    hasTrailer: document.getElementById('add-has-trailer').value,
-                    road: document.getElementById('add-road').value,
+                    hasTrailer: isSpecMissing(document.getElementById('add-road').value) ? 'UNKNOWN' : document.getElementById('add-has-trailer').value,
+                    road: roadLabel(document.getElementById('add-road').value),
+                    roadRaw: document.getElementById('add-road').value,
                     hasHoist: document.getElementById('add-has-hoist').value,
                     hoist: document.getElementById('add-hoist').value,
-                    powerNum: Number(document.getElementById('add-power-num').value),
+                    powerNum: extractNum(document.getElementById('add-power-num').value, 0),
+                    powerText: powerLabel(document.getElementById('add-power-num').value),
                     height: document.getElementById('add-height').value,
                     isDone: editIdx >= 0 ? properties[editIdx].isDone : false,
                     imgs: imgArray,

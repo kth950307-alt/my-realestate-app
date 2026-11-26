@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>포레스트 그린 슬라이드 생성기 | 우리부동산 사장님 작업실</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="청약·공공임대 블로그 본문용 매트 화이트 & 딥 포레스트 그린 에디토리얼 카드를 5초 만에 만들어 1080px PNG로 저장하는 도구">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --forest:#1B4332; --forest-2:#245741; --forest-soft:#EDF2EE;
+    --paper:#F8F9F7; --line:#E2E5E0; --ink:#16202B; --ink2:#3F4A56; --muted:#6B7684;
+    --bg:#F4F6F4; --white:#fff;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0; padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕","Noto Sans KR",system-ui,sans-serif;
+    -webkit-text-size-adjust:100%; line-height:1.5;
+  }
+  button{font-family:inherit; cursor:pointer; border:0; border-radius:11px; font-weight:800; letter-spacing:-.2px;}
+
+  /* ───── 상단 바 ───── */
+  .topbar{
+    position:sticky; top:0; z-index:30; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    padding:10px 16px; background:#fff; border-bottom:1px solid var(--line);
+    box-shadow:0 2px 12px rgba(27,67,50,.06);
+  }
+  .brand{display:flex; align-items:center; gap:9px; min-width:0}
+  .brand .leaf{
+    width:34px; height:34px; border-radius:10px; background:var(--forest); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:17px; flex:0 0 auto;
+  }
+  .brand h1{margin:0; font-size:15.5px; font-weight:900; letter-spacing:-.5px; color:var(--forest); white-space:nowrap}
+  .brand p{margin:1px 0 0; font-size:11px; font-weight:600; color:var(--muted); white-space:nowrap}
+  .topbtns{display:flex; gap:6px; margin-left:auto; flex-wrap:wrap}
+  .topbtns button{padding:9px 12px; font-size:12.5px; background:#EDF1ED; color:var(--forest)}
+  .topbtns button:hover{background:#E3EAE4}
+  .topbtns button.primary{background:var(--forest); color:#fff; box-shadow:0 3px 10px rgba(27,67,50,.24)}
+  .topbtns button.primary:hover{background:var(--forest-2)}
+  .topbtns button.ghost{background:#fff; border:1px solid var(--line); color:var(--ink2); font-weight:700}
+
+  /* ───── 본문 2단 ───── */
+  .wrap{display:grid; grid-template-columns:minmax(0,1fr) minmax(320px,468px); gap:16px; padding:16px; max-width:1360px; margin:0 auto; align-items:start}
+  @media (max-width:940px){ .wrap{grid-template-columns:1fr; gap:12px; padding:12px} }
+
+  .panel{background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 16px 18px}
+  .panel h2{margin:0 0 3px; font-size:14px; font-weight:900; letter-spacing:-.4px; color:var(--forest); display:flex; align-items:center; gap:6px}
+  .panel .sub{margin:0 0 14px; font-size:11.5px; font-weight:600; color:var(--muted)}
+
+  .field{margin-bottom:13px}
+  .field label{display:block; font-size:11.5px; font-weight:800; color:var(--ink2); margin-bottom:5px; letter-spacing:-.1px}
+  .field label .t{font-weight:600; color:#8A94A0; font-size:10.5px; margin-left:4px}
+  .field input[type=text], .field textarea{
+    width:100%; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px;
+    font-family:inherit; font-size:14px; font-weight:600; color:var(--ink); background:#FCFDFC;
+    transition:border-color .12s, background .12s;
+  }
+  .field input[type=text]:focus, .field textarea:focus{outline:none; border-color:var(--forest); background:#fff}
+  .field input::placeholder, .field textarea::placeholder{color:#A9B2BC; font-weight:500}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  @media (max-width:520px){ .two{grid-template-columns:1fr} }
+
+  .rows-head{display:flex; align-items:center; justify-content:space-between; margin:18px 0 8px; padding-top:14px; border-top:1px dashed var(--line)}
+  .rows-head strong{font-size:12.5px; font-weight:900; color:var(--forest)}
+  .rows-head span{font-size:11px; font-weight:600; color:var(--muted)}
+  .rowitem{display:grid; grid-template-columns:132px 1fr; gap:8px; margin-bottom:8px; align-items:start}
+  @media (max-width:520px){ .rowitem{grid-template-columns:104px 1fr} }
+  .rowitem .no{
+    position:absolute; margin:-2px 0 0 -2px; font-size:9.5px; font-weight:800; color:#B6BFC7;
+  }
+  .rowitem input[type=text]{
+    width:100%; padding:10px 11px; border:1.5px solid var(--line); border-radius:10px;
+    font-family:inherit; font-size:13.5px; font-weight:600; color:var(--ink); background:#FCFDFC;
+  }
+  .rowitem input[type=text]:focus{outline:none; border-color:var(--forest); background:#fff}
+  .rowitem input::placeholder{color:#AEB7C0; font-weight:500}
+
+  .hintbox{
+    margin-top:4px; padding:11px 13px; background:var(--forest-soft); border-radius:11px;
+    font-size:11.5px; font-weight:600; color:#3C5B49; line-height:1.65;
+  }
+  .hintbox b{color:var(--forest)}
+
+  /* ───── 미리보기 ───── */
+  .previewPane{position:sticky; top:74px}
+  @media (max-width:940px){ .previewPane{position:static} }
+  .previewCard{background:#fff; border:1px solid var(--line); border-radius:16px; padding:13px}
+  .previewHead{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px}
+  .previewHead strong{font-size:12.5px; font-weight:900; color:var(--forest)}
+  .previewHead span{font-size:10.5px; font-weight:700; color:#9AA4AF; background:#F1F4F1; padding:3px 8px; border-radius:999px}
+  .canvasShell{border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--paper)}
+  #cv{display:block; width:100%; height:auto}
+  .saveRow{display:grid; gap:7px; margin-top:11px}
+  .saveRow button{padding:13px; font-size:14.5px; background:var(--forest); color:#fff; box-shadow:0 4px 14px rgba(27,67,50,.2)}
+  .saveRow button:hover{background:var(--forest-2)}
+  .saveRow button.ghost2{background:#fff; color:var(--forest); border:1.5px solid #CFDBD3; box-shadow:none; font-size:12.5px; padding:10px}
+  .saveNote{font-size:10.5px; font-weight:600; color:#95A0AA; text-align:center; margin-top:2px}
+
+  .toast{
+    position:fixed; left:50%; bottom:26px; transform:translate(-50%, 20px); z-index:60;
+    background:var(--forest); color:#fff; font-size:13px; font-weight:700; letter-spacing:-.2px;
+    padding:12px 18px; border-radius:12px; box-shadow:0 8px 24px rgba(27,67,50,.3);
+    opacity:0; pointer-events:none; transition:opacity .18s, transform .18s;
+  }
+  .toast.on{opacity:1; transform:translate(-50%, 0)}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="leaf" aria-hidden="true">🌿</div>
+    <div>
+      <h1>포레스트 그린 슬라이드</h1>
+      <p>청약·공공임대 본문 카드 · 매트 화이트 &amp; 딥 그린</p>
+    </div>
+  </div>
+  <div class="topbtns">
+    <button type="button" class="ghost" id="btnSample">예시 채우기</button>
+    <button type="button" class="ghost" id="btnClear">비우기</button>
+    <button type="button" class="primary" id="btnPng">🖼️ 이미지 저장(PNG)</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- ───── 입력 ───── -->
+  <section class="panel" aria-label="슬라이드 내용 입력">
+    <h2><span aria-hidden="true">✍️</span> 내용만 적으면 카드가 바로 나옵니다</h2>
+    <p class="sub">왼쪽 칸을 채우면 오른쪽 미리보기가 실시간으로 바뀝니다. 저장 버튼 한 번이면 1080×1080 PNG 완성.</p>
+
+    <div class="field">
+      <label for="fLabel">상단 라벨 <span class="t">카테고리 (예: LH 공공임대 브리핑)</span></label>
+      <input type="text" id="fLabel" maxlength="40" placeholder="LH 공공임대 브리핑">
+    </div>
+
+    <div class="field">
+      <label for="fKicker">키워드 줄 <span class="t">지역·단지 이름 (없으면 비워두세요)</span></label>
+      <input type="text" id="fKicker" maxlength="60" placeholder="서울삼전 · 강동천호 · LH수서 1·2">
+    </div>
+
+    <div class="two">
+      <div class="field">
+        <label for="fTitle1">큰 제목 첫 줄</label>
+        <input type="text" id="fTitle1" maxlength="26" placeholder="송파·강남·강동">
+      </div>
+      <div class="field">
+        <label for="fTitle2">큰 제목 둘째 줄 <span class="t">진한 초록 강조</span></label>
+        <input type="text" id="fTitle2" maxlength="26" placeholder="행복주택 390명">
+      </div>
+    </div>
+
+    <div class="rows-head">
+      <strong>핵심 항목 (3~5개)</strong>
+      <span>빈 칸은 카드에서 빠집니다</span>
+    </div>
+
+    <div id="rows"></div>
+
+    <div class="rows-head" style="margin-top:14px">
+      <strong>하단 서명</strong>
+      <span>출처 표시</span>
+    </div>
+    <div class="two">
+      <div class="field" style="margin-bottom:0">
+        <label for="fSign">서명</label>
+        <input type="text" id="fSign" maxlength="30" placeholder="우리부동산 김소장">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label for="fDate">날짜 <span class="t">비우면 오늘 날짜</span></label>
+        <input type="text" id="fDate" maxlength="24" placeholder="2026. 11. 26">
+      </div>
+    </div>
+
+    <div class="hintbox">
+      <b>이렇게 쓰면 됩니다</b><br>
+      항목명은 <b>접수 기간 / 임대 조건 / 신청 자격</b>처럼 4~6글자로 짧게, 내용은 <b>11.30(월) 10:00 ~ 12.01(화) 17:00</b>처럼 한 줄에 들어가게 적으면 가장 깔끔합니다.<br>
+      내용이 길면 카드 안에서 자동으로 줄바꿈되고, 글자가 넘치면 크기가 알아서 줄어듭니다.
+    </div>
+  </section>
+
+  <!-- ───── 미리보기 ───── -->
+  <section class="previewPane" aria-label="미리보기">
+    <div class="previewCard">
+      <div class="previewHead">
+        <strong>미리보기 (1080×1080)</strong>
+        <span id="fitNote">실시간</span>
+      </div>
+      <div class="canvasShell">
+        <canvas id="cv" width="1080" height="1080" aria-label="슬라이드 미리보기"></canvas>
+      </div>
+      <div class="saveRow">
+        <button type="button" id="btnPng2">🖼️ 이미지 저장(PNG · 1080×1080)</button>
+        <button type="button" class="ghost2" id="btnPng2x">고해상도로 저장 (2160×2160)</button>
+        <div class="saveNote">저장된 파일은 다운로드 폴더에 들어갑니다 · 네이버 블로그 본문에 그대로 올리세요</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ════════════════════════════════════════════
+     디자인 상수 (2026-11-25 확정 톤)
+     매트 화이트 바탕 + 좌측 딥 포레스트 그린 바
+     ════════════════════════════════════════════ */
+  var DESIGN = {
+    W: 1080, H: 1080,
+    BG: '#F8F9F7',
+    BAR: '#1B4332',
+    BAR_W: 26,
+    PAD: 96,             // 좌우 여백
+    RULE: '#E2E5E0',     // 얇은 회색 구분선
+    INK: '#16202B',      // 제목 첫 줄
+    GREEN: '#1B4332',    // 강조 줄 · 라벨
+    KICKER: '#5B6472',
+    CARD_BG: '#FFFFFF',
+    CARD_LINE: '#E4E7E2',
+    LABEL: '#556070',
+    VALUE: '#101820',
+    FOOT: '#16202B',
+    DATE: '#7A838D',
+    FONT: '"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕","Noto Sans KR",system-ui,sans-serif'
+  };
+
+  var cv = document.getElementById('cv');
+  var ctx = cv.getContext('2d');
+  var toastEl = document.getElementById('toast');
+  var toastTimer = null;
+
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('on'); }, 1800);
+  }
+
+  /* ════════════════════════════════════════════
+     항목 입력칸 5줄
+     ════════════════════════════════════════════ */
+  var ROWS = 5;
+  var rowsEl = document.getElementById('rows');
+  for (var i = 0; i < ROWS; i++){
+    var wrap = document.createElement('div');
+    wrap.className = 'rowitem';
+    var a = document.createElement('input');
+    a.type = 'text'; a.id = 'fKey' + i; a.maxLength = 14;
+    a.placeholder = ['접수 기간','임대 조건','신청 자격','당첨 발표','문의'][i];
+    a.setAttribute('aria-label', (i+1) + '번째 항목명');
+    var b = document.createElement('input');
+    b.type = 'text'; b.id = 'fVal' + i; b.maxLength = 60;
+    b.placeholder = ['11.30(월) 10:00 ~ 12.01(화) 17:00','보증금 5,220만 / 월 18만~61만 원대','서울 + 인천·경기 연접지역 1순위 추첨','12.04(목) 17:00 LH청약플러스','우리부동산 김소장 010-2660-8276'][i];
+    b.setAttribute('aria-label', (i+1) + '번째 항목 내용');
+    wrap.appendChild(a); wrap.appendChild(b);
+    rowsEl.appendChild(wrap);
+  }
+
+  var F = {};
+  ['fLabel','fKicker','fTitle1','fTitle2','fSign','fDate'].forEach(function(id){ F[id] = document.getElementById(id); });
+
+  var VAL_IDS = [], KEY_IDS = [];
+  for (var j = 0; j < ROWS; j++){ KEY_IDS.push('fKey' + j); VAL_IDS.push('fVal' + j); }
+
+  function val(id){
+    var el = document.getElementById(id);
+    return el ? String(el.value || '').trim() : '';
+  }
+
+  function todayText(){
+    var d = new Date();
+    return d.getFullYear() + '. ' + (d.getMonth() + 1) + '. ' + d.getDate();
+  }
+
+  /* ════════════════════════════════════════════
+     상태 저장 (다음에 열어도 그대로)
+     ════════════════════════════════════════════ */
+  var STORE = 'woori_editorial_slide_v1';
+
+  function readState(){
+    var s = { fLabel: val('fLabel'), fKicker: val('fKicker'), fTitle1: val('fTitle1'),
+              fTitle2: val('fTitle2'), fSign: val('fSign'), fDate: val('fDate'), rows: [] };
+    for (var k = 0; k < ROWS; k++) s.rows.push({ k: val(KEY_IDS[k]), v: val(VAL_IDS[k]) });
+    return s;
+  }
+
+  function applyState(s){
+    F.fLabel.value = s.fLabel || '';
+    F.fKicker.value = s.fKicker || '';
+    F.fTitle1.value = s.fTitle1 || '';
+    F.fTitle2.value = s.fTitle2 || '';
+    F.fSign.value = s.fSign || '';
+    F.fDate.value = s.fDate || '';
+    (s.rows || []).forEach(function(r, k){
+      if (k >= ROWS) return;
+      document.getElementById(KEY_IDS[k]).value = r.k || '';
+      document.getElementById(VAL_IDS[k]).value = r.v || '';
+    });
+  }
+
+  function saveState(){
+    try { localStorage.setItem(STORE, JSON.stringify(readState())); } catch(e){}
+  }
+
+  var SAMPLE = {
+    fLabel: 'LH 공공임대 브리핑',
+    fKicker: '서울삼전 · 강동천호 · LH수서 1·2',
+    fTitle1: '송파·강남·강동',
+    fTitle2: '행복주택 390명',
+    fSign: '우리부동산 김소장',
+    fDate: '',
+    rows: [
+      { k: '접수 기간', v: '11.30(월) 10:00 ~ 12.01(화) 17:00' },
+      { k: '임대 조건', v: '보증금 5,220만~ / 월 18만~61만 원대' },
+      { k: '신청 자격', v: '서울 + 인천·경기 연접지역 1순위 추첨' },
+      { k: '', v: '' }, { k: '', v: '' }
+    ]
+  };
+
+  /* ════════════════════════════════════════════
+     그리기
+     ════════════════════════════════════════════ */
+  function font(weight, size){ return weight + ' ' + size + 'px ' + DESIGN.FONT; }
+
+  function measure(text, weight, size){
+    ctx.font = font(weight, size);
+    return ctx.measureText(text).width;
+  }
+
+  // 한 줄에 들어가도록 글자 단위로 줄바꿈
+  function wrapLines(text, weight, size, maxW){
+    var out = [];
+    var t = String(text || '').trim();
+    if (!t) return out;
+    ctx.font = font(weight, size);
+    var line = '';
+    for (var i = 0; i < t.length; i++){
+      var ch = t.charAt(i);
+      if (ch === '\n'){ out.push(line); line = ''; continue; }
+      var test = line + ch;
+      if (ctx.measureText(test).width > maxW && line){
+        out.push(line);
+        line = ch;
+      } else {
+        line = test;
+      }
+    }
+    if (line) out.push(line);
+    return out;
+  }
+
+  // 제목 크기 자동 맞춤
+  function fitTitleSize(lines, maxW, startSize, minSize){
+    var size = startSize;
+    while (size > minSize){
+      var ok = lines.every(function(l){ return measure(l, 900, size) <= maxW; });
+      if (ok) break;
+      size -= 2;
+    }
+    return size;
+  }
+
+  function roundRect(c, x, y, w, h, r){
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.lineTo(x + w - r, y);
+    c.quadraticCurveTo(x + w, y, x + w, y + r);
+    c.lineTo(x + w, y + h - r);
+    c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    c.lineTo(x + r, y + h);
+    c.quadraticCurveTo(x, y + h, x, y + h - r);
+    c.lineTo(x, y + r);
+    c.quadraticCurveTo(x, y, x + r, y);
+    c.closePath();
+  }
+
+  function collect(){
+    var label = val('fLabel');
+    var kicker = val('fKicker');
+    var t1 = val('fTitle1') || '제목을 입력하세요';
+    var t2 = val('fTitle2');
+    var rows = [];
+    for (var k = 0; k < ROWS; k++){
+      var kk = val(KEY_IDS[k]), vv = val(VAL_IDS[k]);
+      if (!kk && !vv) continue;
+      rows.push({ k: kk || '항목', v: vv || '' });
+    }
+    if (!rows.length) rows = [{ k: '항목', v: '내용을 입력하세요' }];
+    return {
+      label: label,
+      kicker: kicker,
+      titles: [t1].concat(t2 ? [t2] : []),
+      rows: rows.slice(0, 5),
+      sign: val('fSign') || '우리부동산 김소장',
+      date: val('fDate') || todayText()
+    };
+  }
+
+  // 한 번의 배치 계산: 제목/항목 크기를 받아 카드·서명 위치까지 모두 구한다
+  function layoutAll(tSize, rowSize, rowGap, cardPadY, kickLines, titleSrc, data, MAXW, RIGHT, PAD){
+    var tLineH = Math.round(tSize * 1.16);
+    var y = 152;
+
+    // 상단 라벨 + 구분선
+    if (data.label) y += 14; else y -= 4;
+    var ruleY = y + 6;
+    y = ruleY;
+
+    // 키워드 줄
+    if (kickLines.length){
+      y += 60 + (kickLines.length - 1) * 44 + 26;
+    } else {
+      y += 30;
+    }
+
+    var titleTop = y + tSize * 0.98;
+    var titleBottom = titleTop + (titleSrc.length - 1) * tLineH + tSize * 0.24;
+
+    // 항목 카드
+    var labelSize = Math.min(rowSize, 30);
+    var labelCol = 0;
+    data.rows.forEach(function(r){ labelCol = Math.max(labelCol, measure(r.k, 700, labelSize)); });
+    labelCol = Math.min(Math.max(labelCol, 92), 236);
+    var valueX = PAD + 46 + labelCol + 20;
+    var valueW = RIGHT - 46 - valueX;
+
+    var lineH = Math.round(rowSize * 1.28);
+    var prepared = data.rows.map(function(r){
+      var lines = wrapLines(r.v, 700, rowSize, valueW);
+      return { k: r.k, lines: lines.length ? lines : [''] };
+    });
+    var innerH = 0;
+    prepared.forEach(function(p, i){
+      p.h = p.lines.length * lineH;
+      innerH += p.h + (i < prepared.length - 1 ? rowGap : 0);
+    });
+
+    var cardTop = titleBottom + 62;
+    var cardH = innerH + cardPadY * 2;
+    var cardBottom = cardTop + cardH;
+
+    var footRuleY = cardBottom + 54;
+    var footY = footRuleY + 46;
+
+    return {
+      tSize: tSize, tLineH: tLineH, titleTop: titleTop, titleBottom: titleBottom,
+      ruleY: ruleY, kickTop: 0,
+      rowSize: rowSize, labelSize: labelSize, lineH: lineH, rowGap: rowGap, cardPadY: cardPadY,
+      prepared: prepared, valueX: valueX,
+      cardTop: cardTop, cardH: cardH, cardBottom: cardBottom,
+      footRuleY: footRuleY, footY: footY
+    };
+  }
+
+  function draw(sizePx){
+    var D = DESIGN;
+    var W = D.W, H = D.H;
+    var PAD = D.PAD, RIGHT = W - PAD, MAXW = RIGHT - PAD;
+    var data = collect();
+
+    // 텍스트 줄바꿈 준비
+    var kickLines = data.kicker ? wrapLines(data.kicker, 600, 33, MAXW) : [];
+    var titleSrc = [];
+    data.titles.forEach(function(t, i){
+      wrapLines(t, 900, 96, MAXW).forEach(function(l){ titleSrc.push({ text: l, accent: i === 1 }); });
+    });
+
+    // 1080 안에 들어오도록 제목·항목 크기를 줄여가며 맞춘다
+    var tSize = 96, rowSize = 30, rowGap = 16, cardPadY = 34, geo = null;
+    for (var guard = 0; guard < 30; guard++){
+      geo = layoutAll(tSize, rowSize, rowGap, cardPadY, kickLines, titleSrc, data, MAXW, RIGHT, PAD);
+      if (geo.footY + 44 <= 1050) break;
+      if (rowSize > 23){ rowSize -= 2; rowGap = Math.max(10, rowGap - 1); cardPadY = Math.max(24, cardPadY - 2); }
+      else if (tSize > 50){ tSize -= 4; }
+      else break;
+    }
+
+    ctx.clearRect(0, 0, W, H);
+
+    // 배경 + 좌측 딥 포레스트 그린 바
+    ctx.fillStyle = D.BG;
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = D.BAR;
+    ctx.fillRect(0, 0, D.BAR_W, H);
+
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left';
+
+    // 상단 카테고리 라벨
+    if (data.label){
+      ctx.fillStyle = D.GREEN;
+      ctx.font = font(800, 30);
+      ctx.fillText(data.label, PAD, 152);
+    }
+
+    // 얇은 회색 구분선
+    ctx.strokeStyle = D.RULE;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(PAD, geo.ruleY);
+    ctx.lineTo(RIGHT, geo.ruleY);
+    ctx.stroke();
+
+    // 키워드 줄
+    if (kickLines.length){
+      ctx.fillStyle = D.KICKER;
+      ctx.font = font(600, 33);
+      kickLines.forEach(function(l, i){ ctx.fillText(l, PAD, geo.ruleY + 60 + i * 44); });
+    }
+
+    // 큰 제목
+    ctx.font = font(900, geo.tSize);
+    titleSrc.forEach(function(l, i){
+      ctx.fillStyle = l.accent ? D.GREEN : D.INK;
+      ctx.font = font(900, geo.tSize);
+      ctx.fillText(l.text, PAD, geo.titleTop + i * geo.tLineH);
+    });
+
+    // ── 핵심 항목 카드 ──
+    ctx.save();
+    ctx.shadowColor = 'rgba(20,35,28,.05)';
+    ctx.shadowBlur = 18;
+    ctx.shadowOffsetY = 6;
+    ctx.fillStyle = D.CARD_BG;
+    roundRect(ctx, PAD, geo.cardTop, RIGHT - PAD, geo.cardH, 16);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.strokeStyle = D.CARD_LINE;
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, PAD, geo.cardTop, RIGHT - PAD, geo.cardH, 16);
+    ctx.stroke();
+
+    var ry = geo.cardTop + geo.cardPadY + geo.rowSize * 0.34;
+    geo.prepared.forEach(function(p){
+      ctx.fillStyle = D.LABEL;
+      ctx.font = font(700, geo.labelSize);
+      ctx.fillText(p.k, PAD + 46, ry + geo.rowSize * 0.66);
+
+      ctx.fillStyle = D.VALUE;
+      ctx.font = font(700, geo.rowSize);
+      p.lines.forEach(function(l, i){
+        ctx.fillText(l, geo.valueX, ry + geo.rowSize * 0.66 + i * geo.lineH);
+      });
+      ry += p.h + geo.rowGap;
+    });
+
+    // ── 하단 서명 ──
+    ctx.strokeStyle = D.RULE;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(PAD, geo.footRuleY);
+    ctx.lineTo(RIGHT, geo.footRuleY);
+    ctx.stroke();
+
+    ctx.fillStyle = D.FOOT;
+    ctx.font = font(800, 28);
+    ctx.fillText(data.sign, PAD, geo.footY);
+
+    ctx.fillStyle = D.DATE;
+    ctx.font = font(700, 26);
+    ctx.textAlign = 'right';
+    ctx.fillText(data.date, RIGHT, geo.footY);
+    ctx.textAlign = 'left';
+
+    var note = document.getElementById('fitNote');
+    if (note) note.textContent = sizePx + '×' + sizePx;
+  }
+
+  var renderQueued = false;
+  function render(){
+    if (renderQueued) return;
+    renderQueued = true;
+    requestAnimationFrame(function(){
+      renderQueued = false;
+      draw(DESIGN.W);
+    });
+  }
+
+  /* ════════════════════════════════════════════
+     저장
+     ════════════════════════════════════════════ */
+  function exportPng(mult){
+    mult = mult || 1;
+    var out = document.createElement('canvas');
+    out.width = DESIGN.W * mult;
+    out.height = DESIGN.H * mult;
+    var octx = out.getContext('2d');
+    // 같은 그리기 코드를 배율만 바꿔 다시 실행
+    var mainCtx = ctx;
+    ctx = octx;
+    ctx.save();
+    ctx.scale(mult, mult);
+    try { draw(DESIGN.W); }
+    catch(e){ ctx.restore(); ctx = mainCtx; toast('저장 중 문제가 생겼어요. 다시 눌러주세요.'); return; }
+    ctx.restore();
+    ctx = mainCtx;
+
+    var name = (val('fTitle2') || val('fTitle1') || '슬라이드').replace(/[\\/:*?"<>|\s]+/g, '');
+    var d = new Date();
+    var stamp = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+    var filename = '우리부동산_포레스트_' + name.slice(0, 20) + '_' + stamp + (mult > 1 ? '_' + (DESIGN.W * mult) : '') + '.png';
+
+    var done = function(blob){
+      if (!blob){ toast('저장에 실패했어요. 다시 시도해 주세요.'); return; }
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+      toast('저장 완료 · ' + (DESIGN.W * mult) + '×' + (DESIGN.H * mult) + ' PNG');
+    };
+    try { out.toBlob(done, 'image/png'); }
+    catch(e){ toast('저장 중 문제가 생겼어요. 다시 시도해 주세요.'); }
+  }
+
+  /* ════════════════════════════════════════════
+     이벤트
+     ════════════════════════════════════════════ */
+  var ALL = ['fLabel','fKicker','fTitle1','fTitle2','fSign','fDate'].concat(KEY_IDS, VAL_IDS);
+  ALL.forEach(function(id){
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', function(){ render(); });
+    el.addEventListener('change', function(){ render(); saveState(); });
+    el.addEventListener('blur', saveState);
+  });
+
+  document.getElementById('btnSample').addEventListener('click', function(){
+    applyState(SAMPLE);
+    render(); saveState();
+    toast('예시를 채웠어요. 숫자만 바꿔 쓰세요.');
+  });
+
+  document.getElementById('btnClear').addEventListener('click', function(){
+    applyState({ rows: [] });
+    F.fSign.value = '우리부동산 김소장';
+    render(); saveState();
+    toast('비웠어요. 필요한 칸만 채우면 됩니다.');
+  });
+
+  document.getElementById('btnPng').addEventListener('click', function(){ exportPng(1); });
+  document.getElementById('btnPng2').addEventListener('click', function(){ exportPng(1); });
+  document.getElementById('btnPng2x').addEventListener('click', function(){ exportPng(2); });
+
+  /* 처음 상태 */
+  var restored = false;
+  try {
+    var saved = localStorage.getItem(STORE);
+    if (saved){ applyState(JSON.parse(saved)); restored = true; }
+  } catch(e){}
+  if (!restored){
+    applyState(SAMPLE);
+    F.fDate.value = '';
+  }
+
+  // 폰트가 준비되면 정확한 자간·굵기로 다시 그린다
+  function start(){
+    render();
+    if (document.fonts && document.fonts.load){
+      Promise.all(['400 30px Pretendard','600 30px Pretendard','700 30px Pretendard','800 30px Pretendard','900 96px Pretendard']
+        .map(function(s){ return document.fonts.load(s).catch(function(){}); }))
+        .then(function(){ render(); })
+        .catch(function(){});
+    }
+  }
+  start();
+  window.addEventListener('load', render);
+})();
+</script>
+</body>
+</html>
