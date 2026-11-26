@@ -641,18 +641,32 @@
     return la.toFixed(5) + ',' + lo.toFixed(5);
   }
 
-  function buildNominatimAddress(a){
+  function buildNominatimAddress(a, csvDong){
     a = a || {};
     var city = text(a.city) || text(a.state) || text(a.province) || '';
     var gu = text(a.borough) || text(a.city_district) || text(a.county) || '';
-    var dong = text(a.quarter) || text(a.village) || text(a.suburb) || text(a.neighbourhood) || '';
+    var osmDong = text(a.quarter) || text(a.village) || text(a.suburb) || text(a.neighbourhood) || '';
+    var dong = osmDong;
+    var mismatch = false;
+    if (csvDong) {
+      if (!osmDong) { dong = csvDong; }
+      else if (osmDong !== csvDong) {
+        if (dongStem(osmDong) === dongStem(csvDong)) { dong = csvDong; }
+        else { mismatch = true; dong = csvDong; }   // 네이버가 적은 동을 우선 쓰고, 확인 필요 표시
+      }
+    }
     var parts = [];
     if (city) parts.push(city);
     if (gu && gu !== city) parts.push(gu);
     if (dong) parts.push(dong);
     var road = text(a.road);
     if (road && text(a.house_number)) road += ' ' + text(a.house_number);
-    return { jibun: parts.join(' '), road: road };
+    return { jibun: parts.join(' '), road: road, mismatch: mismatch };
+  }
+
+  // '석남1동' → '석남동' 처럼 행정동 번호를 떼어 법정동과 견줄 수 있게 만든다
+  function dongStem(s){
+    return String(s || '').replace(/\d+\s*동$/, '동').replace(/\d+/g, '').trim();
   }
 
   function requestJSON(url, opts, tries){
@@ -675,7 +689,8 @@
   function lookupOne(r, mode, key){
     var ck = cacheKeyOf(r);
     if (!ck) return Promise.resolve({ status: 'no_coord' });
-    if (geoCache[ck] && geoCache[ck].status === 'ok') return Promise.resolve(geoCache[ck]);
+    var gk = ck + '|' + text(r.dong);
+    if (geoCache[gk] && geoCache[gk].status === 'ok') return Promise.resolve(geoCache[gk]);
 
     if (mode === 'kakao') {
       var url = 'https://dapi.kakao.com/v2/local/geo/coord2address.json?x=' + encodeURIComponent(r.lng) + '&y=' + encodeURIComponent(r.lat) + '&input_coord=WGS84';
@@ -685,7 +700,7 @@
         var jibun = text(d.address && d.address.address_name);
         var road = text(d.road_address && d.road_address.address_name);
         var out = { status: jibun ? 'ok' : 'fail', jibun: jibun, road: road };
-        if (out.status === 'ok') geoCache[ck] = out;
+        if (out.status === 'ok') geoCache[gk] = out;
         return out;
       }).catch(function(err){
         if (err && (err.status === 401 || err.status === 403)) {
@@ -699,9 +714,9 @@
 
     var nurl = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=' + encodeURIComponent(r.lat) + '&lon=' + encodeURIComponent(r.lng) + '&zoom=18&addressdetails=1&accept-language=ko';
     return requestJSON(nurl, { headers: { 'Accept': 'application/json' } }).then(function(j){
-      var built = buildNominatimAddress(j && j.address);
-      var out = { status: built.jibun ? 'ok' : 'fail', jibun: built.jibun, road: built.road, mode: 'nominatim' };
-      if (out.status === 'ok') geoCache[ck] = out;
+      var built = buildNominatimAddress(j && j.address, text(r.dong));
+      var out = { status: built.jibun ? 'ok' : 'fail', jibun: built.jibun, road: built.road, mismatch: !!built.mismatch, mode: 'nominatim' };
+      if (out.status === 'ok') geoCache[gk] = out;
       return out;
     });
   }
@@ -732,6 +747,7 @@
 
     geoRunning = true;
     geoCancelled = false;
+    state.rows.forEach(function(r){ if (!cacheKeyOf(r) && !r.geo) r.geo = '좌표없음'; });
     $('btnGeo').disabled = true;
     $('btnGeoStop').style.display = 'inline-flex';
     $('geomsg').textContent = (mode === 'kakao' ? '카카오로' : '무료 주소 서비스로') + ' 지번을 찾는 중...';
@@ -749,7 +765,7 @@
         if (res && res.status === 'ok') {
           r.jibun = res.jibun || '';
           if (res.road) r.road = res.road;
-          r.geo = mode === 'kakao' ? '카카오' : '자동';
+          r.geo = res.mismatch ? '확인필요' : (mode === 'kakao' ? '카카오' : '자동');
           ok++;
         } else if (res && res.status === 'no_coord') {
           r.geo = '좌표없음';
@@ -831,6 +847,10 @@
       updateStats();
       saveState();
     });
+    if (r.geo === '확인필요') {
+      inJ.title = '주소 서비스가 찾은 동과 네이버에 적힌 동이 달라요. 지도로 한 번 확인해 주세요.';
+      inJ.style.borderColor = '#f0b429';
+    }
     tdJibun.appendChild(inJ);
     tr.appendChild(tdJibun);
 
@@ -857,7 +877,8 @@
     nm.title = r.name || '';
     var sm = document.createElement('span');
     sm.className = 'sm';
-    sm.textContent = [r.dong, r.id, r.floor ? r.floor + '층' : ''].filter(Boolean).join(' · ');
+    var floorTxt = r.floor ? (/층$/.test(r.floor) ? r.floor : r.floor + '층') : '';
+    sm.textContent = [r.dong, r.id, floorTxt].filter(Boolean).join(' · ');
     tdName.appendChild(nm);
     tdName.appendChild(sm);
     tr.appendChild(tdName);
