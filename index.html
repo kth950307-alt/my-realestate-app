@@ -1776,13 +1776,26 @@
             return HOME_URL + '#' + encodeURIComponent(p.id);
         }
 
-        // 카드 스펙칸에 넣을 짧은 도로 표기 ("대로변 (40ft 츄레라 진입가능)" → "대로변")
+        // 카드 스펙칸에 넣을 짧은 도로 표기 ("5톤 이상 진입·상하차 가능(전면 마당, 단차 없음)" → "5톤 이상 진입")
         function kkShortRoad(p) {
             const raw = kkRoad(p);
             if (!raw || raw === '확인문의') return raw || '확인문의';
-            const beforeParen = raw.split('(')[0].trim();
-            const base = beforeParen || raw;
-            return kkOneLine(base, 9);
+            let s = String(raw).split('(')[0].trim();
+            s = s.split('·')[0].split(',')[0].trim();
+            s = s.replace(/\s*가능$/, '').trim();
+            return kkOneLine(s || raw, 9);
+        }
+
+        // 글자가 칸을 넘으면 글자 크기를 줄여서라도 끝까지 보이게
+        function kkFitFontSize(ctx, str, maxW, size, min, weight) {
+            let s = size;
+            while (s > min) {
+                ctx.font = kkFont(weight, s);
+                if (ctx.measureText(String(str || '')).width <= maxW) return s;
+                s -= 2;
+            }
+            ctx.font = kkFont(weight, s);
+            return s;
         }
 
         function buildKakaoSummary(p) {
@@ -1944,11 +1957,11 @@
 
             // 제목 · 가격 · 위치
             ctx.fillStyle = '#0f172a';
-            ctx.font = kkFont(900, 46);
+            kkFitFontSize(ctx, p.title || '', PW, 46, 34, 900);
             ctx.fillText(kkFitText(ctx, p.title || '', PW), PX, 636);
 
             ctx.fillStyle = '#dc2626';
-            ctx.font = kkFont(900, 60);
+            kkFitFontSize(ctx, p.price || '금액 협의', PW, 60, 38, 900);
             ctx.fillText(kkFitText(ctx, p.price || '금액 협의', PW), PX, 706);
 
             ctx.fillStyle = '#475569';
