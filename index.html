@@ -1065,6 +1065,13 @@
             return (s.includes("츄레라") || s.includes("40ft") || s.includes("25톤")) ? "YES" : "WING";
         }
 
+        // 📏 층고 표시: 공란이나 '-'는 '확인문의', 숫자만 있으면 m 붙임
+        function heightLabel(val) {
+            const s = String(val == null ? "" : val).trim();
+            if (!s || s === "-" || s === "—") return "확인문의";
+            return s.includes("m") ? s : s + "m";
+        }
+
         // 기존에 저장된 매물(powerNum 숫자만 있는 경우)까지 포함해 전력 표시값을 구한다
         function propPowerLabel(p) {
             if (p && p.powerText) return p.powerText;
@@ -1220,7 +1227,7 @@
                         hoist: hasH === "YES" ? (hoistToneTxt || "호이스트 보유") : "없음",
                         powerNum: powerVal,
                         powerText: powerLabel(powerRaw),
-                        height: c(12) ? (c(12).includes("m") ? c(12) : c(12) + "m") : "확인문의",
+                        height: heightLabel(c(12)),
                         isDone: c5.includes("완료") || c(6).includes("계약완료"),
                         imgs: [validImg],
                         desc: c(24) ? `• ${c(24)}\n• 입주시기: ${c(17) || "즉시/협의"} / 추천업종: ${c(18) || "제조·물류"}` : `• 인천 서구 ${c3} 현장 확인된 실매물입니다.\n• 진입도로: ${roadStr}`,
@@ -1254,7 +1261,7 @@
                         hoist: hoistRaw,
                         powerNum: extractNum(c(11), 0),
                         powerText: powerLabel(c(11)),
-                        height: c(10) || "확인문의",
+                        height: heightLabel(c(10)),
                         isDone: false,
                         imgs: ["https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80"],
                         desc: c(20) || "• 현장 실사 완료된 우수 매물입니다.",
