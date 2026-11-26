@@ -765,7 +765,7 @@
         if (res && res.status === 'ok') {
           r.jibun = res.jibun || '';
           if (res.road) r.road = res.road;
-          r.geo = res.mismatch ? '확인필요' : (mode === 'kakao' ? '카카오' : '자동');
+          r.geo = mode === 'kakao' ? '카카오' : '자동';
           ok++;
         } else if (res && res.status === 'no_coord') {
           r.geo = '좌표없음';
@@ -847,9 +847,8 @@
       updateStats();
       saveState();
     });
-    if (r.geo === '확인필요') {
-      inJ.title = '주소 서비스가 찾은 동과 네이버에 적힌 동이 달라요. 지도로 한 번 확인해 주세요.';
-      inJ.style.borderColor = '#f0b429';
+    if (r.geo === '자동') {
+      inJ.title = '주소 서비스가 채운 값입니다. 번지는 지도로 확인해 더해 주세요.';
     }
     tdJibun.appendChild(inJ);
     tr.appendChild(tdJibun);
