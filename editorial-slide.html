@@ -404,29 +404,26 @@
 
   // 한 번의 배치 계산: 제목/항목 크기를 받아 카드·서명 위치까지 모두 구한다
   function layoutAll(tSize, rowSize, rowGap, cardPadY, kickLines, titleSrc, data, MAXW, RIGHT, PAD){
+    var FOOT_RULE_MIN = 892;   // 서명 줄은 항상 카드 아래 이 위치보다 더 내려가지 않는다
     var tLineH = Math.round(tSize * 1.16);
     var y = 152;
 
     // 상단 라벨 + 구분선
     if (data.label) y += 14; else y -= 4;
     var ruleY = y + 6;
-    y = ruleY;
 
     // 키워드 줄
-    if (kickLines.length){
-      y += 60 + (kickLines.length - 1) * 44 + 26;
-    } else {
-      y += 30;
-    }
+    var kickBase = ruleY + 78;
+    var titleBase1 = kickLines.length ? (kickBase + 158) : (ruleY + 148);
 
-    var titleTop = y + tSize * 0.98;
+    var titleTop = titleBase1;
     var titleBottom = titleTop + (titleSrc.length - 1) * tLineH + tSize * 0.24;
 
     // 항목 카드
     var labelSize = Math.min(rowSize, 30);
     var labelCol = 0;
     data.rows.forEach(function(r){ labelCol = Math.max(labelCol, measure(r.k, 700, labelSize)); });
-    labelCol = Math.min(Math.max(labelCol, 92), 236);
+    labelCol = Math.min(Math.max(labelCol, 124), 236);
     var valueX = PAD + 46 + labelCol + 20;
     var valueW = RIGHT - 46 - valueX;
 
@@ -441,16 +438,16 @@
       innerH += p.h + (i < prepared.length - 1 ? rowGap : 0);
     });
 
-    var cardTop = titleBottom + 62;
+    var cardTop = titleBottom + 58;
     var cardH = innerH + cardPadY * 2;
     var cardBottom = cardTop + cardH;
 
-    var footRuleY = cardBottom + 54;
-    var footY = footRuleY + 46;
+    var footRuleY = Math.max(cardBottom + 54, FOOT_RULE_MIN);
+    var footY = footRuleY + 52;
 
     return {
       tSize: tSize, tLineH: tLineH, titleTop: titleTop, titleBottom: titleBottom,
-      ruleY: ruleY, kickTop: 0,
+      ruleY: ruleY, kickBase: kickBase,
       rowSize: rowSize, labelSize: labelSize, lineH: lineH, rowGap: rowGap, cardPadY: cardPadY,
       prepared: prepared, valueX: valueX,
       cardTop: cardTop, cardH: cardH, cardBottom: cardBottom,
@@ -472,12 +469,13 @@
     });
 
     // 1080 안에 들어오도록 제목·항목 크기를 줄여가며 맞춘다
-    var tSize = 96, rowSize = 30, rowGap = 16, cardPadY = 34, geo = null;
+    var tSize = fitTitleSize(titleSrc.map(function(l){ return l.text; }), MAXW, 104, 52);
+    var rowSize = 30, rowGap = 16, cardPadY = 34, geo = null;
     for (var guard = 0; guard < 30; guard++){
       geo = layoutAll(tSize, rowSize, rowGap, cardPadY, kickLines, titleSrc, data, MAXW, RIGHT, PAD);
-      if (geo.footY + 44 <= 1050) break;
+      if (geo.footY + 26 <= 1050) break;
       if (rowSize > 23){ rowSize -= 2; rowGap = Math.max(10, rowGap - 1); cardPadY = Math.max(24, cardPadY - 2); }
-      else if (tSize > 50){ tSize -= 4; }
+      else if (tSize > 50){ tSize -= 3; }
       else break;
     }
 
@@ -511,7 +509,7 @@
     if (kickLines.length){
       ctx.fillStyle = D.KICKER;
       ctx.font = font(600, 33);
-      kickLines.forEach(function(l, i){ ctx.fillText(l, PAD, geo.ruleY + 60 + i * 44); });
+      kickLines.forEach(function(l, i){ ctx.fillText(l, PAD, geo.kickBase + i * 44); });
     }
 
     // 큰 제목
