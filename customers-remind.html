@@ -107,6 +107,8 @@
   .m-item .mt{font-size:12.8px; font-weight:800; color:var(--ink); margin:1px 0 2px; word-break:keep-all;}
   .m-item .mp{font-size:12px; font-weight:700; color:var(--danger);}
   .m-none{font-size:12px; color:var(--muted); font-weight:600;}
+  .m-approx{display:inline-block; background:#fff7ed; color:#b45309; border:1px solid #fed7aa; font-size:10.5px;
+    font-weight:800; padding:1px 6px; border-radius:6px; margin-left:5px; vertical-align:1px;}
 
   .c-actions{display:flex; gap:6px; flex-wrap:wrap; margin-top:11px;}
   .c-actions button{flex:1 1 auto; font-family:inherit; font-size:12.5px; font-weight:800; padding:10px 8px;
@@ -421,6 +423,13 @@
         if(!data.ok) throw new Error(data.error || "요청을 처리하지 못했습니다.");
         return data;
       });
+    }).catch(function(e){
+      if(e && e.friendly) throw e;
+      var msg = e && e.message ? e.message : "";
+      if(msg.indexOf("응답을") === 0 || msg.indexOf("비밀번호") === 0 || msg.indexOf("요청을") === 0 || msg.indexOf("시트를") === 0) throw e;
+      var err = new Error("연결하지 못했습니다 — 인터넷과 웹 앱 주소를 확인해 주세요. (" + (msg || "network") + ")");
+      err.friendly = true;
+      throw err;
     });
   }
 
@@ -486,7 +495,7 @@
   }
 
   /* ---------- 분류 ---------- */
-  function isDone(c){ return String(c["진행상태"] || "").indexOf("완료") >= 0; }
+  function isDone(c){ return String(c["진행상태"] || "").indexOf("계약완료") >= 0; }
   function isHold(c){ return String(c["진행상태"] || "").indexOf("보류") >= 0; }
   function isActive(c){ return !isDone(c) && !isHold(c); }
   function isDue(c){
@@ -505,72 +514,89 @@
   }
 
   /* ---------- 조건 → 매물 짝맞춤 (3건) ---------- */
-  function matchFor(c){
-    var out = [];
-    if(!state.properties.length) return out;
+  /* relaxed=false : 금액·전력·호이스트·층수·평수까지 모두 맞는 매물
+     relaxed=true  : 동네·거래만 맞는 “가까운” 매물 (조건을 모두 맞추는 매물이 3건이 안 될 때만) */
+  function scoreProperty(c, p, relaxed){
+    var dealText = String(c["희망거래"] || "");
+    var wantRent = /임대/.test(dealText);
+    var wantSale = /매매|분양/.test(dealText);
+    if(wantRent && p.deal.indexOf("임대") < 0) return null;
+    if(wantSale && !/매매|분양/.test(p.deal)) return null;
 
-    var wantDeal = String(c["희망거래"] || "");
-    var wantRent = /임대/.test(wantDeal);
-    var wantSale = /매매|분양/.test(wantDeal);
     var region = String(c["선호권역"] || "").trim();
+    var score = 0;
+    var regionFree = !region || region.indexOf("기타") >= 0 || region.indexOf("전역") >= 0;
+    if(!regionFree){
+      if(String(p.region).indexOf(region) < 0) return null;
+      score += 3;
+    }
+    if(relaxed) return { score: score };
+
     var floor = String(c["희망층수"] || "").trim();
-    var minArea = num(c["최소평수"]);
-    var maxRent = num(c["최대월세"]);
-    var maxDep = num(c["최대예산_보증금"]);
-    var needPower = num(c["필수전력"]);
-    var needHoist = /필요|필수|y|yes|o|있/i.test(String(c["호이스트필수"] || ""));
-
-    for(var i = 0; i < state.properties.length; i++){
-      var p = state.properties[i];
-      var score = 0;
-
-      if(wantRent && p.deal.indexOf("임대") < 0) continue;
-      if(wantSale && !/매매|분양/.test(p.deal)) continue;
-
-      if(region && region.indexOf("기타") < 0 && region.indexOf("전역") < 0){
-        if(String(p.region).indexOf(region) < 0) continue;
-        score += 3;
+    if(floor && p.floor){
+      if(floor.indexOf("건물 전체") >= 0){
+        if(p.floor.indexOf("건물 전체") < 0) return null;
+      } else {
+        var fm = floor.match(/(\d+)\s*층/);
+        if(fm && p.floor.indexOf(fm[1] + "층") < 0) return null;
       }
-      if(floor && p.floor){
-        if(floor.indexOf("건물 전체") >= 0){
-          if(p.floor.indexOf("건물 전체") < 0) continue;
-        } else {
-          var fm = floor.match(/(\d+)\s*층/);
-          if(fm && p.floor.indexOf(fm[1] + "층") < 0) continue;
-        }
-        score += 2;
-      }
-      if(minArea > 0){
-        if(!(p.area >= minArea)) continue;
-        score += 2;
-        if(p.area <= minArea * 1.5) score += 1;
-      }
-      if(maxRent > 0 && /임대/.test(p.deal)){
-        if(p.rent > 0){
-          if(p.rent > maxRent) continue;
-          score += 2;
-        }
-      }
-      if(maxDep > 0 && p.dep > 0 && !/매매|분양/.test(p.deal)){
-        if(p.dep > maxDep) continue;
-        score += 1;
-      }
-      if(needPower > 0){
-        if(p.power > 0 && p.power < needPower) continue;
-        if(p.power >= needPower) score += 2;
-      }
-      if(needHoist){
-        if(String(p.hoist).indexOf("없") >= 0) continue;
-        score += 2;
-      }
-      out.push({ p: p, score: score });
+      score += 2;
     }
 
-    out.sort(function(a, b){
-      if(b.score !== a.score) return b.score - a.score;
-      return (b.p.area || 0) - (a.p.area || 0);
-    });
-    return out.slice(0, 3).map(function(x){ return x.p; });
+    var minArea = num(c["최소평수"]);
+    if(minArea > 0){
+      if(!(p.area >= minArea)) return null;
+      score += 2;
+      if(p.area <= minArea * 1.5) score += 1;
+    }
+
+    var maxRent = num(c["최대월세"]);
+    if(maxRent > 0 && /임대/.test(p.deal) && p.rent > 0){
+      if(p.rent > maxRent) return null;
+      score += 2;
+    }
+
+    var maxDep = num(c["최대예산_보증금"]);
+    if(maxDep > 0 && p.dep > 0 && !/매매|분양/.test(p.deal)){
+      if(p.dep > maxDep) return null;
+      score += 1;
+    }
+
+    var needPower = num(c["필수전력"]);
+    if(needPower > 0){
+      if(p.power > 0 && p.power < needPower) return null;
+      if(p.power >= needPower) score += 2;
+    }
+
+    if(/필요|필수|yes|있/i.test(String(c["호이스트필수"] || ""))){
+      if(String(p.hoist).indexOf("없") >= 0) return null;
+      score += 2;
+    }
+    return { score: score };
+  }
+
+  function matchFor(c){
+    var out = [], used = {}, want = 3;
+    for(var pass = 0; pass < 2 && out.length < want; pass++){
+      var relaxed = (pass === 1);
+      var cands = [];
+      for(var i = 0; i < state.properties.length; i++){
+        var p = state.properties[i];
+        if(used[p.id]) continue;
+        var r = scoreProperty(c, p, relaxed);
+        if(!r) continue;
+        cands.push({ p: p, score: r.score, approx: relaxed });
+      }
+      cands.sort(function(a, b){
+        if(b.score !== a.score) return b.score - a.score;
+        return (b.p.area || 0) - (a.p.area || 0);
+      });
+      for(var k = 0; k < cands.length && out.length < want; k++){
+        out.push(cands[k]);
+        used[cands[k].p.id] = 1;
+      }
+    }
+    return out;
   }
 
   /* ---------- 그리기 ---------- */
@@ -599,18 +625,24 @@
       return '<div class="c-match"><div class="m-title">조건 맞춤 매물</div><div class="m-none">매물 목록을 불러오는 중입니다… (새로고침을 눌러 주세요)</div></div>';
     }
     if(!list.length){
-      return '<div class="c-match"><div class="m-title">조건 맞춤 매물</div><div class="m-none">조건에 딱 맞는 공개 매물이 없습니다. 비공개 매물은 직접 확인해 보세요.</div></div>';
+      return '<div class="c-match"><div class="m-title">조건 맞춤 매물</div><div class="m-none">고객 조건(동네·거래)에 맞는 공개 매물이 없습니다. 비공개 매물은 직접 확인해 보세요.</div></div>';
     }
+    var anyApprox = false;
+    for(var a = 0; a < list.length; a++){ if(list[a].approx) anyApprox = true; }
+
     var html = '<div class="c-match"><div class="m-title">조건 맞춤 공개 매물 ' + list.length + '건</div>';
     for(var i = 0; i < list.length; i++){
-      var p = list[i];
+      var p = list[i].p;
       var link = HOME_URL + "#" + encodeURIComponent(p.id);
       html += '<a class="m-item" href="' + esc(link) + '" target="_blank" rel="noopener">' +
-        '<span class="mid">' + esc(p.id) + ' · ' + esc(p.deal) + '</span>' +
+        '<span class="mid">' + esc(p.id) + ' · ' + esc(p.deal) + (list[i].approx ? '<span class="m-approx">조건 근접</span>' : '') + '</span>' +
         '<div class="mt">' + esc((p.title || "").slice(0, 42)) + '</div>' +
         '<div class="mp">' + esc(p.price || "금액 협의") +
         ' <span style="color:#64748b;font-weight:700;">· 전용 ' + esc(p.area) + '평 · ' + esc(p.floor || "층 확인문의") + '</span></div>' +
         '</a>';
+    }
+    if(anyApprox){
+      html += '<div class="m-none">조건을 모두 맞춘 매물이 모자라서, 동네·거래만 맞춘 가까운 매물을 같이 보여드립니다.</div>';
     }
     html += '</div>';
     return html;
@@ -626,8 +658,9 @@
     var rd = parseDate(c["리마인드예정일"]);
     if(rd){
       var diff = dayDiff(new Date(), rd);
-      remindTxt = " · 리마인드 <b>" + esc(c["리마인드예정일"]) + "</b>" +
-        (diff > 0 ? " (D-" + diff + ")" : (diff === 0 ? " (오늘)" : " (D+" + Math.abs(diff) + " 지남)"));
+      if(diff > 0) remindTxt = " · 리마인드 <b>" + esc(c["리마인드예정일"]) + "</b> (D+" + diff + " 지남)";
+      else if(diff === 0) remindTxt = " · 리마인드 <b>" + esc(c["리마인드예정일"]) + "</b> (오늘)";
+      else remindTxt = " · 리마인드 <b>" + esc(c["리마인드예정일"]) + "</b> (D-" + Math.abs(diff) + ")";
     } else {
       remindTxt = " · 리마인드 <b>예정일 없음</b>";
     }
