@@ -92,7 +92,7 @@
 
   /* 손님 카드 — 한 장에 몇 줄로 끝나게 */
   .c-list{display:flex; flex-direction:column; gap:7px;}
-  .c-card{background:#fff; border:1px solid var(--line); border-radius:13px; padding:9px 11px 8px;
+  .c-card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:8px 10px 7px;
     box-shadow:0 2px 6px rgba(15,23,42,.03);}
   .c-card.due{border:1.5px solid #fcd34d; background:#fffdf6;}
   .c-row1{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
@@ -113,20 +113,20 @@
     padding:6px 10px; border-radius:9px; box-shadow:0 2px 8px rgba(37,99,235,.20); white-space:nowrap;
     font-variant-numeric:tabular-nums;}
   .c-call:active{transform:translateY(1px);}
-  .c-line{display:flex; align-items:baseline; gap:8px; margin-top:4px;}
-  .c-line .cond{flex:1; min-width:0; font-size:12.2px; font-weight:700; color:#475569; line-height:1.45;
-    display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;}
+  .c-line{display:flex; align-items:center; gap:8px; margin-top:3px;}
+  .c-line .cond{flex:1; min-width:0; font-size:12px; font-weight:700; color:#475569; line-height:1.4;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .c-line .cond .warn{color:#b45309; font-weight:900;}
-  .c-memo{margin-top:5px; font-size:12px; font-weight:600; color:#475569; background:#f8fafc;
-    border-left:3px solid var(--blue-line); border-radius:7px; padding:5px 9px; cursor:pointer;
+  .c-last{font-size:10.5px; font-weight:700; color:#94a3b8; white-space:nowrap;}
+  .c-memo{margin-top:4px; font-size:11.8px; font-weight:600; color:#475569; background:#f8fafc;
+    border-left:3px solid var(--blue-line); border-radius:6px; padding:4px 8px; cursor:pointer;
     display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;
-    white-space:pre-wrap; word-break:break-word;}
+    white-space:pre-wrap; word-break:break-word; line-height:1.45;}
   .c-memo.open{display:block; -webkit-line-clamp:unset;}
-  .c-tail{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:7px;}
-  .m-toggle{font-family:inherit; font-size:11.5px; font-weight:900; color:var(--royal-dark);
-    background:#eff6ff; border:1px solid var(--blue-line); border-radius:8px; padding:4px 9px; cursor:pointer;}
+  .m-toggle{flex:none; font-family:inherit; font-size:11px; font-weight:900; color:var(--royal-dark);
+    background:#eff6ff; border:1px solid var(--blue-line); border-radius:8px; padding:4px 8px;
+    cursor:pointer; white-space:nowrap;}
   .m-toggle.on{background:#dbeafe;}
-  .c-last{font-size:11px; font-weight:700; color:#94a3b8; margin-left:auto; white-space:nowrap;}
 
   .c-match{margin-top:7px; border-top:1px dashed var(--line); padding-top:7px;}
   .m-title{display:none;}
@@ -142,7 +142,7 @@
   .m-approx{display:inline-block; background:#fff7ed; color:#b45309; border:1px solid #fed7aa; font-size:10px;
     font-weight:800; padding:0 5px; border-radius:5px; margin-left:4px; vertical-align:1px;}
 
-  .c-actions{display:flex; gap:5px; margin-top:7px;}
+  .c-actions{display:flex; gap:5px; margin-top:6px;}
   .c-actions button{flex:1 1 0; font-family:inherit; font-size:11.5px; font-weight:800; padding:6px 2px;
     border-radius:8px; border:1px solid var(--line); background:#fff; color:var(--ink2); cursor:pointer;
     white-space:nowrap;}
@@ -764,9 +764,9 @@
   }
 
   function matchBtnLabel(c){
-    if(!state.properties.length) return "🎯 추천 매물 보기 ▾";
+    if(!state.properties.length) return "🎯 매물 보기 ▾";
     var n = cachedMatch(c).length;
-    return n ? ("🎯 추천 매물 " + n + "건 ▾") : "🎯 맞는 매물 없음 ▾";
+    return n ? ("🎯 매물 " + n + "건 ▾") : "🎯 매물 없음 ▾";
   }
 
   function cardHtml(c, opts){
@@ -790,23 +790,21 @@
     if(hot) html += '<span class="badge hot">🔥 급구</span>';
     html += statusBadge(st);
     html += ddayBadge(diff);
+    if(c["최근통화일"]) html += '<span class="c-last">통화 ' + esc(String(c["최근통화일"]).slice(5)) + '</span>';
     if(phone) html += '<a class="c-call" href="tel:' + esc(phone) + '">📞 ' + esc(c["연락처"]) + '</a>';
     html += '</div>';
 
-    /* 2줄: 조건 한 줄 */
-    html += '<div class="c-line"><span class="cond">' + condLine(c) + '</span></div>';
+    /* 2줄: 조건 한 줄 + 추천 매물 토글 */
+    var full = condLine(c);
+    html += '<div class="c-line"><span class="cond" title="' + esc(String(full).replace(/<[^>]+>/g, "")) + '">' + full + '</span>';
+    html += '<button type="button" class="m-toggle' + (open ? " on" : "") + '" data-toggle="' + c.row + '" ' +
+            'title="추천 매물 보기" aria-label="추천 매물 보기">' + matchBtnLabel(c) + '</button>';
+    html += '</div>';
 
     /* 메모: 2줄까지만, 누르면 펼침 */
     if(c["상세메모"]){
       html += '<div class="c-memo" title="눌러서 메모 전체 보기">📝 ' + esc(c["상세메모"]) + '</div>';
     }
-
-    /* 토글 + 최근 통화 */
-    html += '<div class="c-tail">';
-    html += '<button type="button" class="m-toggle' + (open ? " on" : "") + '" data-toggle="' + c.row + '">' +
-            matchBtnLabel(c) + '</button>';
-    html += '<span class="c-last">' + (c["최근통화일"] ? "최근 통화 " + esc(String(c["최근통화일"]).slice(5)) : "통화 기록 없음") + '</span>';
-    html += '</div>';
 
     /* 추천 매물 (접힘/펼침) */
     html += '<div class="c-match" data-match="' + (open ? "1" : "0") + '"' + (open ? "" : " hidden") + '>' +
