@@ -67,68 +67,101 @@
   .guide-actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;}
 
   /* 통계 */
-  .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-bottom:14px;}
-  .stat{background:#fff; border:1px solid var(--line); border-radius:14px; padding:11px 12px;}
+  .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-bottom:10px;}
+  .stat{background:#fff; border:1px solid var(--line); border-radius:14px; padding:10px 12px;}
   .stat .k{font-size:11.5px; font-weight:800; color:var(--muted);}
-  .stat .v{font-size:23px; font-weight:900; color:var(--navy); line-height:1.15;}
+  .stat .v{font-size:22px; font-weight:900; color:var(--navy); line-height:1.15;}
   .stat.alert .v{color:var(--danger);}
   .stat.alert{border-color:#fbd5d1; background:#fff8f7;}
 
-  h2.sec{font-size:15.5px; font-weight:900; color:var(--navy); margin:18px 0 10px; display:flex; align-items:center; gap:7px;}
+  /* 검색 */
+  .searchbar{display:flex; align-items:center; gap:8px; background:#fff; border:1.5px solid var(--line);
+    border-radius:12px; padding:8px 12px; margin-bottom:10px;}
+  .searchbar:focus-within{border-color:var(--royal); box-shadow:0 0 0 3px rgba(37,99,235,.10);}
+  .searchbar .ic{font-size:15px; line-height:1; color:#94a3b8;}
+  .searchbar input{flex:1; min-width:0; border:0; outline:none; background:transparent;
+    font-family:inherit; font-size:14.5px; font-weight:700; color:var(--ink);}
+  .searchbar input::placeholder{color:#a3b0c2; font-weight:600;}
+  .searchbar .clear{border:0; background:#f1f5f9; color:#475569; font-size:12px; font-weight:800;
+    border-radius:999px; padding:4px 9px; cursor:pointer; display:none;}
+  .searchbar.has .clear{display:inline-block;}
+  .searchbar .hint{font-size:11.5px; font-weight:800; color:var(--muted); white-space:nowrap;}
+
+  h2.sec{font-size:15.5px; font-weight:900; color:var(--navy); margin:16px 0 9px; display:flex; align-items:center; gap:7px;}
   h2.sec .cnt{font-size:12px; font-weight:800; color:#fff; background:var(--royal); border-radius:999px; padding:2px 8px;}
 
-  /* 손님 카드 */
-  .c-list{display:flex; flex-direction:column; gap:10px;}
-  .c-card{background:#fff; border:1px solid var(--line); border-radius:16px; padding:13px 14px; box-shadow:0 4px 12px rgba(15,23,42,.04);}
-  .c-card.due{border:2px solid #fbbf24; box-shadow:0 8px 20px rgba(245,158,11,.14);}
-  .c-head{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
-  .c-name{font-size:16.5px; font-weight:900; color:var(--ink); letter-spacing:-.3px;}
-  .pri{font-size:11px; font-weight:800; padding:2px 8px; border-radius:6px; background:#fef3c7; color:#92400e;}
-  .pri.hot{background:#ffe4e6; color:#b91c1c;}
-  .c-call{margin-left:auto; display:inline-flex; align-items:center; gap:6px; text-decoration:none;
-    background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; font-size:13px; font-weight:900;
-    padding:9px 13px; border-radius:10px; box-shadow:0 3px 10px rgba(37,99,235,.22);}
-  .c-chips{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;}
-  .c-chips span{background:var(--blue-soft); color:#1d4ed8; border:1px solid var(--blue-line);
-    font-size:11.8px; font-weight:800; padding:3px 9px; border-radius:999px;}
-  .c-chips span.warn{background:#fff7ed; color:#b45309; border-color:#fed7aa;}
-  .c-meta{margin-top:8px; font-size:12px; color:var(--muted); font-weight:700; line-height:1.6;}
-  .c-meta b{color:var(--ink2);}
-  .c-memo{margin-top:7px; font-size:12.5px; color:#334155; background:#f8fafc; border-left:3px solid var(--blue-line);
-    border-radius:8px; padding:8px 10px; white-space:pre-wrap; word-break:break-word;}
+  /* 손님 카드 — 한 장에 몇 줄로 끝나게 */
+  .c-list{display:flex; flex-direction:column; gap:7px;}
+  .c-card{background:#fff; border:1px solid var(--line); border-radius:13px; padding:9px 11px 8px;
+    box-shadow:0 2px 6px rgba(15,23,42,.03);}
+  .c-card.due{border:1.5px solid #fcd34d; background:#fffdf6;}
+  .c-row1{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+  .c-date{font-size:10.5px; font-weight:800; color:#7c8aa0; background:#f1f5f9; border-radius:6px;
+    padding:2px 6px; font-variant-numeric:tabular-nums; flex:none;}
+  .c-name{font-size:15px; font-weight:900; color:var(--ink); letter-spacing:-.3px;
+    max-width:13em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .badge{font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:999px; white-space:nowrap; line-height:1.35;}
+  .badge.st{background:#eef2ff; color:#3730a3;}
+  .badge.st.done{background:#ecfdf5; color:#047857;}
+  .badge.st.hold{background:#f1f5f9; color:#475569;}
+  .badge.dd{background:#eef2ff; color:#3730a3; font-variant-numeric:tabular-nums;}
+  .badge.dd.today{background:#fff7ed; color:#b45309; border:1px solid #fed7aa;}
+  .badge.dd.over{background:#fee2e2; color:#b91c1c;}
+  .badge.hot{background:#ffe4e6; color:#b91c1c;}
+  .c-call{margin-left:auto; display:inline-flex; align-items:center; gap:5px; text-decoration:none;
+    background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; font-size:11.5px; font-weight:900;
+    padding:6px 10px; border-radius:9px; box-shadow:0 2px 8px rgba(37,99,235,.20); white-space:nowrap;
+    font-variant-numeric:tabular-nums;}
+  .c-call:active{transform:translateY(1px);}
+  .c-line{display:flex; align-items:baseline; gap:8px; margin-top:4px;}
+  .c-line .cond{flex:1; min-width:0; font-size:12.2px; font-weight:700; color:#475569; line-height:1.45;
+    display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;}
+  .c-line .cond .warn{color:#b45309; font-weight:900;}
+  .c-memo{margin-top:5px; font-size:12px; font-weight:600; color:#475569; background:#f8fafc;
+    border-left:3px solid var(--blue-line); border-radius:7px; padding:5px 9px; cursor:pointer;
+    display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;
+    white-space:pre-wrap; word-break:break-word;}
+  .c-memo.open{display:block; -webkit-line-clamp:unset;}
+  .c-tail{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:7px;}
+  .m-toggle{font-family:inherit; font-size:11.5px; font-weight:900; color:var(--royal-dark);
+    background:#eff6ff; border:1px solid var(--blue-line); border-radius:8px; padding:4px 9px; cursor:pointer;}
+  .m-toggle.on{background:#dbeafe;}
+  .c-last{font-size:11px; font-weight:700; color:#94a3b8; margin-left:auto; white-space:nowrap;}
 
-  .c-match{margin-top:10px; border-top:1px dashed var(--line); padding-top:9px;}
-  .m-title{font-size:11.8px; font-weight:900; color:var(--royal-dark); margin-bottom:6px;}
-  .m-item{display:block; text-decoration:none; color:inherit; background:#fbfcfd; border:1px solid var(--line);
-    border-radius:10px; padding:8px 10px; margin-bottom:6px;}
+  .c-match{margin-top:7px; border-top:1px dashed var(--line); padding-top:7px;}
+  .m-title{display:none;}
+  .m-item{display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit; background:#fbfcfd;
+    border:1px solid var(--line); border-radius:9px; padding:5px 9px; margin-bottom:4px;}
   .m-item:last-child{margin-bottom:0;}
   .m-item:hover{border-color:#93c5fd; background:#f8fbff;}
-  .m-item .mid{font-size:11.5px; font-weight:900; color:#1d4ed8;}
-  .m-item .mt{font-size:12.8px; font-weight:800; color:var(--ink); margin:1px 0 2px; word-break:keep-all;}
-  .m-item .mp{font-size:12px; font-weight:700; color:var(--danger);}
-  .m-none{font-size:12px; color:var(--muted); font-weight:600;}
-  .m-approx{display:inline-block; background:#fff7ed; color:#b45309; border:1px solid #fed7aa; font-size:10.5px;
-    font-weight:800; padding:1px 6px; border-radius:6px; margin-left:5px; vertical-align:1px;}
+  .m-item .mid{font-size:10.5px; font-weight:900; color:#1d4ed8; flex:none;}
+  .m-item .mt{font-size:12.2px; font-weight:800; color:var(--ink); flex:1; min-width:0;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .m-item .mp{font-size:11.5px; font-weight:800; color:var(--danger); flex:none; white-space:nowrap;}
+  .m-none{font-size:11.8px; color:var(--muted); font-weight:600;}
+  .m-approx{display:inline-block; background:#fff7ed; color:#b45309; border:1px solid #fed7aa; font-size:10px;
+    font-weight:800; padding:0 5px; border-radius:5px; margin-left:4px; vertical-align:1px;}
 
-  .c-actions{display:flex; gap:6px; flex-wrap:wrap; margin-top:11px;}
-  .c-actions button{flex:1 1 auto; font-family:inherit; font-size:12.5px; font-weight:800; padding:10px 8px;
-    border-radius:10px; border:1px solid var(--line); background:#fff; color:var(--ink2); cursor:pointer; white-space:nowrap;}
+  .c-actions{display:flex; gap:5px; margin-top:7px;}
+  .c-actions button{flex:1 1 0; font-family:inherit; font-size:11.5px; font-weight:800; padding:6px 2px;
+    border-radius:8px; border:1px solid var(--line); background:#fff; color:var(--ink2); cursor:pointer;
+    white-space:nowrap;}
   .c-actions button:hover{background:#f8fafc;}
   .c-actions button.act-done3{background:#ecfdf5; border-color:#a7f3d0; color:#047857;}
   .c-actions button.act-week7{background:#eff6ff; border-color:var(--blue-line); color:#1d4ed8;}
   .c-actions button.act-contract{background:#fef3c7; border-color:#fde68a; color:#92400e;}
   .c-actions button.act-hold{color:#64748b;}
 
-  .empty{background:#fff; border:1px dashed var(--line); border-radius:14px; padding:26px 16px; text-align:center;
+  .empty{background:#fff; border:1px dashed var(--line); border-radius:14px; padding:22px 16px; text-align:center;
     font-size:13px; color:var(--muted); font-weight:700; line-height:1.7;}
 
-  .filters{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;}
-  .filters button{font-family:inherit; font-size:12.5px; font-weight:800; padding:8px 13px; border-radius:999px;
+  .filters{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:9px;}
+  .filters button{font-family:inherit; font-size:12px; font-weight:800; padding:7px 12px; border-radius:999px;
     border:1.5px solid #d3dbe6; background:#fff; color:#334155; cursor:pointer;}
   .filters button.active{background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; border-color:#1d4ed8;}
 
-  details.newcust{background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-top:14px;}
-  details.newcust summary{cursor:pointer; font-size:13.5px; font-weight:900; color:var(--navy);}
+  details.newcust{background:#fff; border:1px solid var(--line); border-radius:14px; padding:11px 14px; margin:12px 0;}
+  details.newcust summary{cursor:pointer; font-size:13px; font-weight:900; color:var(--navy);}
   .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:11px;}
   .form-grid .full{grid-column:span 2;}
   .btn-save{width:100%; margin-top:10px; background:linear-gradient(140deg,#3B82F6,#1D4ED8); color:#fff; border:0;
@@ -142,15 +175,19 @@
   .toast.warn{background:var(--danger);}
 
   @media (max-width:640px){
-    .wrap{padding:12px 11px 70px;}
+    .wrap{padding:12px 10px 70px;}
     .brand h1{font-size:15.5px;}
     .brand p{display:none;}
     .btn .label{display:none;}
     .btn.primary .label{display:inline;}
-    .stat .v{font-size:20px;}
+    .stat .v{font-size:19px;}
+    .stat{padding:9px 10px;}
     .form-grid{grid-template-columns:1fr;}
     .form-grid .full{grid-column:span 1;}
-    .c-call{font-size:12.5px; padding:8px 11px;}
+    .c-name{font-size:14.5px; max-width:9.5em;}
+    .c-call{font-size:11px; padding:5px 8px;}
+    .c-line .cond{font-size:11.8px;}
+    .c-actions button{font-size:11px; padding:6px 1px;}
   }
 </style>
 </head>
@@ -162,7 +199,7 @@
       <div class="logo" aria-hidden="true">👥</div>
       <div>
         <h1>손님 리마인드</h1>
-        <p>오늘 연락할 손님 · 조건 맞춤 매물 3건 · 통화 후 3일 뒤 다시</p>
+        <p>최근 등록 순 · 조건 맞춤 매물 3건 · 통화 후 3일 뒤 다시</p>
       </div>
     </div>
     <div class="top-actions">
@@ -226,6 +263,13 @@
     <div class="stat"><div class="k">전체 손님</div><div class="v" id="statAll">-</div></div>
   </section>
 
+  <div class="searchbar" id="searchBar">
+    <span class="ic" aria-hidden="true">🔍</span>
+    <input type="search" id="qSearch" autocomplete="off" placeholder="이름 · 전화 · 동네 · 업종 검색 (예: 석남 / 8392 / 금속)">
+    <span class="hint" id="qHint"></span>
+    <button type="button" class="clear" id="qClear" aria-label="검색 지우기">✕</button>
+  </div>
+
   <div id="lockedNote"></div>
 
   <section id="dueSection">
@@ -282,9 +326,10 @@
   </details>
 
   <section id="allSection">
-    <h2 class="sec">📇 전체 손님 <span class="cnt" id="allCnt">0</span></h2>
+    <h2 class="sec"><span id="allTitle">📇 전체 손님</span> <span class="cnt" id="allCnt">0</span></h2>
     <div class="filters" id="filters">
       <button type="button" data-filter="active" class="active">진행 중</button>
+      <button type="button" data-filter="recent">🆕 최근 7일</button>
       <button type="button" data-filter="due">오늘 연락</button>
       <button type="button" data-filter="done">계약완료</button>
       <button type="button" data-filter="hold">보류</button>
@@ -306,7 +351,8 @@
   var state = {
     url: "", pw: "", connected: false,
     customers: [], properties: [],
-    filter: "active", busy: false, lastLoaded: ""
+    filter: "active", q: "", busy: false, lastLoaded: "",
+    matchCache: {}
   };
   var gsSource = "";
 
@@ -316,10 +362,12 @@
     setupPanel: $("setupPanel"),
     cfgUrl: $("cfgUrl"), cfgPw: $("cfgPw"), cfgRemember: $("cfgRemember"),
     statDue: $("statDue"), statActive: $("statActive"), statAll: $("statAll"),
-    dueList: $("dueList"), dueCnt: $("dueCnt"),
-    allList: $("allList"), allCnt: $("allCnt"),
+    dueList: $("dueList"), dueCnt: $("dueCnt"), dueSection: $("dueSection"),
+    allList: $("allList"), allCnt: $("allCnt"), allTitle: $("allTitle"),
     filters: $("filters"), toast: $("toast"), gsCode: $("gsCode"),
-    lockedNote: $("lockedNote"), guideBox: $("guideBox")
+    lockedNote: $("lockedNote"), guideBox: $("guideBox"),
+    searchBar: $("searchBar"), qSearch: $("qSearch"), qHint: $("qHint"), qClear: $("qClear"),
+    newBox: $("newBox")
   };
 
   /* ---------- 작은 도우미 ---------- */
@@ -361,6 +409,37 @@
   function timeLabel(){
     var d = new Date();
     return "마지막 확인 " + pad2(d.getHours()) + ":" + pad2(d.getMinutes());
+  }
+
+  /* ---------- 등록일 (정렬·표시 공통) ---------- */
+  /* ① 시트의 '등록일자' ② 없으면 고객명 앞의 YYMMDD / YYYYMMDD ③ 없으면 null */
+  function regDate(c){
+    var d = parseDate(c["등록일자"]);
+    if(d) return d;
+    var m = String(c["고객명"] || "").match(/^\s*(\d{8}|\d{6})(?!\d)/);
+    if(m){
+      var s = m[1], y, mo, da;
+      if(s.length === 8){ y = +s.slice(0,4); mo = +s.slice(4,6); da = +s.slice(6,8); }
+      else { y = 2000 + +s.slice(0,2); mo = +s.slice(2,4); da = +s.slice(4,6); }
+      var t = new Date(y, mo - 1, da);
+      if(!isNaN(t.getTime())) return t;
+    }
+    return null;
+  }
+  function regKey(c){
+    var d = regDate(c);
+    if(!d) return 0;
+    return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+  }
+  function regLabel(c){
+    var d = regDate(c);
+    return d ? (pad2(d.getMonth() + 1) + "/" + pad2(d.getDate())) : "--/--";
+  }
+  /* 최신 등록이 위로 (같은 날이면 시트 아래(나중에 추가)가 위) */
+  function regSort(a, b){
+    var ka = regKey(a), kb = regKey(b);
+    if(ka !== kb) return kb - ka;
+    return (b.row || 0) - (a.row || 0);
   }
 
   /* ---------- 연결 설정 ---------- */
@@ -467,7 +546,8 @@
     setConn("wait", "불러오는 중…");
     return apiGet({ action: "customers" }).then(function(data){
       state.connected = true;
-      state.customers = (data.customers || []).slice().reverse();   // 최근 등록이 위로
+      state.customers = (data.customers || []).slice();
+      state.matchCache = {};
       state.lastLoaded = timeLabel();
       setConn("on", "연결됨 · 손님 " + state.customers.length + "명");
       el.connTime.textContent = state.lastLoaded;
@@ -487,9 +567,11 @@
     if(!state.url || !state.pw) return Promise.resolve();
     return apiGet({ action: "properties" }).then(function(data){
       state.properties = data.properties || [];
+      state.matchCache = {};
       render();
     }).catch(function(){
       state.properties = [];
+      state.matchCache = {};
       render();
     });
   }
@@ -505,12 +587,12 @@
     if(!d) return true;
     return d <= new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
   }
-  function dueSort(a, b){
-    var da = parseDate(a["리마인드예정일"]), db = parseDate(b["리마인드예정일"]);
-    if(da && db) return da - db;
-    if(da && !db) return -1;
-    if(!da && db) return 1;
-    return 0;
+  function isRecent7(c){
+    var d = regDate(c);
+    if(!d) return false;
+    var t = new Date();
+    var base = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+    return dayDiff(base, d) <= 7;
   }
 
   /* ---------- 조건 → 매물 짝맞춤 (3건) ---------- */
@@ -595,123 +677,198 @@
     }
     return out;
   }
+  /* 카드마다 한 번만 계산해 둔다 (검색으로 다시 그려도 빠르게) */
+  function cachedMatch(c){
+    var key = String(c.row);
+    if(!state.matchCache[key]) state.matchCache[key] = matchFor(c);
+    return state.matchCache[key];
+  }
+
+  /* ---------- 검색 ---------- */
+  function norm(s){ return String(s == null ? "" : s).toLowerCase().replace(/\s+/g, ""); }
+  function matchQuery(c, q){
+    if(!q) return true;
+    var hay = norm([
+      c["고객명"], c["연락처"], digits(c["연락처"]), c["선호권역"], c["업종"],
+      c["희망거래"], c["희망층수"], c["상세메모"], c["진행상태"], c["등록일자"]
+    ].join(" "));
+    if(hay.indexOf(q) >= 0) return true;
+    var onlyDigits = q.replace(/[^0-9]/g, "");
+    if(onlyDigits.length >= 3) return norm(digits(c["연락처"])).indexOf(onlyDigits) >= 0;
+    return false;
+  }
 
   /* ---------- 그리기 ---------- */
-  function chipHtml(c){
-    var chips = [];
-    if(c["희망거래"]) chips.push(esc(c["희망거래"]));
-    if(c["선호권역"]) chips.push(esc(c["선호권역"]));
-    if(c["희망층수"]) chips.push(esc(c["희망층수"]));
-    if(num(c["최소평수"])) chips.push(esc(c["최소평수"]) + "평 이상");
-    if(num(c["최대예산_보증금"])) chips.push("보증금 " + esc(c["최대예산_보증금"]) + "↓");
-    if(num(c["최대월세"])) chips.push("월 " + esc(c["최대월세"]) + "↓");
-    if(num(c["필수전력"])) chips.push("전력 " + esc(c["필수전력"]) + "kW↑");
-    if(c["호이스트필수"]) chips.push("호이스트 " + esc(c["호이스트필수"]));
-    if(c["업종"]) chips.push(esc(c["업종"]));
-    if(!chips.length) chips.push('<span class="warn">조건 미입력 — 상담하며 채워 주세요</span>');
-    var html = "";
-    for(var i = 0; i < chips.length; i++){
-      html += (chips[i].indexOf("<span") === 0) ? chips[i] : "<span>" + chips[i] + "</span>";
+  /* 둘째 줄: 조건을 칩 대신 한 줄로 */
+  function condLine(c){
+    var bits = [];
+    if(c["희망거래"]) bits.push(c["희망거래"]);
+    if(c["선호권역"]) bits.push(c["선호권역"]);
+    if(c["희망층수"]){
+      bits.push(String(c["희망층수"]).replace("지상 ", ""));
     }
-    return html;
+    if(num(c["최소평수"])) bits.push(num(c["최소평수"]) + "평↑");
+    if(num(c["최대예산_보증금"])) bits.push("보증 " + num(c["최대예산_보증금"]) + "만↓");
+    if(num(c["최대월세"])) bits.push("월 " + num(c["최대월세"]) + "만↓");
+    if(num(c["필수전력"])) bits.push("전력 " + num(c["필수전력"]) + "kW↑");
+    if(/필요|필수/.test(String(c["호이스트필수"] || "")) && !/불필요/.test(String(c["호이스트필수"] || ""))) bits.push("호이스트 필수");
+    if(c["업종"]) bits.push(c["업종"]);
+    if(!bits.length) return '<span class="warn">조건 미입력 — 상담하며 채워 주세요</span>';
+    return esc(bits.join(" · "));
+  }
+
+  function statusBadge(st){
+    var t = String(st || "");
+    if(!t) return "";
+    if(t.indexOf("계약완료") >= 0) return '<span class="badge st done">계약완료</span>';
+    if(t.indexOf("보류") >= 0) return '<span class="badge st hold">보류</span>';
+    if(t.indexOf("콜백") >= 0) return '<span class="badge st">콜백대기</span>';
+    return '<span class="badge st">' + esc(t.replace(/[^\w가-힣()\s]/g, "").trim() || t) + '</span>';
+  }
+
+  function remindDiff(c){
+    var rd = parseDate(c["리마인드예정일"]);
+    if(!rd) return null;
+    return dayDiff(rd, new Date());            // +면 아직 남음, 0이면 오늘, -면 지남
+  }
+  function ddayBadge(diff){
+    if(diff == null) return "";
+    if(diff === 0) return '<span class="badge dd today">오늘 연락</span>';
+    if(diff > 0) return '<span class="badge dd">D-' + diff + '</span>';
+    return '<span class="badge dd over">D+' + Math.abs(diff) + ' 지남</span>';
   }
 
   function matchHtml(c){
-    var list = matchFor(c);
+    var list = state.properties.length ? cachedMatch(c) : [];
     if(!state.properties.length){
-      return '<div class="c-match"><div class="m-title">조건 맞춤 매물</div><div class="m-none">매물 목록을 불러오는 중입니다… (새로고침을 눌러 주세요)</div></div>';
+      return '<div class="m-none">매물 목록을 아직 못 불러왔습니다. 새로고침(↻)을 눌러 주세요.</div>';
     }
     if(!list.length){
-      return '<div class="c-match"><div class="m-title">조건 맞춤 매물</div><div class="m-none">고객 조건(동네·거래)에 맞는 공개 매물이 없습니다. 비공개 매물은 직접 확인해 보세요.</div></div>';
+      return '<div class="m-none">조건(동네·거래)에 맞는 공개 매물이 없습니다. 비공개 매물은 직접 확인해 보세요.</div>';
     }
-    var anyApprox = false;
-    for(var a = 0; a < list.length; a++){ if(list[a].approx) anyApprox = true; }
-
-    var html = '<div class="c-match"><div class="m-title">조건 맞춤 공개 매물 ' + list.length + '건</div>';
+    var compact = window.matchMedia && window.matchMedia("(max-width:640px)").matches;
+    var html = "", anyApprox = false;
     for(var i = 0; i < list.length; i++){
       var p = list[i].p;
+      if(list[i].approx) anyApprox = true;
       var link = HOME_URL + "#" + encodeURIComponent(p.id);
       html += '<a class="m-item" href="' + esc(link) + '" target="_blank" rel="noopener">' +
-        '<span class="mid">' + esc(p.id) + ' · ' + esc(p.deal) + (list[i].approx ? '<span class="m-approx">조건 근접</span>' : '') + '</span>' +
-        '<div class="mt">' + esc((p.title || "").slice(0, 42)) + '</div>' +
-        '<div class="mp">' + esc(p.price || "금액 협의") +
-        ' <span style="color:#64748b;font-weight:700;">· 전용 ' + esc(p.area) + '평 · ' + esc(p.floor || "층 확인문의") + '</span></div>' +
+        '<span class="mid">' + esc(p.id) + '</span>' +
+        '<span class="mt">' + esc((p.title || p.deal || "").slice(0, compact ? 18 : 34)) +
+          (list[i].approx ? '<span class="m-approx">근접</span>' : '') + '</span>' +
+        '<span class="mp">' + esc(p.price || "협의") + '</span>' +
         '</a>';
     }
-    if(anyApprox){
-      html += '<div class="m-none">조건을 모두 맞춘 매물이 모자라서, 동네·거래만 맞춘 가까운 매물을 같이 보여드립니다.</div>';
-    }
-    html += '</div>';
+    if(anyApprox) html += '<div class="m-none">조건을 모두 맞춘 매물이 모자라 동네·거래만 맞춘 매물도 함께 보여드립니다.</div>';
     return html;
   }
 
-  function cardHtml(c, isDueCard){
-    var row = c.row;
+  function matchBtnLabel(c){
+    if(!state.properties.length) return "🎯 추천 매물 보기 ▾";
+    var n = cachedMatch(c).length;
+    return n ? ("🎯 추천 매물 " + n + "건 ▾") : "🎯 맞는 매물 없음 ▾";
+  }
+
+  function cardHtml(c, opts){
+    opts = opts || {};
+    var isDueCard = !!opts.due;
+    var open = !!opts.open;
     var st = String(c["진행상태"] || "");
     var pri = String(c["중요도"] || "");
-    var priCls = /급구|집중/.test(pri) ? "pri hot" : "pri";
     var phone = digits(c["연락처"]);
-    var remindTxt = "";
-    var rd = parseDate(c["리마인드예정일"]);
-    if(rd){
-      var diff = dayDiff(new Date(), rd);
-      if(diff > 0) remindTxt = " · 리마인드 <b>" + esc(c["리마인드예정일"]) + "</b> (D+" + diff + " 지남)";
-      else if(diff === 0) remindTxt = " · 리마인드 <b>" + esc(c["리마인드예정일"]) + "</b> (오늘)";
-      else remindTxt = " · 리마인드 <b>" + esc(c["리마인드예정일"]) + "</b> (D-" + Math.abs(diff) + ")";
-    } else {
-      remindTxt = " · 리마인드 <b>예정일 없음</b>";
-    }
-    var recent = c["최근통화일"] ? "최근 통화 <b>" + esc(c["최근통화일"]) + "</b>" : "최근 통화 기록 없음";
+    var hot = /급구|집중/.test(pri);
+    var diff = remindDiff(c);
+    /* 오늘 연락할 손님이라도 진짜 급한(오늘·지남) 것만 노란 테두리로 */
+    var urgent = isDueCard && diff != null && diff <= 0;
 
-    var html = '<article class="c-card' + (isDueCard ? " due" : "") + '">';
-    html += '<div class="c-head">';
-    html += '<span class="c-name">' + esc(c["고객명"] || "(이름 없음)") + '</span>';
-    if(pri) html += '<span class="' + priCls + '">' + esc(pri) + '</span>';
-    if(st) html += '<span class="pri" style="background:#eef2ff;color:#3730a3;">' + esc(st.replace(/[^\w가-힣()\s]/g, "").trim() || st) + '</span>';
+    var html = '<article class="c-card' + (urgent ? " due" : "") + '" data-row="' + c.row + '">';
+
+    /* 1줄: 등록일 · 이름 · 배지 · 전화 */
+    html += '<div class="c-row1">';
+    html += '<span class="c-date" title="등록일">' + regLabel(c) + '</span>';
+    html += '<span class="c-name" title="' + esc(c["고객명"] || "") + '">' + esc(c["고객명"] || "(이름 없음)") + '</span>';
+    if(hot) html += '<span class="badge hot">🔥 급구</span>';
+    html += statusBadge(st);
+    html += ddayBadge(diff);
     if(phone) html += '<a class="c-call" href="tel:' + esc(phone) + '">📞 ' + esc(c["연락처"]) + '</a>';
     html += '</div>';
-    html += '<div class="c-chips">' + chipHtml(c) + '</div>';
-    html += '<div class="c-meta">' + recent + remindTxt + '</div>';
-    if(c["상세메모"]) html += '<div class="c-memo">📝 ' + esc(c["상세메모"]) + '</div>';
-    html += matchHtml(c);
+
+    /* 2줄: 조건 한 줄 */
+    html += '<div class="c-line"><span class="cond">' + condLine(c) + '</span></div>';
+
+    /* 메모: 2줄까지만, 누르면 펼침 */
+    if(c["상세메모"]){
+      html += '<div class="c-memo" title="눌러서 메모 전체 보기">📝 ' + esc(c["상세메모"]) + '</div>';
+    }
+
+    /* 토글 + 최근 통화 */
+    html += '<div class="c-tail">';
+    html += '<button type="button" class="m-toggle' + (open ? " on" : "") + '" data-toggle="' + c.row + '">' +
+            matchBtnLabel(c) + '</button>';
+    html += '<span class="c-last">' + (c["최근통화일"] ? "최근 통화 " + esc(String(c["최근통화일"]).slice(5)) : "통화 기록 없음") + '</span>';
+    html += '</div>';
+
+    /* 추천 매물 (접힘/펼침) */
+    html += '<div class="c-match" data-match="' + (open ? "1" : "0") + '"' + (open ? "" : " hidden") + '>' +
+            (open ? matchHtml(c) : "") + '</div>';
+
+    /* 액션 1줄 */
     html += '<div class="c-actions">';
-    html += '<button type="button" class="act-done3" data-row="' + row + '" data-act="done3">✅ 통화완료 (+3일)</button>';
-    html += '<button type="button" class="act-week7" data-row="' + row + '" data-act="week7">📅 다음 주 (+7일)</button>';
-    html += '<button type="button" class="act-contract" data-row="' + row + '" data-act="contract">🎉 계약완료</button>';
-    html += '<button type="button" class="act-hold" data-row="' + row + '" data-act="hold">⏸️ 보류</button>';
+    html += '<button type="button" class="act-done3" data-row="' + c.row + '" data-act="done3">✅ +3일</button>';
+    html += '<button type="button" class="act-week7" data-row="' + c.row + '" data-act="week7">📅 +7일</button>';
+    html += '<button type="button" class="act-contract" data-row="' + c.row + '" data-act="contract">🎉 완료</button>';
+    html += '<button type="button" class="act-hold" data-row="' + c.row + '" data-act="hold">⏸️ 보류</button>';
     html += '</div></article>';
     return html;
   }
 
   function render(){
-    var all = state.customers.slice();
-    var due = all.filter(isDue).sort(dueSort);
-    var active = all.filter(isActive);
+    var all = state.customers.slice().sort(regSort);
 
     el.statAll.textContent = all.length;
-    el.statActive.textContent = active.length;
-    el.statDue.textContent = due.length;
-    el.dueCnt.textContent = due.length;
+    el.statActive.textContent = all.filter(isActive).length;
+    el.statDue.textContent = all.filter(isDue).length;
 
-    el.dueList.innerHTML = !all.length
-      ? '<div class="empty">아직 불러온 손님이 없습니다. 연결 설정을 확인하거나 [➕ 신규 손님 빠른 등록]으로 추가해 보세요.</div>'
-      : (due.length
-        ? due.map(function(c){ return cardHtml(c, true); }).join("")
-        : '<div class="empty">오늘 연락할 손님이 없습니다 👍<br>전체 손님 목록에서 직접 골라 전화해도 됩니다.</div>');
+    var q = norm(state.q);
+    var searching = !!q;
+    var base = searching ? all.filter(function(c){ return matchQuery(c, q); }) : all;
+
+    el.searchBar.classList.toggle("has", !!state.q);
+    el.qHint.textContent = searching ? (base.length + "명 찾음") : "";
+
+    /* 오늘 연락할 손님 — 추천 매물은 펼친 채로 */
+    var due = base.filter(isDue);
+    el.dueCnt.textContent = due.length;
+    el.dueSection.hidden = searching;
+    el.newBox.hidden = searching;
+    if(searching){
+      el.dueList.innerHTML = "";
+    } else {
+      el.dueList.innerHTML = !all.length
+        ? '<div class="empty">아직 불러온 손님이 없습니다. 연결 설정을 확인하거나 [➕ 신규 손님 빠른 등록]으로 추가해 보세요.</div>'
+        : (due.length
+          ? due.map(function(c, i){ return cardHtml(c, { due: true, open: i === 0 }); }).join("")
+          : '<div class="empty">오늘 연락할 손님이 없습니다 👍<br>아래 목록에서 직접 골라 전화해도 됩니다.</div>');
+    }
 
     var f = state.filter;
-    var list = all.filter(function(c){
+    var list = base.filter(function(c){
       if(f === "active") return isActive(c);
       if(f === "due") return isDue(c);
+      if(f === "recent") return isRecent7(c);
       if(f === "done") return isDone(c);
       if(f === "hold") return isHold(c);
       return true;
     });
-    if(f === "active") list = list.sort(dueSort);
+    /* 추천 매물은 기본으로 접어 두고, 버튼 한 번으로 연다 */
+    var openInList = false;
     el.allCnt.textContent = list.length;
+    el.allTitle.textContent = searching ? "🔍 검색 결과" : "📇 전체 손님";
     el.allList.innerHTML = list.length
-      ? list.map(function(c){ return cardHtml(c, false); }).join("")
-      : '<div class="empty">해당하는 손님이 없습니다.</div>';
+      ? list.map(function(c){ return cardHtml(c, { open: openInList }); }).join("")
+      : '<div class="empty">' + (searching
+          ? "‘" + esc(state.q) + "’에 맞는 손님이 없습니다."
+          : "해당하는 손님이 없습니다.") + '</div>';
 
     var btns = el.filters.querySelectorAll("button");
     for(var i = 0; i < btns.length; i++){
@@ -870,7 +1027,7 @@
       localStorage.removeItem(LS_PW);
       localStorage.removeItem(LS_REMEMBER);
     } catch(e){}
-    state.url = ""; state.pw = ""; state.customers = []; state.properties = [];
+    state.url = ""; state.pw = ""; state.customers = []; state.properties = []; state.matchCache = {};
     el.cfgUrl.value = ""; el.cfgPw.value = "";
     setConn("off", "연결을 해제했습니다");
     el.connTime.textContent = "";
@@ -900,13 +1057,52 @@
     render();
   });
 
-  function onActionClick(e){
-    var b = e.target.closest("button[data-act]");
-    if(!b) return;
-    doAction(b.dataset.row, b.dataset.act, b);
+  /* 검색 */
+  var qTimer = 0;
+  el.qSearch.addEventListener("input", function(){
+    clearTimeout(qTimer);
+    var v = el.qSearch.value;
+    qTimer = setTimeout(function(){
+      state.q = v;
+      render();
+    }, 120);
+  });
+  el.qSearch.addEventListener("keydown", function(e){
+    if(e.key === "Escape"){ el.qSearch.value = ""; state.q = ""; render(); }
+  });
+  el.qClear.addEventListener("click", function(){
+    el.qSearch.value = ""; state.q = ""; render(); el.qSearch.focus();
+  });
+
+  /* 카드 안: 액션 · 추천 매물 토글 · 메모 펼치기 */
+  function onCardClick(e){
+    var act = e.target.closest("button[data-act]");
+    if(act){ doAction(act.dataset.row, act.dataset.act, act); return; }
+
+    var tog = e.target.closest("button[data-toggle]");
+    if(tog){
+      var card = tog.closest(".c-card");
+      var box = card ? card.querySelector(".c-match") : null;
+      if(!box) return;
+      var row = tog.dataset.toggle;
+      if(box.dataset.match === "0"){
+        var c = findCustomer(row);
+        box.innerHTML = c ? matchHtml(c) : "";
+        box.dataset.match = "1";
+      }
+      var willOpen = box.hasAttribute("hidden");
+      if(willOpen) box.removeAttribute("hidden"); else box.setAttribute("hidden", "");
+      tog.classList.toggle("on", willOpen);
+      var label = tog.textContent.replace(/[▾▴]/g, willOpen ? "▴" : "▾");
+      tog.textContent = label;
+      return;
+    }
+
+    var memo = e.target.closest(".c-memo");
+    if(memo){ memo.classList.toggle("open"); }
   }
-  el.dueList.addEventListener("click", onActionClick);
-  el.allList.addEventListener("click", onActionClick);
+  el.dueList.addEventListener("click", onCardClick);
+  el.allList.addEventListener("click", onCardClick);
 
   $("btnAddCustomer").addEventListener("click", addCustomer);
 
@@ -921,6 +1117,9 @@
     el.setupPanel.classList.remove("hidden");
     loadGsSource();
   }
+
+  /* 확인용 (개발) */
+  window.__cust = { state: state, render: render, regSort: regSort, matchQuery: matchQuery, isRecent7: isRecent7 };
 })();
 </script>
 </body>
