@@ -17,6 +17,7 @@
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0; padding:0;}
+  [hidden]{display:none !important;}
   body{
     background:var(--bg); color:var(--ink);
     font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕","Noto Sans KR",system-ui,sans-serif;
@@ -98,6 +99,8 @@
   .c-row1{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
   .c-date{font-size:10.5px; font-weight:800; color:#7c8aa0; background:#f1f5f9; border-radius:6px;
     padding:2px 6px; font-variant-numeric:tabular-nums; flex:none;}
+  .c-date-lg{display:none;}
+  .c-conds{display:none;}   /* PC 큰 화면에서만 보이는 조건 요약 그리드 */
   .c-name{font-size:15px; font-weight:900; color:var(--ink); letter-spacing:-.3px;
     max-width:13em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .badge{font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:999px; white-space:nowrap; line-height:1.35;}
@@ -127,6 +130,7 @@
     background:#eff6ff; border:1px solid var(--blue-line); border-radius:8px; padding:4px 8px;
     cursor:pointer; white-space:nowrap;}
   .m-toggle.on{background:#dbeafe;}
+  .t-pc{display:none;}
 
   .c-match{margin-top:7px; border-top:1px dashed var(--line); padding-top:7px;}
   .m-title{display:none;}
@@ -174,6 +178,96 @@
   .toast.show{opacity:1; transform:translate(-50%,0);}
   .toast.warn{background:var(--danger);}
 
+  /* ───────── PC 큰 화면 (768px 이상) — 한 사람씩 시원하게, 스크롤로 ───────── */
+  @media (min-width:768px){
+    body{background:#f1f5f9; font-size:15.5px;}
+    .wrap{max-width:1120px; padding:22px 24px 80px;}
+    .top{gap:14px; margin-bottom:16px;}
+    .logo{width:46px; height:46px; border-radius:14px; font-size:24px;}
+    .brand h1{font-size:22px; letter-spacing:-.8px;}
+    .brand p{font-size:13px;}
+    .top-actions{gap:9px;}
+    .btn{font-size:14px; padding:11px 16px; border-radius:12px;}
+    .btn.big-open{background:#0f172a; color:#fff; border-color:#0f172a; box-shadow:0 4px 14px rgba(15,23,42,.18);}
+    .btn.big-open:hover{background:#1e293b; border-color:#1e293b;}
+
+    .conn-bar{font-size:14px; padding:12px 16px; border-radius:14px; margin-bottom:16px;}
+
+    .setup{padding:20px 24px; border-radius:18px;}
+    .setup h2{font-size:18px;}
+    .setup .sub{font-size:13.5px;}
+
+    .stats{gap:14px; margin-bottom:16px;}
+    .stat{padding:16px 20px; border-radius:16px;}
+    .stat .k{font-size:13.5px;}
+    .stat .v{font-size:32px;}
+
+    .searchbar{padding:13px 18px; border-radius:14px; margin-bottom:14px;}
+    .searchbar .ic{font-size:18px;}
+    .searchbar input{font-size:17px;}
+
+    h2.sec{font-size:20px; margin:26px 0 14px;}
+    h2.sec .cnt{font-size:13.5px; padding:3px 11px;}
+
+    .filters{gap:9px; margin-bottom:16px;}
+    .filters button{font-size:14px; padding:9px 18px;}
+
+    /* 손님 카드: 흰 큰 카드 1열 */
+    .c-list{gap:20px;}
+    .c-card{display:flex; flex-direction:column; padding:24px 28px; border-radius:18px;
+      box-shadow:0 4px 18px rgba(15,23,42,.06);}
+    .c-card.due{box-shadow:0 6px 22px rgba(245,158,11,.16);}
+
+    /* 1) 머리줄: 등록일 · 이름 · 배지 · 전화 */
+    .c-row1{order:1; gap:10px 12px;}
+    .c-date{display:none;}
+    .c-date-lg{display:inline-flex; align-items:center; font-size:14px; font-weight:900; color:#334155;
+      background:#eef2f7; border:1px solid #dbe3ee; border-radius:9px; padding:5px 11px;
+      font-variant-numeric:tabular-nums; letter-spacing:.2px;}
+    .c-name{font-size:21px; font-weight:900; letter-spacing:-.6px; max-width:none;}
+    .badge{font-size:13px; padding:4px 11px;}
+    .c-last{font-size:13px; color:#94a3b8;}
+    .c-call{font-size:16px; font-weight:900; padding:11px 18px; border-radius:12px; gap:7px;}
+
+    /* 2) 조건: 4칸 요약 그리드 */
+    .c-conds{order:2; display:grid; grid-template-columns:repeat(2,1fr); gap:14px 18px;
+      margin-top:16px; background:#f8fafc; border:1px solid var(--line); border-radius:14px; padding:18px 20px;}
+    .cd{min-width:0;}
+    .cd .k{font-size:12.5px; font-weight:800; color:#7c8aa0; letter-spacing:-.1px;}
+    .cd .v{margin-top:5px; font-size:16px; font-weight:800; color:#0f172a; line-height:1.4; word-break:break-word;}
+
+    /* 3) 메모: 4줄까지 바로 */
+    .c-memo{order:3; margin-top:14px; font-size:15px; line-height:1.65; padding:13px 16px;
+      border-left-width:4px; border-radius:10px; -webkit-line-clamp:4; color:#334155;}
+
+    /* 4) 추천 매물: 큰 버튼 + 큰 글씨 */
+    .c-line{order:4; margin-top:14px; display:block;}
+    .c-line .cond{display:none;}
+    .m-toggle{display:flex; width:100%; align-items:center; justify-content:center; gap:8px;
+      font-size:15px; font-weight:900; padding:13px 16px; border-radius:12px;
+      background:#eff6ff; border-color:var(--blue-line); color:var(--royal-dark);}
+    .m-toggle.on{background:#dbeafe;}
+    .m-toggle .t-mob{display:none;}
+    .m-toggle .t-pc{display:inline;}
+    .c-match{order:5; margin-top:12px; padding-top:12px;}
+    .m-item{padding:12px 16px; border-radius:11px; margin-bottom:9px; gap:12px;}
+    .m-item .mid{font-size:13px;}
+    .m-item .mt{font-size:15.5px;}
+    .m-item .mp{font-size:15.5px;}
+    .m-none{font-size:13.5px;}
+    .m-approx{font-size:11.5px; padding:1px 7px; vertical-align:2px;}
+
+    /* 5) 액션 */
+    .c-actions{order:6; gap:10px; margin-top:18px;}
+    .c-actions button{font-size:15px; font-weight:900; padding:13px 8px; border-radius:11px;}
+
+    .empty{font-size:14.5px; padding:32px 20px; line-height:1.8;}
+    .toast{font-size:15px; padding:15px 22px;}
+  }
+  @media (min-width:1100px){
+    .c-conds{grid-template-columns:repeat(4,1fr);}
+  }
+
   @media (max-width:640px){
     .wrap{padding:12px 10px 70px;}
     .brand h1{font-size:15.5px;}
@@ -204,6 +298,8 @@
       </div>
     </div>
     <div class="top-actions">
+      <a class="btn big-open" id="btnBigOpen" href="customers-remind.html" target="_blank" rel="noopener" hidden
+         title="PC 큰 화면으로 새 창에서 열기">🖥️ <span class="label">새 창으로 크게 보기</span></a>
       <button type="button" class="btn" id="btnRefresh"><span>↻</span><span class="label">새로고침</span></button>
       <button type="button" class="btn primary" id="btnSetup"><span>⚙</span><span class="label">연결 설정</span></button>
     </div>
@@ -368,7 +464,7 @@
     filters: $("filters"), toast: $("toast"), gsCode: $("gsCode"),
     lockedNote: $("lockedNote"), guideBox: $("guideBox"),
     searchBar: $("searchBar"), qSearch: $("qSearch"), qHint: $("qHint"), qClear: $("qClear"),
-    newBox: $("newBox")
+    newBox: $("newBox"), btnBigOpen: $("btnBigOpen")
   };
 
   /* ---------- 작은 도우미 ---------- */
@@ -435,6 +531,11 @@
   function regLabel(c){
     var d = regDate(c);
     return d ? (pad2(d.getMonth() + 1) + "/" + pad2(d.getDate())) : "--/--";
+  }
+  /* PC 큰 화면용 등록일: 26.11.27 */
+  function regLabelFull(c){
+    var d = regDate(c);
+    return d ? (String(d.getFullYear()).slice(2) + "." + pad2(d.getMonth() + 1) + "." + pad2(d.getDate())) : "--.--.--";
   }
   /* 최신 등록이 위로 (같은 날이면 시트 아래(나중에 추가)가 위) */
   function regSort(a, b){
@@ -718,6 +819,48 @@
     return esc(bits.join(" · "));
   }
 
+  /* PC 큰 화면용: 조건을 라벨 + 값 4칸 요약 그리드로 */
+  function commaNum(n){
+    return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  function gridCells(c){
+    var deal = String(c["희망거래"] || "").trim();
+    var region = String(c["선호권역"] || "").trim();
+    var floor = String(c["희망층수"] || "").trim().replace("지상 ", "");
+    var minArea = num(c["최소평수"]);
+    var dep = num(c["최대예산_보증금"]);
+    var rent = num(c["최대월세"]);
+    var power = num(c["필수전력"]);
+    var hoistRaw = String(c["호이스트필수"] || "");
+    var hoist = /필요|필수/.test(hoistRaw) && !/불필요/.test(hoistRaw);
+    var ind = String(c["업종"] || "").trim();
+    var isSale = /매매|분양/.test(deal);
+
+    var money = [];
+    if(dep) money.push("보증 " + commaNum(dep) + "만↓");
+    if(rent) money.push("월 " + commaNum(rent) + "만↓");
+
+    var spec = [];
+    if(power) spec.push("전력 " + commaNum(power) + "kW↑");
+    if(hoist) spec.push("호이스트 필수");
+    if(ind) spec.push(ind);
+
+    return [
+      { k: "거래 · 지역", v: [deal, region].filter(Boolean).join(" · ") || "미입력" },
+      { k: "층수 · 면적", v: [floor, minArea ? commaNum(minArea) + "평 이상" : ""].filter(Boolean).join(" · ") || "무관" },
+      { k: (isSale && !rent) ? "예산 (보증금)" : "예산 (보증 / 월세)", v: money.join(" · ") || "협의" },
+      { k: "설비 · 업종", v: spec.join(" · ") || "특이사항 없음" }
+    ];
+  }
+  function condGridHtml(c){
+    var cells = gridCells(c), html = "";
+    for(var i = 0; i < cells.length; i++){
+      html += '<div class="cd"><div class="k">' + esc(cells[i].k) + '</div>' +
+              '<div class="v">' + esc(cells[i].v) + '</div></div>';
+    }
+    return html;
+  }
+
   function statusBadge(st){
     var t = String(st || "");
     if(!t) return "";
@@ -747,8 +890,7 @@
     if(!list.length){
       return '<div class="m-none">조건(동네·거래)에 맞는 공개 매물이 없습니다. 비공개 매물은 직접 확인해 보세요.</div>';
     }
-    var compact = window.matchMedia && window.matchMedia("(max-width:640px)").matches;
-    var html = "", anyApprox = false;
+    var compact = window.matchMedia && window.matchMedia("(max-width:640px)").matches;    var html = "", anyApprox = false;
     for(var i = 0; i < list.length; i++){
       var p = list[i].p;
       if(list[i].approx) anyApprox = true;
@@ -769,6 +911,16 @@
     var n = cachedMatch(c).length;
     return n ? ("🎯 매물 " + n + "건 ▾") : "🎯 매물 없음 ▾";
   }
+  /* 같은 버튼을 휴대폰은 짧게, PC 큰 화면은 길고 큼직하게 */
+  function matchBtnHtml(c, open){
+    var mob = matchBtnLabel(c);
+    var mobTxt = mob.replace("▾", open ? "▴" : "▾");
+    var pcTxt = mob.replace("🎯 매물", "🎯 추천 매물").replace("▾", open ? "접기 ▴" : "보기 ▾");
+    return '<button type="button" class="m-toggle' + (open ? " on" : "") + '" data-toggle="' + c.row + '" ' +
+           'title="추천 매물 보기" aria-label="추천 매물 보기">' +
+           '<span class="t-mob">' + esc(mobTxt) + '</span>' +
+           '<span class="t-pc">' + esc(pcTxt) + '</span></button>';
+  }
 
   function cardHtml(c, opts){
     opts = opts || {};
@@ -787,6 +939,7 @@
     /* 1줄: 등록일 · 이름 · 배지 · 전화 */
     html += '<div class="c-row1">';
     html += '<span class="c-date" title="등록일">' + regLabel(c) + '</span>';
+    html += '<span class="c-date-lg" title="등록일">' + regLabelFull(c) + '</span>';
     html += '<span class="c-name" title="' + esc(c["고객명"] || "") + '">' + esc(c["고객명"] || "(이름 없음)") + '</span>';
     if(hot) html += '<span class="badge hot">🔥 급구</span>';
     html += statusBadge(st);
@@ -795,12 +948,14 @@
     if(phone) html += '<a class="c-call" href="tel:' + esc(phone) + '">📞 ' + esc(c["연락처"]) + '</a>';
     html += '</div>';
 
-    /* 2줄: 조건 한 줄 + 추천 매물 토글 */
+    /* 2줄: 조건 한 줄 + 추천 매물 토글 (PC에서는 토글이 큰 버튼이 되고 조건은 아래 그리드로) */
     var full = condLine(c);
     html += '<div class="c-line"><span class="cond" title="' + esc(String(full).replace(/<[^>]+>/g, "")) + '">' + full + '</span>';
-    html += '<button type="button" class="m-toggle' + (open ? " on" : "") + '" data-toggle="' + c.row + '" ' +
-            'title="추천 매물 보기" aria-label="추천 매물 보기">' + matchBtnLabel(c) + '</button>';
+    html += matchBtnHtml(c, open);
     html += '</div>';
+
+    /* 조건 요약 그리드 (PC 큰 화면 전용) */
+    html += '<div class="c-conds">' + condGridHtml(c) + '</div>';
 
     /* 메모: 2줄까지만, 누르면 펼침 */
     if(c["상세메모"]){
@@ -823,6 +978,8 @@
 
   function render(){
     var all = state.customers.slice().sort(regSort);
+    /* PC 큰 화면: 한 사람씩 크게 보는 흐름이라 '오늘 연락할 손님'은 매물까지 펼친 상태로 */
+    var wide = !!(window.matchMedia && window.matchMedia("(min-width:768px)").matches);
 
     el.statAll.textContent = all.length;
     el.statActive.textContent = all.filter(isActive).length;
@@ -846,7 +1003,7 @@
       el.dueList.innerHTML = !all.length
         ? '<div class="empty">아직 불러온 손님이 없습니다. 연결 설정을 확인하거나 [➕ 신규 손님 빠른 등록]으로 추가해 보세요.</div>'
         : (due.length
-          ? due.map(function(c, i){ return cardHtml(c, { due: true, open: i === 0 }); }).join("")
+          ? due.map(function(c, i){ return cardHtml(c, { due: true, open: wide ? true : i === 0 }); }).join("")
           : '<div class="empty">오늘 연락할 손님이 없습니다 👍<br>아래 목록에서 직접 골라 전화해도 됩니다.</div>');
     }
 
@@ -1103,8 +1260,12 @@
       var willOpen = box.hasAttribute("hidden");
       if(willOpen) box.removeAttribute("hidden"); else box.setAttribute("hidden", "");
       tog.classList.toggle("on", willOpen);
-      var label = tog.textContent.replace(/[▾▴]/g, willOpen ? "▴" : "▾");
-      tog.textContent = label;
+      var spans = tog.querySelectorAll(".t-mob, .t-pc");
+      for(var i = 0; i < spans.length; i++){
+        var txt = spans[i].textContent.replace(/[▾▴]/g, willOpen ? "▴" : "▾");
+        txt = willOpen ? txt.replace("보기", "접기") : txt.replace("접기", "보기");
+        spans[i].textContent = txt;
+      }
       return;
     }
 
@@ -1117,6 +1278,13 @@
   $("btnAddCustomer").addEventListener("click", addCustomer);
 
   /* ---------- 시작 ---------- */
+  /* 작업실 탭(iframe) 안에서 PC로 볼 때만: 새 창으로 크게 보기 버튼 */
+  var inFrame = false;
+  try { inFrame = window.self !== window.top; } catch(e){ inFrame = true; }
+  if(inFrame && window.matchMedia && window.matchMedia("(min-width:768px)").matches){
+    el.btnBigOpen.hidden = false;
+  }
+
   loadConfig();
   render();
   if(state.url && state.pw){
