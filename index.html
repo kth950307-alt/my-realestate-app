@@ -377,6 +377,59 @@
             .kk-share { margin-bottom: 16px; }
             .kk-btn { font-size: 13px; padding: 12px 10px; flex: 1 1 100%; }
         }
+
+        /* ── ⚡ 손님 조건 1초 필터 (전화 상담 직후) ── */
+        .os-panel { background: linear-gradient(180deg, #ffffff 0%, #f5f9ff 100%); border: 2px solid var(--accent-border); border-radius: 18px; padding: 15px 18px 10px; margin-bottom: 16px; box-shadow: 0 8px 22px rgba(37, 99, 235, 0.09); }
+        .os-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+        .os-title { font-size: 16.5px; font-weight: 900; color: var(--primary-dark); letter-spacing: -0.3px; }
+        .os-sub { font-size: 12px; color: var(--text-sub); font-weight: 700; margin-top: 3px; }
+        .os-head-right { display: flex; align-items: center; gap: 8px; }
+        .os-count { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; border-radius: 999px; padding: 8px 15px; font-size: 13px; font-weight: 900; white-space: nowrap; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25); }
+        .os-count span { font-size: 17px; }
+        .os-count.zero { background: #94a3b8; box-shadow: none; }
+        .os-reset { background: #ffffff; border: 1px solid #cbd5e1; color: #475569; font-size: 12.5px; font-weight: 800; padding: 8px 12px; border-radius: 9px; cursor: pointer; }
+        .os-reset:hover { border-color: var(--accent); color: var(--accent); }
+        .os-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px dashed #dbeafe; }
+        .os-label { flex: 0 0 52px; font-size: 12.5px; font-weight: 900; color: #475569; }
+        .os-chips { display: flex; gap: 7px; flex-wrap: wrap; flex: 1; }
+        .os-range { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; flex: 1; }
+        .os-input { width: 92px; padding: 9px 10px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13.5px; font-weight: 800; color: var(--text-main); background: #ffffff; text-align: right; }
+        .os-input:focus { border-color: var(--accent); outline: none; }
+        .os-unit { font-size: 12.5px; font-weight: 800; color: var(--text-sub); }
+        .os-hint { font-size: 11.5px; font-weight: 700; color: #94a3b8; }
+
+        /* ── 카드 담기 체크 · 선택 표시 ── */
+        .card-pick { position: absolute; left: 10px; bottom: 10px; z-index: 6; display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.95); border: 2px solid #cbd5e1; color: #475569; border-radius: 10px; padding: 6px 10px; font-size: 12.5px; font-weight: 900; cursor: pointer; box-shadow: 0 3px 10px rgba(15,23,42,.18); user-select: none; }
+        .card-pick input { width: 16px; height: 16px; margin: 0; accent-color: #2563eb; cursor: pointer; }
+        .card-pick.on { background: #2563eb; border-color: #1d4ed8; color: #ffffff; }
+        .prop-card.picked { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.18), 0 14px 28px rgba(37,99,235,.16); }
+        .floor-tag { background: #f1f5f9; color: #334155; border-color: #e2e8f0; }
+
+        /* ── 하단 카톡 일괄 브리핑 바 ── */
+        @keyframes bulkUp { from { opacity: 0; } to { opacity: 1; } }
+        .bulk-bar { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 1800; display: none; align-items: center; gap: 10px; background: rgba(15,23,42,.97); color: #ffffff; padding: 11px 13px; border-radius: 16px; box-shadow: 0 14px 34px rgba(15,23,42,.34); max-width: 96vw; }
+        .bulk-bar.show { display: flex; animation: bulkUp .18s ease; }
+        .bulk-count { font-size: 13.5px; font-weight: 900; white-space: nowrap; }
+        .bulk-count b { color: #fbbf24; font-size: 18px; }
+        .bulk-go { background: linear-gradient(135deg, #f59e0b, #ea8a04); color: #3b2600; border: none; padding: 12px 16px; border-radius: 11px; font-size: 14px; font-weight: 900; cursor: pointer; white-space: nowrap; font-family: inherit; box-shadow: 0 4px 12px rgba(245,158,11,.3); }
+        .bulk-go:active { transform: translateY(1px); }
+        .bulk-chart { background: linear-gradient(135deg, #0f766e, #115e59); color: #ffffff; border: none; padding: 12px 14px; border-radius: 11px; font-size: 13.5px; font-weight: 900; cursor: pointer; white-space: nowrap; font-family: inherit; box-shadow: 0 4px 12px rgba(15,118,110,.3); }
+        .bulk-chart:active { transform: translateY(1px); }
+        .bulk-mini { background: rgba(255,255,255,.12); color: #e2e8f0; border: 1px solid rgba(255,255,255,.22); padding: 10px 12px; border-radius: 10px; font-size: 12.5px; font-weight: 800; cursor: pointer; white-space: nowrap; font-family: inherit; }
+        .bulk-mini:hover { background: rgba(255,255,255,.2); }
+
+        @media (max-width: 860px) {
+            .os-panel { padding: 13px 14px 8px; }
+            .os-row { display: block; }
+            .os-label { display: block; margin-bottom: 7px; }
+            .os-chips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+            .os-chips::-webkit-scrollbar { display: none; }
+            .os-input { width: 82px; }
+            .bulk-bar { left: 10px; right: 10px; transform: none; bottom: calc(74px + env(safe-area-inset-bottom)); flex-wrap: wrap; justify-content: center; gap: 8px; padding: 10px; max-width: none; }
+            .bulk-go { flex: 1 1 100%; font-size: 13.5px; padding: 12px 10px; }
+            .bulk-chart { flex: 1 1 100%; font-size: 13px; padding: 11px 10px; }
+            .bulk-count { flex: 1; }
+        }
     </style>
 </head>
 <body>
@@ -438,6 +491,66 @@
     <!-- 메인 컨텐츠 영역 -->
     <main class="container">
         <section id="pane-list" class="tab-pane active">
+
+            <!-- ⚡ 손님 조건 1초 필터 (전화 상담 직후 바로) -->
+            <div class="os-panel" id="oneshot-panel">
+                <div class="os-head">
+                    <div>
+                        <div class="os-title">⚡ 손님 조건 1초 필터</div>
+                        <div class="os-sub">전화 받자마자 손님이 말한 조건만 눌러 주세요. 아래 매물이 바로 추려집니다.</div>
+                    </div>
+                    <div class="os-head-right">
+                        <button type="button" class="os-reset" onclick="resetOneShot()">조건 지우기</button>
+                        <div class="os-count" id="os-count">맞는 매물 <span>0</span>건</div>
+                    </div>
+                </div>
+                <div class="os-row">
+                    <span class="os-label">동네</span>
+                    <div class="os-chips" id="os-chips-region">
+                        <button type="button" class="qf-chip active" data-os-region="ALL" onclick="setOsRegion('ALL')">전체</button>
+                        <button type="button" class="qf-chip" data-os-region="석남동" onclick="setOsRegion('석남동')">석남동</button>
+                        <button type="button" class="qf-chip" data-os-region="가좌동" onclick="setOsRegion('가좌동')">가좌동</button>
+                        <button type="button" class="qf-chip" data-os-region="원창동" onclick="setOsRegion('원창동')">원창동</button>
+                        <button type="button" class="qf-chip" data-os-region="청라·경서" onclick="setOsRegion('청라·경서')">청라·경서</button>
+                        <button type="button" class="qf-chip" data-os-region="오류동" onclick="setOsRegion('오류동')">오류동(검단)</button>
+                        <button type="button" class="qf-chip" data-os-region="도화·주안" onclick="setOsRegion('도화·주안')">도화·주안</button>
+                    </div>
+                </div>
+                <div class="os-row">
+                    <span class="os-label">층수</span>
+                    <div class="os-chips" id="os-chips-floor">
+                        <button type="button" class="qf-chip active" data-os-floor="ALL" onclick="setOsFloor('ALL')">전체</button>
+                        <button type="button" class="qf-chip" data-os-floor="1F" onclick="setOsFloor('1F')">1층</button>
+                        <button type="button" class="qf-chip" data-os-floor="2F+" onclick="setOsFloor('2F+')">2층 이상</button>
+                    </div>
+                </div>
+                <div class="os-row">
+                    <span class="os-label">평수</span>
+                    <div class="os-range">
+                        <input type="number" inputmode="numeric" class="os-input" id="os-area-min" placeholder="최소" min="0" oninput="renderProperties()">
+                        <span class="os-unit">평 ~</span>
+                        <input type="number" inputmode="numeric" class="os-input" id="os-area-max" placeholder="최대" min="0" oninput="renderProperties()">
+                        <span class="os-unit">평</span>
+                        <span class="os-hint">비워두면 전체 평수</span>
+                    </div>
+                </div>
+                <div class="os-row">
+                    <span class="os-label">월세</span>
+                    <div class="os-range">
+                        <input type="number" inputmode="numeric" class="os-input" id="os-rent" placeholder="최대" min="0" oninput="renderProperties()">
+                        <span class="os-unit">만원 이하</span>
+                        <span class="os-hint">임대 매물에만 적용됩니다</span>
+                    </div>
+                </div>
+                <div class="os-row">
+                    <span class="os-label">전력</span>
+                    <div class="os-range">
+                        <input type="number" inputmode="numeric" class="os-input" id="os-power" placeholder="최소" min="0" oninput="renderProperties()">
+                        <span class="os-unit">kW 이상</span>
+                        <span class="os-hint">전력 '확인문의' 매물은 빠집니다</span>
+                    </div>
+                </div>
+            </div>
 
             <!-- 원클릭 빠른 필터 (거래구분 · 평수 · 주요 지역) -->
             <div class="quick-filter-panel" id="quick-filter">
@@ -835,6 +948,10 @@
                             <input type="number" id="add-area" placeholder="예: 180" required>
                         </div>
                         <div class="form-group">
+                            <label>🏢 해당 층수 <span style="font-weight:600; color:#64748b; font-size:11px;">(1초 필터 층수에 쓰입니다)</span></label>
+                            <input type="text" id="add-floor" placeholder="예: 지상 1층 / 지상 2층">
+                        </div>
+                        <div class="form-group">
                             <label>대지면적 / 건물면적 상세 표기</label>
                             <input type="text" id="add-land" placeholder="예: 대지 260평 / 1층 180평" required>
                         </div>
@@ -938,6 +1055,15 @@
         </div>
     </div>
 
+    <!-- 선택 매물 카톡 일괄 브리핑 바 (카드에 1건 이상 담으면 올라옴) -->
+    <div class="bulk-bar" id="bulk-bar">
+        <div class="bulk-count">선택 <b id="bulk-n">0</b>건</div>
+        <button type="button" class="bulk-go" onclick="copyBulkBrief()">📋 선택한 <span id="bulk-n2">0</span>건 카톡 일괄 브리핑 복사</button>
+        <button type="button" class="bulk-chart" onclick="saveCompareTable()">📊 비교표 이미지 저장</button>
+        <button type="button" class="bulk-mini" onclick="selectAllVisible()">목록 전체 담기</button>
+        <button type="button" class="bulk-mini" onclick="clearPicks()">담기 해제</button>
+    </div>
+
     <!-- 매물 데이터베이스 (기본 매물 + 구글 시트 실시간 매물 자동 결합) -->
  <script id="data-script">
     let baseProperties = [];
@@ -948,6 +1074,11 @@
         let isAdmin = false;
         let quickPower100 = false;
         let chipArea = 'ALL';
+
+        // ⚡ 손님 조건 1초 필터 상태 (층수 — 동네는 기존 지역 선택과 같은 값을 쓴다)
+        let osFloor = 'ALL';
+        // 📋 카톡 일괄 브리핑에 담아 둔 매물 (매물번호 기준 → 정렬·필터를 바꿔도 유지)
+        let pickedIds = new Set();
 
         // 📄 목록 표시 상태 (24건씩 끊어 보기 · 정렬)
         const PAGE_SIZE = 24;
@@ -1055,6 +1186,7 @@
                 }
             }
             document.querySelectorAll('#chips-region .qf-chip').forEach(b => b.classList.toggle('active', b.dataset.region === activeRegion));
+            syncOsChips();
         }
 
         function extractNum(val, defVal = 0) {
@@ -1241,9 +1373,12 @@
                         isMigrated: /^OLD-/i.test(idStr),
                         deal: dealClean,
                         region: c3 || "석남동",
+                        floorText: c(4),
                         badge: c4 ? `✨ ${c4}` : "🌟 실매물",
                         title: c(6) || `[${c3}] ${c4} 전용 ${areaVal}평 ${c2}`,
                         price: priceTxt,
+                        depNum: depNum,
+                        rentNum: dealClean === "임대" ? rentNum : null,
                         areaNum: areaVal,
                         landInfo: subArea > 0 ? `전용 ${areaVal}평 / 사무실 ${subArea}평` : `전용 ${areaVal}평`,
                         zone: c(22) || "일반공업지역",
@@ -1275,6 +1410,7 @@
                         isMigrated: /^OLD-/i.test(idStr),
                         deal: normalizeDeal(c3),
                         region: c4 || "석남동",
+                        floorText: "",
                         badge: c(6).includes("2층") ? "✨ 지상 2층" : "🌟 추천매물",
                         title: c(6) || `[${c4 || "석남동"}] 추천 공장`,
                         price: c(7) || "금액 협의",
@@ -1455,7 +1591,114 @@
             renderProperties();
         }
 
+        /* ═════════ ⚡ 손님 조건 1초 필터 ═════════ */
+        // 동네는 기존 지역 선택(f-region)과 같은 값을 쓴다 (두 곳이 따로 놀지 않게)
+        function osRegionChipValue() {
+            const v = document.getElementById('f-region').value;
+            if (v === 'ALL') return 'ALL';
+            for (const k in REGION_GROUPS) {
+                if (REGION_GROUPS[k].includes(v)) return k;
+            }
+            return v;
+        }
+
+        function setOsRegion(value) {
+            const sel = document.getElementById('f-region');
+            sel.value = value;
+            if (sel.value !== value) sel.value = 'ALL';
+            onRegionSelectChange();
+        }
+
+        function setOsFloor(value) {
+            osFloor = value;
+            syncOsChips();
+            renderProperties();
+        }
+
+        function syncOsChips() {
+            const r = osRegionChipValue();
+            document.querySelectorAll('#os-chips-region .qf-chip').forEach(b => b.classList.toggle('active', b.dataset.osRegion === r));
+            document.querySelectorAll('#os-chips-floor .qf-chip').forEach(b => b.classList.toggle('active', b.dataset.osFloor === osFloor));
+        }
+
+        // 숫자칸 읽기 (빈칸이면 null → 조건 적용 안 함)
+        function osNum(id) {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            const raw = String(el.value || '').replace(/[^\d.]/g, '');
+            if (!raw) return null;
+            const n = parseFloat(raw);
+            return Number.isFinite(n) ? n : null;
+        }
+
+        function resetOneShot() {
+            osFloor = 'ALL';
+            ['os-area-min', 'os-area-max', 'os-rent', 'os-power'].forEach(function (id) {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            const sel = document.getElementById('f-region');
+            if (sel) sel.value = 'ALL';
+            syncOsChips();
+            renderProperties();
+        }
+
+        // 매물 층 표기 (시트 '해당층수' 값 → 없으면 제목·배지에서 찾는다)
+        function propFloorText(p) {
+            if (!p) return '';
+            let t = String(p.floorText || '').replace(/\s+/g, ' ').trim();
+            if (!t) {
+                const src = [p.badge, p.title, p.landInfo].filter(Boolean).join(' ');
+                const m = src.match(/(?:지상|지하)\s*\d+(?:\s*[~,·]\s*\d+)?\s*층/);
+                if (m) t = m[0];
+            }
+            t = String(t || '').replace(/\s+/g, ' ').trim();
+            if (!t) return '';
+            if (/^(지상|지하)\s*층/.test(t)) return '';   // 시트 기본 틀만 있는 값은 비운다
+            return t;
+        }
+
+        // 층 구분: 1F(1층) / 2F+(2층 이상) / WHOLE(건물 전체) / B(지하) / UNKNOWN
+        function propFloorKind(p) {
+            const t = propFloorText(p);
+            if (!t) return 'UNKNOWN';
+            if (t.indexOf('건물 전체') >= 0) return 'WHOLE';
+            const above = t.replace(/지하\s*\d+\s*층/g, ' ');
+            const nums = [];
+            const re = /(\d+)\s*층/g;
+            let m;
+            while ((m = re.exec(above)) !== null) nums.push(parseInt(m[1], 10));
+            if (!nums.length) {
+                const m2 = above.match(/지상\s*(\d+)/);
+                if (m2) nums.push(parseInt(m2[1], 10));
+            }
+            if (!nums.length) return t.indexOf('지하') >= 0 ? 'B' : 'UNKNOWN';
+            return Math.min.apply(null, nums) <= 1 ? '1F' : '2F+';
+        }
+
+        // 월세(만원) — 시트 숫자 우선, 없으면 가격 문구에서 읽는다
+        function propRentNum(p) {
+            if (!p) return null;
+            let v = (typeof p.rentNum === 'number') ? p.rentNum : null;
+            if (!v) {
+                const m = String(p.price || '').match(/월\s*([\d,\.]+)\s*(억|만)?/);
+                if (m) {
+                    v = parseFloat(String(m[1]).replace(/,/g, ''));
+                    if (m[2] === '억') v = v * 10000;
+                }
+            }
+            return (typeof v === 'number' && Number.isFinite(v)) ? v : null;
+        }
+
+        // 계약전력(kW) — '확인문의'면 비교하지 않는다
+        function propPowerNum(p) {
+            if (!p || propPowerLabel(p) === '확인문의') return null;
+            const n = Number(p.powerNum);
+            return Number.isFinite(n) && n > 0 ? n : null;
+        }
+
         function createCardHtml(p, idx) {
+            const picked = pickedIds.has(String(p.id));
             const dealBadgeClass = p.deal === '임대' ? 'badge-rent' : (p.deal === '매매' ? 'badge-sale' : 'badge-new');
             const mainImg = (p.imgs && p.imgs.length > 0) ? p.imgs[0] : 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80';
             const hoistCell = p.hasHoist === 'YES' ? (hoistSpecDetail(p) || '있음') : '없음';
@@ -1480,7 +1723,7 @@
             ` : '';
 
             return `
-                <article class="prop-card" onclick="openDetailModal(${idx})">
+                <article class="prop-card${picked ? ' picked' : ''}" onclick="openDetailModal(${idx})">
                     <div class="thumb-wrap">
                         <img src="${mainImg}" alt="${p.title}">
                         ${doneHtml}
@@ -1490,12 +1733,16 @@
                             <span class="badge badge-hot">${p.badge}</span>
                         </div>
                         <span class="prop-id">매물번호 ${p.id}</span>
+                        <label class="card-pick${picked ? ' on' : ''}" onclick="event.stopPropagation()" title="카톡 일괄 브리핑에 담기">
+                            <input type="checkbox"${picked ? ' checked' : ''} onchange="togglePick('${p.id}', this)"> 담기
+                        </label>
                     </div>
                     <div class="card-body">
                         <div>
                             <div class="prop-loc">
                                 <span>📍 인천 서구 ${p.region} · ${p.zone}</span>
                                 <span class="py-tag">전용 ${p.areaNum}평 (${getAreaCategoryLabel(p.areaNum)})</span>
+                                ${propFloorText(p) ? `<span class="py-tag floor-tag">🏢 ${propFloorText(p)}</span>` : ''}
                             </div>
                             <h3 class="prop-title">${p.title}</h3>
                             <div class="prop-price">${p.price}</div>
@@ -1525,6 +1772,12 @@
             const hoist = document.getElementById('f-hoist').value;
             const keyword = document.getElementById('f-keyword').value.trim().toLowerCase();
 
+            // ⚡ 1초 필터 조건 (평수 범위 · 최대 월세 · 최소 전력)
+            const osAreaMin = osNum('os-area-min');
+            const osAreaMax = osNum('os-area-max');
+            const osRent = osNum('os-rent');
+            const osPower = osNum('os-power');
+
             const items = [];
             properties.forEach((p, idx) => {
                 if (deal !== 'ALL' && p.deal !== deal) return;
@@ -1540,6 +1793,24 @@
                 if (trailer !== 'ALL' && p.hasTrailer !== trailer) return;
                 if (hoist !== 'ALL' && p.hasHoist !== hoist) return;
                 if (quickPower100 && p.powerNum < 100) return;
+
+                // ⚡ 1초 필터: 층수 · 평수 범위 · 최대 월세 · 최소 전력
+                if (osFloor !== 'ALL') {
+                    const kind = propFloorKind(p);
+                    if (osFloor === '1F' && kind !== '1F') return;
+                    if (osFloor === '2F+' && kind !== '2F+') return;
+                }
+                if (osAreaMin !== null && !(Number(p.areaNum) >= osAreaMin)) return;
+                if (osAreaMax !== null && !(Number(p.areaNum) <= osAreaMax)) return;
+                if (osRent !== null && p.deal === '임대') {
+                    const r = propRentNum(p);
+                    if (r === null || r > osRent) return;
+                }
+                if (osPower !== null) {
+                    const pw = propPowerNum(p);
+                    if (pw === null || pw < osPower) return;
+                }
+
                 if (keyword) {
                     const searchTarget = (p.id + p.title + p.region + p.road + p.hoist + p.desc + (isAdmin ? (p.secretAddr + p.secretOwner + p.secretMemo) : '')).toLowerCase();
                     if (!searchTarget.includes(keyword)) return;
@@ -1561,6 +1832,11 @@
             const shown = all.slice(0, visibleCount);
 
             document.getElementById('prop-count').innerText = all.length;
+            const osCount = document.getElementById('os-count');
+            if (osCount) {
+                osCount.innerHTML = '맞는 매물 <span>' + all.length + '</span>건';
+                osCount.classList.toggle('zero', all.length === 0);
+            }
             document.getElementById('property-list').innerHTML = shown.length > 0
                 ? shown.map(it => createCardHtml(it.p, it.idx)).join('')
                 : `<div style="grid-column: 1/-1; text-align:center; padding: 60px 20px; background:white; border-radius:16px; border:1px solid #e2e8f0;">
@@ -1578,6 +1854,7 @@
             } else {
                 wrap.style.display = 'none';
             }
+            renderBulkBar();
         }
 
         // 필터·정렬이 바뀌면 항상 24건부터 다시 보여준다.
@@ -1653,6 +1930,13 @@
             chipArea = 'ALL';
             quickPower100 = false;
             document.getElementById('q-power').classList.remove('active');
+            // ⚡ 1초 필터 조건도 함께 비운다
+            osFloor = 'ALL';
+            ['os-area-min', 'os-area-max', 'os-rent', 'os-power'].forEach(function (id) {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            syncOsChips();
             syncFromDropdown();
             syncAreaDropdown();
         }
@@ -1845,10 +2129,321 @@
             }
         }
 
+        /* ═════════ 📋 담아 둔 매물 카톡 일괄 브리핑 ═════════ */
+        function pickedList() {
+            return properties.filter(function (p) { return pickedIds.has(String(p.id)); });
+        }
+
+        function renderBulkBar() {
+            const bar = document.getElementById('bulk-bar');
+            if (!bar) return;
+            // 시트 새로고침으로 사라진 매물은 담기에서도 빼준다
+            const liveIds = new Set(properties.map(function (p) { return String(p.id); }));
+            pickedIds.forEach(function (id) { if (!liveIds.has(id)) pickedIds.delete(id); });
+            const n = pickedIds.size;
+            const nEl = document.getElementById('bulk-n');
+            const n2El = document.getElementById('bulk-n2');
+            if (nEl) nEl.innerText = n;
+            if (n2El) n2El.innerText = n;
+            bar.classList.toggle('show', n > 0);
+        }
+
+        function togglePick(id, el) {
+            const key = String(id);
+            if (pickedIds.has(key)) pickedIds.delete(key); else pickedIds.add(key);
+            const on = pickedIds.has(key);
+            if (el) {
+                const card = el.closest('.prop-card');
+                if (card) card.classList.toggle('picked', on);
+                const label = el.closest('.card-pick');
+                if (label) label.classList.toggle('on', on);
+            }
+            renderBulkBar();
+        }
+
+        function selectAllVisible() {
+            const all = sortPropertyItems(getFilteredItems());
+            if (!all.length) { kkToast('지금 조건에 맞는 매물이 없습니다.'); return; }
+            all.forEach(function (it) { pickedIds.add(String(it.p.id)); });
+            renderList();
+            renderBulkBar();
+            kkToast(all.length + '건을 담았습니다. 아래 버튼으로 복사하세요.');
+        }
+
+        function clearPicks() {
+            pickedIds.clear();
+            renderList();
+            renderBulkBar();
+        }
+
+        // 카톡에 붙여넣기 좋은 여러 건 비교 브리핑 글
+        function buildBulkBrief(list) {
+            const out = [];
+            out.push('[우리부동산] 매물 ' + list.length + '건 비교 브리핑');
+            out.push('');
+            list.forEach(function (p, i) {
+                const floor = propFloorText(p);
+                out.push('▶ ' + (i + 1) + ') ' + (p.title || ('인천 서구 ' + p.region + ' ' + p.areaNum + '평')));
+                out.push('· 매물번호 : ' + p.id + ' (' + p.deal + ')');
+                out.push('· 위치 : 인천 서구 ' + p.region + (p.zone ? ' (' + p.zone + ')' : ''));
+                out.push('· 층수·면적 : ' + (floor ? floor + ' · ' : '') + '전용 ' + p.areaNum + '평');
+                out.push('· 보증금/월세 : ' + (p.price || '금액 협의'));
+                out.push('· 층고·전력 : ' + kkHeight(p) + ' / ' + propPowerLabel(p));
+                out.push('· 도로·설비 : ' + kkRoad(p) + ' · ' + hoistText(p));
+                out.push('· 링크 : ' + propertyLink(p));
+                out.push('');
+            });
+            out.push('☎ 매매상담 032-582-6200 · 임대상담 032-576-2600');
+            out.push('📱 김소장 직통 010-2660-8276');
+            return out.join('\n');
+        }
+
+        function copyBulkBrief() {
+            const list = pickedList();
+            if (!list.length) { kkToast('담아 둔 매물이 없습니다. 카드의 [담기]를 먼저 눌러 주세요.'); return; }
+            const msg = buildBulkBrief(list);
+            const done = function () { kkToast('✅ ' + list.length + '건 브리핑을 복사했습니다 — 카톡에 붙여넣으세요'); };
+            const fallback = function () {
+                const ta = document.createElement('textarea');
+                ta.value = msg;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); done(); }
+                catch (e) { kkToast('복사가 되지 않았습니다. 매물 상세에서 하나씩 복사해 주세요.'); }
+                document.body.removeChild(ta);
+            };
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(msg).then(done).catch(fallback);
+            } else {
+                fallback();
+            }
+        }
+
+        /* ═════════ 📊 투어 매물 비교표 이미지 ═════════ */
+        function propOfficeArea(p) {
+            const m = String((p && p.landInfo) || '').match(/사무실\s*([\d.]+)\s*평/);
+            return m ? m[1] : '';
+        }
+
+        // 비교표 한 줄씩 (모든 매물에 같은 순서로 쓴다)
+        function compareRowsOf(p) {
+            const floor = propFloorText(p);
+            const office = propOfficeArea(p);
+            return [
+                { label: '매물명', text: p.title || '', w: 900, s: 22, c: '#0f172a' },
+                { label: '매물번호', text: p.id, w: 900, s: 21, c: '#1d4ed8' },
+                { label: '지역', text: '인천 서구 ' + p.region + (p.zone ? ' · ' + p.zone : ''), w: 700, s: 20, c: '#334155' },
+                { label: '거래·층수', text: p.deal + (floor ? ' · ' + floor : ''), w: 800, s: 21, c: '#0f172a' },
+                { label: '전용평수', text: '전용 ' + p.areaNum + '평' + (office ? '\n사무실 ' + office + '평' : ''), w: 800, s: 21, c: '#0f172a' },
+                { label: '보증금/월세', text: p.price || '금액 협의', w: 900, s: 22, c: '#b91c1c' },
+                { label: '층고·전력', text: kkHeight(p) + ' / ' + propPowerLabel(p), w: 700, s: 20, c: '#334155' },
+                { label: '호이스트', text: hoistText(p), w: 700, s: 20, c: p.hasHoist === 'YES' ? '#b45309' : '#64748b' },
+                { label: '도로조건', text: kkRoad(p), w: 700, s: 20, c: '#334155' },
+                { label: '특징', text: kkFeature(p) || '-', w: 600, s: 19, c: '#475569' }
+            ];
+        }
+
+        function wrapCanvasText(ctx, text, maxW) {
+            const out = [];
+            String(text == null ? '' : text).split('\n').forEach(function (para) {
+                const words = para.split(/\s+/).filter(Boolean);
+                if (!words.length) { out.push(''); return; }
+                let line = '';
+                words.forEach(function (w) {
+                    const test = line ? line + ' ' + w : w;
+                    if (ctx.measureText(test).width <= maxW) { line = test; return; }
+                    if (line) out.push(line);
+                    if (ctx.measureText(w).width > maxW) {
+                        let chunk = '';
+                        Array.from(w).forEach(function (ch) {
+                            if (chunk && ctx.measureText(chunk + ch).width > maxW) { out.push(chunk); chunk = ch; }
+                            else chunk += ch;
+                        });
+                        line = chunk;
+                    } else {
+                        line = w;
+                    }
+                });
+                if (line) out.push(line);
+            });
+            return out;
+        }
+
+        function compareDateLabel() {
+            const d = new Date();
+            const p2 = function (v) { return (v < 10 ? '0' : '') + v; };
+            return d.getFullYear() + '.' + p2(d.getMonth() + 1) + '.' + p2(d.getDate());
+        }
+
+        function compareFileDate() {
+            const d = new Date();
+            const p2 = function (v) { return (v < 10 ? '0' : '') + v; };
+            return '' + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate());
+        }
+
+        // 2건 이상 담은 매물을 한 장의 비교표 PNG로 (2배 해상도)
+        async function buildCompareTableCanvas(list) {
+            if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) {} }
+            const items = list.slice(0, 6);
+            const n = items.length;
+            const SCALE = 2;
+            const PAD = 46;
+            const W = Math.max(1200, 210 + 218 * n);
+            const LABEL_W = 170;
+            const tableW = W - PAD * 2;
+            const colW = (tableW - LABEL_W) / n;
+            const padX = 16, padY = 16, lineH = 30;
+            const HEAD_H = 148, FOOT_H = 128, GAP = 22;
+
+            const cv = document.createElement('canvas');
+            let ctx = cv.getContext('2d');
+
+            const rowDef = compareRowsOf(items[0]);
+            const cellLines = [];
+            const rowH = [];
+            rowDef.forEach(function (rd, ri) {
+                const linesArr = [];
+                let maxLines = 1;
+                items.forEach(function (p) {
+                    ctx.font = kkFont(rd.w, rd.s);
+                    const lines = wrapCanvasText(ctx, compareRowsOf(p)[ri].text, colW - padX * 2);
+                    linesArr.push(lines);
+                    if (lines.length > maxLines) maxLines = lines.length;
+                });
+                cellLines.push(linesArr);
+                rowH.push(maxLines * lineH + padY * 2);
+            });
+
+            const tableH = rowH.reduce(function (a, b) { return a + b; }, 0);
+            const H = HEAD_H + GAP + tableH + GAP + FOOT_H + PAD;
+
+            cv.width = Math.round(W * SCALE);
+            cv.height = Math.round(H * SCALE);
+            ctx = cv.getContext('2d');
+            ctx.scale(SCALE, SCALE);
+            ctx.textBaseline = 'alphabetic';
+            ctx.textAlign = 'left';
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, W, H);
+
+            // 상단 브랜드 띠
+            const grad = ctx.createLinearGradient(0, 0, W, HEAD_H);
+            grad.addColorStop(0, '#1e3a8a');
+            grad.addColorStop(1, '#2563eb');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, HEAD_H);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = kkFont(900, 40);
+            ctx.fillText('우리부동산 매물 비교표', PAD, 74);
+            ctx.fillStyle = 'rgba(255,255,255,.9)';
+            ctx.font = kkFont(700, 21);
+            ctx.fillText('인천 서구 공장·창고 전문 김소장이 고른 후보 ' + n + '곳', PAD, 112);
+            ctx.textAlign = 'right';
+            ctx.font = kkFont(900, 24);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(compareDateLabel(), W - PAD, 62);
+            ctx.font = kkFont(700, 19);
+            ctx.fillStyle = 'rgba(255,255,255,.85)';
+            ctx.fillText('김소장 직통 010-2660-8276', W - PAD, 96);
+            ctx.textAlign = 'left';
+
+            // 표
+            const x0 = PAD;
+            let y = HEAD_H + GAP;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(x0, y, tableW, tableH);
+            ctx.strokeStyle = '#d7dee7';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x0, y, tableW, tableH);
+
+            rowDef.forEach(function (rd, ri) {
+                const h = rowH[ri];
+                if (ri % 2 === 0) {
+                    ctx.fillStyle = '#f8fafc';
+                    ctx.fillRect(x0 + 1, y + 1, tableW - 2, h - 2);
+                }
+                ctx.fillStyle = '#eff6ff';
+                ctx.fillRect(x0 + 1, y + 1, LABEL_W - 1, h - 2);
+                ctx.fillStyle = '#1e40af';
+                ctx.font = kkFont(900, 20);
+                ctx.fillText(rd.label, x0 + padX, y + padY + 21);
+                items.forEach(function (p, ci) {
+                    const row = compareRowsOf(p)[ri];
+                    const cx = x0 + LABEL_W + ci * colW;
+                    ctx.fillStyle = row.c;
+                    ctx.font = kkFont(row.w, row.s);
+                    cellLines[ri][ci].forEach(function (ln, li) {
+                        ctx.fillText(ln, cx + padX, y + padY + 21 + li * lineH);
+                    });
+                });
+                if (ri < rowDef.length - 1) {
+                    ctx.strokeStyle = '#e6ebf1';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(x0, y + h);
+                    ctx.lineTo(x0 + tableW, y + h);
+                    ctx.stroke();
+                }
+                y += h;
+            });
+
+            // 라벨 열 세로선
+            ctx.strokeStyle = '#d7dee7';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(x0 + LABEL_W, HEAD_H + GAP);
+            ctx.lineTo(x0 + LABEL_W, HEAD_H + GAP + tableH);
+            ctx.stroke();
+
+            // 하단 문의 띠
+            const fy = H - PAD - FOOT_H + 8;
+            ctx.fillStyle = '#12294d';
+            kkRoundRect(ctx, x0, fy, tableW, FOOT_H - 8, 18);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = kkFont(900, 27);
+            ctx.fillText(kkFitText(ctx, '문의 : 우리부동산 032-576-2600 · 032-582-6200', tableW - 60), x0 + 30, fy + 50);
+            ctx.fillStyle = 'rgba(255,255,255,.86)';
+            ctx.font = kkFont(700, 21);
+            ctx.fillText(kkFitText(ctx, '김소장 직통 010-2660-8276   |   인천 서구 건지로 167   |   kth950307-alt.github.io/my-realestate-app', tableW - 60), x0 + 30, fy + 88);
+
+            return cv;
+        }
+
+        async function saveCompareTable() {
+            const list = pickedList();
+            if (list.length < 2) {
+                kkToast('비교표는 2건 이상 담아야 만들 수 있습니다. 카드의 [담기]를 먼저 눌러 주세요.');
+                return;
+            }
+            if (list.length > 6) kkToast('비교표에는 앞 6건까지만 담습니다');
+            try {
+                const cv = await buildCompareTableCanvas(list);
+                const fname = '우리부동산_매물비교표_' + compareFileDate() + '.png';
+                if (cv.toBlob) {
+                    cv.toBlob(function (blob) {
+                        if (!blob) { kkToast('비교표 이미지를 만들지 못했습니다. 다시 눌러 주세요.'); return; }
+                        kkDownload(blob, fname);
+                        kkToast('📊 비교표 이미지를 저장했습니다 (' + Math.min(list.length, 6) + '건)');
+                    }, 'image/png');
+                } else {
+                    const a = document.createElement('a');
+                    a.href = cv.toDataURL('image/png');
+                    a.download = fname;
+                    a.click();
+                    kkToast('📊 비교표 이미지를 저장했습니다');
+                }
+            } catch (e) {
+                kkToast('비교표를 만들지 못했습니다: ' + (e && e.message ? e.message : e));
+            }
+        }
+
         function kkFont(w, s) {
             return `${w} ${s}px "Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif`;
         }
-
         function kkRoundRect(ctx, x, y, w, h, r) {
             const rr = Math.min(r, w / 2, h / 2);
             ctx.beginPath();
@@ -2062,6 +2657,7 @@
             document.getElementById('add-title').value = "";
             document.getElementById('add-price').value = "";
             document.getElementById('add-area').value = "";
+            document.getElementById('add-floor').value = "";
             document.getElementById('add-land').value = "";
             document.getElementById('add-desc').value = "";
             document.getElementById('add-secret-addr').value = "";
@@ -2081,6 +2677,7 @@
             document.getElementById('add-title').value = p.title;
             document.getElementById('add-price').value = p.price;
             document.getElementById('add-area').value = p.areaNum;
+            document.getElementById('add-floor').value = p.floorText || propFloorText(p) || "";
             document.getElementById('add-land').value = p.landInfo;
             document.getElementById('add-zone').value = p.zone;
             document.getElementById('add-has-trailer').value = (p.hasTrailer === 'YES') ? 'YES' : 'WING';
@@ -2110,6 +2707,7 @@
                     title: document.getElementById('add-title').value,
                     price: document.getElementById('add-price').value,
                     areaNum: Number(document.getElementById('add-area').value),
+                    floorText: document.getElementById('add-floor').value.trim(),
                     landInfo: document.getElementById('add-land').value,
                     zone: document.getElementById('add-zone').value,
                     hasTrailer: isSpecMissing(document.getElementById('add-road').value) ? 'UNKNOWN' : document.getElementById('add-has-trailer').value,

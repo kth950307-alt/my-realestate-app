@@ -75,6 +75,56 @@
   .charcount .goal.ok{color:var(--green-dark);}
 
   .actionbar{margin-top:16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+
+  /* ── ③ 올리기 전 점검 (검색 첫 2줄·키워드·해시태그) ── */
+  .checkup{margin-top:14px; background:var(--card); border:1px solid var(--line); border-radius:18px; padding:16px;}
+  .check-head{display:flex; justify-content:space-between; align-items:flex-end; gap:10px; flex-wrap:wrap; margin-bottom:12px;}
+  .ch-title{font-size:16px; font-weight:800; letter-spacing:-.3px;}
+  .ch-title .ch-badge{display:inline-block; background:#e8f8ef; color:var(--green-dark); font-size:11.5px; font-weight:800; padding:3px 8px; border-radius:999px; margin-left:6px; vertical-align:2px;}
+  .ch-sub{font-size:12.8px; color:var(--ink-3); font-weight:500;}
+  .check-grid{display:grid; grid-template-columns:1fr; gap:12px;}
+  .ch-card{background:#fbfcfd; border:1px solid var(--line); border-radius:14px; padding:13px;}
+  .ch-label{display:block; font-size:12.5px; font-weight:800; color:var(--ink-2); margin-bottom:6px;}
+  .ch-hint{font-size:11.5px; font-weight:600; color:var(--ink-3); margin-left:4px;}
+  .ch-input{width:100%; padding:11px 12px; border:1.5px solid #dfe4ea; border-radius:10px; font-family:inherit; font-size:14.5px; font-weight:600; color:var(--ink); background:#fff;}
+  .ch-input:focus{outline:none; border-color:var(--green); box-shadow:0 0 0 3px rgba(3,199,90,.10);}
+  .serp{margin-top:10px; background:#fff; border:1px solid #e6e9ec; border-radius:12px; padding:12px 13px;}
+  .serp-top{display:flex; align-items:center; gap:7px; margin-bottom:5px;}
+  .serp-fav{width:18px; height:18px; border-radius:5px; background:var(--green); color:#fff; font-size:11px; font-weight:900; display:flex; align-items:center; justify-content:center;}
+  .serp-url{font-size:11.5px; color:#5f6b7a; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .serp-url .serp-path{color:#9aa4af;}
+  .serp-title{font-size:14.5px; font-weight:700; color:#1a56c4; line-height:1.4; margin-bottom:4px; word-break:keep-all;}
+  .serp-desc{font-size:13px; color:#3b4653; line-height:1.55; word-break:keep-all;}
+  .serp-tail{display:block; color:#b6bec8; margin-top:2px;}
+  .serp-tail-label{display:block; font-size:11px; font-weight:700; color:#c0c7cf; margin-top:3px;}
+  .serp-note{margin-top:8px; padding-top:8px; border-top:1px dashed #e6e9ec; font-size:11.8px; font-weight:700; color:var(--ink-3); display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap;}
+  .serp-note.ok{color:var(--green-dark);}
+  .serp-note.warn{color:#b3261e;}
+  .serp mark{background:#fff3b0; color:inherit; padding:0 2px; border-radius:3px; font-weight:800;}
+  .kw-legend{display:flex; gap:10px; font-size:11.5px; font-weight:700; color:var(--ink-3); margin:9px 0 6px;}
+  .kw-rows{display:flex; flex-direction:column; gap:6px;}
+  .kw-empty{font-size:12.5px; color:var(--ink-3); line-height:1.5;}
+  .kw-row{display:flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:9px 11px; flex-wrap:wrap;}
+  .kw-name{font-size:13.5px; font-weight:800; color:var(--ink); flex:1 1 90px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .kw-cell{font-size:12px; color:var(--ink-2); font-weight:700; white-space:nowrap;}
+  .kw-cell b{font-size:14px; color:var(--ink);}
+  .badge-ok,.badge-no{font-size:11px; font-weight:800; padding:2px 7px; border-radius:6px; margin-left:4px;}
+  .badge-ok{background:#e8f8ef; color:#028a41;}
+  .badge-no{background:#fdecea; color:#b3261e;}
+  .tag-card{margin-top:12px;}
+  .tag-head{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px;}
+  .tag-head b{font-size:13.5px; font-weight:800;}
+  .tag-count{background:#eef1f4; color:var(--ink-2); font-size:12px; font-weight:800; padding:2px 9px; border-radius:999px; margin-left:4px;}
+  .tag-count.over{background:#fdecea; color:#b3261e;}
+  .tag-actions{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .tag-toggle{font-size:12.5px; font-weight:700; color:var(--ink-2); display:inline-flex; align-items:center; gap:5px; cursor:pointer;}
+  .tag-copy{background:var(--green); color:#fff; font-weight:800; padding:8px 12px; border-radius:9px;}
+  .tag-copy:active{background:var(--green-dark);}
+  .tag-chips{display:flex; gap:6px; flex-wrap:wrap;}
+  .tag-chip{background:#e8f8ef; color:#028a41; font-size:12.5px; font-weight:700; padding:3px 9px; border-radius:999px;}
+  .tag-note{font-size:11.5px; color:var(--ink-3); font-weight:600; margin-top:8px; line-height:1.5;}
+  @media (min-width:880px){ .check-grid{grid-template-columns:1fr 1fr;} }
+
   .btn-main{flex:1; border:0; border-radius:16px; background:var(--green); color:#fff;
     font-family:inherit; font-size:16.5px; font-weight:800; letter-spacing:-.3px; padding:17px 14px;
     cursor:pointer; box-shadow:0 6px 16px rgba(3,199,90,.25); transition:transform .08s, background .12s;}
@@ -175,6 +225,48 @@
       </div>
     </section>
   </div>
+
+  <section class="checkup" aria-label="올리기 전 점검">
+    <div class="check-head">
+      <div class="ch-title">③ 올리기 전 점검 <span class="ch-badge">검색 첫 2줄 · 키워드 · 해시태그</span></div>
+      <div class="ch-sub">제목을 넣으면 네이버 검색에 실제로 보이는 첫 2줄과 필수 키워드 횟수를 바로 확인할 수 있어요.</div>
+    </div>
+
+    <div class="check-grid">
+      <div class="ch-card">
+        <label class="ch-label" for="postTitle">블로그 제목</label>
+        <input id="postTitle" class="ch-input" type="text" placeholder="예) 역곡맛집 역곡할매솥뚜껑 삼겹살 후기 (가성비 최고)">
+        <div class="serp" id="serp">
+          <div class="serp-top">
+            <span class="serp-fav">N</span>
+            <div class="serp-url">blog.naver.com<span class="serp-path"> › 인천공장전문 우리부동산 김소장</span></div>
+          </div>
+          <div class="serp-title" id="serpTitle">제목을 입력하면 여기에 그대로 보입니다</div>
+          <div class="serp-desc" id="serpDesc">원고를 붙여넣으면 검색에 노출되는 첫 2줄이 여기에 나옵니다.</div>
+          <div class="serp-note" id="serpNote">권장 90~110자</div>
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <label class="ch-label" for="kwList">필수 키워드 <span class="ch-hint">쉼표(,) 또는 줄바꿈으로 여러 개</span></label>
+        <input id="kwList" class="ch-input" type="text" placeholder="예) 역곡맛집, 역곡역맛집">
+        <div class="kw-legend"><span>제목 1회 이상 권장</span><span>본문 3회 이상 권장</span></div>
+        <div id="kwRows" class="kw-rows"><div class="kw-empty">필수 키워드를 넣으면 제목·본문에 몇 번 들어갔는지 바로 세어 드립니다.</div></div>
+      </div>
+    </div>
+
+    <div class="ch-card tag-card">
+      <div class="tag-head">
+        <div><b>#️⃣ 해시태그</b> <span id="tagCount" class="tag-count">0개</span></div>
+        <div class="tag-actions">
+          <label class="tag-toggle"><input type="checkbox" id="stripTags" checked> 본문 복사에서 빼기</label>
+          <button type="button" class="mini tag-copy" id="btnCopyTags">해시태그만 복사</button>
+        </div>
+      </div>
+      <div id="tagChips" class="tag-chips"><span class="kw-empty">원고 맨 아래 #태그를 넣으면 자동으로 여기로 분리됩니다.</span></div>
+      <div class="tag-note">· 원문 입력칸은 그대로 두고, 복사되는 본문에서만 #태그를 뻔니다. 네이버에는 아래 [태그] 칸에 따로 넣어 주세요.</div>
+    </div>
+  </section>
 
   <div class="actionbar">
     <button class="btn-main" id="btnMain" type="button">📋 네이버 블로그 서식 복사 (표 포함)</button>
@@ -643,6 +735,16 @@
   var goalEl  = document.getElementById("goal");
   var tblInfo = document.getElementById("tableInfo");
   var toastEl = document.getElementById("toast");
+  /* ③ 점검용 요소 */
+  var titleEl  = document.getElementById("postTitle");
+  var kwEl     = document.getElementById("kwList");
+  var stripEl  = document.getElementById("stripTags");
+  var serpTitleEl = document.getElementById("serpTitle");
+  var serpDescEl  = document.getElementById("serpDesc");
+  var serpNoteEl  = document.getElementById("serpNote");
+  var kwRowsEl    = document.getElementById("kwRows");
+  var tagCountEl  = document.getElementById("tagCount");
+  var tagChipsEl  = document.getElementById("tagChips");
   var mode    = "pc";
   var lastResult = "";
   var lastHtml   = "";
@@ -654,10 +756,161 @@
     return {withSpace: withSpace, noSpace: noSpace};
   }
 
+  /* ============================================================
+     ③ 올리기 전 점검 — 해시태그 분리 · 키워드 횟수 · 검색 첫 2줄
+     ============================================================ */
+
+  /* 원고 맨 아래의 #태그 묶음을 본문과 분리한다 */
+  function splitTrailingTags(raw){
+    var lines = String(raw || "").replace(/\r\n?/g, "\n").split("\n");
+    var tags = [], i = lines.length - 1;
+    while(i >= 0){
+      var ln = lines[i].trim();
+      if(!ln){ i--; continue; }
+      if(!/^#[^\s#]+(?:\s+#[^\s#]+)*$/.test(ln)) break;
+      tags = ln.split(/\s+/).filter(Boolean).concat(tags);
+      i--;
+    }
+    var bodyLines = lines.slice(0, i + 1);
+    /* 마지막 문단 끝에 붙은 #태그도 떼어낸다 */
+    for(var j = bodyLines.length - 1; j >= 0; j--){
+      var t = bodyLines[j].trim();
+      if(!t) continue;
+      var m = t.match(/(?:^|\s)((?:#[^\s#]+)(?:\s+#[^\s#]+)*)$/);
+      if(m && t.length > m[1].length){
+        tags = m[1].split(/\s+/).concat(tags);
+        bodyLines[j] = t.slice(0, t.length - m[1].length).replace(/\s+$/, "");
+      }
+      break;
+    }
+    return { body: bodyLines.join("\n"), tags: tags };
+  }
+
+  function uniqTags(tags){
+    var seen = {}, out = [], dup = 0, i, t;
+    for(i = 0; i < tags.length; i++){
+      t = String(tags[i]).trim();
+      if(!t) continue;
+      if(seen[t]){ dup++; continue; }
+      seen[t] = 1; out.push(t);
+    }
+    return { list: out, dup: dup };
+  }
+
+  function renderTagBox(tags){
+    var u = uniqTags(tags);
+    var over = u.list.length > 30;
+    tagCountEl.textContent = u.list.length + "개" + (u.dup ? " (중복 " + u.dup + " 제외)" : "");
+    tagCountEl.classList.toggle("over", over);
+    tagCountEl.title = over ? "네이버 태그는 30개까지만 등록됩니다" : "";
+    if(!u.list.length){
+      tagChipsEl.innerHTML = '<span class="kw-empty">원고 맨 아래 #태그를 넣으면 자동으로 여기로 분리됩니다.</span>';
+    } else {
+      var html = [];
+      for(var i = 0; i < u.list.length; i++){
+        html.push('<span class="tag-chip">' + escHtml(u.list[i]) + '</span>');
+      }
+      tagChipsEl.innerHTML = html.join("");
+    }
+    return u.list;
+  }
+
+  function parseKeywords(){
+    var parts = String(kwEl.value || "").split(/[,\n、，]/);
+    var out = [], i, k;
+    for(i = 0; i < parts.length; i++){
+      k = parts[i].trim().replace(/^#+/, "").replace(/\s+/g, " ");
+      if(k && out.indexOf(k) < 0) out.push(k);
+    }
+    return out;
+  }
+
+  function countOccur(hay, needle){
+    if(!needle) return 0;
+    var t = String(hay || "").toLowerCase();
+    var k = String(needle).toLowerCase();
+    var n = 0, i = 0;
+    while((i = t.indexOf(k, i)) !== -1){ n++; i += k.length; }
+    return n;
+  }
+
+  function escRe(s){
+    return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  function highlight(s, kws){
+    var out = escHtml(s);
+    for(var i = 0; i < kws.length; i++){
+      var k = escHtml(kws[i]).replace(/^\s+|\s+$/g, "");
+      if(!k) continue;
+      out = out.replace(new RegExp(escRe(k), "gi"), function(m){ return "<mark>" + m + "</mark>"; });
+    }
+    return out;
+  }
+
+  function renderKeywordCheck(bodyText){
+    var kws = parseKeywords();
+    if(!kws.length){
+      kwRowsEl.innerHTML = '<div class="kw-empty">필수 키워드를 넣으면 제목·본문에 몇 번 들어갔는지 바로 세어 드립니다.</div>';
+      return;
+    }
+    var titleTxt = titleEl.value || "";
+    var html = [];
+    for(var i = 0; i < kws.length; i++){
+      var k = kws[i];
+      var tc = countOccur(titleTxt, k);
+      var bc = countOccur(bodyText, k);
+      html.push('<div class="kw-row">');
+      html.push('<span class="kw-name" title="' + escHtml(k) + '">' + escHtml(k) + '</span>');
+      html.push('<span class="kw-cell">제목 <b>' + tc + '</b>회 <span class="' + (tc >= 1 ? 'badge-ok' : 'badge-no') + '">' + (tc >= 1 ? '충족' : '부족') + '</span></span>');
+      html.push('<span class="kw-cell">본문 <b>' + bc + '</b>회 <span class="' + (bc >= 3 ? 'badge-ok' : 'badge-no') + '">' + (bc >= 3 ? '충족' : '부족') + '</span></span>');
+      html.push('</div>');
+    }
+    kwRowsEl.innerHTML = html.join("");
+  }
+
+  /* 네이버 모바일 검색 결과의 첫 2줄 미리보기 (앞 100자 노출 + 잘릴 수 있는 구간) */
+  function renderSerp(bodyText, kws){
+    var title = (titleEl.value || "").trim();
+    var flat = String(bodyText || "").split("\n").map(function(s){ return s.trim(); }).filter(Boolean).join(" ");
+    if(!title) title = flat ? Array.from(flat).slice(0, 40).join("") : "제목을 입력하면 여기에 그대로 보입니다";
+    serpTitleEl.innerHTML = highlight(title, kws);
+
+    var chars = Array.from(flat);
+    if(!chars.length){
+      serpDescEl.innerHTML = "원고를 붙여넣으면 검색에 노출되는 첫 2줄이 여기에 나옵니다.";
+      serpNoteEl.className = "serp-note";
+      serpNoteEl.textContent = "권장 90~110자";
+      return;
+    }
+    var head = chars.slice(0, 100).join("");
+    var tail = chars.slice(100, 130).join("");
+    var html = highlight(head, kws) + (chars.length > 100 ? "…" : "");
+    if(tail){
+      html += '<span class="serp-tail">' + highlight(tail, kws) + '…</span>';
+      html += '<span class="serp-tail-label">↑ 여기부터는 기기·화면에 따라 잘릴 수 있어요</span>';
+    }
+    serpDescEl.innerHTML = html;
+
+    var n = chars.length;
+    if(n < 90){
+      serpNoteEl.className = "serp-note warn";
+      serpNoteEl.innerHTML = '<span>첫 2줄 ' + n + '자 — 조금 짧아요</span><span>90~110자 권장</span>';
+    } else {
+      serpNoteEl.className = "serp-note ok";
+      serpNoteEl.innerHTML = '<span>첫 2줄 ' + Math.min(n, 100) + '자 노출 (전체 ' + n + '자)</span><span>권장 90~110자 ✅</span>';
+    }
+  }
+
   function render(){
     var raw = inputEl.value;
     var cnt = countText(raw);
     inMeta.textContent = cnt.withSpace.toLocaleString("ko-KR") + "자";
+
+    /* 해시태그 분리 → 점검 칸에 보여주고, 복사되는 본문에서는 뺀다 */
+    var split = splitTrailingTags(raw);
+    renderTagBox(split.tags);
+    var bodyRaw = stripEl.checked ? split.body : raw;
 
     if(!raw.trim()){
       lastResult = ""; lastHtml = "";
@@ -670,10 +923,12 @@
       goalEl.classList.remove("ok");
       tblInfo.textContent = "표 자동 인식";
       tblInfo.classList.remove("ok");
+      renderSerp("", parseKeywords());
+      renderKeywordCheck("");
       return;
     }
 
-    var res = cleanAll(raw, mode);
+    var res = cleanAll(bodyRaw, mode);
     var plain = toPlainText(res);
     var html = buildHtml(res);
     lastResult = plain;
@@ -702,6 +957,11 @@
       tblInfo.textContent = "표 없음 → 문단 정리";
       tblInfo.classList.remove("ok");
     }
+
+    /* ③ 검색 첫 2줄 · 키워드 횟수 갱신 */
+    var kws = parseKeywords();
+    renderSerp(plain, kws);
+    renderKeywordCheck(plain);
   }
 
   function showToast(msg, sub, warn){
@@ -878,6 +1138,40 @@
   }catch(e){}
   inputEl.addEventListener("input", function(){
     try { localStorage.setItem("blogCleanInput", inputEl.value); } catch(e){}
+  });
+
+  /* ③ 점검 칸: 제목·키워드·해시태그 설정 기억 + 실시간 갱신 */
+  function saveCheckSettings(){
+    try {
+      localStorage.setItem("blogCleanTitle", titleEl.value || "");
+      localStorage.setItem("blogCleanKw", kwEl.value || "");
+      localStorage.setItem("blogCleanStrip", stripEl.checked ? "1" : "0");
+    } catch(e){}
+  }
+  titleEl.addEventListener("input", function(){ saveCheckSettings(); render(); });
+  kwEl.addEventListener("input", function(){ saveCheckSettings(); render(); });
+  stripEl.addEventListener("change", function(){ saveCheckSettings(); render(); });
+  try {
+    var savedTitle = localStorage.getItem("blogCleanTitle");
+    if(savedTitle) titleEl.value = savedTitle;
+    var savedKw = localStorage.getItem("blogCleanKw");
+    if(savedKw) kwEl.value = savedKw;
+    if(localStorage.getItem("blogCleanStrip") === "0") stripEl.checked = false;
+  } catch(e){}
+
+  document.getElementById("btnCopyTags").addEventListener("click", function(){
+    var u = uniqTags(splitTrailingTags(inputEl.value).tags);
+    if(!u.list.length){
+      showToast("복사할 해시태그가 없습니다", "원고 맨 아래에 #태그를 넣고 다시 눌러 주세요.", true);
+      return;
+    }
+    copyText(u.list.join(" "), function(ok){
+      if(ok){
+        showToast("✅ 해시태그 " + u.list.length + "개 복사 완료", "네이버 글쓰기 아래 [태그] 칸에 붙여넣으세요.");
+      } else {
+        showToast("자동 복사가 막혔습니다", "위 해시태그를 길게 눌러 직접 복사해 주세요.", true);
+      }
+    });
   });
 
   render();

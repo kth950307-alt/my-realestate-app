@@ -1,0 +1,897 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>손님 리마인드 · 우리부동산 사장님 작업실</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%91%A5%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --navy:#1e3a8a; --royal:#2563eb; --royal-dark:#1e40af;
+    --blue-soft:#eff6ff; --blue-line:#bfdbfe;
+    --gold:#f59e0b; --green:#059669;
+    --ink:#1e293b; --ink2:#475569; --muted:#64748b;
+    --line:#e2e8f0; --bg:#f6f8fc; --card:#ffffff;
+    --danger:#b3261e;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕","Noto Sans KR",system-ui,sans-serif;
+    -webkit-text-size-adjust:100%; font-size:15px; line-height:1.55;
+  }
+  .wrap{max-width:1000px; margin:0 auto; padding:14px 14px 60px;}
+
+  /* 상단 */
+  .top{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px;}
+  .brand{display:flex; align-items:center; gap:10px; min-width:0;}
+  .logo{width:38px; height:38px; border-radius:12px; background:linear-gradient(140deg,#3B82F6,#1D4ED8);
+    display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 4px 12px rgba(37,99,235,.28);}
+  .brand h1{margin:0; font-size:17px; font-weight:900; letter-spacing:-.5px; color:var(--navy); line-height:1.2;}
+  .brand p{margin:2px 0 0; font-size:11.5px; font-weight:600; color:var(--muted);}
+  .top-actions{display:flex; align-items:center; gap:7px; margin-left:auto;}
+  .btn{display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-size:12.5px; font-weight:800;
+    padding:9px 12px; border-radius:10px; border:1px solid var(--line); background:#fff; color:var(--ink2); cursor:pointer; white-space:nowrap;}
+  .btn:hover{background:#f8fafc; border-color:#cbd5e1;}
+  .btn.primary{background:linear-gradient(140deg,#3B82F6,#1D4ED8); color:#fff; border-color:#1D4ED8; box-shadow:0 4px 12px rgba(37,99,235,.24);}
+  .btn:disabled{opacity:.55; cursor:progress;}
+
+  .conn-bar{display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:#fff; border:1px solid var(--line);
+    border-radius:12px; padding:9px 12px; font-size:12.5px; font-weight:700; color:var(--ink2); margin-bottom:12px;}
+  .dot{width:9px; height:9px; border-radius:50%; background:#cbd5e1;}
+  .dot.on{background:var(--green); box-shadow:0 0 0 3px rgba(5,150,105,.15);}
+  .dot.err{background:var(--danger); box-shadow:0 0 0 3px rgba(179,38,30,.12);}
+  .conn-bar .sp{margin-left:auto; font-weight:600; color:var(--muted);}
+
+  /* 설정 패널 */
+  .setup{background:#fff; border:2px solid var(--blue-line); border-radius:16px; padding:14px 16px; margin-bottom:14px;}
+  .setup.hidden{display:none;}
+  .setup h2{margin:0 0 4px; font-size:15px; font-weight:900; color:var(--navy);}
+  .setup .sub{margin:0 0 12px; font-size:12.5px; color:var(--muted); font-weight:600;}
+  .fld{margin-bottom:10px;}
+  .fld label{display:block; font-size:12px; font-weight:800; color:var(--ink2); margin-bottom:5px;}
+  .fld input, .fld select, .fld textarea{width:100%; padding:10px 12px; border:1.5px solid #dfe4ea; border-radius:10px;
+    font-family:inherit; font-size:14px; font-weight:600; color:var(--ink); background:#fff;}
+  .fld input:focus, .fld select:focus, .fld textarea:focus{outline:none; border-color:var(--royal); box-shadow:0 0 0 3px rgba(37,99,235,.10);}
+  .setup-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:4px;}
+  .chk{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:var(--ink2); cursor:pointer;}
+  .note{font-size:11.8px; color:var(--muted); font-weight:600; line-height:1.55; background:#f8fafc; border:1px dashed var(--line);
+    border-radius:10px; padding:9px 11px; margin-top:10px;}
+  .note b{color:var(--ink2);}
+  details.guide{margin-top:10px;}
+  details.guide summary{cursor:pointer; font-size:12.5px; font-weight:800; color:var(--royal-dark);}
+  .code-box{margin-top:8px; background:#0f172a; color:#e2e8f0; border-radius:10px; padding:10px; overflow:auto; max-height:320px;}
+  .code-box pre{margin:0; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; line-height:1.5; white-space:pre;}
+  .guide-actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;}
+
+  /* 통계 */
+  .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-bottom:14px;}
+  .stat{background:#fff; border:1px solid var(--line); border-radius:14px; padding:11px 12px;}
+  .stat .k{font-size:11.5px; font-weight:800; color:var(--muted);}
+  .stat .v{font-size:23px; font-weight:900; color:var(--navy); line-height:1.15;}
+  .stat.alert .v{color:var(--danger);}
+  .stat.alert{border-color:#fbd5d1; background:#fff8f7;}
+
+  h2.sec{font-size:15.5px; font-weight:900; color:var(--navy); margin:18px 0 10px; display:flex; align-items:center; gap:7px;}
+  h2.sec .cnt{font-size:12px; font-weight:800; color:#fff; background:var(--royal); border-radius:999px; padding:2px 8px;}
+
+  /* 손님 카드 */
+  .c-list{display:flex; flex-direction:column; gap:10px;}
+  .c-card{background:#fff; border:1px solid var(--line); border-radius:16px; padding:13px 14px; box-shadow:0 4px 12px rgba(15,23,42,.04);}
+  .c-card.due{border:2px solid #fbbf24; box-shadow:0 8px 20px rgba(245,158,11,.14);}
+  .c-head{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .c-name{font-size:16.5px; font-weight:900; color:var(--ink); letter-spacing:-.3px;}
+  .pri{font-size:11px; font-weight:800; padding:2px 8px; border-radius:6px; background:#fef3c7; color:#92400e;}
+  .pri.hot{background:#ffe4e6; color:#b91c1c;}
+  .c-call{margin-left:auto; display:inline-flex; align-items:center; gap:6px; text-decoration:none;
+    background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; font-size:13px; font-weight:900;
+    padding:9px 13px; border-radius:10px; box-shadow:0 3px 10px rgba(37,99,235,.22);}
+  .c-chips{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;}
+  .c-chips span{background:var(--blue-soft); color:#1d4ed8; border:1px solid var(--blue-line);
+    font-size:11.8px; font-weight:800; padding:3px 9px; border-radius:999px;}
+  .c-chips span.warn{background:#fff7ed; color:#b45309; border-color:#fed7aa;}
+  .c-meta{margin-top:8px; font-size:12px; color:var(--muted); font-weight:700; line-height:1.6;}
+  .c-meta b{color:var(--ink2);}
+  .c-memo{margin-top:7px; font-size:12.5px; color:#334155; background:#f8fafc; border-left:3px solid var(--blue-line);
+    border-radius:8px; padding:8px 10px; white-space:pre-wrap; word-break:break-word;}
+
+  .c-match{margin-top:10px; border-top:1px dashed var(--line); padding-top:9px;}
+  .m-title{font-size:11.8px; font-weight:900; color:var(--royal-dark); margin-bottom:6px;}
+  .m-item{display:block; text-decoration:none; color:inherit; background:#fbfcfd; border:1px solid var(--line);
+    border-radius:10px; padding:8px 10px; margin-bottom:6px;}
+  .m-item:last-child{margin-bottom:0;}
+  .m-item:hover{border-color:#93c5fd; background:#f8fbff;}
+  .m-item .mid{font-size:11.5px; font-weight:900; color:#1d4ed8;}
+  .m-item .mt{font-size:12.8px; font-weight:800; color:var(--ink); margin:1px 0 2px; word-break:keep-all;}
+  .m-item .mp{font-size:12px; font-weight:700; color:var(--danger);}
+  .m-none{font-size:12px; color:var(--muted); font-weight:600;}
+
+  .c-actions{display:flex; gap:6px; flex-wrap:wrap; margin-top:11px;}
+  .c-actions button{flex:1 1 auto; font-family:inherit; font-size:12.5px; font-weight:800; padding:10px 8px;
+    border-radius:10px; border:1px solid var(--line); background:#fff; color:var(--ink2); cursor:pointer; white-space:nowrap;}
+  .c-actions button:hover{background:#f8fafc;}
+  .c-actions button.act-done3{background:#ecfdf5; border-color:#a7f3d0; color:#047857;}
+  .c-actions button.act-week7{background:#eff6ff; border-color:var(--blue-line); color:#1d4ed8;}
+  .c-actions button.act-contract{background:#fef3c7; border-color:#fde68a; color:#92400e;}
+  .c-actions button.act-hold{color:#64748b;}
+
+  .empty{background:#fff; border:1px dashed var(--line); border-radius:14px; padding:26px 16px; text-align:center;
+    font-size:13px; color:var(--muted); font-weight:700; line-height:1.7;}
+
+  .filters{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;}
+  .filters button{font-family:inherit; font-size:12.5px; font-weight:800; padding:8px 13px; border-radius:999px;
+    border:1.5px solid #d3dbe6; background:#fff; color:#334155; cursor:pointer;}
+  .filters button.active{background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; border-color:#1d4ed8;}
+
+  details.newcust{background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-top:14px;}
+  details.newcust summary{cursor:pointer; font-size:13.5px; font-weight:900; color:var(--navy);}
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:11px;}
+  .form-grid .full{grid-column:span 2;}
+  .btn-save{width:100%; margin-top:10px; background:linear-gradient(140deg,#3B82F6,#1D4ED8); color:#fff; border:0;
+    border-radius:12px; padding:13px; font-family:inherit; font-size:14.5px; font-weight:900; cursor:pointer;
+    box-shadow:0 5px 14px rgba(37,99,235,.24);}
+
+  .toast{position:fixed; left:50%; bottom:24px; transform:translate(-50%,14px); opacity:0; pointer-events:none;
+    transition:opacity .18s, transform .18s; z-index:90; background:#0f172a; color:#fff; font-size:13.5px; font-weight:800;
+    padding:13px 18px; border-radius:13px; max-width:min(92vw,460px); text-align:center; box-shadow:0 12px 30px rgba(0,0,0,.28);}
+  .toast.show{opacity:1; transform:translate(-50%,0);}
+  .toast.warn{background:var(--danger);}
+
+  @media (max-width:640px){
+    .wrap{padding:12px 11px 70px;}
+    .brand h1{font-size:15.5px;}
+    .brand p{display:none;}
+    .btn .label{display:none;}
+    .btn.primary .label{display:inline;}
+    .stat .v{font-size:20px;}
+    .form-grid{grid-template-columns:1fr;}
+    .form-grid .full{grid-column:span 1;}
+    .c-call{font-size:12.5px; padding:8px 11px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">👥</div>
+      <div>
+        <h1>손님 리마인드</h1>
+        <p>오늘 연락할 손님 · 조건 맞춤 매물 3건 · 통화 후 3일 뒤 다시</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button type="button" class="btn" id="btnRefresh"><span>↻</span><span class="label">새로고침</span></button>
+      <button type="button" class="btn primary" id="btnSetup"><span>⚙</span><span class="label">연결 설정</span></button>
+    </div>
+  </header>
+
+  <div class="conn-bar">
+    <span class="dot" id="connDot"></span>
+    <span id="connText">아직 연결하지 않았습니다</span>
+    <span class="sp" id="connTime"></span>
+  </div>
+
+  <!-- 연결 설정 -->
+  <section class="setup hidden" id="setupPanel">
+    <h2>⚙ 연결 설정 (한 번만 하면 됩니다)</h2>
+    <p class="sub">손님 명단은 공개 홈페이지에 두지 않습니다. 사장님 구글 계정의 Apps Script를 거쳐서만 읽고 씁니다.</p>
+
+    <div class="fld">
+      <label for="cfgUrl">Apps Script 웹 앱 URL</label>
+      <input type="url" id="cfgUrl" placeholder="https://script.google.com/macros/s/AKfycb.../exec" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="fld">
+      <label for="cfgPw">사장님 비밀번호</label>
+      <input type="password" id="cfgPw" placeholder="Apps Script에 넣은 비밀번호" autocomplete="off">
+    </div>
+    <div class="setup-row">
+      <label class="chk"><input type="checkbox" id="cfgRemember" checked> 이 브라우저에 저장</label>
+      <div style="margin-left:auto; display:flex; gap:7px;">
+        <button type="button" class="btn" id="btnDisconnect">연결 해제</button>
+        <button type="button" class="btn primary" id="btnConnect">연결 확인</button>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>준비물은 딱 하나</b> — 구글 스프레드시트에 붙일 Apps Script입니다. 아래 [설치 안내]를 펼쳐 ① 코드 복사 → ②
+      script.google.com에 붙여넣기 → ③ 웹 앱으로 배포 → 나온 주소를 위 칸에 붙여넣으면 끝입니다.
+      비밀번호는 코드 안(<code>PASSWORD</code>)에서 바꿀 수 있고, <b>확인은 서버(Apps Script)에서</b> 합니다.
+    </div>
+
+    <details class="guide" id="guideBox">
+      <summary>📋 설치 안내 &amp; Apps Script 코드 보기</summary>
+      <div class="note" style="margin-top:8px;">
+        ① <b>script.google.com</b> → 새 프로젝트 → 아래 코드를 통째로 붙여넣기<br>
+        ② 코드 맨 위 <code>PASSWORD</code>를 사장님 비밀번호로 바꾸기 (지금은 563011로 되어 있습니다)<br>
+        ③ <b>배포 → 새 배포 → 웹 앱</b>, 실행 계정 ‘나’, 액세스 권한 ‘모든 사용자’ → 배포<br>
+        ④ 나온 <b>웹 앱 URL(.../exec)</b>을 위 칸에 붙여넣고 [연결 확인]
+      </div>
+      <div class="guide-actions">
+        <button type="button" class="btn" id="btnCopyGs">📋 코드 복사</button>
+        <a class="btn" href="apps-script-customers.gs" target="_blank" rel="noopener">↗ 코드 파일 열기</a>
+      </div>
+      <div class="code-box"><pre id="gsCode">코드를 불러오는 중…</pre></div>
+    </details>
+  </section>
+
+  <section class="stats">
+    <div class="stat alert"><div class="k">오늘 연락할 손님</div><div class="v" id="statDue">-</div></div>
+    <div class="stat"><div class="k">진행 중</div><div class="v" id="statActive">-</div></div>
+    <div class="stat"><div class="k">전체 손님</div><div class="v" id="statAll">-</div></div>
+  </section>
+
+  <div id="lockedNote"></div>
+
+  <section id="dueSection">
+    <h2 class="sec">🔥 오늘 연락할 손님 <span class="cnt" id="dueCnt">0</span></h2>
+    <div class="c-list" id="dueList"></div>
+  </section>
+
+  <details class="newcust" id="newBox">
+    <summary>➕ 신규 손님 빠른 등록</summary>
+    <div class="form-grid">
+      <div class="fld"><label for="nName">고객명 *</label><input id="nName" placeholder="예) 박사장 (우리정밀)"></div>
+      <div class="fld"><label for="nPhone">연락처 *</label><input id="nPhone" type="tel" placeholder="010-0000-0000"></div>
+      <div class="fld"><label for="nDeal">희망거래</label>
+        <select id="nDeal">
+          <option value="공장임대">공장임대</option><option value="창고임대">창고임대</option>
+          <option value="공장매매">공장매매</option><option value="창고매매">창고매매</option>
+          <option value="신축공장분양">신축공장분양</option><option value="토지매매">토지매매</option>
+          <option value="지식산업센터">지식산업센터</option>
+        </select>
+      </div>
+      <div class="fld"><label for="nRegion">선호권역</label>
+        <select id="nRegion">
+          <option value="">선택 안 함</option>
+          <option value="석남동">석남동</option><option value="가좌동">가좌동</option><option value="원창동">원창동</option>
+          <option value="경서동">경서동</option><option value="청라동">청라동</option><option value="오류동">오류동</option>
+          <option value="도화동">도화동</option><option value="송림동">송림동</option><option value="송현동">송현동</option>
+          <option value="기타/인천전역">기타/인천전역</option>
+        </select>
+      </div>
+      <div class="fld"><label for="nFloor">희망층수</label>
+        <select id="nFloor">
+          <option value="">상관없음</option>
+          <option value="지상 1층">지상 1층</option><option value="지상 2층">지상 2층</option>
+          <option value="지상 3층">지상 3층</option><option value="지상 4층">지상 4층</option>
+          <option value="지상 5층 이상">지상 5층 이상</option><option value="지하 1층">지하 1층</option>
+          <option value="건물 전체(통임대/통매매)">건물 전체</option>
+        </select>
+      </div>
+      <div class="fld"><label for="nMinArea">최소평수</label><input id="nMinArea" inputmode="numeric" placeholder="예) 100"></div>
+      <div class="fld"><label for="nRent">최대 월세(만원)</label><input id="nRent" inputmode="numeric" placeholder="예) 300"></div>
+      <div class="fld"><label for="nDeposit">최대 보증금(만원)</label><input id="nDeposit" inputmode="numeric" placeholder="예) 5000"></div>
+      <div class="fld"><label for="nPower">필수 전력(kW)</label><input id="nPower" inputmode="numeric" placeholder="예) 100"></div>
+      <div class="fld"><label for="nHoist">호이스트</label>
+        <select id="nHoist"><option value="">상관없음</option><option value="필요">필요</option></select>
+      </div>
+      <div class="fld"><label for="nIndustry">업종</label><input id="nIndustry" placeholder="예) 금속가공"></div>
+      <div class="fld"><label for="nRemind">리마인드 예정일</label><input id="nRemind" type="date"></div>
+      <div class="fld"><label for="nPriority">중요도</label>
+        <select id="nPriority"><option value="보통">보통</option><option value="🔥 급구(집중케어)">🔥 급구</option></select>
+      </div>
+      <div class="fld full"><label for="nMemo">상세메모</label><textarea id="nMemo" rows="2" placeholder="예) 츄레라 진입 필수, 12월 초 입주 희망"></textarea></div>
+    </div>
+    <button type="button" class="btn-save" id="btnAddCustomer">손님 장부에 등록하기</button>
+  </details>
+
+  <section id="allSection">
+    <h2 class="sec">📇 전체 손님 <span class="cnt" id="allCnt">0</span></h2>
+    <div class="filters" id="filters">
+      <button type="button" data-filter="active" class="active">진행 중</button>
+      <button type="button" data-filter="due">오늘 연락</button>
+      <button type="button" data-filter="done">계약완료</button>
+      <button type="button" data-filter="hold">보류</button>
+      <button type="button" data-filter="all">전체</button>
+    </div>
+    <div class="c-list" id="allList"></div>
+  </section>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var HOME_URL = "https://kth950307-alt.github.io/my-realestate-app/";
+  var LS_URL = "wr_cfg_url", LS_PW = "wr_cfg_pw", LS_REMEMBER = "wr_cfg_remember";
+
+  var state = {
+    url: "", pw: "", connected: false,
+    customers: [], properties: [],
+    filter: "active", busy: false, lastLoaded: ""
+  };
+  var gsSource = "";
+
+  var $ = function(id){ return document.getElementById(id); };
+  var el = {
+    connDot: $("connDot"), connText: $("connText"), connTime: $("connTime"),
+    setupPanel: $("setupPanel"),
+    cfgUrl: $("cfgUrl"), cfgPw: $("cfgPw"), cfgRemember: $("cfgRemember"),
+    statDue: $("statDue"), statActive: $("statActive"), statAll: $("statAll"),
+    dueList: $("dueList"), dueCnt: $("dueCnt"),
+    allList: $("allList"), allCnt: $("allCnt"),
+    filters: $("filters"), toast: $("toast"), gsCode: $("gsCode"),
+    lockedNote: $("lockedNote"), guideBox: $("guideBox")
+  };
+
+  /* ---------- 작은 도우미 ---------- */
+  function esc(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(m){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m];
+    });
+  }
+  function digits(s){ return String(s || "").replace(/[^0-9]/g, ""); }
+  function pad2(n){ return (n < 10 ? "0" : "") + n; }
+  function ymd(d){ return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); }
+  function today(){ return ymd(new Date()); }
+  function addDays(base, days){
+    var d = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+    d.setDate(d.getDate() + Number(days || 0));
+    return ymd(d);
+  }
+  function parseDate(s){
+    var m = String(s == null ? "" : s).match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+    if(!m) return null;
+    var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function dayDiff(a, b){
+    var ms = new Date(a.getFullYear(), a.getMonth(), a.getDate()) - new Date(b.getFullYear(), b.getMonth(), b.getDate());
+    return Math.round(ms / 86400000);
+  }
+  function num(v){
+    var m = String(v == null ? "" : v).replace(/,/g, "").match(/\d+(?:\.\d+)?/);
+    return m ? parseFloat(m[0]) : 0;
+  }
+  function toast(msg, warn){
+    el.toast.textContent = msg;
+    el.toast.classList.toggle("warn", !!warn);
+    el.toast.classList.add("show");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){ el.toast.classList.remove("show"); }, 3200);
+  }
+  function timeLabel(){
+    var d = new Date();
+    return "마지막 확인 " + pad2(d.getHours()) + ":" + pad2(d.getMinutes());
+  }
+
+  /* ---------- 연결 설정 ---------- */
+  function loadConfig(){
+    try {
+      var saved = localStorage.getItem(LS_URL);
+      if(saved) state.url = saved;
+      var rmb = localStorage.getItem(LS_REMEMBER);
+      el.cfgRemember.checked = (rmb !== "0");
+      if(rmb !== "0"){
+        var pw = localStorage.getItem(LS_PW);
+        if(pw) state.pw = pw;
+      }
+    } catch(e){}
+    if(state.url) el.cfgUrl.value = state.url;
+    if(state.pw) el.cfgPw.value = state.pw;
+  }
+
+  function saveConfig(){
+    state.url = el.cfgUrl.value.trim();
+    state.pw = el.cfgPw.value;
+    try {
+      localStorage.setItem(LS_URL, state.url);
+      localStorage.setItem(LS_REMEMBER, el.cfgRemember.checked ? "1" : "0");
+      if(el.cfgRemember.checked) localStorage.setItem(LS_PW, state.pw);
+      else localStorage.removeItem(LS_PW);
+    } catch(e){}
+  }
+
+  function setConn(status, text){
+    el.connDot.className = "dot" + (status === "on" ? " on" : (status === "err" ? " err" : ""));
+    el.connText.textContent = text;
+  }
+
+  function needSetup(){
+    el.lockedNote.innerHTML = '<div class="empty">먼저 <b>[연결 설정]</b>에서 Apps Script 주소와 비밀번호를 넣어 주세요.<br>' +
+      '손님 명단은 공개 홈페이지에 저장하지 않고, 사장님 구글 계정에서만 열립니다.</div>';
+  }
+  function clearSetupNote(){ el.lockedNote.innerHTML = ""; }
+
+  /* ---------- 서버 통신 (Apps Script) ---------- */
+  function qs(params){
+    var out = [];
+    for(var k in params){
+      if(params[k] === undefined || params[k] === null) continue;
+      out.push(encodeURIComponent(k) + "=" + encodeURIComponent(params[k]));
+    }
+    return out.join("&");
+  }
+
+  function apiGet(params){
+    var all = { pw: state.pw };
+    for(var k in params) all[k] = params[k];
+    var url = state.url + (state.url.indexOf("?") >= 0 ? "&" : "?") + qs(all);
+    return fetch(url, { method: "GET", cache: "no-store", redirect: "follow" }).then(function(res){
+      return res.text().then(function(text){
+        var data = null;
+        try { data = JSON.parse(text); } catch(e){}
+        if(!data) throw new Error("응답을 읽지 못했습니다. 웹 앱 URL과 배포 상태(액세스 권한 ‘모든 사용자’)를 확인해 주세요.");
+        if(!data.ok) throw new Error(data.error || "요청을 처리하지 못했습니다.");
+        return data;
+      });
+    });
+  }
+
+  // 저장(POST)은 먼저 text/plain POST 로 보내고, 브라우저가 막으면 같은 내용을 GET 으로 다시 보냅니다.
+  function apiWrite(params){
+    var payload = { pw: state.pw };
+    for(var k in params) payload[k] = params[k];
+    return fetch(state.url, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+      redirect: "follow"
+    }).then(function(res){
+      return res.text().then(function(text){
+        var data = null;
+        try { data = JSON.parse(text); } catch(e){}
+        if(data && data.ok) return data;
+        if(data && data.error && !data.ok) {
+          var err = new Error(data.error);
+          err.fromServer = true;
+          throw err;
+        }
+        return apiGet(params);          // POST 본문이 사라진 경우 → GET 으로 재시도(같은 내용이라 중복되어도 안전)
+      });
+    }).catch(function(e){
+      if(e && e.fromServer) throw e;
+      return apiGet(params);
+    });
+  }
+
+  /* ---------- 읽어오기 ---------- */
+  function loadCustomers(showToast){
+    if(!state.url || !state.pw) { setConn("off", "아직 연결하지 않았습니다"); needSetup(); return Promise.resolve(); }
+    state.busy = true;
+    setConn("wait", "불러오는 중…");
+    return apiGet({ action: "customers" }).then(function(data){
+      state.connected = true;
+      state.customers = (data.customers || []).slice().reverse();   // 최근 등록이 위로
+      state.lastLoaded = timeLabel();
+      setConn("on", "연결됨 · 손님 " + state.customers.length + "명");
+      el.connTime.textContent = state.lastLoaded;
+      clearSetupNote();
+      render();
+      if(showToast) toast("손님 장부를 새로 불러왔습니다");
+    }).catch(function(e){
+      state.connected = false;
+      setConn("err", "연결 실패");
+      el.connTime.textContent = "";
+      needSetup();
+      toast(e.message || "불러오지 못했습니다", true);
+    }).then(function(){ state.busy = false; });
+  }
+
+  function loadProperties(){
+    if(!state.url || !state.pw) return Promise.resolve();
+    return apiGet({ action: "properties" }).then(function(data){
+      state.properties = data.properties || [];
+      render();
+    }).catch(function(){
+      state.properties = [];
+      render();
+    });
+  }
+
+  /* ---------- 분류 ---------- */
+  function isDone(c){ return String(c["진행상태"] || "").indexOf("완료") >= 0; }
+  function isHold(c){ return String(c["진행상태"] || "").indexOf("보류") >= 0; }
+  function isActive(c){ return !isDone(c) && !isHold(c); }
+  function isDue(c){
+    if(!isActive(c)) return false;
+    if(String(c["진행상태"] || "").indexOf("콜백대기") >= 0) return true;
+    var d = parseDate(c["리마인드예정일"]);
+    if(!d) return true;
+    return d <= new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+  }
+  function dueSort(a, b){
+    var da = parseDate(a["리마인드예정일"]), db = parseDate(b["리마인드예정일"]);
+    if(da && db) return da - db;
+    if(da && !db) return -1;
+    if(!da && db) return 1;
+    return 0;
+  }
+
+  /* ---------- 조건 → 매물 짝맞춤 (3건) ---------- */
+  function matchFor(c){
+    var out = [];
+    if(!state.properties.length) return out;
+
+    var wantDeal = String(c["희망거래"] || "");
+    var wantRent = /임대/.test(wantDeal);
+    var wantSale = /매매|분양/.test(wantDeal);
+    var region = String(c["선호권역"] || "").trim();
+    var floor = String(c["희망층수"] || "").trim();
+    var minArea = num(c["최소평수"]);
+    var maxRent = num(c["최대월세"]);
+    var maxDep = num(c["최대예산_보증금"]);
+    var needPower = num(c["필수전력"]);
+    var needHoist = /필요|필수|y|yes|o|있/i.test(String(c["호이스트필수"] || ""));
+
+    for(var i = 0; i < state.properties.length; i++){
+      var p = state.properties[i];
+      var score = 0;
+
+      if(wantRent && p.deal.indexOf("임대") < 0) continue;
+      if(wantSale && !/매매|분양/.test(p.deal)) continue;
+
+      if(region && region.indexOf("기타") < 0 && region.indexOf("전역") < 0){
+        if(String(p.region).indexOf(region) < 0) continue;
+        score += 3;
+      }
+      if(floor && p.floor){
+        if(floor.indexOf("건물 전체") >= 0){
+          if(p.floor.indexOf("건물 전체") < 0) continue;
+        } else {
+          var fm = floor.match(/(\d+)\s*층/);
+          if(fm && p.floor.indexOf(fm[1] + "층") < 0) continue;
+        }
+        score += 2;
+      }
+      if(minArea > 0){
+        if(!(p.area >= minArea)) continue;
+        score += 2;
+        if(p.area <= minArea * 1.5) score += 1;
+      }
+      if(maxRent > 0 && /임대/.test(p.deal)){
+        if(p.rent > 0){
+          if(p.rent > maxRent) continue;
+          score += 2;
+        }
+      }
+      if(maxDep > 0 && p.dep > 0 && !/매매|분양/.test(p.deal)){
+        if(p.dep > maxDep) continue;
+        score += 1;
+      }
+      if(needPower > 0){
+        if(p.power > 0 && p.power < needPower) continue;
+        if(p.power >= needPower) score += 2;
+      }
+      if(needHoist){
+        if(String(p.hoist).indexOf("없") >= 0) continue;
+        score += 2;
+      }
+      out.push({ p: p, score: score });
+    }
+
+    out.sort(function(a, b){
+      if(b.score !== a.score) return b.score - a.score;
+      return (b.p.area || 0) - (a.p.area || 0);
+    });
+    return out.slice(0, 3).map(function(x){ return x.p; });
+  }
+
+  /* ---------- 그리기 ---------- */
+  function chipHtml(c){
+    var chips = [];
+    if(c["희망거래"]) chips.push(esc(c["희망거래"]));
+    if(c["선호권역"]) chips.push(esc(c["선호권역"]));
+    if(c["희망층수"]) chips.push(esc(c["희망층수"]));
+    if(num(c["최소평수"])) chips.push(esc(c["최소평수"]) + "평 이상");
+    if(num(c["최대예산_보증금"])) chips.push("보증금 " + esc(c["최대예산_보증금"]) + "↓");
+    if(num(c["최대월세"])) chips.push("월 " + esc(c["최대월세"]) + "↓");
+    if(num(c["필수전력"])) chips.push("전력 " + esc(c["필수전력"]) + "kW↑");
+    if(c["호이스트필수"]) chips.push("호이스트 " + esc(c["호이스트필수"]));
+    if(c["업종"]) chips.push(esc(c["업종"]));
+    if(!chips.length) chips.push('<span class="warn">조건 미입력 — 상담하며 채워 주세요</span>');
+    var html = "";
+    for(var i = 0; i < chips.length; i++){
+      html += (chips[i].indexOf("<span") === 0) ? chips[i] : "<span>" + chips[i] + "</span>";
+    }
+    return html;
+  }
+
+  function matchHtml(c){
+    var list = matchFor(c);
+    if(!state.properties.length){
+      return '<div class="c-match"><div class="m-title">조건 맞춤 매물</div><div class="m-none">매물 목록을 불러오는 중입니다… (새로고침을 눌러 주세요)</div></div>';
+    }
+    if(!list.length){
+      return '<div class="c-match"><div class="m-title">조건 맞춤 매물</div><div class="m-none">조건에 딱 맞는 공개 매물이 없습니다. 비공개 매물은 직접 확인해 보세요.</div></div>';
+    }
+    var html = '<div class="c-match"><div class="m-title">조건 맞춤 공개 매물 ' + list.length + '건</div>';
+    for(var i = 0; i < list.length; i++){
+      var p = list[i];
+      var link = HOME_URL + "#" + encodeURIComponent(p.id);
+      html += '<a class="m-item" href="' + esc(link) + '" target="_blank" rel="noopener">' +
+        '<span class="mid">' + esc(p.id) + ' · ' + esc(p.deal) + '</span>' +
+        '<div class="mt">' + esc((p.title || "").slice(0, 42)) + '</div>' +
+        '<div class="mp">' + esc(p.price || "금액 협의") +
+        ' <span style="color:#64748b;font-weight:700;">· 전용 ' + esc(p.area) + '평 · ' + esc(p.floor || "층 확인문의") + '</span></div>' +
+        '</a>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function cardHtml(c, isDueCard){
+    var row = c.row;
+    var st = String(c["진행상태"] || "");
+    var pri = String(c["중요도"] || "");
+    var priCls = /급구|집중/.test(pri) ? "pri hot" : "pri";
+    var phone = digits(c["연락처"]);
+    var remindTxt = "";
+    var rd = parseDate(c["리마인드예정일"]);
+    if(rd){
+      var diff = dayDiff(new Date(), rd);
+      remindTxt = " · 리마인드 <b>" + esc(c["리마인드예정일"]) + "</b>" +
+        (diff > 0 ? " (D-" + diff + ")" : (diff === 0 ? " (오늘)" : " (D+" + Math.abs(diff) + " 지남)"));
+    } else {
+      remindTxt = " · 리마인드 <b>예정일 없음</b>";
+    }
+    var recent = c["최근통화일"] ? "최근 통화 <b>" + esc(c["최근통화일"]) + "</b>" : "최근 통화 기록 없음";
+
+    var html = '<article class="c-card' + (isDueCard ? " due" : "") + '">';
+    html += '<div class="c-head">';
+    html += '<span class="c-name">' + esc(c["고객명"] || "(이름 없음)") + '</span>';
+    if(pri) html += '<span class="' + priCls + '">' + esc(pri) + '</span>';
+    if(st) html += '<span class="pri" style="background:#eef2ff;color:#3730a3;">' + esc(st.replace(/[^\w가-힣()\s]/g, "").trim() || st) + '</span>';
+    if(phone) html += '<a class="c-call" href="tel:' + esc(phone) + '">📞 ' + esc(c["연락처"]) + '</a>';
+    html += '</div>';
+    html += '<div class="c-chips">' + chipHtml(c) + '</div>';
+    html += '<div class="c-meta">' + recent + remindTxt + '</div>';
+    if(c["상세메모"]) html += '<div class="c-memo">📝 ' + esc(c["상세메모"]) + '</div>';
+    html += matchHtml(c);
+    html += '<div class="c-actions">';
+    html += '<button type="button" class="act-done3" data-row="' + row + '" data-act="done3">✅ 통화완료 (+3일)</button>';
+    html += '<button type="button" class="act-week7" data-row="' + row + '" data-act="week7">📅 다음 주 (+7일)</button>';
+    html += '<button type="button" class="act-contract" data-row="' + row + '" data-act="contract">🎉 계약완료</button>';
+    html += '<button type="button" class="act-hold" data-row="' + row + '" data-act="hold">⏸️ 보류</button>';
+    html += '</div></article>';
+    return html;
+  }
+
+  function render(){
+    var all = state.customers.slice();
+    var due = all.filter(isDue).sort(dueSort);
+    var active = all.filter(isActive);
+
+    el.statAll.textContent = all.length;
+    el.statActive.textContent = active.length;
+    el.statDue.textContent = due.length;
+    el.dueCnt.textContent = due.length;
+
+    el.dueList.innerHTML = !all.length
+      ? '<div class="empty">아직 불러온 손님이 없습니다. 연결 설정을 확인하거나 [➕ 신규 손님 빠른 등록]으로 추가해 보세요.</div>'
+      : (due.length
+        ? due.map(function(c){ return cardHtml(c, true); }).join("")
+        : '<div class="empty">오늘 연락할 손님이 없습니다 👍<br>전체 손님 목록에서 직접 골라 전화해도 됩니다.</div>');
+
+    var f = state.filter;
+    var list = all.filter(function(c){
+      if(f === "active") return isActive(c);
+      if(f === "due") return isDue(c);
+      if(f === "done") return isDone(c);
+      if(f === "hold") return isHold(c);
+      return true;
+    });
+    if(f === "active") list = list.sort(dueSort);
+    el.allCnt.textContent = list.length;
+    el.allList.innerHTML = list.length
+      ? list.map(function(c){ return cardHtml(c, false); }).join("")
+      : '<div class="empty">해당하는 손님이 없습니다.</div>';
+
+    var btns = el.filters.querySelectorAll("button");
+    for(var i = 0; i < btns.length; i++){
+      btns[i].classList.toggle("active", btns[i].dataset.filter === f);
+    }
+  }
+
+  /* ---------- 상태 바꾸기 ---------- */
+  function findCustomer(row){
+    for(var i = 0; i < state.customers.length; i++){
+      if(String(state.customers[i].row) === String(row)) return state.customers[i];
+    }
+    return null;
+  }
+
+  function doAction(row, act, btn){
+    var c = findCustomer(row);
+    if(!c) return;
+    var t = today();
+    var payload = { action: "update", row: row };
+    var label = "";
+
+    if(act === "done3"){
+      payload.status = "📞 콜백대기(리마인드)";
+      payload.recent = t;
+      payload.remind = addDays(new Date(), 3);
+      label = c["고객명"] + " — 통화완료, " + payload.remind + "에 다시";
+    } else if(act === "week7"){
+      payload.status = "📞 콜백대기(리마인드)";
+      payload.recent = t;
+      payload.remind = addDays(new Date(), 7);
+      label = c["고객명"] + " — 다음 주 " + payload.remind + "에 다시";
+    } else if(act === "contract"){
+      if(!confirm(c["고객명"] + " 손님을 '계약완료'로 바꿀까요?")) return;
+      payload.status = "✅ 계약완료";
+      payload.recent = t;
+      label = c["고객명"] + " — 계약완료 처리";
+    } else if(act === "hold"){
+      if(!confirm(c["고객명"] + " 손님을 '보류(장기추적)'로 바꿀까요?")) return;
+      payload.status = "⏸️ 보류(장기추적)";
+      payload.recent = t;
+      label = c["고객명"] + " — 보류 처리";
+    } else {
+      return;
+    }
+
+    if(btn){ btn.disabled = true; btn.textContent = "저장 중…"; }
+    apiWrite(payload).then(function(){
+      return loadCustomers(false);
+    }).then(function(){
+      toast("✅ 저장했습니다 — " + label);
+    }).catch(function(e){
+      toast(e.message || "저장하지 못했습니다", true);
+      if(btn){ btn.disabled = false; }
+    });
+  }
+
+  /* ---------- 신규 손님 등록 ---------- */
+  function addCustomer(){
+    var name = $("nName").value.trim();
+    var phone = $("nPhone").value.trim();
+    if(!name){ toast("손님 이름을 넣어 주세요", true); $("nName").focus(); return; }
+    if(!phone){ toast("연락처를 넣어 주세요", true); $("nPhone").focus(); return; }
+
+    var btn = $("btnAddCustomer");
+    btn.disabled = true; btn.textContent = "등록 중…";
+    apiWrite({
+      action: "add",
+      name: name, phone: phone,
+      deal: $("nDeal").value, region: $("nRegion").value, floor: $("nFloor").value,
+      minArea: $("nMinArea").value, deposit: $("nDeposit").value, rent: $("nRent").value,
+      power: $("nPower").value, hoist: $("nHoist").value, industry: $("nIndustry").value,
+      remind: $("nRemind").value, priority: $("nPriority").value, memo: $("nMemo").value,
+      status: "📞 콜백대기(리마인드)"
+    }).then(function(){
+      return loadCustomers(false);
+    }).then(function(){
+      toast("✅ " + name + " 손님을 장부에 등록했습니다");
+      ["nName","nPhone","nMinArea","nDeposit","nRent","nPower","nIndustry","nRemind","nMemo"].forEach(function(id){ $(id).value = ""; });
+      $("nRegion").value = "";
+      $("nFloor").value = "";
+      $("nHoist").value = "";
+      $("newBox").open = false;
+    }).catch(function(e){
+      toast(e.message || "등록하지 못했습니다", true);
+    }).then(function(){
+      btn.disabled = false; btn.textContent = "손님 장부에 등록하기";
+    });
+  }
+
+  /* ---------- Apps Script 코드 보기/복사 ---------- */
+  function loadGsSource(){
+    if(gsSource) return Promise.resolve(gsSource);
+    return fetch("apps-script-customers.gs", { cache: "no-store" }).then(function(r){
+      if(!r.ok) throw new Error("HTTP " + r.status);
+      return r.text();
+    }).then(function(text){
+      gsSource = text;
+      el.gsCode.textContent = text;
+      return text;
+    }).catch(function(){
+      el.gsCode.textContent = "코드를 불러오지 못했습니다. 저장소의 apps-script-customers.gs 파일을 열어 복사해 주세요.";
+      return "";
+    });
+  }
+
+  function copyText(text, okMsg){
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(text).then(function(){ toast(okMsg); }, function(){ fallbackCopy(text, okMsg); });
+    } else {
+      fallbackCopy(text, okMsg);
+    }
+  }
+  function fallbackCopy(text, okMsg){
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); toast(okMsg); }
+    catch(e){ toast("복사가 되지 않았습니다. 코드 칸을 길게 눌러 직접 복사해 주세요.", true); }
+    document.body.removeChild(ta);
+  }
+
+  /* ---------- 이벤트 ---------- */
+  $("btnSetup").addEventListener("click", function(){
+    el.setupPanel.classList.toggle("hidden");
+    if(!el.setupPanel.classList.contains("hidden")){
+      el.cfgUrl.focus();
+      loadGsSource();
+    }
+  });
+
+  $("btnConnect").addEventListener("click", function(){
+    saveConfig();
+    if(!state.url || !state.pw){ toast("주소와 비밀번호를 모두 넣어 주세요", true); return; }
+    var btn = $("btnConnect");
+    btn.disabled = true;
+    setConn("wait", "연결 확인 중…");
+    apiGet({ action: "ping" }).then(function(){
+      setConn("on", "연결 확인 완료");
+      toast("✅ 연결되었습니다");
+      el.setupPanel.classList.add("hidden");
+      return loadCustomers(false).then(loadProperties);
+    }).catch(function(e){
+      state.connected = false;
+      setConn("err", "연결 실패");
+      toast(e.message || "연결하지 못했습니다", true);
+    }).then(function(){ btn.disabled = false; });
+  });
+
+  $("btnDisconnect").addEventListener("click", function(){
+    try {
+      localStorage.removeItem(LS_URL);
+      localStorage.removeItem(LS_PW);
+      localStorage.removeItem(LS_REMEMBER);
+    } catch(e){}
+    state.url = ""; state.pw = ""; state.customers = []; state.properties = [];
+    el.cfgUrl.value = ""; el.cfgPw.value = "";
+    setConn("off", "연결을 해제했습니다");
+    el.connTime.textContent = "";
+    render();
+    needSetup();
+    toast("저장된 연결 정보를 지웠습니다");
+  });
+
+  $("btnRefresh").addEventListener("click", function(){
+    if(!state.connected){ el.setupPanel.classList.remove("hidden"); loadGsSource(); }
+    loadCustomers(true).then(loadProperties);
+  });
+
+  $("guideBox").addEventListener("toggle", function(){ if(el.guideBox.open) loadGsSource(); });
+
+  $("btnCopyGs").addEventListener("click", function(){
+    loadGsSource().then(function(text){
+      if(!text){ toast("코드를 불러오지 못했습니다", true); return; }
+      copyText(text, "✅ Apps Script 코드를 복사했습니다 — script.google.com에 붙여넣으세요");
+    });
+  });
+
+  el.filters.addEventListener("click", function(e){
+    var b = e.target.closest("button[data-filter]");
+    if(!b) return;
+    state.filter = b.dataset.filter;
+    render();
+  });
+
+  function onActionClick(e){
+    var b = e.target.closest("button[data-act]");
+    if(!b) return;
+    doAction(b.dataset.row, b.dataset.act, b);
+  }
+  el.dueList.addEventListener("click", onActionClick);
+  el.allList.addEventListener("click", onActionClick);
+
+  $("btnAddCustomer").addEventListener("click", addCustomer);
+
+  /* ---------- 시작 ---------- */
+  loadConfig();
+  render();
+  if(state.url && state.pw){
+    if(state.pw) el.cfgPw.value = state.pw;
+    loadCustomers(false).then(loadProperties);
+  } else {
+    needSetup();
+    el.setupPanel.classList.remove("hidden");
+    loadGsSource();
+  }
+})();
+</script>
+</body>
+</html>
