@@ -203,6 +203,37 @@
     /* 모바일에서는 미리보기가 화면 위에 붙으므로 모드 바는 따라다니지 않는다 */
     .modebar{position:static}
   }
+
+  /* ───────── 입력 동선 정리: 1) 내용 입력 ↔ 2) 크기·스타일 ───────── */
+  .grp{display:flex; flex-direction:column; gap:10px; scroll-margin-top:96px}
+  .grpHead{
+    display:flex; align-items:center; gap:7px; padding:3px 3px 0;
+    font-weight:900; font-size:12.5px; color:#123A70; letter-spacing:-.3px;
+  }
+  .grpHead .grpNum{
+    width:19px; height:19px; border-radius:6px; background:var(--navy2); color:#fff;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:900; flex:none;
+  }
+  .grpHead.gold .grpNum{background:var(--gold); color:#4A3400}
+  .grpHead .grpLine{flex:1; height:1px; background:var(--line); margin:0 2px}
+  .grpHead .grpSub{font-weight:700; font-size:10.5px; color:#9AA7B8; letter-spacing:0; white-space:nowrap}
+  .jumpBtn{
+    width:100%; background:#fff; border:1px dashed #C9D3E2; color:#41505F;
+    font-weight:800; font-size:12.5px; padding:11px 10px; border-radius:12px;
+  }
+  .jumpBtn:active{background:#F2F6FC}
+  .colorRow{margin-bottom:10px}
+  .colorRow:last-of-type{margin-bottom:12px}
+  .colorRow .colorName{display:block; font-size:11.5px; font-weight:700; color:var(--muted); margin-bottom:4px}
+  .fontCtl.first{border-top:0; padding-top:0; margin-top:0}
+  /* 크기 칸이 위아래로 이어질 때는 구분선을 살린다 */
+  #sizeKBox:not([hidden]) + #sizeBottomBox .fontCtl.first{
+    border-top:1px dashed #E1E7F0; padding-top:10px; margin-top:11px;
+  }
+  @media (max-width:920px){
+    .grp{scroll-margin-top:8px}
+  }
 </style>
 </head>
 <body>
@@ -240,318 +271,381 @@
 
   <section class="controls">
 
-    <div class="card" id="ledgerCard">
-      <div class="cardTitle">장부 매물 불러오기 <span class="tag gray" id="ledgerBadge">불러오는 중…</span></div>
-      <div class="ledgerTop">
-        <input type="text" id="ledgerQuery" autocomplete="off" autocapitalize="characters" placeholder="매물번호 · 동 · 제목 검색 (예: W-261119 / 송림 / 창고)">
-        <button type="button" class="ghost" id="ledgerReload" title="장부 매물 새로고침" aria-label="장부 매물 새로고침">↻</button>
-      </div>
-      <div class="ledgerList" id="ledgerList"><div class="ledgerEmpty">장부 매물을 불러오는 중…</div></div>
-      <p class="hint" id="ledgerHint">
-        매물을 누르면 <b>제목 · 체크리스트 · 가격 · 스펙</b>이 자동으로 채워집니다. 채운 뒤에도 직접 고칠 수 있어요.<br>
-        사진은 <b>직접 올린 사진 그대로</b> 두어 PNG/JPG 저장이 항상 되도록 했습니다.
-      </p>
-    </div>
+    <!-- =========================================================
+         1) 내용 입력 — 글씨·사진 넣는 칸을 전부 위로 모음
+         ========================================================= -->
+    <div class="grp" id="grpContent">
+      <div class="grpHead"><span class="grpNum">1</span>내용 입력<span class="grpLine"></span><span class="grpSub">글씨 · 사진</span></div>
 
-    <div class="card" id="styleCard">
-      <div class="cardTitle">1. 스타일</div>
-      <div class="seg" id="styleSeg">
-        <button type="button" data-style="K" class="on k">김해 진영읍형</button>
-        <button type="button" data-style="A">A · 큰 사진형</button>
-        <button type="button" data-style="B">B · 정보 카드형</button>
-      </div>
-    </div>
-
-    <div class="card" id="photoCard">
-      <div class="cardTitle">2. 사진</div>
-
-      <div class="drop" id="mainDrop">
-        <input type="file" id="mainFile" accept="image/*" hidden>
-        <div class="dropInner">
-          <span class="ic">＋</span>
-          <b>메인 사진</b>
-          <i>눌러서 선택 · 끌어다 놓기 · 붙여넣기</i>
+      <div class="card" id="ledgerCard">
+        <div class="cardTitle">📒 장부 매물 불러오기 <span class="tag gray" id="ledgerBadge">불러오는 중…</span></div>
+        <div class="ledgerTop">
+          <input type="text" id="ledgerQuery" autocomplete="off" autocapitalize="characters" placeholder="매물번호 · 동 · 제목 검색 (예: W-261119 / 송림 / 창고)">
+          <button type="button" class="ghost" id="ledgerReload" title="장부 매물 새로고침" aria-label="장부 매물 새로고침">↻</button>
         </div>
-        <img id="mainThumb" class="thumb" alt="">
+        <div class="ledgerList" id="ledgerList"><div class="ledgerEmpty">장부 매물을 불러오는 중…</div></div>
+        <p class="hint" id="ledgerHint">
+          매물을 누르면 <b>제목 · 체크리스트 · 가격 · 스펙</b>이 자동으로 채워집니다. 채운 뒤에도 직접 고칠 수 있어요.<br>
+          사진은 <b>직접 올린 사진 그대로</b> 두어 PNG/JPG 저장이 항상 되도록 했습니다.
+        </p>
       </div>
 
-      <div class="sliders" id="focusBox" hidden>
-        <label>사진 위치 · 가로
-          <input type="range" id="focusX" min="0" max="100" value="50">
-        </label>
-        <label>사진 위치 · 세로
-          <input type="range" id="focusY" min="0" max="100" value="50">
-        </label>
+      <div class="card" id="styleCard">
+        <div class="cardTitle">① 모양 <span class="tag">스타일</span></div>
+        <div class="seg" id="styleSeg">
+          <button type="button" data-style="K" class="on k">김해 진영읍형</button>
+          <button type="button" data-style="A">A · 큰 사진형</button>
+          <button type="button" data-style="B">B · 정보 카드형</button>
+        </div>
       </div>
 
-      <div id="subPhotoBox">
-        <div class="drop small" id="subDrop">
-          <input type="file" id="subFile" accept="image/*" hidden>
+      <div class="card" id="photoCard">
+        <div class="cardTitle">② 사진</div>
+
+        <div class="drop" id="mainDrop">
+          <input type="file" id="mainFile" accept="image/*" hidden>
           <div class="dropInner">
             <span class="ic">＋</span>
-            <b>추가 사진</b>
-            <i>내부 · 사무실 사진 (선택)</i>
+            <b>메인 사진</b>
+            <i>눌러서 선택 · 끌어다 놓기 · 붙여넣기</i>
           </div>
-          <img id="subThumb" class="thumb" alt="">
+          <img id="mainThumb" class="thumb" alt="">
         </div>
 
+        <div id="subPhotoBox">
+          <div class="drop small" id="subDrop">
+            <input type="file" id="subFile" accept="image/*" hidden>
+            <div class="dropInner">
+              <span class="ic">＋</span>
+              <b>추가 사진</b>
+              <i>내부 · 사무실 사진 (선택)</i>
+            </div>
+            <img id="subThumb" class="thumb" alt="">
+          </div>
+
+          <div class="row">
+            <select id="subMode">
+              <option value="none">추가 사진 표시 안 함</option>
+              <option value="rect">사각으로 넣기</option>
+              <option value="circle">원형으로 넣기</option>
+            </select>
+            <button type="button" class="ghost" id="clearImg">사진 지우기</button>
+          </div>
+        </div>
+
+        <p class="hint" id="subPhotoNote" hidden>김해 진영읍형은 <b>대표 사진 한 장</b>만 씁니다. (동그라미 사진 없음)</p>
+        <p class="hint">사진의 어느 부분을 보여 줄지는 <b>아래 2 · 크기·스타일</b>의 ‘사진 위치’에서 맞춥니다.</p>
+      </div>
+
+      <div class="card" id="titleCard">
+        <div class="cardTitle">③ 제목 글씨</div>
+        <label class="f"><span>지역 · 앞부분 (흰 글씨)</span>
+          <input type="text" id="t1" maxlength="18" placeholder="예) 원창동">
+        </label>
+        <label class="f"><span>강조 · 뒷부분 (노란 글씨)</span>
+          <input type="text" id="t2" maxlength="18" placeholder="예) 대형창고 임대">
+        </label>
+        <label class="f" style="margin-bottom:0"><span id="subLabel">흰 배지 · 핵심 스펙</span>
+          <input type="text" id="sub" maxlength="44" placeholder="예) 대지 300평 · 층고 12.9m">
+        </label>
+        <p class="hint">글씨 크기는 <b>아래 2 · 크기·스타일</b>에서 슬라이더로 맞춥니다.</p>
+      </div>
+
+      <div class="card" id="priceCard">
+        <div class="cardTitle">④ 가격 · 거래구분</div>
+        <div class="seg" id="tradeSeg" style="margin-bottom:9px">
+          <button type="button" data-trade="rent" class="on">임대</button>
+          <button type="button" data-trade="sale">매매</button>
+        </div>
+        <div class="row2 priceRow">
+          <label class="f" style="margin-bottom:0"><span>가격 카드 제목</span>
+            <input type="text" id="priceLabel" maxlength="10" placeholder="매매가">
+          </label>
+          <label class="f" style="margin-bottom:0"><span>가격 문구</span>
+            <input type="text" id="price" maxlength="30" placeholder="예) 7억원">
+          </label>
+        </div>
+        <p class="hint">매매를 고르면 배지가 <b>공장 매매</b>, 전화가 <b>032-582-6200</b>으로 바뀝니다.</p>
+      </div>
+
+      <div class="card" id="kPanel">
+        <div class="cardTitle">⑤ 김해 진영읍형 내용 <span class="tag red">기본</span></div>
+
+        <label class="f"><span>왼쪽 위 붉은 배지</span>
+          <input type="text" id="badge" maxlength="14" placeholder="공장 매매">
+        </label>
+
+        <div class="cardTitle" style="margin:14px 0 8px">체크리스트 (최대 5줄)</div>
+
+        <label class="f"><span>체크 1</span><input type="text" id="chk0" maxlength="34"></label>
+        <label class="f"><span>체크 2</span><input type="text" id="chk1" maxlength="34"></label>
+        <label class="f"><span>체크 3</span><input type="text" id="chk2" maxlength="34"></label>
+        <label class="f"><span>체크 4</span><input type="text" id="chk3" maxlength="34"></label>
+        <label class="f"><span>체크 5</span><input type="text" id="chk4" maxlength="34"></label>
+
+        <div class="cardTitle" style="margin:14px 0 8px">하단 얇은 바 — 면적·층고 (핵심 스펙)</div>
+        <div class="specGrid">
+          <div class="specRow k"><input type="text" id="kSpecL0" maxlength="10" aria-label="핵심1 항목" placeholder="항목 (예: 건물면적)"><input type="text" id="kSpecV0" maxlength="24" aria-label="핵심1 값" placeholder="값 (예: 60평)"></div>
+          <div class="specRow k"><input type="text" id="kSpecL1" maxlength="10" aria-label="핵심2 항목" placeholder="항목 (예: 층고)"><input type="text" id="kSpecV1" maxlength="24" aria-label="핵심2 값" placeholder="값 (예: 5m)"></div>
+        </div>
+        <p class="hint">하단은 <b>① 가격 한 줄(전체 폭)</b> + <b>② 얇은 면적·층고 바</b> 2단입니다. 위에 적은 항목·값이 아래 얇은 바에 큰 글씨로 들어가고, 장부에서 불러오면 면적·층고가 자동으로 채워집니다.</p>
+
+        <div class="row2">
+          <label class="f"><span>대표 전화</span>
+            <input type="text" id="phone" maxlength="20" placeholder="032-576-2600">
+          </label>
+          <label class="f"><span>주소</span>
+            <input type="text" id="address" maxlength="34" placeholder="인천 서구 건지로 167">
+          </label>
+        </div>
+        <p class="hint">매매 <b>032-582-6200</b> · 임대 <b>032-576-2600</b> (거래구분을 바꾸면 자동으로 따라 바뀝니다. 직접 고쳐도 됩니다.)</p>
+      </div>
+
+      <div class="card" id="bPanel" hidden>
+        <div class="cardTitle">⑤ 카드형 정보 <span class="tag">스타일 B</span></div>
+
+        <label class="f"><span>매물번호</span>
+          <input type="text" id="listingNo" maxlength="20" placeholder="예) W-261117-0958">
+        </label>
+
+        <label class="f"><span>추천 업종 · 제목</span>
+          <input type="text" id="checkTitle" maxlength="22" placeholder="예) 이런 업종에 추천">
+        </label>
+
+        <div class="cardTitle" style="margin:14px 0 8px">하단 스펙 5칸</div>
+        <div class="specGrid">
+          <div class="specRow"><input type="text" id="specL0" maxlength="10" aria-label="B카드1 항목"><input type="text" id="specV0" maxlength="24" aria-label="B카드1 값"></div>
+          <div class="specRow"><input type="text" id="specL1" maxlength="10" aria-label="B카드2 항목"><input type="text" id="specV1" maxlength="24" aria-label="B카드2 값"></div>
+          <div class="specRow"><input type="text" id="specL2" maxlength="10" aria-label="B카드3 항목"><input type="text" id="specV2" maxlength="24" aria-label="B카드3 값"></div>
+          <div class="specRow"><input type="text" id="specL3" maxlength="10" aria-label="B카드4 항목"><input type="text" id="specV3" maxlength="24" aria-label="B카드4 값"></div>
+          <div class="specRow"><input type="text" id="specL4" maxlength="10" aria-label="B카드5 항목"><input type="text" id="specV4" maxlength="24" aria-label="B카드5 값"></div>
+        </div>
+
+        <label class="f" style="margin-bottom:0"><span>맨 아래 연락처 줄</span>
+          <input type="text" id="contactLine" maxlength="95">
+        </label>
+      </div>
+
+      <!-- ===================== 소식·맛집 임팩트형 전용 칸 ===================== -->
+      <div class="card" id="impBadgeCard" hidden>
+        <div class="cardTitle">① 위쪽 배지 (알약 모양) <span class="tag">두 개까지</span></div>
+        <label class="f"><span>배지 1 — 왼쪽</span>
+          <input type="text" id="impPill1" maxlength="16" placeholder="예) 11/25 오늘의 소식">
+        </label>
+
+        <label class="f" style="margin-bottom:0"><span>배지 2 — 오른쪽 (비우면 배지 하나만)</span>
+          <input type="text" id="impPill2" maxlength="16" placeholder="예) 인천 청라">
+        </label>
+        <p class="hint">배지 <b>색</b>은 아래 <b>2 · 크기·스타일 → 색상</b>에서 고릅니다.</p>
+      </div>
+
+      <div class="card" id="impTitleCard" hidden>
+        <div class="cardTitle">② 큰 글씨 <span class="tag red">임팩트형</span></div>
+        <label class="f"><span>제목 1줄 (흰색)</span>
+          <input type="text" id="impT1" maxlength="24" placeholder="예) 청라 한식당 점심">
+        </label>
+        <label class="f"><span>강조 제목 (포인트 색 · 노란색 등)</span>
+          <input type="text" id="impT2" maxlength="20" placeholder="예) 웨이팅 20분 각오!">
+        </label>
+        <label class="f"><span>짧은 부제 (흰색 굵게)</span>
+          <input type="text" id="impSub" maxlength="30" placeholder="예) 12시 전에 가면 바로 앉아요">
+        </label>
+        <label class="f" style="margin-bottom:0"><span>작은 설명 (회색 · 비워도 됨)</span>
+          <input type="text" id="impSmall" maxlength="40" placeholder="예) 주차 · 가격 · 메뉴 한 번에 정리">
+        </label>
+        <p class="hint">글씨 크기는 <b>아래 2 · 크기·스타일</b>에서 한 번에 맞춥니다.</p>
+      </div>
+
+      <div class="card" id="impBoxCard" hidden>
+        <div class="cardTitle">③ 하단 3칸 요약 박스</div>
+        <div class="impRow">
+          <input type="text" id="impBox1L" maxlength="10" placeholder="위치" aria-label="1칸 항목">
+          <input type="text" id="impBox1V" maxlength="16" placeholder="청라 카페거리" aria-label="1칸 값">
+        </div>
+        <div class="impRow">
+          <input type="text" id="impBox2L" maxlength="10" placeholder="대표 메뉴" aria-label="2칸 항목">
+          <input type="text" id="impBox2V" maxlength="16" placeholder="갈치조림 12,000원" aria-label="2칸 값">
+        </div>
+        <div class="impRow">
+          <input type="text" id="impBox3L" maxlength="10" placeholder="주차" aria-label="3칸 항목">
+          <input type="text" id="impBox3V" maxlength="16" placeholder="건물 뒤 3대" aria-label="3칸 값">
+        </div>
+        <p class="hint">강조할 칸은 아래 <b>2 · 크기·스타일 → 색상</b>에서 고릅니다. 청약이면 <b>청약일 · 경쟁률 · 발표일</b>처럼 세 칸을 쪼개 쓰세요.</p>
+      </div>
+
+      <div class="card" id="impBgCard" hidden>
+        <div class="cardTitle">④ 배경 사진</div>
+        <div class="drop small" id="impBgDrop">
+          <input type="file" id="impBgFile" accept="image/*" hidden>
+          <div class="dropInner">
+            <span class="ic">＋</span>
+            <b>배경 사진 (선택)</b>
+            <i>없으면 고른 배경색으로 나옵니다</i>
+          </div>
+          <img id="impBgThumb" class="thumb" alt="">
+        </div>
         <div class="row">
-          <select id="subMode">
-            <option value="none">추가 사진 표시 안 함</option>
-            <option value="rect">사각으로 넣기</option>
-            <option value="circle">원형으로 넣기</option>
-          </select>
-          <button type="button" class="ghost" id="clearImg">사진 지우기</button>
+          <button type="button" class="ghost" id="impBgClear">배경 사진 지우기</button>
+        </div>
+        <p class="hint">배경 사진은 <b>가운데를 기준으로</b> 꽉 채워 넣고, 그 위에 글씨를 얹습니다. 배경색·어둡게 정도는 <b>아래 2 · 크기·스타일</b>에 있습니다.</p>
+      </div>
+    </div>
+
+    <button type="button" class="jumpBtn" id="jumpDown">↓ 크기·스타일 조절로 내려가기</button>
+
+    <!-- =========================================================
+         2) 크기·스타일 — 크기·색·위치 맞추는 칸을 전부 아래로 모음
+         ========================================================= -->
+    <div class="grp" id="grpStyle">
+      <div class="grpHead gold"><span class="grpNum">2</span>크기 · 스타일<span class="grpLine"></span><span class="grpSub">슬라이더로 맞추기</span></div>
+
+      <div class="card" id="sizeCard">
+        <div class="cardTitle">🎚️ 크기 조절</div>
+
+        <div id="sizeKBox">
+          <div class="fontCtl first">
+            <div class="fcTop">
+              <span class="fcName">제목 글자 크기</span>
+              <span class="fcPx" id="titleSizeOut">104px</span>
+            </div>
+            <input type="range" id="titleSize" min="70" max="140" step="2" value="104" aria-label="제목 글자 크기">
+            <div class="fcScale"><span>작게</span><span>크게</span></div>
+            <p class="fcNow"><span id="titleSizeNote">노란 줄 기준</span> · 지금 미리보기 <b id="titleSizeNow">104px</b><br>글씨가 길면 가로 폭에 맞춰 자동으로 줄어듭니다.</p>
+          </div>
+
+          <div class="fontCtl" id="bodySizeBox">
+            <div class="fcTop">
+              <span class="fcName">본문(체크리스트) 글자 크기</span>
+              <span class="fcPx" id="bodySizeOut">34px</span>
+            </div>
+            <input type="range" id="bodySize" min="24" max="44" step="1" value="34" aria-label="본문 글자 크기">
+            <div class="fcScale"><span>작게</span><span>크게</span></div>
+            <p class="fcNow">지금 미리보기 <b id="bodySizeNow">34px</b><br>5줄을 넘거나 배지와 겹치면 박스에 맞춰 자동으로 줄어듭니다.</p>
+          </div>
+        </div>
+
+        <div id="sizeBottomBox">
+          <div class="fontCtl first">
+            <div class="fcTop">
+              <span class="fcName">하단 가격(임대가) 글자 크기</span>
+              <span class="fcPx" id="sumPriceSizeOut">64px</span>
+            </div>
+            <input type="range" id="sumPriceSize" min="40" max="92" step="1" value="64" aria-label="하단 임대가 글자 크기">
+            <div class="fcScale"><span>작게</span><span>크게</span></div>
+            <p class="fcNow">지금 미리보기 <b id="sumPriceSizeNow">64px</b><br>1단 가격 줄 전체 폭에 맞춰 크게 들어갑니다. 문구가 길면 칸 폭에 맞춰 자동으로 줄어듭니다.</p>
+          </div>
+
+          <div class="fontCtl">
+            <div class="fcTop">
+              <span class="fcName">하단 면적·층고 글자 크기</span>
+              <span class="fcPx" id="specSizeOut">38px</span>
+            </div>
+            <input type="range" id="specSize" min="22" max="56" step="1" value="38" aria-label="하단 면적·층고 글자 크기">
+            <div class="fcScale"><span>작게</span><span>크게</span></div>
+            <p class="fcNow">지금 미리보기 <b id="specSizeNow">38px</b><br><b>면적</b>·<b>층고</b> 같은 항목 이름도 같은 비율로 따라 바뀝니다. 글씨를 키우면 얇은 바가 그만큼 높아집니다.</p>
+          </div>
+        </div>
+
+        <div id="sizeImpBox">
+          <div class="fontCtl first">
+            <div class="fcTop">
+              <span class="fcName">글씨 크기</span>
+              <span class="fcPx" id="impScaleOut">100%</span>
+            </div>
+            <input type="range" id="impScale" min="70" max="140" step="5" value="100" aria-label="임팩트형 글씨 크기">
+            <div class="fcScale"><span>작게</span><span>크게</span></div>
+          </div>
+
+          <div class="fontCtl">
+            <div class="fcTop">
+              <span class="fcName">배경 어둡게 (사진 위 글씨가 잘 보이게)</span>
+              <span class="fcPx" id="impOverlayOut">55%</span>
+            </div>
+            <input type="range" id="impOverlay" min="0" max="95" step="5" value="55" aria-label="배경 어둡게 정도">
+            <div class="fcScale"><span>밝게</span><span>어둡게</span></div>
+          </div>
+        </div>
+
+        <div class="fontCtl" id="focusBox" hidden>
+          <div class="fcTop">
+            <span class="fcName">사진 위치</span>
+            <span class="fcPx">가로 · 세로</span>
+          </div>
+          <div class="sliders">
+            <label>가로
+              <input type="range" id="focusX" min="0" max="100" value="50">
+            </label>
+            <label>세로
+              <input type="range" id="focusY" min="0" max="100" value="50">
+            </label>
+          </div>
+          <p class="fcNow">사진을 올리면 여기서 맞출 수 있습니다. 사진이 잘린 느낌이면 보여 줄 부분을 옮기세요.</p>
         </div>
       </div>
 
-      <p class="hint" id="subPhotoNote" hidden>김해 진영읍형은 <b>대표 사진 한 장</b>만 씁니다. (동그라미 사진 없음)</p>
-    </div>
+      <div class="card" id="colorCard">
+        <div class="cardTitle">🎨 색상 <span class="tag">임팩트형</span></div>
 
-    <div class="card" id="titleCard">
-      <div class="cardTitle">3. 큰 글씨 <span class="tag">크기 조절</span></div>
-      <label class="f"><span>지역 · 앞부분 (흰 글씨)</span>
-        <input type="text" id="t1" maxlength="18" placeholder="예) 원창동">
-      </label>
-      <label class="f"><span>강조 · 뒷부분 (노란 글씨)</span>
-        <input type="text" id="t2" maxlength="18" placeholder="예) 대형창고 임대">
-      </label>
-      <label class="f" style="margin-bottom:0"><span id="subLabel">흰 배지 · 핵심 스펙</span>
-        <input type="text" id="sub" maxlength="44" placeholder="예) 대지 300평 · 층고 12.9m">
-      </label>
-
-      <div class="fontCtl">
-        <div class="fcTop">
-          <span class="fcName">제목 글자 크기</span>
-          <span class="fcPx" id="titleSizeOut">104px</span>
+        <div class="colorRow">
+          <span class="colorName">배지 1 색</span>
+          <div class="swSeg" id="pill1Seg" style="margin:0">
+            <button type="button" data-v="red">🔴 빨강</button>
+            <button type="button" data-v="yellow">🟡 노랑</button>
+            <button type="button" data-v="blue">🔵 파랑</button>
+            <button type="button" data-v="mint">🟢 민트</button>
+          </div>
         </div>
-        <input type="range" id="titleSize" min="70" max="140" step="2" value="104" aria-label="제목 글자 크기">
-        <div class="fcScale"><span>작게</span><span>크게</span></div>
-        <p class="fcNow"><span id="titleSizeNote">노란 줄 기준</span> · 지금 미리보기 <b id="titleSizeNow">104px</b><br>글씨가 길면 가로 폭에 맞춰 자동으로 줄어듭니다.</p>
-      </div>
+        <input type="hidden" id="impPill1Color" value="red">
 
-      <div class="fontCtl" id="bodySizeBox">
-        <div class="fcTop">
-          <span class="fcName">본문(체크리스트) 글자 크기</span>
-          <span class="fcPx" id="bodySizeOut">34px</span>
+        <div class="colorRow">
+          <span class="colorName">배지 2 색</span>
+          <div class="swSeg" id="pill2Seg" style="margin:0">
+            <button type="button" data-v="red">🔴 빨강</button>
+            <button type="button" data-v="yellow">🟡 노랑</button>
+            <button type="button" data-v="blue">🔵 파랑</button>
+            <button type="button" data-v="mint">🟢 민트</button>
+          </div>
         </div>
-        <input type="range" id="bodySize" min="24" max="44" step="1" value="34" aria-label="본문 글자 크기">
-        <div class="fcScale"><span>작게</span><span>크게</span></div>
-        <p class="fcNow">지금 미리보기 <b id="bodySizeNow">34px</b><br>5줄을 넘거나 배지와 겹치면 박스에 맞춰 자동으로 줄어듭니다.</p>
-      </div>
-    </div>
+        <input type="hidden" id="impPill2Color" value="blue">
 
-    <div class="card" id="priceCard">
-      <div class="cardTitle">4. 가격 · 거래구분</div>
-      <div class="seg" id="tradeSeg" style="margin-bottom:9px">
-        <button type="button" data-trade="rent" class="on">임대</button>
-        <button type="button" data-trade="sale">매매</button>
-      </div>
-      <div class="row2 priceRow">
-        <label class="f" style="margin-bottom:0"><span>가격 카드 제목</span>
-          <input type="text" id="priceLabel" maxlength="10" placeholder="매매가">
-        </label>
-        <label class="f" style="margin-bottom:0"><span>가격 문구</span>
-          <input type="text" id="price" maxlength="30" placeholder="예) 7억원">
-        </label>
-      </div>
-      <p class="hint">매매를 고르면 배지가 <b>공장 매매</b>, 전화가 <b>032-582-6200</b>으로 바뀝니다.</p>
-    </div>
-
-    <div class="card" id="kPanel">
-      <div class="cardTitle">5. 김해 진영읍형 내용 <span class="tag red">기본</span></div>
-
-      <label class="f"><span>왼쪽 위 붉은 배지</span>
-        <input type="text" id="badge" maxlength="14" placeholder="공장 매매">
-      </label>
-
-      <div class="cardTitle" style="margin:14px 0 8px">체크리스트 (최대 5줄)</div>
-
-      <label class="f"><span>체크 1</span><input type="text" id="chk0" maxlength="34"></label>
-      <label class="f"><span>체크 2</span><input type="text" id="chk1" maxlength="34"></label>
-      <label class="f"><span>체크 3</span><input type="text" id="chk2" maxlength="34"></label>
-      <label class="f"><span>체크 4</span><input type="text" id="chk3" maxlength="34"></label>
-      <label class="f"><span>체크 5</span><input type="text" id="chk4" maxlength="34"></label>
-
-      <div class="cardTitle" style="margin:14px 0 8px">하단 얇은 바 — 면적·층고 (핵심 스펙)</div>
-      <div class="specGrid">
-        <div class="specRow k"><input type="text" id="kSpecL0" maxlength="10" aria-label="핵심1 항목" placeholder="항목 (예: 건물면적)"><input type="text" id="kSpecV0" maxlength="24" aria-label="핵심1 값" placeholder="값 (예: 60평)"></div>
-        <div class="specRow k"><input type="text" id="kSpecL1" maxlength="10" aria-label="핵심2 항목" placeholder="항목 (예: 층고)"><input type="text" id="kSpecV1" maxlength="24" aria-label="핵심2 값" placeholder="값 (예: 5m)"></div>
-      </div>
-      <p class="hint">하단은 <b>① 가격 한 줄(전체 폭)</b> + <b>② 얇은 면적·층고 바</b> 2단입니다. 위에 적은 항목·값이 아래 얇은 바에 큰 글씨로 들어가고, 장부에서 불러오면 면적·층고가 자동으로 채워집니다.</p>
-
-      <div class="fontCtl">
-        <div class="fcTop">
-          <span class="fcName">하단 가격(임대가) 글자 크기</span>
-          <span class="fcPx" id="sumPriceSizeOut">64px</span>
+        <div class="colorRow">
+          <span class="colorName">강조 제목 색</span>
+          <div class="swSeg" id="accentSeg" style="margin:0">
+            <button type="button" data-v="yellow">노랑</button>
+            <button type="button" data-v="red">빨강</button>
+            <button type="button" data-v="blue">파랑</button>
+            <button type="button" data-v="mint">민트</button>
+          </div>
         </div>
-        <input type="range" id="sumPriceSize" min="40" max="92" step="1" value="64" aria-label="하단 임대가 글자 크기">
-        <div class="fcScale"><span>작게</span><span>크게</span></div>
-        <p class="fcNow">지금 미리보기 <b id="sumPriceSizeNow">64px</b><br>1단 가격 줄 전체 폭에 맞춰 크게 들어갑니다. 문구가 길면 칸 폭에 맞춰 자동으로 줄어듭니다.</p>
-      </div>
+        <input type="hidden" id="impAccent" value="yellow">
 
-      <div class="fontCtl">
-        <div class="fcTop">
-          <span class="fcName">하단 면적·층고 글자 크기</span>
-          <span class="fcPx" id="specSizeOut">38px</span>
+        <div class="colorRow">
+          <span class="colorName">하단 3칸에서 강조할 칸</span>
+          <div class="swSeg" id="boxHiSeg" style="margin:0">
+            <button type="button" data-v="none">강조 없음</button>
+            <button type="button" data-v="1">1번</button>
+            <button type="button" data-v="2">2번</button>
+            <button type="button" data-v="3">3번</button>
+          </div>
         </div>
-        <input type="range" id="specSize" min="22" max="56" step="1" value="38" aria-label="하단 면적·층고 글자 크기">
-        <div class="fcScale"><span>작게</span><span>크게</span></div>
-        <p class="fcNow">지금 미리보기 <b id="specSizeNow">38px</b><br><b>면적</b>·<b>층고</b> 같은 항목 이름도 같은 비율로 따라 바뀝니다. 글씨를 키우면 얇은 바가 그만큼 높아집니다.</p>
-      </div>
+        <input type="hidden" id="impBoxHi" value="2">
 
-      <div class="row2">
-        <label class="f"><span>대표 전화</span>
-          <input type="text" id="phone" maxlength="20" placeholder="032-576-2600">
-        </label>
-        <label class="f"><span>주소</span>
-          <input type="text" id="address" maxlength="34" placeholder="인천 서구 건지로 167">
-        </label>
-      </div>
-      <p class="hint">매매 <b>032-582-6200</b> · 임대 <b>032-576-2600</b> (거래구분을 바꾸면 자동으로 따라 바뀝니다. 직접 고쳐도 됩니다.)</p>
-    </div>
-
-    <div class="card" id="bPanel" hidden>
-      <div class="cardTitle">5. 카드형 정보 <span class="tag">스타일 B</span></div>
-
-      <label class="f"><span>매물번호</span>
-        <input type="text" id="listingNo" maxlength="20" placeholder="예) W-261117-0958">
-      </label>
-
-      <label class="f"><span>추천 업종 · 제목</span>
-        <input type="text" id="checkTitle" maxlength="22" placeholder="예) 이런 업종에 추천">
-      </label>
-
-      <div class="cardTitle" style="margin:14px 0 8px">하단 스펙 5칸</div>
-      <div class="specGrid">
-        <div class="specRow"><input type="text" id="specL0" maxlength="10" aria-label="B카드1 항목"><input type="text" id="specV0" maxlength="24" aria-label="B카드1 값"></div>
-        <div class="specRow"><input type="text" id="specL1" maxlength="10" aria-label="B카드2 항목"><input type="text" id="specV1" maxlength="24" aria-label="B카드2 값"></div>
-        <div class="specRow"><input type="text" id="specL2" maxlength="10" aria-label="B카드3 항목"><input type="text" id="specV2" maxlength="24" aria-label="B카드3 값"></div>
-        <div class="specRow"><input type="text" id="specL3" maxlength="10" aria-label="B카드4 항목"><input type="text" id="specV3" maxlength="24" aria-label="B카드4 값"></div>
-        <div class="specRow"><input type="text" id="specL4" maxlength="10" aria-label="B카드5 항목"><input type="text" id="specV4" maxlength="24" aria-label="B카드5 값"></div>
-      </div>
-
-      <label class="f" style="margin-bottom:0"><span>맨 아래 연락처 줄</span>
-        <input type="text" id="contactLine" maxlength="95">
-      </label>
-    </div>
-
-    <!-- ===================== 소식·맛집 임팩트형 전용 칸 ===================== -->
-    <div class="card" id="impBadgeCard" hidden>
-      <div class="cardTitle">🏷️ 위쪽 배지 (알약 모양) <span class="tag">두 개까지</span></div>
-      <label class="f"><span>배지 1 — 왼쪽</span>
-        <input type="text" id="impPill1" maxlength="16" placeholder="예) 11/25 오늘의 소식">
-      </label>
-      <div class="swSeg" id="pill1Seg">
-        <button type="button" data-v="red">🔴 빨강</button>
-        <button type="button" data-v="yellow">🟡 노랑</button>
-        <button type="button" data-v="blue">🔵 파랑</button>
-        <button type="button" data-v="mint">🟢 민트</button>
-      </div>
-      <input type="hidden" id="impPill1Color" value="red">
-
-      <label class="f"><span>배지 2 — 오른쪽 (비우면 배지 하나만)</span>
-        <input type="text" id="impPill2" maxlength="16" placeholder="예) 인천 청라">
-      </label>
-      <div class="swSeg" id="pill2Seg">
-        <button type="button" data-v="red">🔴 빨강</button>
-        <button type="button" data-v="yellow">🟡 노랑</button>
-        <button type="button" data-v="blue">🔵 파랑</button>
-        <button type="button" data-v="mint">🟢 민트</button>
-      </div>
-      <input type="hidden" id="impPill2Color" value="blue">
-    </div>
-
-    <div class="card" id="impTitleCard" hidden>
-      <div class="cardTitle">✍️ 큰 글씨 <span class="tag red">임팩트형</span></div>
-      <label class="f"><span>제목 1줄 (흰색)</span>
-        <input type="text" id="impT1" maxlength="24" placeholder="예) 청라 한식당 점심">
-      </label>
-      <label class="f"><span>강조 제목 (포인트 색 · 노란색 등)</span>
-        <input type="text" id="impT2" maxlength="20" placeholder="예) 웨이팅 20분 각오!">
-      </label>
-      <div class="swSeg" id="accentSeg">
-        <button type="button" data-v="yellow">노랑</button>
-        <button type="button" data-v="red">빨강</button>
-        <button type="button" data-v="blue">파랑</button>
-        <button type="button" data-v="mint">민트</button>
-      </div>
-      <input type="hidden" id="impAccent" value="yellow">
-
-      <label class="f"><span>짧은 부제 (흰색 굵게)</span>
-        <input type="text" id="impSub" maxlength="30" placeholder="예) 12시 전에 가면 바로 앉아요">
-      </label>
-      <label class="f" style="margin-bottom:4px"><span>작은 설명 (회색 · 비워도 됨)</span>
-        <input type="text" id="impSmall" maxlength="40" placeholder="예) 주차 · 가격 · 메뉴 한 번에 정리">
-      </label>
-
-      <div class="fontCtl">
-        <div class="fcTop">
-          <span class="fcName">글씨 크기</span>
-          <span class="fcPx" id="impScaleOut">100%</span>
+        <div class="colorRow">
+          <span class="colorName">배경 색 (배경 사진이 없을 때)</span>
+          <div class="bgSeg" id="bgSeg" style="margin:0">
+            <button type="button" data-v="navy" style="background:linear-gradient(160deg,#0B1524,#172A44)">딥네이비</button>
+            <button type="button" data-v="char" style="background:linear-gradient(160deg,#14161A,#2A2E36)">차콜</button>
+            <button type="button" data-v="green" style="background:linear-gradient(160deg,#0A1D18,#173D2C)">다크그린</button>
+            <button type="button" data-v="wine" style="background:linear-gradient(160deg,#200A12,#41171F)">버건디</button>
+          </div>
         </div>
-        <input type="range" id="impScale" min="70" max="140" step="5" value="100" aria-label="임팩트형 글씨 크기">
-        <div class="fcScale"><span>작게</span><span>크게</span></div>
+        <input type="hidden" id="impBg" value="navy">
+
+        <p class="hint">색은 누르면 미리보기에 바로 나옵니다.</p>
       </div>
     </div>
 
-    <div class="card" id="impBoxCard" hidden>
-      <div class="cardTitle">📊 하단 3칸 요약 박스</div>
-      <div class="impRow">
-        <input type="text" id="impBox1L" maxlength="10" placeholder="위치" aria-label="1칸 항목">
-        <input type="text" id="impBox1V" maxlength="16" placeholder="청라 카페거리" aria-label="1칸 값">
-      </div>
-      <div class="impRow">
-        <input type="text" id="impBox2L" maxlength="10" placeholder="대표 메뉴" aria-label="2칸 항목">
-        <input type="text" id="impBox2V" maxlength="16" placeholder="갈치조림 12,000원" aria-label="2칸 값">
-      </div>
-      <div class="impRow">
-        <input type="text" id="impBox3L" maxlength="10" placeholder="주차" aria-label="3칸 항목">
-        <input type="text" id="impBox3V" maxlength="16" placeholder="건물 뒤 3대" aria-label="3칸 값">
-      </div>
-      <div class="swSeg" id="boxHiSeg" style="margin-top:6px">
-        <button type="button" data-v="none">강조 없음</button>
-        <button type="button" data-v="1">1번</button>
-        <button type="button" data-v="2">2번</button>
-        <button type="button" data-v="3">3번</button>
-      </div>
-      <input type="hidden" id="impBoxHi" value="2">
-      <p class="hint">강조한 칸의 값만 <b>포인트 색</b>으로 나옵니다. 청약이면 <b>청약일 · 경쟁률 · 발표일</b>처럼 세 칸을 쪼개 쓰세요.</p>
-    </div>
-
-    <div class="card" id="impBgCard" hidden>
-      <div class="cardTitle">🌄 배경</div>
-      <div class="bgSeg" id="bgSeg">
-        <button type="button" data-v="navy" style="background:linear-gradient(160deg,#0B1524,#172A44)">딥네이비</button>
-        <button type="button" data-v="char" style="background:linear-gradient(160deg,#14161A,#2A2E36)">차콜</button>
-        <button type="button" data-v="green" style="background:linear-gradient(160deg,#0A1D18,#173D2C)">다크그린</button>
-        <button type="button" data-v="wine" style="background:linear-gradient(160deg,#200A12,#41171F)">버건디</button>
-      </div>
-      <input type="hidden" id="impBg" value="navy">
-
-      <div class="drop small" id="impBgDrop">
-        <input type="file" id="impBgFile" accept="image/*" hidden>
-        <div class="dropInner">
-          <span class="ic">＋</span>
-          <b>배경 사진 (선택)</b>
-          <i>없으면 위 색 배경으로 나옵니다</i>
-        </div>
-        <img id="impBgThumb" class="thumb" alt="">
-      </div>
-      <div class="row">
-        <button type="button" class="ghost" id="impBgClear">배경 사진 지우기</button>
-      </div>
-
-      <div class="fontCtl">
-        <div class="fcTop">
-          <span class="fcName">배경 어둡게 (사진 위 글씨가 잘 보이게)</span>
-          <span class="fcPx" id="impOverlayOut">55%</span>
-        </div>
-        <input type="range" id="impOverlay" min="0" max="95" step="5" value="55" aria-label="배경 어둡게 정도">
-        <div class="fcScale"><span>밝게</span><span>어둡게</span></div>
-      </div>
-      <p class="hint">배경 사진은 <b>가운데를 기준으로</b> 꽉 채워 넣고, 그 위에 글씨를 얹습니다.</p>
-    </div>
+    <button type="button" class="jumpBtn" id="jumpUp">↑ 내용 입력으로 올라가기</button>
 
     <div class="card" id="saveCard">
       <div class="cardTitle">💾 저장</div>
@@ -2462,7 +2556,7 @@ function loadFile(file, which){
       S.mainName = file.name || 'main';
       $('mainThumb').src = url;
       $('mainDrop').classList.add('has');
-      $('focusBox').hidden = false;
+      $('focusBox').hidden = (S.style === 'I');
     } else if (which === 'bg'){
       S.impImg = img;
       $('impBgThumb').src = url;
@@ -2944,6 +3038,14 @@ function updatePanels(){
   $('subPhotoNote').hidden = !k;
   /* 사진만 쓰는 스타일 A에는 체크리스트가 없어 본문 크기 조절을 숨긴다 */
   $('bodySizeBox').hidden = S.style === 'A' || isI;
+  /* 크기·스타일 칸: 지금 고른 모양에 쓰는 조절칸만 남긴다 */
+  const hide = function(id, h){ const el = $(id); if (el) el.hidden = h; };
+  hide('sizeKBox', isI);
+  hide('sizeBottomBox', !k);
+  hide('sizeImpBox', !isI);
+  hide('colorCard', !isI);
+  /* 사진 위치는 사진을 올렸고 임팩트형이 아닐 때만 */
+  hide('focusBox', isI || !S.mainImg);
   $('titleSizeNote').textContent = k ? '노란 줄 기준' : '제목 기준';
   $('subLabel').textContent = k ? '사진 위 흰 배지 (비우면 안 나옴)' : '부제 · 한 줄 설명';
   $('sub').placeholder = k ? '적으면 사진 위에 흰 배지가 나옵니다' : '예) 북항 초입 | 40m 대로변';
@@ -3077,6 +3179,17 @@ function init(){
     fillDefaults();
     render(); saveState();
   });
+
+  /* 내용 입력 ↔ 크기·스타일 사이를 한 번에 오가기 */
+  const jumpTo = function(id){
+    const el = $(id);
+    if (!el || !el.scrollIntoView) return;
+    const narrow = window.matchMedia && window.matchMedia('(max-width:920px)').matches;
+    try { el.scrollIntoView({ behavior: 'smooth', block: narrow ? 'center' : 'start' }); }
+    catch(e){ el.scrollIntoView(); }
+  };
+  if ($('jumpDown')) $('jumpDown').addEventListener('click', function(){ jumpTo('grpStyle'); });
+  if ($('jumpUp')) $('jumpUp').addEventListener('click', function(){ jumpTo('grpContent'); });
 
   $('btnPng').addEventListener('click', function(){ download('png'); });
   $('btnPng2').addEventListener('click', function(){ download('png'); });
