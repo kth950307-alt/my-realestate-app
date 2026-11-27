@@ -163,7 +163,7 @@
   /* ───────── 상단 모드 전환 (공장 매물형 ↔ 소식·맛집 임팩트형) ───────── */
   .modebar{
     background:#0f1c33; border-bottom:1px solid #0a1424; padding:8px 16px;
-    display:flex; justify-content:center; position:sticky; top:0; z-index:29;
+    display:flex; justify-content:center; position:static;
   }
   .modeSeg{
     display:flex; gap:6px; background:rgba(255,255,255,.08); padding:5px; border-radius:13px;
@@ -230,6 +230,21 @@
   /* 크기 칸이 위아래로 이어질 때는 구분선을 살린다 */
   #sizeKBox:not([hidden]) + #sizeBottomBox .fontCtl.first{
     border-top:1px dashed #E1E7F0; padding-top:10px; margin-top:11px;
+  }
+
+  /* ───────── 넓은 화면: 조절하는 동안 미리보기가 같이 보이게 붙박이 ───────── */
+  @media (min-width:921px){
+    .previewWrap{
+      position:sticky; top:calc(var(--barH, 60px) + 10px); align-self:start;
+    }
+    .canvasBox{
+      display:flex; align-items:center; justify-content:center;
+      max-height:calc(100vh - var(--barH, 60px) - 70px);
+    }
+    .canvasBox canvas{
+      width:auto; height:auto; max-width:100%;
+      max-height:calc(100vh - var(--barH, 60px) - 92px);
+    }
   }
   @media (max-width:920px){
     .grp{scroll-margin-top:8px}
@@ -3221,6 +3236,14 @@ function init(){
    .catch(function(){ renderNow(); });
 
   updatePanels();
+  /* 넓은 화면에서 미리보기를 붙박을 때 위쪽 바 높이만큼 비켜 준다 */
+  const barEl = document.querySelector('.topbar');
+  const setBarH = function(){
+    if (!barEl) return;
+    document.documentElement.style.setProperty('--barH', barEl.offsetHeight + 'px');
+  };
+  setBarH();
+  window.addEventListener('resize', setBarH);
   renderNow();
   initLedger();
 }
