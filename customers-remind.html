@@ -542,17 +542,22 @@
     }
 
     if(floor && p.floor){
+      var fp = String(p.floor).trim();
       var floorOk;
       if(floor.indexOf("건물 전체") >= 0){
-        floorOk = p.floor.indexOf("건물 전체") >= 0;
+        floorOk = fp.indexOf("건물 전체") >= 0;
+      } else if(/지하/.test(floor)){
+        floorOk = /지하/.test(fp);
+      } else if(fp.indexOf("지하") === 0){
+        floorOk = false;                                   // "지하 1층"을 "1층"으로 읽지 않는다
       } else {
         var fm = floor.match(/(\d+)\s*층/);
-        floorOk = !fm || p.floor.indexOf(fm[1] + "층") >= 0;
+        floorOk = !fm || fp.indexOf(fm[1] + "층") >= 0;
       }
       chk(floorOk, 3);
     }
     if(minArea > 0){
-      chk(p.area >= minArea, 2);
+      chk(p.area >= minArea, 3);
       if(p.area >= minArea && p.area <= minArea * 1.5) bonus += 1;
     }
     if(maxRent > 0 && /임대/.test(p.deal) && p.rent > 0) chk(p.rent <= maxRent, 1.5);
