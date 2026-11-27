@@ -524,54 +524,46 @@
     if(wantSale && !/매매|분양/.test(p.deal)) return null;
 
     var region = String(c["선호권역"] || "").trim();
-    var score = 0;
     var regionFree = !region || region.indexOf("기타") >= 0 || region.indexOf("전역") >= 0;
-    if(!regionFree){
-      if(String(p.region).indexOf(region) < 0) return null;
-      score += 3;
-    }
-    if(relaxed) return { score: score };
+    if(!regionFree && String(p.region).indexOf(region) < 0) return null;
 
     var floor = String(c["희망층수"] || "").trim();
+    var minArea = num(c["최소평수"]);
+    var maxRent = num(c["최대월세"]);
+    var maxDep = num(c["최대예산_보증금"]);
+    var needPower = num(c["필수전력"]);
+    var needHoist = /필요|필수|yes|있/i.test(String(c["호이스트필수"] || ""));
+
+    /* 조건별 감점 — 층수·평수가 어긋나는 것을 가장 크게 본다 */
+    var penalty = 0, bonus = 0;
+    function chk(ok, weight){
+      if(!ok) penalty += weight;
+      else bonus += weight / 2;
+    }
+
     if(floor && p.floor){
+      var floorOk;
       if(floor.indexOf("건물 전체") >= 0){
-        if(p.floor.indexOf("건물 전체") < 0) return null;
+        floorOk = p.floor.indexOf("건물 전체") >= 0;
       } else {
         var fm = floor.match(/(\d+)\s*층/);
-        if(fm && p.floor.indexOf(fm[1] + "층") < 0) return null;
+        floorOk = !fm || p.floor.indexOf(fm[1] + "층") >= 0;
       }
-      score += 2;
+      chk(floorOk, 3);
     }
-
-    var minArea = num(c["최소평수"]);
     if(minArea > 0){
-      if(!(p.area >= minArea)) return null;
-      score += 2;
-      if(p.area <= minArea * 1.5) score += 1;
+      chk(p.area >= minArea, 2);
+      if(p.area >= minArea && p.area <= minArea * 1.5) bonus += 1;
     }
+    if(maxRent > 0 && /임대/.test(p.deal) && p.rent > 0) chk(p.rent <= maxRent, 1.5);
+    if(maxDep > 0 && p.dep > 0 && !/매매|분양/.test(p.deal)) chk(p.dep <= maxDep, 1);
+    if(needPower > 0 && p.power > 0) chk(p.power >= needPower, 1.5);
+    if(needHoist) chk(String(p.hoist).indexOf("없") < 0, 1.5);
 
-    var maxRent = num(c["최대월세"]);
-    if(maxRent > 0 && /임대/.test(p.deal) && p.rent > 0){
-      if(p.rent > maxRent) return null;
-      score += 2;
-    }
+    if(!relaxed && penalty > 0) return null;
 
-    var maxDep = num(c["최대예산_보증금"]);
-    if(maxDep > 0 && p.dep > 0 && !/매매|분양/.test(p.deal)){
-      if(p.dep > maxDep) return null;
-      score += 1;
-    }
-
-    var needPower = num(c["필수전력"]);
-    if(needPower > 0){
-      if(p.power > 0 && p.power < needPower) return null;
-      if(p.power >= needPower) score += 2;
-    }
-
-    if(/필요|필수|yes|있/i.test(String(c["호이스트필수"] || ""))){
-      if(String(p.hoist).indexOf("없") >= 0) return null;
-      score += 2;
-    }
+    var score = bonus - penalty * 10;
+    if(!regionFree) score += 3;
     return { score: score };
   }
 
