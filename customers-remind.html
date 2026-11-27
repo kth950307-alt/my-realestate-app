@@ -1302,10 +1302,10 @@
 
     var btn = wrap.querySelector(".mf-save");
     if(btn){ btn.disabled = true; btn.textContent = "저장 중…"; }
+    state.memoOpen[String(row)] = false;      // 저장 뒤 다시 그려질 때 입력칸은 접힌 상태로
     apiWrite(payload).then(function(){
       return loadCustomers(false);
     }).then(function(){
-      state.memoOpen[String(row)] = false;
       toast("✅ " + customerName(c) + " — 메모" + (remind ? "·다음 연락 " + remind : "") + " 저장했습니다");
     }).catch(function(e){
       toast(e.message || "저장하지 못했습니다", true);
