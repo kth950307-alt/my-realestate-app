@@ -1057,19 +1057,30 @@
 
   /* 검색 */
   var qTimer = 0;
+  function setQuery(v){
+    var wasSearching = !!state.q;
+    var willSearch = !!v;
+    if(willSearch && !wasSearching){
+      /* 검색을 시작하면 지금 고른 필터와 상관없이 전체에서 찾는다 */
+      state.filterBefore = state.filter;
+      state.filter = "all";
+    } else if(!willSearch && wasSearching && state.filterBefore){
+      state.filter = state.filterBefore;
+      state.filterBefore = null;
+    }
+    state.q = v;
+    render();
+  }
   el.qSearch.addEventListener("input", function(){
     clearTimeout(qTimer);
     var v = el.qSearch.value;
-    qTimer = setTimeout(function(){
-      state.q = v;
-      render();
-    }, 120);
+    qTimer = setTimeout(function(){ setQuery(v); }, 120);
   });
   el.qSearch.addEventListener("keydown", function(e){
-    if(e.key === "Escape"){ el.qSearch.value = ""; state.q = ""; render(); }
+    if(e.key === "Escape"){ el.qSearch.value = ""; setQuery(""); }
   });
   el.qClear.addEventListener("click", function(){
-    el.qSearch.value = ""; state.q = ""; render(); el.qSearch.focus();
+    el.qSearch.value = ""; setQuery(""); el.qSearch.focus();
   });
 
   /* 카드 안: 액션 · 추천 매물 토글 · 메모 펼치기 */
