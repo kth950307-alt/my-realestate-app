@@ -146,10 +146,43 @@
   .m-approx{display:inline-block; background:#fff7ed; color:#b45309; border:1px solid #fed7aa; font-size:10px;
     font-weight:800; padding:0 5px; border-radius:5px; margin-left:4px; vertical-align:1px;}
 
-  .c-actions{display:flex; gap:5px; margin-top:6px;}
-  .c-actions button{flex:1 1 0; font-family:inherit; font-size:11.5px; font-weight:800; padding:6px 2px;
+  /* 카톡 1초 복사 + 비슷한 매물 더 보기 */
+  .m-tools{display:flex; gap:6px; margin-bottom:7px;}
+  .m-copyall{flex:1; font-family:inherit; font-size:12px; font-weight:900; color:#166534; background:#ecfdf5;
+    border:1px solid #a7f3d0; border-radius:9px; padding:8px 10px; cursor:pointer;}
+  .m-copyall:hover{background:#d1fae5;}
+  .m-item .m-link{display:flex; align-items:center; gap:8px; flex:1; min-width:0; text-decoration:none; color:inherit;}
+  .m-copy{flex:none; font-family:inherit; font-size:11px; font-weight:900; color:#475569; background:#fff;
+    border:1px solid #dbe3ee; border-radius:8px; padding:4px 8px; cursor:pointer; line-height:1.4;}
+  .m-copy:hover{background:#eff6ff; color:#1d4ed8; border-color:#93c5fd;}
+  .m-more{width:100%; margin-top:6px; font-family:inherit; font-size:12px; font-weight:900; color:#1d4ed8;
+    background:#eff6ff; border:1px dashed var(--blue-line); border-radius:9px; padding:8px 10px; cursor:pointer;}
+  .m-more:hover{background:#dbeafe;}
+  .m-more:disabled{opacity:.6; cursor:progress;}
+
+  /* 카드 안 통화 메모 + 다음 연락일 */
+  .c-memoform{margin-top:7px; border-top:1px dashed var(--line); padding-top:8px;}
+  .c-memoform textarea{width:100%; min-height:60px; resize:vertical; font-family:inherit; font-size:12.5px;
+    font-weight:600; color:var(--ink); border:1.5px solid #dfe4ea; border-radius:9px; padding:8px 10px; line-height:1.5;}
+  .c-memoform textarea:focus{outline:none; border-color:var(--royal); box-shadow:0 0 0 3px rgba(37,99,235,.10);}
+  .mf-row{display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-top:7px;}
+  .mf-row label{font-size:11.5px; font-weight:900; color:var(--ink2);}
+  .mf-row input[type=date]{font-family:inherit; font-size:12.5px; font-weight:800; color:var(--ink);
+    border:1.5px solid #dfe4ea; border-radius:8px; padding:6px 8px;}
+  .mf-row input[type=date]:focus{outline:none; border-color:var(--royal); box-shadow:0 0 0 3px rgba(37,99,235,.10);}
+  .mf-chip{font-family:inherit; font-size:11px; font-weight:900; color:var(--royal-dark); background:#eff6ff;
+    border:1px solid var(--blue-line); border-radius:999px; padding:4px 9px; cursor:pointer;}
+  .mf-chip:hover{background:#dbeafe;}
+  .mf-save{margin-left:auto; font-family:inherit; font-size:12px; font-weight:900; color:#fff; border:0;
+    background:linear-gradient(140deg,#3B82F6,#1D4ED8); border-radius:9px; padding:8px 15px; cursor:pointer;}
+  .mf-save:disabled{opacity:.6; cursor:progress;}
+  .mf-hint{width:100%; font-size:10.8px; font-weight:600; color:var(--muted); line-height:1.45;}
+  .c-actions button.act-memo{background:#f5f3ff; border-color:#ddd6fe; color:#5b21b6;}
+
+  .c-actions{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px; margin-top:6px;}
+  .c-actions button{min-width:0; font-family:inherit; font-size:11.5px; font-weight:800; padding:6px 2px;
     border-radius:8px; border:1px solid var(--line); background:#fff; color:var(--ink2); cursor:pointer;
-    white-space:nowrap;}
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .c-actions button:hover{background:#f8fafc;}
   .c-actions button.act-done3{background:#ecfdf5; border-color:#a7f3d0; color:#047857;}
   .c-actions button.act-week7{background:#eff6ff; border-color:var(--blue-line); color:#1d4ed8;}
@@ -159,10 +192,20 @@
   .empty{background:#fff; border:1px dashed var(--line); border-radius:14px; padding:22px 16px; text-align:center;
     font-size:13px; color:var(--muted); font-weight:700; line-height:1.7;}
 
-  .filters{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:9px;}
-  .filters button{font-family:inherit; font-size:12px; font-weight:800; padding:7px 12px; border-radius:999px;
+  /* 상단 1줄 탭 (위·아래 중복 목록 대신 한 줄 전환) */
+  .tabs{display:flex; gap:6px; margin-bottom:10px; overflow-x:auto; overflow-y:hidden;
+    -webkit-overflow-scrolling:touch; scrollbar-width:none; padding:2px 2px 5px;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tabs button{flex:none; display:inline-flex; align-items:center; gap:6px; font-family:inherit;
+    font-size:12.5px; font-weight:800; padding:8px 13px; border-radius:999px; white-space:nowrap;
     border:1.5px solid #d3dbe6; background:#fff; color:#334155; cursor:pointer;}
-  .filters button.active{background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; border-color:#1d4ed8;}
+  .tabs button .n{font-size:11px; font-weight:900; background:#eef2f7; color:#475569; border-radius:999px;
+    padding:1px 7px; font-variant-numeric:tabular-nums;}
+  .tabs button.active{background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; border-color:#1d4ed8;
+    box-shadow:0 4px 12px rgba(37,99,235,.22);}
+  .tabs button.active .n{background:rgba(255,255,255,.24); color:#fff;}
+  .tabs button.alert:not(.active){border-color:#fcd34d; background:#fffbeb; color:#92400e;}
+  .tabs button.alert:not(.active) .n{background:#fef3c7; color:#92400e;}
 
   details.newcust{background:#fff; border:1px solid var(--line); border-radius:14px; padding:11px 14px; margin:12px 0;}
   details.newcust summary{cursor:pointer; font-size:13px; font-weight:900; color:var(--navy);}
@@ -209,8 +252,11 @@
     h2.sec{font-size:20px; margin:26px 0 14px;}
     h2.sec .cnt{font-size:13.5px; padding:3px 11px;}
 
-    .filters{gap:9px; margin-bottom:16px;}
-    .filters button{font-size:14px; padding:9px 18px;}
+    .tabs{gap:9px; margin-bottom:16px; position:sticky; top:0; z-index:20;
+      background:rgba(241,245,249,.97); box-shadow:0 10px 12px -10px rgba(15,23,42,.16);
+      padding:10px 2px 11px;}
+    .tabs button{font-size:15px; font-weight:900; padding:11px 20px; border-radius:11px;}
+    .tabs button .n{font-size:12.5px; padding:2px 9px;}
 
     /* 손님 카드: 흰 큰 카드 1열 */
     .c-list{gap:20px;}
@@ -256,10 +302,25 @@
     .m-item .mp{font-size:15.5px;}
     .m-none{font-size:13.5px;}
     .m-approx{font-size:11.5px; padding:1px 7px; vertical-align:2px;}
+    .m-tools{gap:9px; margin-bottom:11px;}
+    .m-copyall{font-size:14.5px; font-weight:900; padding:13px 18px; border-radius:11px;}
+    .m-copy{font-size:13px; padding:8px 12px; border-radius:10px;}
+    .m-more{font-size:14.5px; padding:13px 16px; border-radius:11px; margin-top:9px;}
+
+    /* 카드 안 통화 메모·다음 연락일 (PC) */
+    .c-memoform{margin-top:14px; padding-top:14px;}
+    .c-memoform textarea{font-size:15px; min-height:84px; padding:12px 14px; border-radius:11px;}
+    .mf-row{gap:9px; margin-top:11px;}
+    .mf-row label{font-size:13.5px;}
+    .mf-row input[type=date]{font-size:15px; padding:9px 12px; border-radius:10px;}
+    .mf-chip{font-size:13px; padding:6px 13px;}
+    .mf-save{font-size:14.5px; padding:12px 22px; border-radius:11px;}
+    .mf-hint{font-size:12.5px;}
 
     /* 5) 액션 */
     .c-actions{order:6; gap:10px; margin-top:18px;}
     .c-actions button{font-size:15px; font-weight:900; padding:13px 8px; border-radius:11px;}
+    .c-memoform{order:7;}
 
     .empty{font-size:14.5px; padding:32px 20px; line-height:1.8;}
     .toast{font-size:15px; padding:15px 22px;}
@@ -283,6 +344,7 @@
     .c-call{font-size:11px; padding:5px 8px;}
     .c-line .cond{font-size:11.8px;}
     .c-actions button{font-size:11px; padding:6px 1px;}
+    .c-actions{grid-template-columns:repeat(3,minmax(0,1fr));}
   }
 </style>
 </head>
@@ -294,7 +356,7 @@
       <div class="logo" aria-hidden="true">👥</div>
       <div>
         <h1>손님 리마인드</h1>
-        <p>최근 등록 순 · 조건 맞춤 매물 3건 · 통화 후 3일 뒤 다시</p>
+        <p>최근 등록 순 · 조건 맞춤 매물 3건 · 카톡 1초 복사 · 통화 후 메모</p>
       </div>
     </div>
     <div class="top-actions">
@@ -369,9 +431,18 @@
 
   <div id="lockedNote"></div>
 
-  <section id="dueSection">
-    <h2 class="sec">🔥 오늘 연락할 손님 <span class="cnt" id="dueCnt">0</span></h2>
-    <div class="c-list" id="dueList"></div>
+  <!-- 위·아래 중복 목록 대신 상단 1줄 탭 전환 -->
+  <div class="tabs" id="filters" role="tablist" aria-label="손님 목록 구분">
+    <button type="button" data-filter="due" class="alert" role="tab">🔥 오늘 연락 <span class="n" id="tabDue">0</span></button>
+    <button type="button" data-filter="active" class="active" role="tab">📇 진행 중 <span class="n" id="tabActive">0</span></button>
+    <button type="button" data-filter="recent" role="tab">🆕 최근 7일 <span class="n" id="tabRecent">0</span></button>
+    <button type="button" data-filter="done" role="tab">✅ 완료 <span class="n" id="tabDone">0</span></button>
+    <button type="button" data-filter="hold" role="tab">⏸️ 보류 <span class="n" id="tabHold">0</span></button>
+    <button type="button" data-filter="all" role="tab">전체 <span class="n" id="tabAll">0</span></button>
+  </div>
+
+  <section id="listSection">
+    <div class="c-list" id="allList"></div>
   </section>
 
   <details class="newcust" id="newBox">
@@ -421,19 +492,6 @@
     </div>
     <button type="button" class="btn-save" id="btnAddCustomer">손님 장부에 등록하기</button>
   </details>
-
-  <section id="allSection">
-    <h2 class="sec"><span id="allTitle">📇 전체 손님</span> <span class="cnt" id="allCnt">0</span></h2>
-    <div class="filters" id="filters">
-      <button type="button" data-filter="active" class="active">진행 중</button>
-      <button type="button" data-filter="recent">🆕 최근 7일</button>
-      <button type="button" data-filter="due">오늘 연락</button>
-      <button type="button" data-filter="done">계약완료</button>
-      <button type="button" data-filter="hold">보류</button>
-      <button type="button" data-filter="all">전체</button>
-    </div>
-    <div class="c-list" id="allList"></div>
-  </section>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -449,7 +507,7 @@
     url: "", pw: "", connected: false,
     customers: [], properties: [],
     filter: "active", q: "", busy: false, lastLoaded: "",
-    matchCache: {}
+    matchCache: {}, moreCache: {}, moreOpen: {}, memoOpen: {}, filterPicked: false
   };
   var gsSource = "";
 
@@ -459,8 +517,9 @@
     setupPanel: $("setupPanel"),
     cfgUrl: $("cfgUrl"), cfgPw: $("cfgPw"), cfgRemember: $("cfgRemember"),
     statDue: $("statDue"), statActive: $("statActive"), statAll: $("statAll"),
-    dueList: $("dueList"), dueCnt: $("dueCnt"), dueSection: $("dueSection"),
-    allList: $("allList"), allCnt: $("allCnt"), allTitle: $("allTitle"),
+    allList: $("allList"),
+    tabDue: $("tabDue"), tabActive: $("tabActive"), tabRecent: $("tabRecent"),
+    tabDone: $("tabDone"), tabHold: $("tabHold"), tabAll: $("tabAll"),
     filters: $("filters"), toast: $("toast"), gsCode: $("gsCode"),
     lockedNote: $("lockedNote"), guideBox: $("guideBox"),
     searchBar: $("searchBar"), qSearch: $("qSearch"), qHint: $("qHint"), qClear: $("qClear"),
@@ -650,6 +709,9 @@
       state.connected = true;
       state.customers = (data.customers || []).slice();
       state.matchCache = {};
+      state.moreCache = {};
+      state.moreOpen = {};
+      state.memoOpen = {};
       state.lastLoaded = timeLabel();
       setConn("on", "연결됨 · 손님 " + state.customers.length + "명");
       el.connTime.textContent = state.lastLoaded;
@@ -670,10 +732,12 @@
     return apiGet({ action: "properties" }).then(function(data){
       state.properties = data.properties || [];
       state.matchCache = {};
+      state.moreCache = {};
       render();
     }).catch(function(){
       state.properties = [];
       state.matchCache = {};
+      state.moreCache = {};
       render();
     });
   }
@@ -697,10 +761,11 @@
     return dayDiff(base, d) <= 7;
   }
 
-  /* ---------- 조건 → 매물 짝맞춤 (3건) ---------- */
-  /* relaxed=false : 금액·전력·호이스트·층수·평수까지 모두 맞는 매물
-     relaxed=true  : 동네·거래만 맞는 “가까운” 매물 (조건을 모두 맞추는 매물이 3건이 안 될 때만) */
-  function scoreProperty(c, p, relaxed){
+  /* ---------- 조건 → 매물 짝맞춤 (추천 3건 + 비슷한 매물 더 보기) ---------- */
+  /* mode: "strict"(조건 모두 일치) · "near"(동네·거래만 맞는 근접) · "wide"(평수·예산을 조금 넓힌 비슷한 매물) */
+  function scoreProperty(c, p, mode){
+    var relaxed = (mode === true || mode === "near");
+    var wide = (mode === "wide");
     var dealText = String(c["희망거래"] || "");
     var wantRent = /임대/.test(dealText);
     var wantSale = /매매|분양/.test(dealText);
@@ -718,6 +783,9 @@
     var needPower = num(c["필수전력"]);
     var needHoist = /필요|필수|yes|있/i.test(String(c["호이스트필수"] || ""));
 
+    /* 비슷한 매물(wide): 평수는 30% 아래까지, 금액은 30% 위까지 봐준다 */
+    var kArea = wide ? 0.7 : 1, kMoney = wide ? 1.3 : 1, kPower = wide ? 0.7 : 1;
+
     /* 조건별 감점 — 층수·평수가 어긋나는 것을 가장 크게 본다 */
     var penalty = 0, bonus = 0;
     function chk(ok, weight){
@@ -725,7 +793,7 @@
       else bonus += weight / 2;
     }
 
-    if(floor && p.floor){
+    if(floor && p.floor && !wide){
       var fp = String(p.floor).trim();
       var floorOk;
       if(floor.indexOf("건물 전체") >= 0){
@@ -741,42 +809,46 @@
       chk(floorOk, 3);
     }
     if(minArea > 0){
-      chk(p.area >= minArea, 3);
+      chk(p.area >= minArea * kArea, 3);
       if(p.area >= minArea && p.area <= minArea * 1.5) bonus += 1;
     }
-    if(maxRent > 0 && /임대/.test(p.deal) && p.rent > 0) chk(p.rent <= maxRent, 1.5);
-    if(maxDep > 0 && p.dep > 0 && !/매매|분양/.test(p.deal)) chk(p.dep <= maxDep, 1);
-    if(needPower > 0 && p.power > 0) chk(p.power >= needPower, 1.5);
+    if(maxRent > 0 && /임대/.test(p.deal) && p.rent > 0) chk(p.rent <= maxRent * kMoney, 1.5);
+    if(maxDep > 0 && p.dep > 0 && !/매매|분양/.test(p.deal)) chk(p.dep <= maxDep * kMoney, 1);
+    if(needPower > 0 && p.power > 0) chk(p.power >= needPower * kPower, 1.5);
     if(needHoist) chk(String(p.hoist).indexOf("없") < 0, 1.5);
 
-    if(!relaxed && penalty > 0) return null;
+    if(!relaxed && !wide && penalty > 0) return null;
 
     var score = bonus - penalty * 10;
     if(!regionFree) score += 3;
     return { score: score };
   }
 
-  function matchFor(c){
-    var out = [], used = {}, want = 3;
-    for(var pass = 0; pass < 2 && out.length < want; pass++){
-      var relaxed = (pass === 1);
-      var cands = [];
-      for(var i = 0; i < state.properties.length; i++){
-        var p = state.properties[i];
-        if(used[p.id]) continue;
-        var r = scoreProperty(c, p, relaxed);
-        if(!r) continue;
-        cands.push({ p: p, score: r.score, approx: relaxed });
-      }
-      cands.sort(function(a, b){
-        if(b.score !== a.score) return b.score - a.score;
-        return (b.p.area || 0) - (a.p.area || 0);
-      });
-      for(var k = 0; k < cands.length && out.length < want; k++){
-        out.push(cands[k]);
-        used[cands[k].p.id] = 1;
-      }
+  function collectMatches(c, mode, used, limit){
+    var cands = [];
+    for(var i = 0; i < state.properties.length; i++){
+      var p = state.properties[i];
+      if(used[p.id]) continue;
+      var r = scoreProperty(c, p, mode);
+      if(!r) continue;
+      cands.push({ p: p, score: r.score, approx: mode !== "strict" });
     }
+    cands.sort(function(a, b){
+      if(b.score !== a.score) return b.score - a.score;
+      return (b.p.area || 0) - (a.p.area || 0);
+    });
+    var out = [];
+    for(var k = 0; k < cands.length && out.length < limit; k++){
+      out.push(cands[k]);
+      used[cands[k].p.id] = 1;
+    }
+    return out;
+  }
+
+  function matchFor(c){
+    var used = {}, out = [];
+    out = out.concat(collectMatches(c, "strict", used, 3));
+    if(out.length < 3) out = out.concat(collectMatches(c, "near", used, 3 - out.length));
     return out;
   }
   /* 카드마다 한 번만 계산해 둔다 (검색으로 다시 그려도 빠르게) */
@@ -784,6 +856,21 @@
     var key = String(c.row);
     if(!state.matchCache[key]) state.matchCache[key] = matchFor(c);
     return state.matchCache[key];
+  }
+  /* 비슷한 매물: 추천 3건에 없는 것 중 평수·예산을 조금 넓혀서 최대 4건 */
+  function moreFor(c){
+    var key = String(c.row);
+    if(state.moreCache[key]) return state.moreCache[key];
+    var used = {}, base = cachedMatch(c);
+    for(var i = 0; i < base.length; i++) used[base[i].p.id] = 1;
+    state.moreCache[key] = state.properties.length ? collectMatches(c, "wide", used, 4) : [];
+    return state.moreCache[key];
+  }
+  /* 지금 카드에 보이는 매물 (추천 3건 + 펼친 비슷한 매물) */
+  function visibleMatches(c){
+    var core = cachedMatch(c);
+    if(!state.moreOpen[String(c.row)]) return core;
+    return core.concat(moreFor(c));
   }
 
   /* ---------- 검색 ---------- */
@@ -882,27 +969,109 @@
     return '<span class="badge dd over">D+' + Math.abs(diff) + ' 지남</span>';
   }
 
+  /* ---------- 카톡 복붙용 글 (매물명·층수·평수·보증금/월세·특징·링크) ---------- */
+  function propMoneyText(p){
+    if(/매매|분양/.test(String(p.deal || ""))) return p.price || "금액 협의";
+    var bits = [];
+    if(p.dep) bits.push("보증 " + commaNum(p.dep) + "만");
+    if(p.rent) bits.push("월 " + commaNum(p.rent) + "만");
+    return bits.length ? bits.join(" / ") : (p.price || "금액 협의");
+  }
+  function propSpecText(p){
+    var bits = [];
+    if(p.height) bits.push(String(p.height));
+    if(p.power) bits.push(commaNum(p.power) + "kW");
+    return bits.join(" · ") || "확인 필요";
+  }
+  function propRoadText(p){
+    var bits = [];
+    if(p.road) bits.push(String(p.road));
+    var h = String(p.hoist || "").trim();
+    if(h) bits.push(p.hoistSpec ? ("호이스트 " + p.hoistSpec) : ("호이스트 " + h));
+    return bits.join(" · ") || "확인 필요";
+  }
+  function propLink(p){ return HOME_URL + "#" + encodeURIComponent(p.id); }
+  function customerName(c){
+    var s = String(c["고객명"] || "").replace(/^\s*\d{6,8}\s*/, "").trim();
+    return s || "손님";
+  }
+
+  function briefItem(p, i){
+    var lines = [];
+    lines.push("▶ " + (i + 1) + ") " + (p.title || ("인천 서구 " + (p.region || "") + " 공장")));
+    lines.push("· 매물번호 : " + p.id + (p.deal ? " (" + p.deal + ")" : ""));
+    lines.push("· 위치 : 인천 서구 " + (p.region || "") + (p.zone ? " (" + p.zone + ")" : ""));
+    var spec = [];
+    if(String(p.floor || "").trim()) spec.push(String(p.floor).trim());
+    if(p.area) spec.push("전용 " + commaNum(p.area) + "평" + (p.office ? " / 사무실 " + commaNum(p.office) + "평" : ""));
+    lines.push("· 층수·면적 : " + (spec.join(" · ") || "확인 필요"));
+    lines.push("· 보증금/월세 : " + propMoneyText(p));
+    lines.push("· 층고·전력 : " + propSpecText(p));
+    lines.push("· 도로·설비 : " + propRoadText(p));
+    if(p.feature) lines.push("· 특징 : " + p.feature);
+    lines.push("· 링크 : " + propLink(p));
+    return lines.join("\n");
+  }
+
+  function briefHead(c, n){
+    var out = ["[우리부동산] " + customerName(c) + " 맞춤 매물 " + n + "건"];
+    var want = [];
+    if(c["희망거래"]) want.push(c["희망거래"]);
+    if(c["선호권역"]) want.push(c["선호권역"]);
+    if(num(c["최소평수"])) want.push(commaNum(num(c["최소평수"])) + "평 이상");
+    if(num(c["최대예산_보증금"])) want.push("보증 " + commaNum(num(c["최대예산_보증금"])) + "만 이하");
+    if(num(c["최대월세"])) want.push("월세 " + commaNum(num(c["최대월세"])) + "만 이하");
+    if(want.length) out.push("· 희망 : " + want.join(" · "));
+    out.push("");
+    return out.join("\n");
+  }
+  function briefFoot(){
+    return ["", "☎ 매매상담 032-582-6200 · 임대상담 032-576-2600", "📱 김소장 직통 010-2660-8276"].join("\n");
+  }
+  function kakaoText(c, items){
+    var out = [briefHead(c, items.length)];
+    for(var i = 0; i < items.length; i++){ out.push(briefItem(items[i].p, i)); out.push(""); }
+    out.push(briefFoot());
+    return out.join("\n");
+  }
+
   function matchHtml(c){
-    var list = state.properties.length ? cachedMatch(c) : [];
     if(!state.properties.length){
       return '<div class="m-none">매물 목록을 아직 못 불러왔습니다. 새로고침(↻)을 눌러 주세요.</div>';
     }
-    if(!list.length){
+    var core = cachedMatch(c);
+    if(!core.length){
       return '<div class="m-none">조건(동네·거래)에 맞는 공개 매물이 없습니다. 비공개 매물은 직접 확인해 보세요.</div>';
     }
-    var compact = window.matchMedia && window.matchMedia("(max-width:640px)").matches;    var html = "", anyApprox = false;
+    var rowKey = String(c.row);
+    var opened = !!state.moreOpen[rowKey];
+    var list = visibleMatches(c);
+    var extraN = moreFor(c).length;
+    var compact = !!(window.matchMedia && window.matchMedia("(max-width:640px)").matches);
+
+    var html = '<div class="m-tools"><button type="button" class="m-copyall" data-copyall="' + c.row + '">' +
+      '📋 카톡으로 ' + list.length + '건 복사</button></div>';
+    var anyApprox = false;
     for(var i = 0; i < list.length; i++){
       var p = list[i].p;
+      var isExtra = i >= core.length;
       if(list[i].approx) anyApprox = true;
-      var link = HOME_URL + "#" + encodeURIComponent(p.id);
-      html += '<a class="m-item" href="' + esc(link) + '" target="_blank" rel="noopener">' +
+      html += '<div class="m-item">' +
+        '<a class="m-link" href="' + esc(propLink(p)) + '" target="_blank" rel="noopener">' +
         '<span class="mid">' + esc(p.id) + '</span>' +
-        '<span class="mt">' + esc((p.title || p.deal || "").slice(0, compact ? 18 : 34)) +
-          (list[i].approx ? '<span class="m-approx">근접</span>' : '') + '</span>' +
+        '<span class="mt">' + esc((p.title || p.deal || "").slice(0, compact ? 15 : 30)) +
+          (list[i].approx ? '<span class="m-approx">' + (isExtra ? "비슷" : "근접") + '</span>' : '') + '</span>' +
         '<span class="mp">' + esc(p.price || "협의") + '</span>' +
-        '</a>';
+        '</a>' +
+        '<button type="button" class="m-copy" data-copy="' + c.row + '|' + i + '" title="이 매물만 카톡 복사">📋</button>' +
+        '</div>';
     }
-    if(anyApprox) html += '<div class="m-none">조건을 모두 맞춘 매물이 모자라 동네·거래만 맞춘 매물도 함께 보여드립니다.</div>';
+    if(anyApprox) html += '<div class="m-none">조건을 모두 맞춘 매물이 모자라 동네·거래가 같은 매물도 함께 넣었습니다.</div>';
+    if(extraN){
+      html += '<button type="button" class="m-more" data-more="' + c.row + '">' +
+        (opened ? "🔎 비슷한 매물 접기 ▴" : "🔎 비슷한 매물 더 보기 (+" + extraN + ")") + '</button>';
+    }
+    if(opened) html += '<div class="m-none">평수를 30% 아래까지, 예산을 30% 위까지 넓혀 찾은 매물입니다.</div>';
     return html;
   }
 
@@ -920,6 +1089,20 @@
            'title="추천 매물 보기" aria-label="추천 매물 보기">' +
            '<span class="t-mob">' + esc(mobTxt) + '</span>' +
            '<span class="t-pc">' + esc(pcTxt) + '</span></button>';
+  }
+
+  /* 통화 직후 메모 + 다음 연락일 (카드 안에서 바로) */
+  function memoFormHtml(c){
+    var row = c.row;
+    return '<textarea data-memoinput="' + row + '" rows="2" placeholder="통화 내용·전달사항 (예: 12월 초 입주 희망, 츄레라 진입 확인)"></textarea>' +
+      '<div class="mf-row"><label for="mfdate-' + row + '">다음 연락</label>' +
+      '<input type="date" id="mfdate-' + row + '" value="' + addDays(new Date(), 3) + '">' +
+      '<button type="button" class="mf-chip" data-mfchip="' + row + '" data-days="3">+3일</button>' +
+      '<button type="button" class="mf-chip" data-mfchip="' + row + '" data-days="7">+7일</button>' +
+      '<button type="button" class="mf-chip" data-mfchip="' + row + '" data-days="14">+2주</button>' +
+      '<button type="button" class="mf-save" data-mfsave="' + row + '">저장</button>' +
+      '<span class="mf-hint">저장하면 최근 통화일이 오늘로 기록되고, 쓴 메모는 기존 메모 뒤에 「오늘 날짜」와 함께 붙습니다.</span>' +
+      '</div>';
   }
 
   function cardHtml(c, opts){
@@ -970,20 +1153,52 @@
     html += '<div class="c-actions">';
     html += '<button type="button" class="act-done3" data-row="' + c.row + '" data-act="done3">✅ +3일</button>';
     html += '<button type="button" class="act-week7" data-row="' + c.row + '" data-act="week7">📅 +7일</button>';
+    html += '<button type="button" class="act-memo" data-row="' + c.row + '" data-act="memoform">📝 메모</button>';
     html += '<button type="button" class="act-contract" data-row="' + c.row + '" data-act="contract">🎉 완료</button>';
     html += '<button type="button" class="act-hold" data-row="' + c.row + '" data-act="hold">⏸️ 보류</button>';
-    html += '</div></article>';
+    html += '</div>';
+
+    /* 통화 후 메모·다음 연락일 입력칸 (기본은 접힘) */
+    html += '<div class="c-memoform" data-memoform="' + c.row + '"' + (state.memoOpen[String(c.row)] ? '' : ' hidden') + '>' +
+            memoFormHtml(c) + '</div>';
+
+    html += '</article>';
     return html;
+  }
+
+  function emptyText(searching, f){
+    if(searching) return "‘" + esc(state.q) + "’에 맞는 손님이 없습니다.";
+    if(!state.customers.length) return "아직 불러온 손님이 없습니다. 연결 설정을 확인하거나 [➕ 신규 손님 빠른 등록]으로 추가해 보세요.";
+    if(f === "due") return "오늘 연락할 손님이 없습니다 👍<br>다른 탭에서 직접 골라 전화해도 됩니다.";
+    if(f === "recent") return "최근 7일 안에 등록된 손님이 없습니다.";
+    if(f === "done") return "계약완료로 정리한 손님이 아직 없습니다.";
+    if(f === "hold") return "보류(장기추적) 손님이 없습니다.";
+    if(f === "active") return "진행 중인 손님이 없습니다.";
+    return "해당하는 손님이 없습니다.";
   }
 
   function render(){
     var all = state.customers.slice().sort(regSort);
-    /* PC 큰 화면: 한 사람씩 크게 보는 흐름이라 '오늘 연락할 손님'은 매물까지 펼친 상태로 */
     var wide = !!(window.matchMedia && window.matchMedia("(min-width:768px)").matches);
 
+    var nDue = all.filter(isDue).length;
+    var nActive = all.filter(isActive).length;
+    var nRecent = all.filter(isRecent7).length;
+    var nDone = all.filter(isDone).length;
+    var nHold = all.filter(isHold).length;
+
     el.statAll.textContent = all.length;
-    el.statActive.textContent = all.filter(isActive).length;
-    el.statDue.textContent = all.filter(isDue).length;
+    el.statActive.textContent = nActive;
+    el.statDue.textContent = nDue;
+    el.tabDue.textContent = nDue;
+    el.tabActive.textContent = nActive;
+    el.tabRecent.textContent = nRecent;
+    el.tabDone.textContent = nDone;
+    el.tabHold.textContent = nHold;
+    el.tabAll.textContent = all.length;
+
+    /* 처음 열 때: 오늘 연락할 손님이 있으면 그 탭으로, 없으면 진행 중으로 */
+    if(!state.filterPicked && all.length){ state.filter = nDue ? "due" : "active"; state.filterPicked = true; }
 
     var q = norm(state.q);
     var searching = !!q;
@@ -991,40 +1206,24 @@
 
     el.searchBar.classList.toggle("has", !!state.q);
     el.qHint.textContent = searching ? (base.length + "명 찾음") : "";
-
-    /* 오늘 연락할 손님 — 추천 매물은 펼친 채로 */
-    var due = base.filter(isDue);
-    el.dueCnt.textContent = due.length;
-    el.dueSection.hidden = searching;
     el.newBox.hidden = searching;
-    if(searching){
-      el.dueList.innerHTML = "";
-    } else {
-      el.dueList.innerHTML = !all.length
-        ? '<div class="empty">아직 불러온 손님이 없습니다. 연결 설정을 확인하거나 [➕ 신규 손님 빠른 등록]으로 추가해 보세요.</div>'
-        : (due.length
-          ? due.map(function(c, i){ return cardHtml(c, { due: true, open: wide ? true : i === 0 }); }).join("")
-          : '<div class="empty">오늘 연락할 손님이 없습니다 👍<br>아래 목록에서 직접 골라 전화해도 됩니다.</div>');
-    }
 
     var f = state.filter;
     var list = base.filter(function(c){
-      if(f === "active") return isActive(c);
+      if(searching) return true;              // 검색 중에는 고른 탭과 상관없이 전체에서 찾는다
       if(f === "due") return isDue(c);
+      if(f === "active") return isActive(c);
       if(f === "recent") return isRecent7(c);
       if(f === "done") return isDone(c);
       if(f === "hold") return isHold(c);
       return true;
     });
-    /* 추천 매물은 기본으로 접어 두고, 버튼 한 번으로 연다 */
-    var openInList = false;
-    el.allCnt.textContent = list.length;
-    el.allTitle.textContent = searching ? "🔍 검색 결과" : "📇 전체 손님";
+
+    /* 오늘 연락 탭은 매물까지 펼친 상태로(PC 큰 화면) */
+    var openOnPc = wide && !searching && f === "due";
     el.allList.innerHTML = list.length
-      ? list.map(function(c){ return cardHtml(c, { open: openInList }); }).join("")
-      : '<div class="empty">' + (searching
-          ? "‘" + esc(state.q) + "’에 맞는 손님이 없습니다."
-          : "해당하는 손님이 없습니다.") + '</div>';
+      ? list.map(function(c){ return cardHtml(c, { due: !searching && f === "due" && isDue(c), open: openOnPc }); }).join("")
+      : '<div class="empty">' + emptyText(searching, f) + '</div>';
 
     var btns = el.filters.querySelectorAll("button");
     for(var i = 0; i < btns.length; i++){
@@ -1079,6 +1278,38 @@
     }).catch(function(e){
       toast(e.message || "저장하지 못했습니다", true);
       if(btn){ btn.disabled = false; }
+    });
+  }
+
+  /* ---------- 통화 메모 + 다음 연락일 저장 ---------- */
+  function saveMemo(row, wrap){
+    var c = findCustomer(row);
+    if(!c || !wrap) return;
+    var ta = wrap.querySelector("textarea");
+    var dateEl = wrap.querySelector("input[type=date]");
+    var text = ta ? String(ta.value || "").trim() : "";
+    var remind = dateEl ? String(dateEl.value || "").trim() : "";
+    if(!text && !remind){ toast("메모나 다음 연락일 중 하나는 넣어 주세요", true); return; }
+
+    var payload = { action: "update", row: row, recent: today() };
+    if(remind) payload.remind = remind;
+    if(text){
+      var d = new Date();
+      var stamp = pad2(d.getMonth() + 1) + "/" + pad2(d.getDate());
+      var prev = String(c["상세메모"] || "").trim();
+      payload.memo = prev ? (prev + "\n" + stamp + " " + text) : (stamp + " " + text);
+    }
+
+    var btn = wrap.querySelector(".mf-save");
+    if(btn){ btn.disabled = true; btn.textContent = "저장 중…"; }
+    apiWrite(payload).then(function(){
+      return loadCustomers(false);
+    }).then(function(){
+      state.memoOpen[String(row)] = false;
+      toast("✅ " + customerName(c) + " — 메모" + (remind ? "·다음 연락 " + remind : "") + " 저장했습니다");
+    }).catch(function(e){
+      toast(e.message || "저장하지 못했습니다", true);
+      if(btn){ btn.disabled = false; btn.textContent = "저장"; }
     });
   }
 
@@ -1183,7 +1414,8 @@
       localStorage.removeItem(LS_PW);
       localStorage.removeItem(LS_REMEMBER);
     } catch(e){}
-    state.url = ""; state.pw = ""; state.customers = []; state.properties = []; state.matchCache = {};
+    state.url = ""; state.pw = ""; state.customers = []; state.properties = [];
+    state.matchCache = {}; state.moreCache = {}; state.moreOpen = {}; state.memoOpen = {};
     el.cfgUrl.value = ""; el.cfgPw.value = "";
     setConn("off", "연결을 해제했습니다");
     el.connTime.textContent = "";
@@ -1210,6 +1442,7 @@
     var b = e.target.closest("button[data-filter]");
     if(!b) return;
     state.filter = b.dataset.filter;
+    state.filterPicked = true;
     render();
   });
 
@@ -1243,6 +1476,81 @@
 
   /* 카드 안: 액션 · 추천 매물 토글 · 메모 펼치기 */
   function onCardClick(e){
+    /* 카톡 1초 복사 — 손님 전체 추천 매물 */
+    var copyAll = e.target.closest("button[data-copyall]");
+    if(copyAll){
+      var cAll = findCustomer(copyAll.dataset.copyall);
+      if(!cAll) return;
+      var allItems = visibleMatches(cAll);
+      if(!allItems.length){ toast("복사할 매물이 없습니다", true); return; }
+      copyText(kakaoText(cAll, allItems), "✅ 카톡에 붙여넣으세요 — " + allItems.length + "건 복사했습니다");
+      return;
+    }
+
+    /* 카톡 1초 복사 — 매물 한 건만 */
+    var copyOne = e.target.closest("button[data-copy]");
+    if(copyOne){
+      var parts = String(copyOne.dataset.copy).split("|");
+      var cOne = findCustomer(parts[0]);
+      var oneItems = cOne ? visibleMatches(cOne) : [];
+      var it = oneItems[Number(parts[1])];
+      if(!cOne || !it){ toast("매물을 찾지 못했습니다", true); return; }
+      copyText(kakaoText(cOne, [it]), "✅ " + it.p.id + " 매물 하나만 복사했습니다 — 카톡에 붙여넣으세요");
+      return;
+    }
+
+    /* 비슷한 매물 더 보기 / 접기 */
+    var moreBtn = e.target.closest("button[data-more]");
+    if(moreBtn){
+      var rowMore = String(moreBtn.dataset.more);
+      state.moreOpen[rowMore] = !state.moreOpen[rowMore];
+      var cMore = findCustomer(rowMore);
+      var boxMore = moreBtn.closest(".c-match");
+      if(cMore && boxMore) boxMore.innerHTML = matchHtml(cMore);
+      return;
+    }
+
+    /* 통화 메모 입력칸 열고 닫기 */
+    var mfBtn = e.target.closest("button[data-act='memoform']");
+    if(mfBtn){
+      var rowMf = String(mfBtn.dataset.row);
+      var cardMf = mfBtn.closest(".c-card");
+      var form = cardMf ? cardMf.querySelector(".c-memoform") : null;
+      if(!form) return;
+      var willOpen = form.hasAttribute("hidden");
+      if(willOpen){
+        form.removeAttribute("hidden");
+        var cMf = findCustomer(rowMf);
+        var di = form.querySelector("input[type=date]");
+        var cur = cMf ? parseDate(cMf["리마인드예정일"]) : null;
+        if(di){
+          var ahead = cur && dayDiff(cur, new Date()) >= 0;
+          di.value = ahead ? ymd(cur) : addDays(new Date(), 3);
+        }
+        state.memoOpen[rowMf] = true;
+        var ta = form.querySelector("textarea");
+        if(ta) ta.focus();
+      } else {
+        form.setAttribute("hidden", "");
+        state.memoOpen[rowMf] = false;
+      }
+      mfBtn.classList.toggle("on", willOpen);
+      return;
+    }
+
+    /* 다음 연락일 빠른 선택 */
+    var chip = e.target.closest("button[data-mfchip]");
+    if(chip){
+      var wrapC = chip.closest(".c-memoform");
+      var diC = wrapC ? wrapC.querySelector("input[type=date]") : null;
+      if(diC) diC.value = addDays(new Date(), Number(chip.dataset.days || 3));
+      return;
+    }
+
+    /* 메모 저장 */
+    var sv = e.target.closest("button[data-mfsave]");
+    if(sv){ saveMemo(sv.dataset.mfsave, sv.closest(".c-memoform")); return; }
+
     var act = e.target.closest("button[data-act]");
     if(act){ doAction(act.dataset.row, act.dataset.act, act); return; }
 
@@ -1272,7 +1580,6 @@
     var memo = e.target.closest(".c-memo");
     if(memo){ memo.classList.toggle("open"); }
   }
-  el.dueList.addEventListener("click", onCardClick);
   el.allList.addEventListener("click", onCardClick);
 
   $("btnAddCustomer").addEventListener("click", addCustomer);
