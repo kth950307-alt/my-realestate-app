@@ -1,0 +1,1534 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>계약 확인서 10초 발급 · 우리부동산 사장님 작업실</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%93%84%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap">
+<style>
+  :root{
+    --navy:#172e6c; --royal:#2563eb; --royal-dark:#1e40af;
+    --blue-soft:#eff6ff; --blue-line:#bfdbfe;
+    --gold:#e0a93b; --gold-soft:#fffcf3;
+    --red:#c81e1e; --green:#047857;
+    --ink:#1e293b; --ink2:#475569; --muted:#64748b;
+    --line:#e2e8f0; --bg:#f6f8fc; --card:#ffffff;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  [hidden]{display:none !important;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕","Noto Sans KR",system-ui,sans-serif;
+    -webkit-text-size-adjust:100%; font-size:15px; line-height:1.55;
+  }
+  .wrap{max-width:1440px; margin:0 auto; padding:14px 14px 96px;}
+
+  .top{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px;}
+  .brand{display:flex; align-items:center; gap:10px; min-width:0;}
+  .logo{width:38px; height:38px; border-radius:12px; background:linear-gradient(140deg,#3B82F6,#1D4ED8);
+    display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 4px 12px rgba(37,99,235,.28);}
+  .brand h1{margin:0; font-size:17px; font-weight:900; letter-spacing:-.5px; color:var(--navy); line-height:1.2;}
+  .brand p{margin:2px 0 0; font-size:11.5px; font-weight:600; color:var(--muted);}
+  .top-actions{display:flex; align-items:center; gap:7px; margin-left:auto;}
+  .btn{display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-size:12.5px; font-weight:800;
+    padding:9px 12px; border-radius:10px; border:1px solid var(--line); background:#fff; color:var(--ink2); cursor:pointer; white-space:nowrap;}
+  .btn:hover{background:#f8fafc; border-color:#cbd5e1;}
+  .btn:active{transform:translateY(1px);}
+  .btn.primary{background:linear-gradient(140deg,#3B82F6,#1D4ED8); color:#fff; border-color:#1D4ED8; box-shadow:0 4px 12px rgba(37,99,235,.24);}
+  .btn.primary:hover{background:linear-gradient(140deg,#2f74e8,#1a45c2);}
+  .btn.dark{background:var(--navy); color:#fff; border-color:var(--navy);}
+  .btn.dark:hover{background:#12245a;}
+  .btn:disabled{opacity:.55; cursor:progress;}
+
+  .grid{display:grid; grid-template-columns:minmax(340px,460px) minmax(0,1fr); gap:14px; align-items:start;}
+  @media (max-width:1080px){ .grid{grid-template-columns:1fr;} }
+
+  .formCol{display:flex; flex-direction:column; gap:10px;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden;}
+  .card > summary{
+    list-style:none; cursor:pointer; display:flex; align-items:center; gap:8px;
+    padding:12px 14px; font-size:14px; font-weight:900; color:var(--navy); letter-spacing:-.3px;
+    background:#fff; border-bottom:1px solid var(--line);
+  }
+  .card > summary::-webkit-details-marker{display:none;}
+  .card > summary .num{width:20px; height:20px; border-radius:6px; background:var(--blue-soft); color:var(--royal-dark);
+    display:inline-flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:900;}
+  .card > summary .m{margin-left:auto; font-size:10.5px; font-weight:800; color:#94a3b8;}
+  .card .body{padding:12px 14px 14px;}
+  .exampleTag{display:flex; align-items:center; gap:8px; background:#fffbeb; border:1px solid #fbe3a6; color:#8a5a05;
+    font-size:11.5px; font-weight:800; border-radius:10px; padding:8px 11px;}
+  .exampleTag .x{margin-left:auto; border:0; background:#fff; color:#8a5a05; border-radius:999px; padding:3px 9px;
+    font-family:inherit; font-size:11px; font-weight:800; cursor:pointer; border:1px solid #f3d489;}
+
+  .fld{margin-bottom:9px;}
+  .fld:last-child{margin-bottom:0;}
+  .fld > label{display:block; font-size:11.5px; font-weight:800; color:var(--ink2); margin-bottom:4px; letter-spacing:-.1px;}
+  .fld > label .lock{color:#b45309; font-weight:800; font-size:10px; background:#fef3c7; border-radius:5px; padding:1px 5px; margin-left:4px;}
+  .fld input[type=text], .fld input[type=date], .fld input[type=number], .fld select, .fld textarea{
+    width:100%; padding:9px 11px; border:1.5px solid #dfe4ea; border-radius:9px;
+    font-family:inherit; font-size:13.5px; font-weight:600; color:var(--ink); background:#fff;}
+  .fld input:focus, .fld select:focus, .fld textarea:focus{outline:none; border-color:var(--royal); box-shadow:0 0 0 3px rgba(37,99,235,.10);}
+  .fld textarea{resize:vertical; min-height:52px; line-height:1.55; font-weight:500;}
+  .fld input[type=number]{text-align:right;}
+  .unit{position:relative;}
+  .unit .u{position:absolute; right:11px; top:50%; transform:translateY(-50%); font-size:11px; font-weight:800; color:#94a3b8; pointer-events:none;}
+  .unit input{padding-right:34px !important;}
+
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;}
+  @media (max-width:520px){ .row3{grid-template-columns:1fr 1fr;} }
+
+  .sw{display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; color:var(--ink2); cursor:pointer; margin-top:2px;}
+  .sw input{width:17px; height:17px; accent-color:var(--royal);}
+  .hintline{font-size:11px; font-weight:600; color:#94a3b8; margin-top:5px; letter-spacing:-.1px;}
+  .safeList{display:flex; flex-direction:column; gap:7px; margin-top:4px;}
+  .safeList label{display:flex; gap:7px; align-items:flex-start; font-size:12.2px; font-weight:700; color:#334155; line-height:1.45; cursor:pointer;}
+  .safeList input{margin-top:2px; width:16px; height:16px; accent-color:var(--green); flex:0 0 auto;}
+
+  .prevCol{position:sticky; top:10px;}
+  @media (max-width:1080px){ .prevCol{position:static;} }
+  .prevBar{display:flex; align-items:center; gap:7px; flex-wrap:wrap; background:#fff; border:1px solid var(--line);
+    border-radius:14px 14px 0 0; padding:9px 11px; border-bottom:0;}
+  .prevBar .title{font-size:12.5px; font-weight:900; color:var(--navy); letter-spacing:-.3px;}
+  .prevBar .sp{margin-left:auto;}
+  .prevBox{background:#eef2f8; border:1px solid var(--line); border-radius:0 0 14px 14px; padding:12px; overflow:auto;}
+  #previewWrap{display:block; margin:0 auto; max-width:960px;}
+  #previewWrap canvas{display:block; width:100%; height:auto; border-radius:6px; box-shadow:0 6px 22px rgba(23,46,108,.14); background:#fff;}
+  .seg{display:inline-flex; border:1.5px solid #dfe4ea; border-radius:10px; overflow:hidden; background:#fff;}
+  .seg button{border:0; background:#fff; font-family:inherit; font-size:12.5px; font-weight:800; color:var(--ink2); padding:8px 12px; cursor:pointer; white-space:nowrap;}
+  .seg button[aria-pressed="true"]{background:var(--navy); color:#fff;}
+  .seg.small button{padding:6px 10px; font-size:11.5px;}
+
+  .actionBar{position:fixed; left:0; right:0; bottom:0; z-index:20; background:rgba(255,255,255,.96);
+    border-top:1px solid var(--line); box-shadow:0 -6px 20px rgba(23,46,108,.08);
+    padding:9px 12px calc(9px + env(safe-area-inset-bottom)); backdrop-filter:blur(8px);}
+  .actionBar .inner{max-width:1440px; margin:0 auto; display:flex; gap:7px; align-items:center; flex-wrap:wrap;}
+  .actionBar .info{margin-right:auto; font-size:11.5px; font-weight:700; color:var(--muted);}
+  .actionBar .info b{color:var(--navy);}
+
+  .toast{position:fixed; left:50%; bottom:78px; transform:translate(-50%,14px); z-index:40;
+    background:#0f172a; color:#fff; font-size:12.5px; font-weight:800; padding:10px 16px; border-radius:999px;
+    opacity:0; pointer-events:none; transition:opacity .18s, transform .18s; max-width:92vw; text-align:center;}
+  .toast.show{opacity:1; transform:translate(-50%,0);}
+  .toast.warn{background:#b3261e;}
+
+  @media (max-width:640px){
+    .wrap{padding:10px 10px 96px;}
+    .brand p{display:none;}
+    .btn .label{display:none;}
+    .btn.primary .label, .btn.dark .label{display:inline;}
+    .actionBar .info{display:none;}
+    .actionBar .inner{gap:6px;}
+    .actionBar .btn{flex:1 1 auto; justify-content:center; font-size:12px; padding:11px 8px;}
+    .actionBar .btn.dark{flex:2 1 auto;}
+  }
+
+  #printArea{display:none;}
+  @media print{
+    @page{size:A4; margin:9mm;}
+    body{background:#fff;}
+    body > *{display:none !important;}
+    #printArea{display:block !important;}
+    #printArea img{display:block; width:100%; margin:0 0 7mm; page-break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">📄</div>
+      <div>
+        <h1>가계약 · 계약 확인서 10초 발급</h1>
+        <p>값만 넣으면 계약 확인서 1장이 카톡 PNG·인쇄 PDF로 바로 나옵니다</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button type="button" class="btn" id="btnExample">📋 <span class="label">예시 불러오기</span></button>
+      <button type="button" class="btn" id="btnClear">🧹 <span class="label">비우기</span></button>
+      <button type="button" class="btn primary" id="btnPrintTop">🖨️ <span class="label">인쇄·PDF</span></button>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- ═══════════ 왼쪽: 입력 ═══════════ -->
+    <div class="formCol" id="formCol">
+
+      <div class="exampleTag" id="exampleTag">
+        <span>📋 지금은 ‘가좌동 289-18’ 예시 값입니다. 값만 바꿔 쓰세요.</span>
+        <button type="button" class="x" id="btnExample2">예시로</button>
+      </div>
+
+      <details class="card" open>
+        <summary><span class="num">0</span> 계약 기본 <span class="m">예정일·소유자</span></summary>
+        <div class="body">
+          <div class="row2">
+            <div class="fld">
+              <label for="fContractDate">계약 예정일</label>
+              <input type="date" id="fContractDate">
+            </div>
+            <div class="fld">
+              <label for="fContractTime">계약 시간 (선택)</label>
+              <input type="text" id="fContractTime" placeholder="예: 11:30">
+            </div>
+          </div>
+          <div class="fld">
+            <label for="fAddress">부동산 소재지 <span class="lock">지번</span></label>
+            <input type="text" id="fAddress" placeholder="인천광역시 서해구 가좌동 289-18">
+            <div class="hintline">인천 서구는 2026-07-01부터 서해구·검단구로 나뉩니다. 지번까지 정확히 넣어 주세요.</div>
+          </div>
+          <div class="row2">
+            <div class="fld">
+              <label for="fOwnerName">소유자 (임대인) 성함</label>
+              <input type="text" id="fOwnerName" placeholder="예: 주식회사 ○○○">
+            </div>
+            <div class="fld">
+              <label for="fPlace">계약 장소</label>
+              <input type="text" id="fPlace" placeholder="석남동 우리부동산">
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card" open>
+        <summary><span class="num">1</span> 목적물 · 기간 <span class="m">면적·기간</span></summary>
+        <div class="body">
+          <div class="fld">
+            <label for="fLandBuilding">토지 / 건물</label>
+            <input type="text" id="fLandBuilding" placeholder="공장용지 920.7㎡ / 철근콘크리트조 공장 1,257.65㎡">
+          </div>
+          <div class="fld">
+            <label for="fPart">임대할 부분</label>
+            <input type="text" id="fPart" placeholder="3층 일부 (70평 · 약 231.4㎡)">
+          </div>
+          <div class="row3">
+            <div class="fld">
+              <label for="fStart">시작일</label>
+              <input type="date" id="fStart">
+            </div>
+            <div class="fld">
+              <label for="fEnd">종료일</label>
+              <input type="date" id="fEnd">
+            </div>
+            <div class="fld">
+              <label for="fHandover">인도일</label>
+              <input type="date" id="fHandover">
+            </div>
+          </div>
+          <div class="hintline" id="periodHint">기간 24개월</div>
+        </div>
+      </details>
+
+      <details class="card" open>
+        <summary><span class="num">2</span> 보증금 · 월세 · 일정 <span class="m">만원 단위</span></summary>
+        <div class="body">
+          <div class="row2">
+            <div class="fld">
+              <label for="fDeposit">보증금 (매매 시 매매가)</label>
+              <div class="unit"><input type="number" id="fDeposit" inputmode="numeric" placeholder="800"><span class="u">만원</span></div>
+            </div>
+            <div class="fld">
+              <label for="fRent">월 차임</label>
+              <div class="unit"><input type="number" id="fRent" inputmode="numeric" placeholder="80"><span class="u">만원</span></div>
+            </div>
+          </div>
+          <div class="row3">
+            <div class="fld">
+              <label for="fContractTotal">계약금 총액</label>
+              <div class="unit"><input type="number" id="fContractTotal" inputmode="numeric" placeholder="80"><span class="u">만원</span></div>
+            </div>
+            <div class="fld">
+              <label for="fMidpay">중도금</label>
+              <div class="unit"><input type="number" id="fMidpay" inputmode="numeric" placeholder="0"><span class="u">만원</span></div>
+            </div>
+            <div class="fld">
+              <label for="fRentDay">월세 납부일</label>
+              <div class="unit"><input type="number" id="fRentDay" inputmode="numeric" placeholder="5"><span class="u">일</span></div>
+            </div>
+          </div>
+          <div class="row2">
+            <div class="fld">
+              <label for="fPart1Date">계약금 1차 날짜</label>
+              <input type="date" id="fPart1Date">
+            </div>
+            <div class="fld">
+              <label for="fPart1Amt">계약금 1차 금액</label>
+              <div class="unit"><input type="number" id="fPart1Amt" inputmode="numeric" placeholder="20"><span class="u">만원</span></div>
+            </div>
+          </div>
+          <div class="row2">
+            <div class="fld">
+              <label for="fPart2Date">계약금 2차 날짜</label>
+              <input type="date" id="fPart2Date">
+            </div>
+            <div class="fld">
+              <label for="fPart2Amt">계약금 2차 금액</label>
+              <div class="unit"><input type="number" id="fPart2Amt" inputmode="numeric" placeholder="60"><span class="u">만원</span></div>
+            </div>
+          </div>
+          <div class="row2">
+            <div class="fld">
+              <label for="fBalance">잔금</label>
+              <div class="unit"><input type="number" id="fBalance" inputmode="numeric" placeholder="720"><span class="u">만원</span></div>
+            </div>
+            <div class="fld">
+              <label for="fBalanceDate">잔금일 (월세 기산일)</label>
+              <input type="date" id="fBalanceDate">
+            </div>
+          </div>
+          <div class="row2">
+            <div class="fld">
+              <label for="fRentTiming">월세 납부 방식</label>
+              <select id="fRentTiming"><option value="후불">후불</option><option value="선불">선불</option></select>
+            </div>
+            <div class="fld" style="display:flex; align-items:flex-end; padding-bottom:6px;">
+              <label class="sw"><input type="checkbox" id="fVat"> 부가세(VAT) 별도</label>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card">
+        <summary><span class="num">3</span> 계약금 · 계좌 · 대리 계약 <span class="m">분쟁 예방</span></summary>
+        <div class="body">
+          <label class="sw" style="margin-bottom:8px;"><input type="checkbox" id="fAccountChecked"> 소유자 계좌 직접 송금 확인 (권장)</label>
+          <div class="row3">
+            <div class="fld">
+              <label for="fBank">은행</label>
+              <input type="text" id="fBank" placeholder="예: 신한은행">
+            </div>
+            <div class="fld">
+              <label for="fAccountNo">계좌번호</label>
+              <input type="text" id="fAccountNo" placeholder="예: 140-011-987240">
+            </div>
+            <div class="fld">
+              <label for="fAccountHolder">예금주</label>
+              <input type="text" id="fAccountHolder" placeholder="소유자 성함">
+            </div>
+          </div>
+          <label class="sw" style="margin-top:4px;"><input type="checkbox" id="fProxy"> 임대인 위임장 받고 대리 계약 진행</label>
+          <div class="fld" style="margin-top:8px;">
+            <label for="fProxyNote">대리 계약 비고</label>
+            <input type="text" id="fProxyNote" placeholder="임대인 위임장 수령 → 개업공인중개사 대리 체결">
+          </div>
+        </div>
+      </details>
+
+      <!-- 문서형: 특약 10줄 -->
+      <details class="card" data-for="doc">
+        <summary><span class="num">4</span> 주요 특약사항 <span class="m">문서형 · 한 줄에 하나</span></summary>
+        <div class="body">
+          <div class="fld">
+            <label for="fSpecTerms">특약 목록 (줄바꿈으로 구분, 자동 번호 1~10)</label>
+            <textarea id="fSpecTerms" style="min-height:210px; font-size:12.5px;"></textarea>
+            <div class="hintline">그대로 인쇄됩니다. 필요 없는 줄은 지우고, 새 줄을 추가하면 번호가 자동으로 다시 매겨집니다.</div>
+          </div>
+          <div style="border-top:1px dashed #dfe6ef; margin:10px 0 8px;"></div>
+          <div class="fld" style="margin-bottom:6px;">
+            <label>분쟁 예방 보강 조항 (체크하면 11번부터 자동 추가)</label>
+            <div class="safeList">
+              <label><input type="checkbox" id="fSpecA1"> 정식 계약서 우선 효력 — 본 확인서는 체결 전 합의 요약이며 최종 권리·의무는 정식 계약서로 확정</label>
+              <label><input type="checkbox" id="fSpecA2"> 무단 전대·업종 변경 금지 — 임대인 서면 동의 없는 전대·업종 외 변경 불가</label>
+              <label><input type="checkbox" id="fSpecA3"> 소유자 계좌 직접 송금 &amp; 법정 중개보수 — 소유자(위임 확인 대리인) 명의 계좌로만 송금, 상한요율 내 별도 정산</label>
+            </div>
+          </div>
+          <div class="fld" style="margin-bottom:6px;">
+            <label>선택 특약 (필요할 때만 체크)</label>
+            <div class="safeList">
+              <label><input type="checkbox" id="fSpecO1"> 계약전력 현 상태 인계 · 증설은 임차인 비용·허가 부담</label>
+              <label><input type="checkbox" id="fSpecO2"> 임대인 위임장에 따른 대리 계약 진행 문구</label>
+              <label><input type="checkbox" id="fSpecO3"> 권리금 없음 · 시설물 양도 조건 없음</label>
+            </div>
+          </div>
+          <div class="fld" style="margin-bottom:0;">
+            <label for="fPowerKw">계약전력 (선택 특약에 쓰입니다)</label>
+            <input type="text" id="fPowerKw" placeholder="예: 30">
+          </div>
+        </div>
+      </details>
+
+      <!-- 카드형: 특약 4종 + 4대 안전장치 -->
+      <details class="card" data-for="card">
+        <summary><span class="num">4</span> 주요 특약 (카드형) <span class="m">문구 그대로 인쇄</span></summary>
+        <div class="body">
+          <div class="fld">
+            <label for="fClause1">현 시설 · 실측 기준</label>
+            <textarea id="fClause1"></textarea>
+          </div>
+          <div class="fld">
+            <label for="fClause2">시설 · 누수 수리 (중요)</label>
+            <textarea id="fClause2"></textarea>
+          </div>
+          <div class="fld">
+            <label for="fClause3">수선 · 유지비 구분</label>
+            <textarea id="fClause3"></textarea>
+          </div>
+          <div class="fld">
+            <label for="fClause4">사업자등록 · 인허가 · 공과금</label>
+            <textarea id="fClause4"></textarea>
+          </div>
+          <div class="hintline" style="margin-bottom:6px;">굵게는 <b>**문장**</b>, 빨간 굵게는 <b>!!문장!!</b>으로 감싸면 그대로 반영됩니다.</div>
+          <div class="safeList">
+            <label><input type="checkbox" id="fCheck1"> ① 등기부 권리관계 · 건축물대장 용도 및 업종 인허가 사전 확인</label>
+            <label><input type="checkbox" id="fCheck2"> ② 민법 제565조 해약금 기준(계약금 포기·배액 상환) 고지</label>
+            <label><input type="checkbox" id="fCheck3"> ③ 소유자 계좌 직접 송금 원칙(대리인·제3자 계좌 금지)</label>
+            <label><input type="checkbox" id="fCheck4"> ④ 법정 상한요율 내 중개보수 · 정식 계약서 우선 효력</label>
+          </div>
+        </div>
+      </details>
+
+      <!-- 카드형: 안내 문구 · 배지 -->
+      <details class="card" data-for="card">
+        <summary><span class="num">5</span> 안내 문구 · 하단 배지 <span class="m">자동 작성</span></summary>
+        <div class="body">
+          <div class="fld" data-rolebox="common">
+            <label for="fNoteCommon">공통 안내 (카드형 · 공통)</label>
+            <textarea id="fNoteCommon" style="min-height:92px;"></textarea>
+            <button type="button" class="btn" data-autonote="common" style="margin-top:6px;">↺ 자동 문구로</button>
+          </div>
+          <div class="fld" data-rolebox="tenant" hidden>
+            <label for="fNoteTenant">임차인분께 드리는 안내 (임차인용)</label>
+            <textarea id="fNoteTenant" style="min-height:92px;"></textarea>
+            <button type="button" class="btn" data-autonote="tenant" style="margin-top:6px;">↺ 자동 문구로</button>
+          </div>
+          <div class="fld" data-rolebox="landlord" hidden>
+            <label for="fNoteLandlord">임대인분께 드리는 안내 (임대인용)</label>
+            <textarea id="fNoteLandlord" style="min-height:92px;"></textarea>
+            <button type="button" class="btn" data-autonote="landlord" style="margin-top:6px;">↺ 자동 문구로</button>
+          </div>
+          <div class="fld">
+            <label for="fBadge">하단 배지 문구</label>
+            <input type="text" id="fBadge">
+          </div>
+        </div>
+      </details>
+
+    </div>
+
+    <!-- ═══════════ 오른쪽: 미리보기 ═══════════ -->
+    <div class="prevCol">
+      <div class="prevBar">
+        <span class="title">미리보기</span>
+        <div class="seg small" id="styleSeg">
+          <button type="button" data-style="doc" aria-pressed="true">📄 깔끔 문서형</button>
+          <button type="button" data-style="card" aria-pressed="false">🟦 네이비 카드형</button>
+        </div>
+        <div class="seg small" id="roleSeg" hidden>
+          <button type="button" data-role="common" aria-pressed="true">공통</button>
+          <button type="button" data-role="tenant" aria-pressed="false">임차인용</button>
+          <button type="button" data-role="landlord" aria-pressed="false">임대인용</button>
+        </div>
+        <span class="sp"></span>
+        <div class="seg small" id="zoomSeg">
+          <button type="button" data-zoom="fit" aria-pressed="true">맞춤</button>
+          <button type="button" data-zoom="full" aria-pressed="false">100%</button>
+        </div>
+      </div>
+      <div class="prevBox">
+        <div id="previewWrap"><canvas id="previewCanvas" width="1920" height="2712"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="actionBar">
+  <div class="inner">
+    <span class="info" id="barInfo"><b>깔끔 문서형</b> · 임차인·임대인 공통 1장</span>
+    <button type="button" class="btn" id="btnPng">🖼️ PNG 저장</button>
+    <button type="button" class="btn dark" id="btnPngBoth" hidden>📥 임차인·임대인 2종</button>
+    <button type="button" class="btn primary" id="btnPrint">🖨️ 인쇄·PDF</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="printArea"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ══════════════════════════════════════════════════════════
+     1. 기본값 (가좌동 289-18 표준 예시)
+     ══════════════════════════════════════════════════════════ */
+  var SPEC_DEFAULT = [
+    "본 계약은 임차인이 공부 서류 및 현장을 직접 확인한 후 '잔금일 기준 현 시설물 상태'에서 체결하는 계약이다. (공실 인도 조건을 전제로 한다.)",
+    "임대할 부분의 면적은 실측면적을 기준으로 하며, 임차인은 추후 현재 시설 상태에 대하여 이의를 제기하지 않는다.",
+    "임차인은 계약일 현재 위 부동산의 등기사항전부증명서 상 존재하는 선순위 권리 등 내용을 확인하고 계약을 체결한다.",
+    "임대인은 임차인이 입주하기 전 공장 내 조명 등 주요 기본 시설의 정상 작동 여부를 확인하고, 고장·불량이 있는 시설은 수리 또는 교체하여 임차인이 정상적으로 사용할 수 있도록 조치한다.",
+    "임대차 기간 중 소모품 교체 및 임차인의 과실이나 일상적 사용으로 인한 경미한 수선·유지보수 비용은 임차인이 부담한다. 단, 자연 노후화로 인한 건축물의 구조적 하자(지붕 누수, 벽체 균열 등 대수선)는 임대인이 책임지고 수리한다.",
+    "임차인의 영업 목적에 따른 업종 허가, 등록, 신고 및 이에 필요한 제반 행정 절차와 비용은 임차인의 책임으로 한다.",
+    "임대료의 부가세는 별도이며 임대인은 매월 세금계산서를 발행하기로 한다.",
+    "잔금일까지 발생하는 관리비, 각종 공과금은 임대인이 정산하기로 하며, 잔금일 이후로 발생하는 비용은 임차인이 납부하기로 한다.",
+    "임차인은 계약 종료 시 공장을 임대 개시 상태로 원상복구한 후 임대인에게 반환해야 하며, 추후 분쟁을 방지하기 위해 입주 전 내·외부 사진을 촬영하여 서로 보관하기로 한다.",
+    "기타사항은 민법 임대차보호법 및 부동산임대차 계약 일반 관례에 따르기로 한다."
+  ];
+
+  var EXAMPLE = {
+    contractDate: "2026-11-26",
+    contractTime: "11:30",
+    address: "인천광역시 서해구 가좌동 289-18",
+    ownerName: "",
+    place: "석남동 우리부동산",
+    landBuilding: "공장용지 920.7㎡ / 철근콘크리트조 공장 1,257.65㎡",
+    part: "3층 일부 (70평 · 약 231.4㎡)",
+    start: "2026-12-05",
+    end: "2028-12-04",
+    handover: "2026-12-05",
+    deposit: 800,
+    contractTotal: 80,
+    midpay: 0,
+    rent: 80,
+    rentDay: 5,
+    rentTiming: "선불",
+    part1Date: "2026-11-23",
+    part1Amt: 20,
+    part2Date: "2026-11-26",
+    part2Amt: 60,
+    balance: 720,
+    balanceDate: "2026-12-05",
+    vat: true,
+    accountChecked: true,
+    bank: "",
+    accountNo: "",
+    accountHolder: "",
+    proxy: true,
+    proxyNote: "임대인으로부터 정식 위임장을 수령하여, 개업공인중개사 김태형(우리부동산 대표)이 임대인의 대리인 자격으로 본 임대차 계약을 적법하게 진행·체결합니다.",
+    clause1: "전금일(12/05) 기준 현 시설물 및 실측면적 상태 계약이며, 입주 전 내·외부 사진 촬영 보관 후 계약 종료 시 원상복구 반환합니다.",
+    clause2: "입주 전 조명 등 기분 시설 정상 작동 확인 및 고장·불량 수리. 현재 목적물 내 !!일부 누수 발생을 상호 인지!!하였으며, 해당 누수는 임대인 책임·비용으로 수리(시기는 상호 협의).",
+    clause3: "소모품 교체 및 임차인 과실·일상 사용 경미 수선은 임차인이, 지붕·누수·벽체 균열 등 **구조적 하자(대수선)는 임대인이 부담**합니다.",
+    clause4: "사업자등록 및 업종 인허가 등록: 신고·면허·인허가 비용은 모두 **임차인 책임**으로 진행합니다. 전금일(12/05) 이전 관리비·공과금은 임대인이 정산하고 이후는 임차인이 부담합니다.",
+    check1: true, check2: true, check3: true, check4: true,
+    specTerms: SPEC_DEFAULT.join("\n"),
+    specA1: true, specA2: true, specA3: true,
+    specO1: false, specO2: false, specO3: false,
+    powerKw: "",
+    noteCommon: "", noteTenant: "", noteLandlord: "",
+    badge: ""
+  };
+
+  var data = Object.assign({}, EXAMPLE);
+  var notesEdited = { common:false, tenant:false, landlord:false };
+  var style = "doc";          /* doc = 깔끔 문서형(기본) / card = 네이비 카드형 */
+  var role = "common";        /* 카드형에서만 사용 */
+  var zoom = "fit";
+
+  var $ = function(id){ return document.getElementById(id); };
+  var el = {
+    toast: $("toast"), canvas: $("previewCanvas"), previewWrap: $("previewWrap"),
+    barInfo: $("barInfo"), periodHint: $("periodHint"), roleSeg: $("roleSeg"),
+    btnPngBoth: $("btnPngBoth"), formCol: $("formCol")
+  };
+
+  /* ══════════════════════════════════════════════════════════
+     2. 도우미
+     ══════════════════════════════════════════════════════════ */
+  var DOW = ["일","월","화","수","목","금","토"];
+  function pad2(n){ return (n < 10 ? "0" : "") + n; }
+  function parseDate(s){
+    var m = String(s || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if(!m) return null;
+    var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function dowText(s){ var d = parseDate(s); return d ? DOW[d.getDay()] : ""; }
+  function longDate(s){
+    var d = parseDate(s);
+    if(!d) return String(s || "-");
+    return d.getFullYear() + "년 " + (d.getMonth() + 1) + "월 " + d.getDate() + "일(" + DOW[d.getDay()] + ")";
+  }
+  function mdText(s){
+    var d = parseDate(s);
+    return d ? (d.getMonth() + 1) + "월 " + d.getDate() + "일" : "-";
+  }
+  function mdd(s){
+    var d = parseDate(s);
+    return d ? pad2(d.getMonth() + 1) + "/" + pad2(d.getDate()) : "-";
+  }
+  function mddDot(s){
+    var d = parseDate(s);
+    return d ? d.getFullYear() + "." + pad2(d.getMonth() + 1) + "." + pad2(d.getDate()) : "-";
+  }
+  function wonText(v){                        /* 800만 원 */
+    v = Math.round(Number(v) || 0);
+    if(!v) return "없음";
+    var eok = Math.floor(v / 10000), man = v % 10000, out = "";
+    if(eok) out += eok + "억 ";
+    if(man) out += man.toLocaleString() + "만 ";
+    return out.trim() + " 원";
+  }
+  function wonShort(v){                       /* 800만 */
+    v = Math.round(Number(v) || 0);
+    if(!v) return "0";
+    var eok = Math.floor(v / 10000), man = v % 10000, out = "";
+    if(eok) out += eok + "억 ";
+    if(man) out += man.toLocaleString() + "만";
+    return out.trim();
+  }
+  function wonDoc(v){                         /* 문서형: 660만원 */
+    v = Math.round(Number(v) || 0);
+    if(!v) return "0원";
+    var eok = Math.floor(v / 10000), man = v % 10000, out = "";
+    if(eok) out += eok + "억 ";
+    if(man) out += man.toLocaleString() + "만";
+    return out.trim() + "원";
+  }
+  function monthsBetween(a, b){
+    var s = parseDate(a), e = parseDate(b);
+    if(!s || !e) return 0;
+    var m = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth());
+    if(e.getDate() < s.getDate()) m -= 1;
+    return m > 0 ? m : 0;
+  }
+  function num(id){ return Number(String($(id).value).replace(/[^\d.-]/g, "")) || 0; }
+
+  function toast(msg, warn){
+    el.toast.textContent = msg;
+    el.toast.className = "toast show" + (warn ? " warn" : "");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){ el.toast.className = "toast"; }, 3200);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     3. 자동 문구
+     ══════════════════════════════════════════════════════════ */
+  function periodText(){
+    var mm = monthsBetween(data.start, data.end);
+    return mm ? "(" + mm + "개월)" : "";
+  }
+  function scheduleLine(){
+    var t = mdd(data.contractDate) + " 본 계약";
+    t += (data.midpay > 0) ? " · 중도금 " + wonShort(data.midpay) + "원" : " · 중도금 없음";
+    t += " · " + mdd(data.balanceDate) + " 잔금";
+    return t;
+  }
+  function autoBadge(){ return scheduleLine(); }
+
+  function contractPartsText(){
+    var p1 = Number(data.part1Amt) || 0, p2 = Number(data.part2Amt) || 0;
+    var total = Number(data.contractTotal) || 0;
+    if(p2 > 0 && p1 > 0){
+      return "총 " + wonShort(total) + "원 중 " + mdd(data.part1Date) + " 일부금 " + wonShort(p1) +
+        "원을 먼저 수령하고, " + longDate(data.part2Date) + " 정식 계약 진행 시 나머지 " + wonShort(p2) +
+        "원을 수령합니다.";
+    }
+    return "총 " + wonShort(total) + "원을 " + longDate(data.contractDate) + " 계약 시 수령합니다.";
+  }
+
+  function autoNoteCommon(){
+    var lines = [];
+    lines.push("안녕하세요. 우리부동산 김태형 소장입니다.");
+    lines.push("① 계약 예정일은 " + longDate(data.contractDate) + (data.contractTime ? " " + data.contractTime : "") +
+      "이며, 보증금 " + wonShort(data.deposit) + " / 월 " + wonShort(data.rent) + " (" + longDate(data.start) +
+      "부터 " + (monthsBetween(data.start, data.end) || "") + "개월) 조건입니다.");
+    lines.push("② 계약금 " + wonShort(data.contractTotal) + "원은 " +
+      (Number(data.part2Amt) > 0 ? mdd(data.part1Date) + " " + wonShort(data.part1Amt) + "원 · " + mdd(data.part2Date) + " " + wonShort(data.part2Amt) + "원 분할" : mdd(data.contractDate) + " 일괄") +
+      " 수령 예정이며, 잔금 " + wonShort(data.balance) + "원은 " + longDate(data.balanceDate) + "입니다.");
+    lines.push("③ 임차인분은 인적사항(성함·주민·사업자번호·주소·연락처)을, 임대인분은 위임장과 입금 계좌를 회신 부탁드립니다.");
+    lines.push("▶ 본 확인서는 임차인·임대인 양측에 동일하게 전달드립니다.");
+    return lines.join("\n");
+  }
+
+  function autoNoteTenant(){
+    var lines = [];
+    lines.push("안녕하세요. 우리부동산 김태형 소장입니다.");
+    lines.push("① 계약 예정일은 " + longDate(data.contractDate) + (data.contractTime ? " " + data.contractTime : "") +
+      "입니다. (보증금 " + wonShort(data.deposit) + " / 월 " + wonShort(data.rent) + " · " + longDate(data.start) +
+      "부터 " + (monthsBetween(data.start, data.end) || "") + "개월)");
+    if(Number(data.balance) > 0){
+      lines.push("② 잔금 " + wonShort(data.balance) + "원은 " + longDate(data.balanceDate) + "까지 준비 부탁드립니다.");
+    }
+    lines.push("③ 정식 계약서 작성을 위해 임차인분 인적사항(성함 · 주민·사업자번호 · 주소 · 연락처) 회신 부탁드립니다.");
+    if(data.accountChecked){
+      lines.push("④ 계약금·잔금은 소유자 명의 계좌로만 직접 송금해 주세요. (제3자·대리인 계좌 송금은 분쟁 위험이 있습니다.)");
+    }
+    return lines.join("\n");
+  }
+
+  function autoNoteLandlord(){
+    var lines = [];
+    lines.push("안녕하세요. 우리부동산 김태형 소장입니다.");
+    lines.push(data.proxy
+      ? "① 보내주신 위임장 정식 수령하였으며, 제가 임대인 대리인으로서 계약을 진행하고 있습니다."
+      : "① 임대인 본인과 직접 계약 진행 예정이며, 일정 다시 한 번 확인 부탁드립니다.");
+    var p1 = Number(data.part1Amt) || 0, p2 = Number(data.part2Amt) || 0;
+    if(p2 > 0 && p1 > 0){
+      lines.push("② " + mdd(data.part1Date) + " 계약금 일부 " + wonShort(p1) + "원 수령 후, " + longDate(data.part2Date) +
+        " 계약 진행 시 나머지 계약금 " + wonShort(p2) + "원 수령 예정이며, " + longDate(data.balanceDate) +
+        " 잔금(" + wonShort(data.balance) + "원) 일정으로 진행합니다.");
+    }else{
+      lines.push("② " + longDate(data.contractDate) + " 계약금 " + wonShort(data.contractTotal) + "원 수령 예정이며, " +
+        longDate(data.balanceDate) + " 잔금(" + wonShort(data.balance) + "원) 일정으로 진행합니다.");
+    }
+    lines.push("▶ 위 내용 확인 부탁드립니다. (계약금 입금 계좌도 함께 회신 부탁드립니다.)");
+    return lines.join("\n");
+  }
+
+  function syncAutoTexts(force){
+    data.badge = (force || !data.badge || data.badge === autoBadge()) ? autoBadge() : data.badge;
+    if(force || !notesEdited.common){ data.noteCommon = autoNoteCommon(); $("fNoteCommon").value = data.noteCommon; }
+    if(force || !notesEdited.tenant){ data.noteTenant = autoNoteTenant(); $("fNoteTenant").value = data.noteTenant; }
+    if(force || !notesEdited.landlord){ data.noteLandlord = autoNoteLandlord(); $("fNoteLandlord").value = data.noteLandlord; }
+    $("fBadge").value = data.badge;
+    el.periodHint.textContent = "임대차 기간 " + periodText() + " · 인도일 " + mddDot(data.handover) + " · 잔금 " + mddDot(data.balanceDate);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     4. 캔버스 공통
+     ══════════════════════════════════════════════════════════ */
+  var W = 960;
+  var NAVY = "#172e6c", INK = "#1e293b", INK2 = "#475569", MUTED = "#64748b",
+      LINE = "#e2e8f0", RED = "#c81e1e", GREEN = "#047857";
+
+  function fnt(w, s){ return w + " " + s + "px Pretendard, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif"; }
+  function serifFnt(w, s){ return w + " " + s + "px 'Nanum Myeongjo', Batang, 바탕, 'AppleMyungjo', 'Apple SD Gothic Neo', serif"; }
+
+  function rr(g, x, y, w, h, r){
+    var r1 = Array.isArray(r) ? r[0] : r, r2 = Array.isArray(r) ? r[1] : r,
+        r3 = Array.isArray(r) ? (r[2] === undefined ? r1 : r[2]) : r,
+        r4 = Array.isArray(r) ? (r[3] === undefined ? r1 : r[3]) : r;
+    g.beginPath();
+    g.moveTo(x + r1, y);
+    g.lineTo(x + w - r2, y); g.quadraticCurveTo(x + w, y, x + w, y + r2);
+    g.lineTo(x + w, y + h - r3); g.quadraticCurveTo(x + w, y + h, x + w - r3, y + h);
+    g.lineTo(x + r4, y + h); g.quadraticCurveTo(x, y + h, x, y + h - r4);
+    g.lineTo(x, y + r1); g.quadraticCurveTo(x, y, x + r1, y);
+    g.closePath();
+  }
+
+  /* 인라인 표기: **굵게**, !!빨간굵게!! */
+  function richRuns(text){
+    var runs = [], re = /(\*\*[^*]+\*\*|!![^!]+!!)/g, last = 0, m;
+    text = String(text == null ? "" : text);
+    while((m = re.exec(text))){
+      if(m.index > last) runs.push({ t: text.slice(last, m.index), b:false, r:false });
+      var raw = m[0];
+      runs.push({ t: raw.slice(2, -2), b:true, r: raw.charAt(0) === "!" });
+      last = m.index + raw.length;
+    }
+    if(last < text.length) runs.push({ t: text.slice(last), b:false, r:false });
+    return runs;
+  }
+  function richWords(text){
+    var runs = richRuns(text), words = [];
+    runs.forEach(function(run){
+      String(run.t).split(/(\s+|\n)/).forEach(function(seg){
+        if(seg === "") return;
+        if(seg === "\n"){ words.push({ br:true }); return; }
+        if(/^\s+$/.test(seg)){ words.push({ sp:true }); return; }
+        words.push({ t: seg, b: run.b, r: run.r });
+      });
+    });
+    return words;
+  }
+  function drawRich(g, text, x, y, maxW, opt){
+    opt = opt || {};
+    var size = opt.size || 13.8, lh = opt.lineH || Math.round(size * 1.62),
+        color = opt.color || "#334155",
+        words = richWords(text), line = [], lineW = 0, first = true;
+    function flush(){
+      var cx = x;
+      for(var i = 0; i < line.length; i++){
+        var wd = line[i];
+        if(wd.sp){ cx += 4; continue; }
+        g.font = fnt(wd.b ? 800 : (opt.weight || 500), size);
+        g.fillStyle = wd.r ? RED : (wd.b ? (opt.boldColor || INK) : color);
+        g.textAlign = "left";
+        g.fillText(wd.t, cx, y);
+        cx += g.measureText(wd.t).width;
+      }
+      line = []; lineW = 0; y += lh; first = false;
+    }
+    words.forEach(function(wd){
+      if(wd.br){ flush(); return; }
+      g.font = fnt(wd.b ? 800 : (opt.weight || 500), size);
+      var w = wd.sp ? 4 : g.measureText(wd.t).width;
+      if(lineW > 0 && lineW + w > maxW){ flush(); }
+      if(line.length === 0 && wd.sp) return;
+      line.push(wd); lineW += w;
+    });
+    if(line.length) flush();
+    return y;
+  }
+  function measuredRichHeight(g, text, maxW, opt){
+    opt = opt || {};
+    var words = richWords(text), w = 0, lines = 1;
+    words.forEach(function(wd){
+      if(wd.br){ lines++; w = 0; return; }
+      g.font = fnt(wd.b ? 800 : (opt.weight || 500), opt.size || 13.8);
+      var ww = wd.sp ? 4 : g.measureText(wd.t).width;
+      if(w > 0 && w + ww > maxW){ lines++; w = ww; return; }
+      w += ww;
+    });
+    return lines * (opt.lineH || 22);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     5. ① 깔끔 문서형 (1장 공통)
+     ══════════════════════════════════════════════════════════ */
+  var D_INSET = 13, D_L = 78, D_R = W - 78, D_W = D_R - D_L;
+
+  function dWrap(g, text, draw, x, y, maxW, size, lh, align){
+    /* 단순 래핑(서식 없음) — measure·draw 공용. 다음 y 반환 */
+    g.font = serifFnt(400, size);
+    var words = String(text == null ? "" : text).split(/(\s+)/).filter(function(s){ return s !== ""; });
+    var line = "", lines = [];
+    words.forEach(function(w){
+      var t = line + w;
+      if(g.measureText(t).width > maxW && line !== ""){ lines.push(line.replace(/\s+$/,"")); line = w.replace(/^\s+/,""); }
+      else line = t;
+    });
+    if(line) lines.push(line.replace(/\s+$/,""));
+    if(!lines.length) lines.push("");
+    if(draw){
+      g.textAlign = align || "left";
+      var xx = align === "center" ? x + maxW / 2 : x;
+      lines.forEach(function(t){ g.fillText(t, xx, y); y += lh; });
+      g.textAlign = "left";
+    }else{
+      y += lh * lines.length;
+    }
+    return y;
+  }
+
+  function dLines(g, text, draw, x, y, maxW, size, lh){
+    return dWrap(g, text, draw, x, y, maxW, size, lh, "left");
+  }
+
+  function specItems(){
+    var raw = String(data.specTerms || "").split("\n");
+    var out = [];
+    raw.forEach(function(t){
+      t = String(t).replace(/^\s*\d+[.)]\s*/, "").trim();
+      if(t) out.push(t);
+    });
+    /* ④ 분쟁 예방 보강 조항 (체크한 것만 11번부터) */
+    if(data.specA1) out.push("본 확인서는 계약 체결 전 주요 합의사항을 정리한 요약 자료이며, 최종 권리·의무는 정식 임대차계약서 작성 시 확정된다.");
+    if(data.specA2) out.push("임차인은 임대인의 서면 동의 없이 본 목적물을 제3자에게 전대하거나, 계약된 업종 외로 무단 변경할 수 없다.");
+    if(data.specA3) out.push("계약금 및 잔금은 등기사항전부증명서상 소유자(또는 위임장이 확인된 정식 대리인) 명의 계좌로만 직접 송금하며, 법정 중개보수는 관련 법령 상한요율 내에서 별도 정산한다.");
+    /* ⑤ 선택 특약 */
+    if(data.specO1){
+      var kw = String(data.powerKw || "").trim();
+      out.push("계약전력(" + (kw || "현 상태") + ")은 현 상태 그대로 인계하며, 증설이 필요한 경우 그 비용과 허가 절차는 임차인이 부담한다.");
+    }
+    if(data.specO2) out.push("임대인의 정식 위임장을 수령하고, 개업공인중개사 김태형(우리부동산 대표)이 임대인 대리인 자격으로 본 계약을 진행·체결한다.");
+    if(data.specO3) out.push("본 계약에는 권리금 및 시설물 양도 조건이 없으며, 임차인은 별도의 권리금·양도 대가를 지급하지 않는다.");
+    return out;
+  }
+
+  function docTitle(){
+    return "-계약 확인서-";
+  }
+
+  function renderDocPage(g, draw){
+    var S = 16.2, LH = 30, y = 62;
+    var left = D_L, right = D_R, maxW = D_W;
+
+    /* 제목 */
+    g.font = serifFnt(400, 21); g.fillStyle = "#111";
+    if(draw){ g.textAlign = "center"; g.fillText(docTitle(), W / 2, y); g.textAlign = "left"; }
+    y += 30;
+
+    /* 소재지 · 소유자 · 동의 문구 */
+    g.font = serifFnt(400, S); g.fillStyle = "#111";
+    y = dLines(g, "부동산 소재지: " + (data.address || "-") + (data.part ? " ," + data.part : ""), draw, left, y, maxW, S, LH);
+    y = dLines(g, "소유자: " + (data.ownerName || "-"), draw, left, y, maxW, S, LH);
+    y = dLines(g, "-상기소재지의 부동산을 계약함에 동의하며 계약금 " + wonDoc(data.contractTotal) + "을 송금하기로 한다.", draw, left, y, maxW, S, LH);
+    y += 16;
+
+    /* ●계약내용● */
+    g.font = serifFnt(700, S); g.fillStyle = "#111";
+    if(draw) g.fillText("●계약내용●", left, y);
+    y += LH;
+    g.font = serifFnt(400, S);
+    var vatTxt = data.vat ? "부가세 별도" : "부가세 포함";
+    var moneyLine = "-보증금 : " + wonDoc(data.deposit) + "   -계약금 : " + wonDoc(data.contractTotal) +
+      "   -월세 : " + wonDoc(data.rent) + " (" + vatTxt + (data.rentTiming ? ", " + data.rentTiming : "") + ")";
+    y = dLines(g, moneyLine, draw, left, y, maxW, S, LH);
+    y = dLines(g, "계약일 및 장소 : " + longDate(data.contractDate) + (data.contractTime ? " " + data.contractTime : "") +
+      " , " + (data.place || "석남동 우리부동산"), draw, left, y, maxW, S, LH);
+    y = dLines(g, "잔금일 및 (월세 기산일) : " + (data.balanceDate ? longDate(data.balanceDate) : "계약 후 협의"), draw, left, y, maxW, S, LH);
+    var mm = monthsBetween(data.start, data.end);
+    var periodStr = mm
+      ? ("잔금일로부터 " + mm + "개월" + (mm % 12 === 0 ? ", " + (mm / 12) + "년 계약" : ""))
+      : "잔금일로부터 협의";
+    y = dLines(g, "계약기간 : " + periodStr, draw, left, y, maxW, S, LH);
+    y += 18;
+
+    /* <주요 특약사항> */
+    g.font = serifFnt(700, S); g.fillStyle = "#111";
+    if(draw) g.fillText("<주요 특약사항> (계약 시 추가 예정)", left + 10, y);
+    y += LH + 2;
+
+    g.font = serifFnt(400, S);
+    var items = specItems();
+    items.forEach(function(t, i){
+      y = dLines(g, (i + 1) + "." + t, draw, left, y, maxW, S, LH);
+      if(i === 4) y += 4;    /* 5번 앞 여백(샘플과 같은 리듬) */
+    });
+    y += 16;
+
+    /* 계좌 */
+    g.font = serifFnt(400, S); g.fillStyle = "#111";
+    var acct = [data.bank, data.accountNo].filter(Boolean).join(" ");
+    var holder = [data.ownerName, data.accountHolder].filter(Boolean).join(" ");
+    var acctLine = "임대인 계좌번호 : " + (acct || "-") + (holder ? " " + holder : "");
+    if(!acct && !holder) acctLine = "임대인 계좌번호 :";
+    y = dLines(g, acctLine, draw, left, y, maxW, S, LH);
+    y += 18;
+
+    /* 해약금 문구 */
+    y = dLines(g, "*계약금 일부 입금시 본 계약은 성립됨으로 간주하며 단순변심 또는 귀책사유 등으로 계약불이행이 발생한 경우 임대인은 계약금의 배액배상, 임차인은 계약금이 포기됨을 양지해주시기 바랍니다.", draw, left, y, maxW, S, LH);
+    y += 22;
+
+    /* 하단 서명부 */
+    g.font = serifFnt(700, S); g.fillStyle = "#111";
+    if(draw){ g.textAlign = "center"; g.fillText("우리부동산 공인중개사 사무소 대표 김태형", W / 2, y); }
+    y += LH;
+    g.font = serifFnt(400, S);
+    if(draw){ g.textAlign = "center"; g.fillText("인천 서구 건지로 167 , 중개업등록번호 28260-2023-00082", W / 2, y); g.textAlign = "left"; }
+    y += 46;
+
+    /* 최소 A4 비율 */
+    return Math.max(y, 1356);
+  }
+
+  function buildDocCanvas(scale){
+    scale = scale || 2;
+    var scratch = document.createElement("canvas");
+    scratch.width = 10; scratch.height = 10;
+    var sg = scratch.getContext("2d");
+    var height = Math.ceil(renderDocPage(sg, false));
+
+    var cv = document.createElement("canvas");
+    cv.width = Math.round(W * scale);
+    cv.height = Math.round(height * scale);
+    var g = cv.getContext("2d");
+    g.scale(scale, scale);
+
+    g.fillStyle = "#ffffff"; g.fillRect(0, 0, W, height);
+    g.strokeStyle = "#111111"; g.lineWidth = 1.1;
+    g.strokeRect(D_INSET + 0.5, D_INSET + 0.5, W - D_INSET * 2 - 1, height - D_INSET * 2 - 1);
+
+    renderDocPage(g, true);
+    return cv;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     6. ② 네이비 카드형
+     ══════════════════════════════════════════════════════════ */
+  var MARGIN = 26, CARD_W = W - MARGIN * 2, PAD = 34,
+      CX = MARGIN + PAD, CW = CARD_W - PAD * 2;
+
+  function sectionTitle(g, y, no, title, tone){
+    var barColor = tone === "red" ? RED : (tone === "green" ? GREEN : NAVY);
+    g.fillStyle = barColor;
+    rr(g, CX, y + 2, 5, 19, 2); g.fill();
+    g.font = fnt(800, 17); g.fillStyle = INK; g.textAlign = "left";
+    g.fillText(no + ". " + title, CX + 14, y + 18);
+    return y + 40;
+  }
+
+  function headerBlock(g, draw){
+    var H = 112;
+    if(draw){
+      rr(g, MARGIN, 0, CARD_W, H, [18, 18, 0, 0]);
+      g.fillStyle = NAVY; g.fill();
+    }
+    var cap = role === "tenant" ? "임차인 확인용 (인적사항 요청 포함)"
+      : role === "landlord" ? "임대인 확인용 (임대인 진행 보고)"
+      : "임차인 · 임대인 공통 확인";
+    if(draw){
+      g.textAlign = "left";
+      try { g.letterSpacing = "1.4px"; } catch(e){}
+      g.font = fnt(700, 12); g.fillStyle = "rgba(255,255,255,.72)";
+      g.fillText("WOORI REAL ESTATE · 계약 핵심 요약 확인서", CX, 38);
+      try { g.letterSpacing = "0px"; } catch(e){}
+      g.font = fnt(800, 29); g.fillStyle = "#ffffff";
+      g.fillText("부동산(공장) 임대차 계약 확인서", CX, 80);
+      g.textAlign = "right";
+      g.font = fnt(700, 13.5); g.fillStyle = "rgba(255,255,255,.94)";
+      g.fillText("계약 예정일: " + longDate(data.contractDate), W - MARGIN - PAD, 40);
+      g.font = fnt(600, 12.5); g.fillStyle = "rgba(255,255,255,.78)";
+      g.fillText(cap, W - MARGIN - PAD, 63);
+      g.textAlign = "left";
+    }
+    return H;
+  }
+
+  function table1(g, draw, y){
+    var rows = [
+      ["소 재 지", (data.address || "-") + (data.ownerName ? "  (" + data.ownerName + ")" : "")],
+      ["토지 / 건물", data.landBuilding || "-"],
+      ["임대할 부분", data.part || "-"],
+      ["임대차 기간", longDate(data.start) + " ~ " + longDate(data.end) + " " + periodText() +
+        " | 인도일: " + mddDot(data.handover)]
+    ];
+    var labelW = 152, rowPadY = 11, size = 13.8, lh = 22;
+    for(var i = 0; i < rows.length; i++){
+      var valMax = CW - labelW - 30;
+      var h = measuredRichHeight(g, rows[i][1], valMax, { size: size, lineH: lh, weight: 600 });
+      var rowH = Math.max(41, h + rowPadY);
+      if(draw){
+        g.fillStyle = "#ffffff"; g.fillRect(CX, y, CW, rowH);
+        g.fillStyle = "#f8fafc"; g.fillRect(CX, y, labelW, rowH);
+        g.strokeStyle = LINE; g.lineWidth = 1;
+        g.strokeRect(CX + 0.5, y + 0.5, CW - 1, rowH);
+        g.beginPath(); g.moveTo(CX + labelW + 0.5, y); g.lineTo(CX + labelW + 0.5, y + rowH); g.stroke();
+        g.font = fnt(700, 13.2); g.fillStyle = INK2; g.textAlign = "left";
+        g.fillText(rows[i][0], CX + 14, y + rowPadY + 9);
+        drawRich(g, rows[i][1], CX + labelW + 15, y + rowPadY + 9, valMax, { size: size, lineH: lh, weight: 600, color: INK });
+      }
+      y += rowH;
+    }
+    return y;
+  }
+
+  function moneyBox(g, draw, y){
+    var boxH = 92;
+    if(draw){
+      rr(g, CX, y, CW, boxH, 12);
+      g.fillStyle = "#f9fbff"; g.fill();
+      g.strokeStyle = "#cddff8"; g.lineWidth = 1.4; g.stroke();
+    }
+    var cells = [
+      { k: "보증금", v: wonText(data.deposit), s: "총 보증금액", c: NAVY },
+      { k: "계약금 (총액)", v: wonText(data.contractTotal), s: contractSubText(), c: NAVY },
+      { k: "중도금", v: data.midpay > 0 ? wonText(data.midpay) : "없 음", s: data.midpay > 0 ? mdd(data.contractDate) + " 납부" : "일시 잔금 진행", c: data.midpay > 0 ? NAVY : MUTED },
+      { k: "잔금 (" + mdd(data.balanceDate) + ")", v: wonText(data.balance), s: mdd(data.balanceDate) + "(" + dowText(data.balanceDate) + ") 지급", c: RED },
+      { k: "월 차임 (" + (data.rentTiming === "선불" ? "선불" : "후불") + ")", v: wonText(data.rent), s: "매월 " + data.rentDay + "일 · " + (data.vat ? "VAT별도" : "VAT포함"), c: NAVY }
+    ];
+    var cw = CW / cells.length;
+    if(draw){
+      for(var i = 0; i < cells.length; i++){
+        var cxx = CX + cw * i + cw / 2;
+        if(i > 0){
+          g.strokeStyle = "#dde8f8"; g.lineWidth = 1;
+          g.beginPath(); g.moveTo(CX + cw * i, y + 12); g.lineTo(CX + cw * i, y + boxH - 12); g.stroke();
+        }
+        g.textAlign = "center";
+        g.font = fnt(600, 12.4); g.fillStyle = MUTED;
+        g.fillText(cells[i].k, cxx, y + 26);
+        g.font = fnt(800, 22); g.fillStyle = cells[i].c;
+        g.fillText(cells[i].v, cxx, y + 57);
+        g.font = fnt(600, 11.4); g.fillStyle = "#94a3b8";
+        g.fillText(cells[i].s, cxx, y + 76);
+      }
+      g.textAlign = "left";
+    }
+    return y + boxH;
+  }
+
+  function contractSubText(){
+    var p1 = Number(data.part1Amt) || 0, p2 = Number(data.part2Amt) || 0;
+    if(p1 && p2) return mdd(data.part1Date) + " " + wonShort(p1) + " · " + mdd(data.part2Date) + " " + wonShort(p2);
+    if(p1) return mdd(data.part1Date) + " 일괄 수령";
+    return mdd(data.contractDate) + " 수령";
+  }
+
+  function progressBox(g, draw, y){
+    var lines = [];
+    lines.push("**계약금 납부 일정:**  " + contractPartsText());
+    if(data.proxy){
+      lines.push("**임대인 대리 계약 진행:**  " + (data.proxyNote || "임대인으로부터 정식 위임장을 수령하여, 개업공인중개사 김태형(우리부동산 대표)이 임대인의 대리인 자격으로 본 임대차 계약을 적법하게 진행·체결합니다."));
+    }else{
+      lines.push("**계약 진행 방식:**  임대인 본인과 직접 대면하여 계약을 진행·체결합니다. (대리 계약 아님)");
+    }
+    if(data.accountChecked && (data.bank || data.accountNo)){
+      lines.push("**입금 계좌:**  " + [data.bank, data.accountNo, data.accountHolder ? "예금주 " + data.accountHolder : ""]
+        .filter(Boolean).join(" ") + " — **소유자 명의 계좌로만 직접 송금**합니다.");
+    }else if(data.accountChecked){
+      lines.push("**입금 계좌:**  계약금·잔금은 **소유자 본인 명의 계좌로만 직접 송금**하며, 대리인·제3자 계좌 송금은 받지 않습니다.");
+    }
+    var innerW = CW - 36, h = 16;
+    lines.forEach(function(t){ h += measuredRichHeight(g, t, innerW - 14, { size: 13.6, lineH: 22 }) + 6; });
+    if(draw){
+      rr(g, CX, y, CW, h, 10);
+      g.fillStyle = "#fffcf3"; g.fill();
+      g.strokeStyle = "#e6b451"; g.lineWidth = 1.6; g.stroke();
+      var cy = y + 27;
+      lines.forEach(function(t){
+        g.fillStyle = "#b98029"; g.beginPath(); g.arc(CX + 18, cy - 5, 2.6, 0, Math.PI * 2); g.fill();
+        cy = drawRich(g, t, CX + 30, cy, innerW - 14, { size: 13.6, lineH: 22, color: "#3f3a33", boldColor: "#7a5312" }) + 6;
+      });
+    }
+    return y + h;
+  }
+
+  function clauseBox(g, draw, y){
+    var innerW = CW - 40;
+    var clauses = [data.clause1, data.clause2, data.clause3, data.clause4];
+    var h = 18, cx = [];
+    clauses.forEach(function(t){
+      if(!String(t || "").trim()) return;
+      var hh = measuredRichHeight(g, t, innerW - 16, { size: 13.6, lineH: 22 });
+      cx.push({ t: t, h: hh });
+      h += hh + 13;
+    });
+    var checks = [
+      [data.check1, "① 등기부 권리관계 · 건축물대장 용도 및 업종 인허가를 **계약 전 쌍방 확인**하였습니다."],
+      [data.check2, "② **민법 제565조 해약금** 기준 — 계약금 포기 또는 배액 상환으로 해제할 수 있음을 고지받았습니다."],
+      [data.check3, "③ **소유자 계좌 직접 송금 원칙** — 대리인·제3자 계좌 송금은 하지 않습니다."],
+      [data.check4, "④ **법정 상한요율 내 중개보수** · 정식 계약서가 본 확인서보다 우선 효력을 가집니다."]
+    ];
+    var checkH = 26 + 22;
+    checks.forEach(function(c){ checkH += Math.max(22, measuredRichHeight(g, c[1], innerW - 30, { size: 12.8, lineH: 20 })); });
+    h += checkH + 6;
+
+    if(draw){
+      rr(g, CX, y, CW, h, 12);
+      g.fillStyle = "#fbfcfe"; g.fill();
+      g.strokeStyle = "#e4eaf2"; g.lineWidth = 1.4; g.stroke();
+
+      var cy = y + 30;
+      cx.forEach(function(c){
+        g.fillStyle = NAVY; g.beginPath(); g.arc(CX + 20, cy - 5, 2.6, 0, Math.PI * 2); g.fill();
+        cy = drawRich(g, c.t, CX + 32, cy, innerW - 16, { size: 13.6, lineH: 22, color: "#334155" }) + 13;
+      });
+      cy += 2;
+      g.strokeStyle = "#dfe7f1"; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(CX + 20, cy - 14); g.lineTo(CX + CW - 20, cy - 14); g.stroke();
+      cy += 8;
+      g.font = fnt(800, 13.4); g.fillStyle = NAVY;
+      g.fillText("부동산 분쟁 예방 4대 안전장치 — 쌍방 확인", CX + 20, cy);
+      cy += 22;
+      checks.forEach(function(c){
+        var on = !!c[0];
+        g.font = fnt(800, 12.6); g.fillStyle = on ? GREEN : "#94a3b8"; g.textAlign = "left";
+        g.fillText(on ? "✅" : "☐", CX + 20, cy - 1);
+        var next = drawRich(g, c[1], CX + 46, cy, innerW - 30, {
+          size: 12.8, lineH: 20, color: on ? "#334155" : "#94a3b8", boldColor: on ? INK : "#64748b"
+        });
+        cy = Math.max(next, cy + 22);
+      });
+    }
+    return y + h;
+  }
+
+  function noteBox(g, draw, y){
+    var tone = role;                                   /* common / tenant / landlord */
+    var text = tone === "tenant" ? data.noteTenant : tone === "landlord" ? data.noteLandlord : data.noteCommon;
+    var innerW = CW - 40;
+    var body = measuredRichHeight(g, text, innerW - 16, { size: 13.4, lineH: 22 });
+    var h = Math.max(96, body + 34);
+    if(draw){
+      rr(g, CX, y, CW, h, 10);
+      g.fillStyle = tone === "tenant" ? "#fffafa" : tone === "landlord" ? "#f7fdfa" : "#f7fbff"; g.fill();
+      g.strokeStyle = tone === "tenant" ? "#f0b3b3" : tone === "landlord" ? "#a9d9c6" : "#bcd3f5"; g.lineWidth = 1.6; g.stroke();
+      drawRich(g, text, CX + 22, y + 28, innerW - 16, {
+        size: 13.4, lineH: 22,
+        color: tone === "tenant" ? "#3f3333" : tone === "landlord" ? "#25403a" : "#233b57",
+        boldColor: tone === "tenant" ? "#7f1d1d" : tone === "landlord" ? "#065f46" : "#123a6b"
+      });
+    }
+    return y + h;
+  }
+
+  function footer(g, draw, y){
+    if(draw){
+      g.strokeStyle = "#e6ebf2"; g.lineWidth = 1.4;
+      g.beginPath(); g.moveTo(CX, y); g.lineTo(CX + CW, y); g.stroke();
+    }
+    y += 26;
+    if(draw){
+      g.textAlign = "left";
+      g.font = fnt(800, 13.6); g.fillStyle = NAVY;
+      g.fillText("우리부동산공인중개사사무소 (대표 공인중개사 김태형)", CX, y);
+      g.font = fnt(600, 11.8); g.fillStyle = "#7b8aa1";
+      g.fillText("인천광역시 서구 건지로 167 (석남동)  |  TEL 032-576-2600  |  등록번호 28260202300082", CX, y + 20);
+
+      var badge = data.badge || autoBadge();
+      g.font = fnt(800, 12.4);
+      var bw = g.measureText(badge).width + 28, bh = 30;
+      var bx = CX + CW - bw, by = y - 18;
+      rr(g, bx, by, bw, bh, 8);
+      g.fillStyle = "#ffffff"; g.fill();
+      g.strokeStyle = NAVY; g.lineWidth = 1.5; g.stroke();
+      g.fillStyle = NAVY; g.textAlign = "center";
+      g.fillText(badge, bx + bw / 2, by + 20);
+      g.textAlign = "left";
+    }
+    return y + 36;
+  }
+
+  function renderCard(g, draw){
+    var y = headerBlock(g, draw) + 30;
+    y = sectionTitle(g, y, 1, "임대차 목적물 및 기간");
+    y = table1(g, draw, y) + 26;
+    y = sectionTitle(g, y, 2, "보증금 · 월세 및 지급 일정 (" + scheduleLine() + ")");
+    y = moneyBox(g, draw, y) + 24;
+    y = sectionTitle(g, y, 3, "계약금 분할 수령 및 임대인 대리 계약 진행 확인");
+    y = progressBox(g, draw, y) + 24;
+    y = sectionTitle(g, y, 4, "주요 특약 및 쌍방 확인사항");
+    y = clauseBox(g, draw, y) + 26;
+    y = sectionTitle(g, y, 5,
+      role === "tenant" ? "임차인분께 드리는 안내 · 회신 요청사항"
+        : role === "landlord" ? "임대인분께 드리는 안내 · 진행 보고"
+        : "쌍방께 드리는 안내 · 확인 요청사항",
+      role === "tenant" ? "red" : role === "landlord" ? "green" : "");
+    y = noteBox(g, draw, y) + 26;
+    y = footer(g, draw, y) + 18;
+    return y;
+  }
+
+  function buildCardCanvas(whichRole, scale){
+    scale = scale || 2;
+    var prev = role;
+    role = whichRole;
+    var scratch = document.createElement("canvas");
+    scratch.width = 10; scratch.height = 10;
+    var sg = scratch.getContext("2d");
+    var height = Math.ceil(renderCard(sg, false));
+
+    var cv = document.createElement("canvas");
+    cv.width = Math.round(W * scale);
+    cv.height = Math.round(height * scale);
+    var g = cv.getContext("2d");
+    g.scale(scale, scale);
+
+    g.fillStyle = "#f1f5f9"; g.fillRect(0, 0, W, height);
+    rr(g, MARGIN, 0, CARD_W, height, [18, 18, 18, 18]);
+    g.fillStyle = "#ffffff"; g.fill();
+    rr(g, MARGIN + 0.5, 0.5, CARD_W - 1, height - 1, 18);
+    g.strokeStyle = "#d9e2ee"; g.lineWidth = 1; g.stroke();
+
+    renderCard(g, true);
+    role = prev;
+    return cv;
+  }
+
+  /* 현재 보기 1장 */
+  function buildCurrent(){
+    return style === "doc" ? buildDocCanvas(2) : buildCardCanvas(role, 2);
+  }
+  function buildFor(kind){
+    /* kind: doc | common | tenant | landlord */
+    if(kind === "doc") return buildDocCanvas(2);
+    return buildCardCanvas(kind, 2);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     7. 화면 동기화
+     ══════════════════════════════════════════════════════════ */
+  var drawTimer = null;
+
+  function readForm(){
+    data.contractDate = $("fContractDate").value;
+    data.contractTime = $("fContractTime").value.trim();
+    data.address = $("fAddress").value;
+    data.ownerName = $("fOwnerName").value.trim();
+    data.place = $("fPlace").value.trim();
+    data.landBuilding = $("fLandBuilding").value;
+    data.part = $("fPart").value;
+    data.start = $("fStart").value;
+    data.end = $("fEnd").value;
+    data.handover = $("fHandover").value;
+    data.deposit = num("fDeposit");
+    data.rent = num("fRent");
+    data.contractTotal = num("fContractTotal");
+    data.midpay = num("fMidpay");
+    data.rentDay = num("fRentDay") || 5;
+    data.rentTiming = $("fRentTiming").value;
+    data.part1Date = $("fPart1Date").value;
+    data.part1Amt = num("fPart1Amt");
+    data.part2Date = $("fPart2Date").value;
+    data.part2Amt = num("fPart2Amt");
+    data.balance = num("fBalance");
+    data.balanceDate = $("fBalanceDate").value;
+    data.vat = $("fVat").checked;
+    data.accountChecked = $("fAccountChecked").checked;
+    data.bank = $("fBank").value.trim();
+    data.accountNo = $("fAccountNo").value.trim();
+    data.accountHolder = $("fAccountHolder").value.trim();
+    data.proxy = $("fProxy").checked;
+    data.proxyNote = $("fProxyNote").value.trim();
+    data.clause1 = $("fClause1").value;
+    data.clause2 = $("fClause2").value;
+    data.clause3 = $("fClause3").value;
+    data.clause4 = $("fClause4").value;
+    data.check1 = $("fCheck1").checked;
+    data.check2 = $("fCheck2").checked;
+    data.check3 = $("fCheck3").checked;
+    data.check4 = $("fCheck4").checked;
+    data.specTerms = $("fSpecTerms").value;
+    data.specA1 = $("fSpecA1").checked;
+    data.specA2 = $("fSpecA2").checked;
+    data.specA3 = $("fSpecA3").checked;
+    data.specO1 = $("fSpecO1").checked;
+    data.specO2 = $("fSpecO2").checked;
+    data.specO3 = $("fSpecO3").checked;
+    data.powerKw = $("fPowerKw").value.trim();
+    data.noteCommon = $("fNoteCommon").value;
+    data.noteTenant = $("fNoteTenant").value;
+    data.noteLandlord = $("fNoteLandlord").value;
+    data.badge = $("fBadge").value.trim();
+  }
+
+  function writeForm(){
+    $("fContractDate").value = data.contractDate;
+    $("fContractTime").value = data.contractTime;
+    $("fAddress").value = data.address;
+    $("fOwnerName").value = data.ownerName;
+    $("fPlace").value = data.place;
+    $("fLandBuilding").value = data.landBuilding;
+    $("fPart").value = data.part;
+    $("fStart").value = data.start;
+    $("fEnd").value = data.end;
+    $("fHandover").value = data.handover;
+    $("fDeposit").value = data.deposit;
+    $("fRent").value = data.rent;
+    $("fContractTotal").value = data.contractTotal;
+    $("fMidpay").value = data.midpay;
+    $("fRentDay").value = data.rentDay;
+    $("fRentTiming").value = data.rentTiming || "후불";
+    $("fPart1Date").value = data.part1Date;
+    $("fPart1Amt").value = data.part1Amt;
+    $("fPart2Date").value = data.part2Date;
+    $("fPart2Amt").value = data.part2Amt;
+    $("fBalance").value = data.balance;
+    $("fBalanceDate").value = data.balanceDate;
+    $("fVat").checked = !!data.vat;
+    $("fAccountChecked").checked = !!data.accountChecked;
+    $("fBank").value = data.bank;
+    $("fAccountNo").value = data.accountNo;
+    $("fAccountHolder").value = data.accountHolder;
+    $("fProxy").checked = !!data.proxy;
+    $("fProxyNote").value = data.proxyNote;
+    $("fClause1").value = data.clause1;
+    $("fClause2").value = data.clause2;
+    $("fClause3").value = data.clause3;
+    $("fClause4").value = data.clause4;
+    $("fCheck1").checked = !!data.check1;
+    $("fCheck2").checked = !!data.check2;
+    $("fCheck3").checked = !!data.check3;
+    $("fCheck4").checked = !!data.check4;
+    $("fSpecTerms").value = data.specTerms;
+    $("fSpecA1").checked = !!data.specA1;
+    $("fSpecA2").checked = !!data.specA2;
+    $("fSpecA3").checked = !!data.specA3;
+    $("fSpecO1").checked = !!data.specO1;
+    $("fSpecO2").checked = !!data.specO2;
+    $("fSpecO3").checked = !!data.specO3;
+    $("fPowerKw").value = data.powerKw;
+    $("fNoteCommon").value = data.noteCommon;
+    $("fNoteTenant").value = data.noteTenant;
+    $("fNoteLandlord").value = data.noteLandlord;
+    $("fBadge").value = data.badge;
+  }
+
+  function fontsReady(){
+    if(!document.fonts || !document.fonts.load) return Promise.resolve();
+    var loads = [
+      document.fonts.load('600 14px Pretendard'),
+      document.fonts.load('700 14px Pretendard'),
+      document.fonts.load('800 14px Pretendard'),
+      document.fonts.load('400 16px "Nanum Myeongjo"'),
+      document.fonts.load('700 16px "Nanum Myeongjo"')
+    ];
+    return Promise.all(loads).catch(function(){}).then(function(){
+      return document.fonts.ready;
+    }).catch(function(){});
+  }
+
+  function applyZoom(){
+    var c = el.canvas;
+    if(zoom === "full"){
+      c.style.width = "960px"; c.style.maxWidth = "none";
+      el.previewWrap.style.maxWidth = "none";
+    }else{
+      c.style.width = "100%"; c.style.maxWidth = "960px";
+      el.previewWrap.style.maxWidth = "960px";
+    }
+  }
+
+  function draw(){
+    readForm();
+    syncAutoTexts(false);
+    var cv = buildCurrent();
+    el.canvas.width = cv.width;
+    el.canvas.height = cv.height;
+    el.canvas.getContext("2d").drawImage(cv, 0, 0);
+    applyZoom();
+
+    var label = style === "doc" ? "깔끔 문서형 · 임차인·임대인 공통 1장"
+      : ("네이비 카드형 · " + (role === "tenant" ? "임차인용" : role === "landlord" ? "임대인용" : "공통"));
+    el.barInfo.innerHTML = "<b>" + label + "</b> · " + (cv.height / 2 | 0) + "px";
+  }
+
+  function scheduleDraw(){
+    clearTimeout(drawTimer);
+    drawTimer = setTimeout(draw, 180);
+  }
+
+  function syncStyleUI(){
+    Array.prototype.forEach.call($("styleSeg").querySelectorAll("button"), function(b){
+      b.setAttribute("aria-pressed", b.dataset.style === style ? "true" : "false");
+    });
+    Array.prototype.forEach.call($("roleSeg").querySelectorAll("button"), function(b){
+      b.setAttribute("aria-pressed", b.dataset.role === role ? "true" : "false");
+    });
+    el.roleSeg.hidden = (style !== "card");
+    el.btnPngBoth.hidden = (style !== "card");
+    Array.prototype.forEach.call(document.querySelectorAll("[data-for]"), function(n){
+      n.hidden = (n.dataset.for !== "both" && n.dataset.for !== style);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-rolebox]"), function(n){
+      n.hidden = (n.dataset.rolebox !== role);
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     8. PNG · 인쇄
+     ══════════════════════════════════════════════════════════ */
+  function place(compact){
+    var s = String(data.address || "").replace(/\s+/g, "");
+    s = s.replace(/^인천광역시/, "").replace(/^인천/, "").replace(/^서해구|^서구|^검단구/, "");
+    if(data.part){
+      var m = String(data.part).match(/(\d+)\s*평/);
+      if(m) s += "_" + m[1] + "평";
+    }
+    return s || "계약";
+  }
+
+  function fileName(kind){
+    var who = kind === "doc" ? "" : (kind === "tenant" ? "임차인용_" : kind === "landlord" ? "임대인용_" : "공통_");
+    return "계약확인서_" + who + place() + "_" + (data.contractDate || "").replace(/-/g, "") + ".png";
+  }
+
+  function savePng(kind){
+    var cv = buildFor(kind);
+    return new Promise(function(resolve){
+      cv.toBlob(function(blob){
+        if(!blob){ toast("이미지를 만들지 못했습니다", true); resolve(false); return; }
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url; a.download = fileName(kind);
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+        resolve(true);
+      }, "image/png");
+    });
+  }
+
+  function printDocs(){
+    var kinds = style === "doc" ? ["doc"] : [role];
+    var area = $("printArea");
+    area.innerHTML = kinds.map(function(k){
+      return '<img src="' + buildFor(k).toDataURL("image/png") + '" alt="계약 확인서">';
+    }).join("");
+    setTimeout(function(){ window.print(); }, 240);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     9. 초기화 · 이벤트
+     ══════════════════════════════════════════════════════════ */
+  function resetToExample(){
+    data = Object.assign({}, EXAMPLE);
+    notesEdited = { common:false, tenant:false, landlord:false };
+    writeForm(); syncAutoTexts(true); writeForm(); draw();
+    toast("가좌동 289-18 예시 값을 불러왔습니다");
+  }
+
+  function clearAll(){
+    ["contractDate","contractTime","address","ownerName","place","landBuilding","part","start","end","handover",
+     "part1Date","part2Date","balanceDate","bank","accountNo","accountHolder","proxyNote",
+     "clause1","clause2","clause3","clause4","specTerms","noteCommon","noteTenant","noteLandlord","badge"
+    ].forEach(function(k){ data[k] = ""; });
+    ["deposit","rent","contractTotal","midpay","part1Amt","part2Amt","balance"].forEach(function(k){ data[k] = 0; });
+    ["vat","accountChecked","proxy","check1","check2","check3","check4"].forEach(function(k){ data[k] = false; });
+    ["specA1","specA2","specA3","specO1","specO2","specO3"].forEach(function(k){ data[k] = false; });
+    data.powerKw = "";
+    data.rentDay = 5; data.rentTiming = "후불";
+    notesEdited = { common:false, tenant:false, landlord:false };
+    writeForm(); syncAutoTexts(true); writeForm(); draw();
+    toast("입력칸을 비웠습니다 — 값을 새로 넣어 주세요");
+  }
+
+  document.querySelectorAll(".formCol input, .formCol textarea, .formCol select").forEach(function(node){
+    node.addEventListener("input", function(){
+      if(node.id === "fNoteCommon") notesEdited.common = true;
+      if(node.id === "fNoteTenant") notesEdited.tenant = true;
+      if(node.id === "fNoteLandlord") notesEdited.landlord = true;
+      scheduleDraw();
+    });
+    node.addEventListener("change", function(){ scheduleDraw(); });
+  });
+
+  document.querySelectorAll("[data-autonote]").forEach(function(b){
+    b.addEventListener("click", function(){
+      notesEdited[b.dataset.autonote] = false;
+      readForm(); syncAutoTexts(false); draw();
+      toast("안내 문구를 자동으로 다시 썼습니다");
+    });
+  });
+
+  $("styleSeg").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-style]"); if(!b) return;
+    style = b.dataset.style;
+    syncStyleUI(); draw();
+  });
+
+  $("roleSeg").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-role]"); if(!b) return;
+    role = b.dataset.role;
+    syncStyleUI(); draw();
+  });
+
+  $("zoomSeg").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-zoom]"); if(!b) return;
+    zoom = b.dataset.zoom;
+    Array.prototype.forEach.call(this.querySelectorAll("button"), function(x){
+      x.setAttribute("aria-pressed", x === b ? "true" : "false");
+    });
+    applyZoom();
+  });
+
+  $("btnExample").addEventListener("click", resetToExample);
+  $("btnExample2").addEventListener("click", resetToExample);
+  $("btnClear").addEventListener("click", clearAll);
+
+  $("btnPng").addEventListener("click", function(){
+    readForm(); syncAutoTexts(false);
+    var kind = style === "doc" ? "doc" : role;
+    var btn = this; btn.disabled = true;
+    savePng(kind).then(function(ok){
+      btn.disabled = false;
+      if(ok) toast(style === "doc" ? "계약 확인서 PNG를 저장했습니다 — 카톡으로 바로 보내세요" : "PNG를 저장했습니다");
+    });
+  });
+
+  $("btnPngBoth").addEventListener("click", function(){
+    readForm(); syncAutoTexts(false);
+    var btn = this; btn.disabled = true;
+    savePng("tenant").then(function(){
+      setTimeout(function(){
+        savePng("landlord").then(function(){
+          btn.disabled = false;
+          toast("2장을 저장했습니다 (임차인용·임대인용)");
+        });
+      }, 700);
+    });
+  });
+
+  $("btnPrint").addEventListener("click", printDocs);
+  $("btnPrintTop").addEventListener("click", printDocs);
+
+  /* 시작 */
+  writeForm();
+  syncAutoTexts(true);
+  writeForm();
+  syncStyleUI();
+  fontsReady().then(draw);
+  setTimeout(draw, 500);
+})();
+</script>
+</body>
+</html>

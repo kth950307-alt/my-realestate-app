@@ -1,0 +1,1123 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>매물 10초 등록·수정 · 우리부동산 사장님 작업실</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%8F%AD%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --navy:#172e6c; --royal:#2563eb; --royal-dark:#1e40af;
+    --blue-soft:#eff6ff; --blue-line:#bfdbfe;
+    --gold:#e0a93b; --gold-soft:#fffbeb;
+    --green:#059669; --red:#b3261e;
+    --ink:#1e293b; --ink2:#475569; --muted:#64748b;
+    --line:#e2e8f0; --bg:#f6f8fc; --card:#ffffff;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  [hidden]{display:none !important;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕","Noto Sans KR",system-ui,sans-serif;
+    -webkit-text-size-adjust:100%; font-size:15px; line-height:1.55;
+  }
+  .wrap{max-width:900px; margin:0 auto; padding:14px 14px 96px;}
+
+  /* 상단 */
+  .top{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px;}
+  .brand{display:flex; align-items:center; gap:10px; min-width:0;}
+  .logo{width:38px; height:38px; border-radius:12px; background:linear-gradient(140deg,#3B82F6,#1D4ED8);
+    display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 4px 12px rgba(37,99,235,.28);}
+  .brand h1{margin:0; font-size:17px; font-weight:900; letter-spacing:-.5px; color:var(--navy); line-height:1.2;}
+  .brand p{margin:2px 0 0; font-size:11.5px; font-weight:600; color:var(--muted);}
+  .top-actions{display:flex; align-items:center; gap:7px; margin-left:auto;}
+  .btn{display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-size:12.5px; font-weight:800;
+    padding:9px 12px; border-radius:10px; border:1px solid var(--line); background:#fff; color:var(--ink2); cursor:pointer; white-space:nowrap;}
+  .btn:hover{background:#f8fafc; border-color:#cbd5e1;}
+  .btn:active{transform:translateY(1px);}
+  .btn.primary{background:linear-gradient(140deg,#3B82F6,#1D4ED8); color:#fff; border-color:#1D4ED8; box-shadow:0 4px 12px rgba(37,99,235,.24);}
+  .btn.dark{background:var(--navy); color:#fff; border-color:var(--navy);}
+  .btn.sm{padding:6px 9px; font-size:11.5px; border-radius:8px;}
+  .btn:disabled{opacity:.55; cursor:progress;}
+
+  .conn-bar{display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:#fff; border:1px solid var(--line);
+    border-radius:12px; padding:9px 12px; font-size:12.5px; font-weight:700; color:var(--ink2); margin-bottom:12px;}
+  .dot{width:9px; height:9px; border-radius:50%; background:#cbd5e1; flex:0 0 auto;}
+  .dot.on{background:var(--green); box-shadow:0 0 0 3px rgba(5,150,105,.15);}
+  .dot.err{background:var(--red); box-shadow:0 0 0 3px rgba(179,38,30,.12);}
+  .conn-bar .sp{margin-left:auto; font-weight:600; color:var(--muted);}
+
+  /* 설정 패널 */
+  .setup{background:#fff; border:2px solid var(--blue-line); border-radius:16px; padding:14px 16px; margin-bottom:14px;}
+  .setup h2{margin:0 0 4px; font-size:15px; font-weight:900; color:var(--navy);}
+  .setup .sub{margin:0 0 12px; font-size:12.5px; color:var(--muted); font-weight:600;}
+  .fld{margin-bottom:10px;}
+  .fld label{display:block; font-size:12px; font-weight:800; color:var(--ink2); margin-bottom:5px;}
+  .fld label .lock{color:#b45309; background:#fef3c7; border-radius:5px; padding:1px 5px; font-size:10px; margin-left:4px;}
+  .fld input, .fld select, .fld textarea{width:100%; padding:10px 12px; border:1.5px solid #dfe4ea; border-radius:10px;
+    font-family:inherit; font-size:14px; font-weight:600; color:var(--ink); background:#fff;}
+  .fld input:focus, .fld select:focus, .fld textarea:focus{outline:none; border-color:var(--royal); box-shadow:0 0 0 3px rgba(37,99,235,.10);}
+  .fld textarea{resize:vertical; min-height:60px; line-height:1.5; font-weight:500;}
+  .setup-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:4px;}
+  .chk{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:var(--ink2); cursor:pointer;}
+  .chk input{width:16px; height:16px; accent-color:var(--royal);}
+  .note{background:#f8fafc; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:12px;
+    font-weight:600; color:var(--ink2); line-height:1.6; margin-top:10px;}
+  .note b{color:var(--navy);}
+  .note code{background:#eef2f7; padding:1px 5px; border-radius:5px; font-size:11.5px;}
+  details.guide{margin-top:8px;}
+  details.guide summary{cursor:pointer; font-size:12.5px; font-weight:800; color:var(--royal-dark); padding:6px 0;}
+  .guide-actions{display:flex; gap:7px; flex-wrap:wrap; margin:8px 0;}
+  .code-box{max-height:260px; overflow:auto; background:#0f172a; border-radius:10px; padding:10px 12px;}
+  .code-box pre{margin:0; color:#dbeafe; font-size:11px; line-height:1.5; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; white-space:pre-wrap;}
+
+  /* 모드 탭 */
+  .modeTabs{display:flex; gap:6px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:5px; margin-bottom:12px;}
+  .modeTabs button{flex:1 1 0; border:0; background:transparent; font-family:inherit; font-size:13.5px; font-weight:900;
+    color:#5b6b82; padding:10px 8px; border-radius:10px; cursor:pointer; letter-spacing:-.3px;}
+  .modeTabs button[aria-selected="true"]{background:linear-gradient(140deg,#3B82F6,#1D4ED8); color:#fff; box-shadow:0 3px 10px rgba(37,99,235,.22);}
+
+  /* 카드 */
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:13px 14px; margin-bottom:10px;}
+  .card > h3{margin:0 0 10px; font-size:13px; font-weight:900; color:var(--navy); letter-spacing:-.3px;
+    display:flex; align-items:center; gap:6px;}
+  .card > h3 .m{margin-left:auto; font-size:10.5px; font-weight:800; color:#94a3b8;}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:9px;}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px;}
+  @media (max-width:560px){ .grid3{grid-template-columns:1fr 1fr;} }
+
+  .chips{display:flex; flex-wrap:wrap; gap:6px;}
+  .chip{border:1.5px solid #dfe4ea; background:#fff; color:var(--ink2); border-radius:999px; padding:7px 12px;
+    font-family:inherit; font-size:12.5px; font-weight:800; cursor:pointer; letter-spacing:-.2px;}
+  .chip:hover{border-color:#b9c6d8; background:#f8fafc;}
+  .chip[aria-pressed="true"]{background:var(--blue-soft); border-color:var(--royal); color:var(--royal-dark); box-shadow:0 0 0 2px rgba(37,99,235,.08);}
+  .seg{display:inline-flex; border:1.5px solid #dfe4ea; border-radius:10px; overflow:hidden;}
+  .seg button{border:0; background:#fff; font-family:inherit; font-size:12.5px; font-weight:800; color:var(--ink2); padding:9px 16px; cursor:pointer;}
+  .seg button[aria-pressed="true"]{background:var(--royal); color:#fff;}
+  .hintline{font-size:11px; font-weight:600; color:#94a3b8; margin-top:6px; letter-spacing:-.1px;}
+  .inline-add{margin-top:7px;}
+
+  /* 결과 · 목록 */
+  .result{background:#ecfdf5; border:1.5px solid #a7f3d0; border-radius:14px; padding:14px 16px; margin-bottom:12px;}
+  .result h3{margin:0 0 6px; font-size:15px; font-weight:900; color:#065f46;}
+  .result .no{font-size:22px; font-weight:900; color:var(--navy); letter-spacing:-.5px;}
+  .result p{margin:6px 0 0; font-size:12.5px; font-weight:700; color:#065f46;}
+  .result .acts{display:flex; gap:7px; flex-wrap:wrap; margin-top:10px;}
+
+  .statRow{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;}
+  .statRow span{background:#fff; border:1px solid var(--line); border-radius:999px; padding:5px 11px;
+    font-size:11.5px; font-weight:800; color:var(--ink2);}
+  .statRow span b{color:var(--navy);}
+  .statRow span.warn{border-color:#fbd5d0; background:#fff5f4; color:#b3261e;}
+
+  .searchbar{display:flex; align-items:center; gap:8px; background:#fff; border:1.5px solid var(--line);
+    border-radius:12px; padding:9px 12px; margin-bottom:10px;}
+  .searchbar input{flex:1 1 auto; border:0; outline:none; font-family:inherit; font-size:14px; font-weight:700; color:var(--ink); background:transparent; min-width:0;}
+  .searchbar input::placeholder{color:#9aa8bb; font-weight:600;}
+
+  .plist{display:flex; flex-direction:column; gap:7px;}
+  .pitem{display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--line); border-radius:12px;
+    padding:10px 12px; cursor:pointer;}
+  .pitem:hover{border-color:#b9c6d8; background:#fbfdff;}
+  .pitem.on{border-color:var(--royal); box-shadow:0 0 0 3px rgba(37,99,235,.10);}
+  .pitem .main{min-width:0; flex:1 1 auto;}
+  .pitem .no{font-size:11px; font-weight:800; color:#94a3b8; letter-spacing:.2px;}
+  .pitem .ttl{font-size:13.5px; font-weight:800; color:var(--ink); letter-spacing:-.3px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .pitem .meta{font-size:11.5px; font-weight:700; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .pitem .tags{display:flex; flex-direction:column; gap:3px; align-items:flex-end; flex:0 0 auto;}
+  .tag{font-size:10.5px; font-weight:800; border-radius:6px; padding:2px 6px; white-space:nowrap;}
+  .tag.ok{background:#ecfdf5; color:#047857;}
+  .tag.off{background:#f1f5f9; color:#64748b;}
+  .tag.need{background:#fff1f0; color:#b3261e;}
+  .empty{background:#fff; border:1px dashed #cfd8e5; border-radius:12px; padding:18px; text-align:center;
+    font-size:12.5px; font-weight:700; color:var(--muted); line-height:1.7;}
+
+  /* 편집 카드 */
+  .editHead{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px;}
+  .editHead .no{font-size:13px; font-weight:900; color:var(--navy);}
+  .editHead .sp{margin-left:auto;}
+  .badgeNeed{font-size:10.5px; font-weight:900; color:#b3261e; background:#fff1f0; border:1px solid #fbd5d0; border-radius:999px; padding:2px 8px;}
+
+  /* 하단 액션 */
+  .actionBar{position:fixed; left:0; right:0; bottom:0; z-index:20; background:rgba(255,255,255,.97);
+    border-top:1px solid var(--line); box-shadow:0 -6px 20px rgba(23,46,108,.08);
+    padding:9px 12px calc(9px + env(safe-area-inset-bottom)); backdrop-filter:blur(8px);}
+  .actionBar .inner{max-width:900px; margin:0 auto; display:flex; gap:8px; align-items:center;}
+  .actionBar .info{margin-right:auto; font-size:11.5px; font-weight:700; color:var(--muted); min-width:0;}
+  .actionBar .info b{color:var(--navy);}
+  .actionBar .btn{flex:0 0 auto;}
+  .actionBar .btn.go{flex:1 1 auto; justify-content:center; font-size:14px; padding:13px 16px; border-radius:12px;}
+
+  .toast{position:fixed; left:50%; bottom:78px; transform:translate(-50%,14px); z-index:40;
+    background:#0f172a; color:#fff; font-size:12.5px; font-weight:800; padding:10px 16px; border-radius:999px;
+    opacity:0; pointer-events:none; transition:opacity .18s, transform .18s; max-width:92vw; text-align:center;}
+  .toast.show{opacity:1; transform:translate(-50%,0);}
+  .toast.warn{background:#b3261e;}
+
+  @media (max-width:640px){
+    .wrap{padding:11px 11px 96px;}
+    .brand p{display:none;}
+    .btn .label{display:none;}
+    .btn.primary .label{display:inline;}
+    .actionBar .info{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">🏭</div>
+      <div>
+        <h1>매물 10초 등록·수정</h1>
+        <p>필수 항목만 넣으면 장부(properties)·홈페이지 공개 시트에 바로 반영</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button type="button" class="btn" id="btnRefresh"><span>↻</span><span class="label">새로고침</span></button>
+      <button type="button" class="btn primary" id="btnSetup"><span>⚙</span><span class="label">연결 설정</span></button>
+    </div>
+  </header>
+
+  <div class="conn-bar">
+    <span class="dot" id="connDot"></span>
+    <span id="connText">아직 연결하지 않았습니다</span>
+    <span class="sp" id="connTime"></span>
+  </div>
+
+  <!-- 연결 설정 -->
+  <section class="setup" id="setupPanel" hidden>
+    <h2>⚙ 연결 설정 (한 번만 하면 됩니다)</h2>
+    <p class="sub">매물 장부는 공개 저장소에 두지 않습니다. 사장님 구글 계정의 Apps Script를 거쳐서만 읽고 씁니다.</p>
+
+    <div class="fld">
+      <label for="cfgUrl">Apps Script 웹 앱 URL</label>
+      <input type="url" id="cfgUrl" placeholder="https://script.google.com/macros/s/AKfycb.../exec" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="fld">
+      <label for="cfgPw">사장님 비밀번호</label>
+      <input type="password" id="cfgPw" placeholder="Apps Script에 넣은 비밀번호" autocomplete="off">
+    </div>
+    <div class="setup-row">
+      <label class="chk"><input type="checkbox" id="cfgRemember" checked> 이 브라우저에 저장</label>
+      <div style="margin-left:auto; display:flex; gap:7px;">
+        <button type="button" class="btn" id="btnDisconnect">연결 해제</button>
+        <button type="button" class="btn primary" id="btnConnect">연결 확인</button>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>준비물 1개</b> — 매물 등록·수정용 Apps Script입니다. 아래 [설치 안내]를 펼쳐
+      ① 코드 복사 → ② script.google.com 새 프로젝트에 붙여넣기 → ③ 웹 앱으로 배포 → 나온 주소를 위 칸에 붙여넣으면 끝입니다.
+      <br>(손님 리마인드와 <b>별도 프로젝트</b>입니다. 비밀번호는 같은 <code>563011</code>을 그대로 쓰면 됩니다.)
+    </div>
+
+    <details class="guide" id="guideBox">
+      <summary>📋 설치 안내 &amp; Apps Script 코드 보기 (3단계)</summary>
+      <div class="note" style="margin-top:8px;">
+        <b>①</b> <b>script.google.com</b> → <b>새 프로젝트</b> → 아래 <b>[코드 복사]</b>를 눌러 편집기에 통째로 붙여넣기<br>
+        <b>②</b> 코드 맨 위 <code>PASSWORD</code>가 사장님 비밀번호(<code>563011</code>)인지 확인 (바꾸려면 여기서)<br>
+        <b>③</b> <b>배포 → 새 배포 → 웹 앱</b>, 실행 계정 ‘나’, 액세스 권한 <b>‘모든 사용자’</b> → 배포 →
+        나온 <b>웹 앱 URL(.../exec)</b>을 위 칸에 붙여넣고 <b>[연결 확인]</b>
+        <br><span style="color:#b3261e;font-weight:800;">코드를 고치면 [배포 → 배포 관리 → 연필 → 새 버전]으로 다시 배포해야 반영됩니다.</span>
+      </div>
+      <div class="guide-actions">
+        <button type="button" class="btn" id="btnCopyGs">📋 코드 복사</button>
+        <a class="btn" href="apps-script-properties.gs" target="_blank" rel="noopener">↗ 코드 파일 열기</a>
+      </div>
+      <div class="code-box"><pre id="gsCode">코드를 불러오는 중…</pre></div>
+    </details>
+  </section>
+
+  <!-- 모드 -->
+  <div class="modeTabs" id="modeTabs" role="tablist">
+    <button type="button" role="tab" data-mode="add" aria-selected="true">➕ 새 매물 등록</button>
+    <button type="button" role="tab" data-mode="edit" aria-selected="false">✏️ 기존 매물 수정</button>
+  </div>
+
+  <!-- ═════════ 새 매물 ═════════ -->
+  <section id="addPane">
+    <div id="addResult"></div>
+
+    <div class="card">
+      <h3>① 거래 · 위치 <span class="m">탭해서 고르기</span></h3>
+      <div class="fld">
+        <label>거래구분</label>
+        <div class="chips" id="dealChips"></div>
+      </div>
+      <div class="fld">
+        <label>권역</label>
+        <div class="chips" id="regionChips"></div>
+        <div class="inline-add" id="regionCustomWrap" hidden>
+          <input type="text" id="fRegionCustom" placeholder="권역 직접입력 (예: 청천동)">
+        </div>
+      </div>
+      <div class="fld">
+        <label>해당층수</label>
+        <div class="chips" id="floorChips"></div>
+        <div class="inline-add" id="floorCustomWrap" hidden>
+          <input type="text" id="fFloorCustom" placeholder="층수 직접입력 (예: 지상 6층)">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>② 노출 · 제목 <span class="m">제목은 자동 조합</span></h3>
+      <div class="fld">
+        <label>홈페이지 노출</label>
+        <div class="seg" id="exposeSeg">
+          <button type="button" data-expose="노출(공개)" aria-pressed="true">노출(공개)</button>
+          <button type="button" data-expose="비공개(내부장부용)" aria-pressed="false">비공개</button>
+        </div>
+        <div class="hintline" id="exposeHint">공개하면 손님용 홈페이지에 바로 보입니다. 상세지번·건물주 성함·연락처는 공개되지 않습니다.</div>
+      </div>
+      <div class="fld">
+        <label for="fTitle">매물제목</label>
+        <input type="text" id="fTitle" placeholder="석남동 지상 1층 60평 공장임대">
+        <button type="button" class="btn sm" id="btnTitleAuto" style="margin-top:6px;">↺ 제목 자동 조합</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>③ 가격 · 면적 <span class="m">만원 / 평 / m / kW</span></h3>
+      <div class="grid2">
+        <div class="fld">
+          <label for="fDep">보증금 (매매는 매매가)</label>
+          <input type="number" id="fDep" inputmode="numeric" placeholder="1000">
+        </div>
+        <div class="fld">
+          <label for="fRent">월세</label>
+          <input type="number" id="fRent" inputmode="numeric" placeholder="80">
+        </div>
+      </div>
+      <div class="grid3">
+        <div class="fld">
+          <label for="fArea">전용평수</label>
+          <input type="number" id="fArea" inputmode="decimal" placeholder="60">
+        </div>
+        <div class="fld">
+          <label for="fHeight">층고 (m)</label>
+          <input type="text" id="fHeight" inputmode="decimal" placeholder="4.2">
+        </div>
+        <div class="fld">
+          <label for="fPower">전력 (kW)</label>
+          <input type="text" id="fPower" placeholder="30">
+        </div>
+      </div>
+      <div class="chips" id="powerChips" style="margin-top:-2px;"></div>
+      <div class="hintline">모르면 <b>확인문의</b>로 넣어 두세요. 홈페이지에는 ‘확인문의’로 표시됩니다.</div>
+    </div>
+
+    <div class="card">
+      <h3>④ 시설 · 도로 <span class="m">호이스트 / 진입로</span></h3>
+      <div class="grid2">
+        <div class="fld">
+          <label>호이스트</label>
+          <div class="seg" id="hoistSeg">
+            <button type="button" data-hoist="없음" aria-pressed="true">없음</button>
+            <button type="button" data-hoist="있음" aria-pressed="false">있음</button>
+          </div>
+        </div>
+        <div class="fld">
+          <label for="fHoistSpec">호이스트 제원</label>
+          <input type="text" id="fHoistSpec" placeholder="5T">
+        </div>
+      </div>
+      <div class="fld">
+        <label for="fRoad">도로조건</label>
+        <input type="text" id="fRoad" placeholder="츄레라(40ft) 진입 가능">
+        <div class="chips" id="roadChips" style="margin-top:7px;"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>⑤ 비공개 정보 <span class="m">🔒 홈페이지에 안 나갑니다</span></h3>
+      <div class="fld">
+        <label for="fJibun">상세지번 <span class="lock">비공개</span></label>
+        <input type="text" id="fJibun" placeholder="석남동 123-45 (뒤 번지까지)">
+      </div>
+      <div class="grid2">
+        <div class="fld">
+          <label for="fOwner">건물주 성함 <span class="lock">비공개</span></label>
+          <input type="text" id="fOwner" placeholder="홍길동">
+        </div>
+        <div class="fld">
+          <label for="fOwnerPhone">건물주 연락처 <span class="lock">비공개</span></label>
+          <input type="text" id="fOwnerPhone" inputmode="tel" placeholder="010-0000-0000">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>⑥ 특징·추가 <span class="m">선택</span></h3>
+      <div class="fld">
+        <label for="fFeature">핵심특징</label>
+        <textarea id="fFeature" placeholder="대로변 코너, 츄레라 진입, 사무실 포함, 즉시 입주 가능"></textarea>
+      </div>
+      <details>
+        <summary style="cursor:pointer;font-size:12px;font-weight:800;color:var(--royal-dark);padding:4px 0;">추가 항목 (사무실평수·입주·업종·용도지역)</summary>
+        <div class="grid2" style="margin-top:8px;">
+          <div class="fld">
+            <label for="fOffice">사무실평수</label>
+            <input type="number" id="fOffice" inputmode="decimal" placeholder="0">
+          </div>
+          <div class="fld">
+            <label for="fMoveIn">입주날짜</label>
+            <input type="text" id="fMoveIn" placeholder="즉시입주 / 협의">
+          </div>
+          <div class="fld">
+            <label for="fIndustry">추천업종</label>
+            <input type="text" id="fIndustry" placeholder="일반제조업, 금속가공">
+          </div>
+          <div class="fld">
+            <label for="fZone">용도지역</label>
+            <input type="text" id="fZone" placeholder="일반공업지역">
+          </div>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ═════════ 기존 매물 수정 ═════════ -->
+  <section id="editPane" hidden>
+    <div class="statRow" id="statRow"></div>
+
+    <div class="searchbar">
+      <span aria-hidden="true">🔍</span>
+      <input type="search" id="qSearch" autocomplete="off" placeholder="매물번호 · 제목 · 권역 · 지번 검색 (예: W-2611 / 석남 / 289-18)">
+      <button type="button" class="btn sm" id="qClear">✕</button>
+    </div>
+
+    <div id="editCard" hidden></div>
+
+    <div class="plist" id="plist"></div>
+    <div id="listEmpty"></div>
+  </section>
+</div>
+
+<!-- 하단 액션 -->
+<div class="actionBar">
+  <div class="inner">
+    <span class="info" id="barInfo"></span>
+    <button type="button" class="btn" id="btnReset" hidden>새로 쓰기</button>
+    <button type="button" class="btn primary go" id="btnGo" disabled>＋ 장부에 등록하기</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ══════════════ 상수 ══════════════ */
+  var LS_URL = "wreal_prop_url", LS_PW = "wreal_prop_pw", LS_REM = "wreal_prop_remember";
+  var HOME = "index.html";
+
+  var DEALS = ["공장임대","공장매매","창고임대","창고매매","신축공장분양","토지매매","지식산업센터"];
+  var REGIONS = ["석남동","가좌동","원창동","도화동","송현동","송림동","주안동","청라동","경서동","직접입력"];
+  var FLOORS = ["지상 1층","지상 2층","지상 3층","지상 4층","지상 5층 이상","지하 1층","건물 전체(통임대/통매매)","기타(직접입력)"];
+  var POWERS = ["10","20","30","50","100","200","확인문의"];
+  var ROADS = ["츄레라(40ft) 진입 가능","5톤 트럭 진입","3톤 진입","1톤~2.5톤 진입","소형차 통행","도로 진입 곤란","확인문의"];
+
+  var $ = function(id){ return document.getElementById(id); };
+  var el = {
+    toast: $("toast"), connDot: $("connDot"), connText: $("connText"), connTime: $("connTime"),
+    setupPanel: $("setupPanel"), cfgUrl: $("cfgUrl"), cfgPw: $("cfgPw"), cfgRemember: $("cfgRemember"),
+    gsCode: $("gsCode"), modeTabs: $("modeTabs"), addPane: $("addPane"), editPane: $("editPane"),
+    plist: $("plist"), listEmpty: $("listEmpty"), editCard: $("editCard"), statRow: $("statRow"),
+    addResult: $("addResult"), barInfo: $("barInfo"), btnGo: $("btnGo"), btnReset: $("btnReset"),
+    qSearch: $("qSearch")
+  };
+
+  var state = {
+    url: "", pw: "", mode: "add",
+    props: null, loading: false,
+    editing: null,        /* 선택한 매물 객체 */
+    add: {},              /* 새 매물 입력값 */
+    busy: false
+  };
+
+  /* ══════════════ 도우미 ══════════════ */
+  function esc(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(m){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m];
+    });
+  }
+  function toast(msg, warn){
+    el.toast.textContent = msg;
+    el.toast.className = "toast show" + (warn ? " warn" : "");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){ el.toast.className = "toast"; }, 3400);
+  }
+  function pad2(n){ return (n < 10 ? "0" : "") + n; }
+  function todayStr(){
+    var d = new Date();
+    return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+  }
+  function num(v){ return String(v == null ? "" : v).replace(/[^\d.]/g, ""); }
+  function comma(v){
+    var n = Number(String(v || "").replace(/[^\d.-]/g, ""));
+    return isNaN(n) ? "" : n.toLocaleString();
+  }
+  function isNeed(v){
+    v = String(v || "").trim();
+    return !v || v.indexOf("확인") >= 0 || v === "-";
+  }
+
+  /* ══════════════ 연결 ══════════════ */
+  function loadConfig(){
+    try {
+      state.url = localStorage.getItem(LS_URL) || "";
+      if(localStorage.getItem(LS_REM) !== "0") state.pw = localStorage.getItem(LS_PW) || "";
+    } catch(e){}
+    if(state.url) el.cfgUrl.value = state.url;
+    if(state.pw) el.cfgPw.value = state.pw;
+  }
+  function saveConfig(){
+    try {
+      localStorage.setItem(LS_URL, state.url);
+      localStorage.setItem(LS_REM, el.cfgRemember.checked ? "1" : "0");
+      if(el.cfgRemember.checked) localStorage.setItem(LS_PW, state.pw);
+      else localStorage.removeItem(LS_PW);
+    } catch(e){}
+  }
+  function setConn(kind, text){
+    el.connDot.className = "dot" + (kind === "on" ? " on" : (kind === "err" ? " err" : ""));
+    el.connText.textContent = text;
+  }
+  function stamp(){
+    var d = new Date();
+    el.connTime.textContent = "마지막 확인 " + pad2(d.getHours()) + ":" + pad2(d.getMinutes());
+  }
+
+  function qs(params){
+    var out = [];
+    for(var k in params){
+      if(params[k] === undefined || params[k] === null) continue;
+      out.push(encodeURIComponent(k) + "=" + encodeURIComponent(params[k]));
+    }
+    return out.join("&");
+  }
+
+  function apiGet(params){
+    var all = { pw: state.pw };
+    for(var k in params) all[k] = params[k];
+    var url = state.url + (state.url.indexOf("?") >= 0 ? "&" : "?") + qs(all);
+    return fetch(url, { method: "GET", cache: "no-store", redirect: "follow" }).then(function(res){
+      return res.text().then(function(text){
+        var data = null;
+        try { data = JSON.parse(text); } catch(e){}
+        if(!data) throw new Error("응답을 읽지 못했습니다. 웹 앱 URL과 배포 상태(액세스 권한 ‘모든 사용자’)를 확인해 주세요.");
+        if(!data.ok) throw new Error(data.error || "요청을 처리하지 못했습니다.");
+        return data;
+      });
+    }).catch(function(e){
+      var msg = e && e.message ? e.message : "";
+      if(/^(응답을|비밀번호|요청을|시트를|"|열 순서)/.test(msg)) throw e;
+      var err = new Error("연결하지 못했습니다 — 인터넷과 웹 앱 주소를 확인해 주세요. (" + (msg || "network") + ")");
+      err.friendly = true;
+      throw err;
+    });
+  }
+
+  function apiWrite(params){
+    var payload = { pw: state.pw };
+    for(var k in params) payload[k] = params[k];
+    return fetch(state.url, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+      redirect: "follow"
+    }).then(function(res){
+      return res.text().then(function(text){
+        var data = null;
+        try { data = JSON.parse(text); } catch(e){}
+        if(data && data.ok) return data;
+        if(data && data.error && !data.ok) throw new Error(data.error);
+        return apiGet(params);
+      });
+    }).catch(function(e){
+      if(e && /비밀번호|시트를|열 순서|넣어 주세요|찾지 못했습니다/.test(e.message || "")) throw e;
+      return apiGet(params);
+    });
+  }
+
+  /* ══════════════ Apps Script 코드 보기 ══════════════ */
+  var gsSource = null;
+  function loadGsSource(){
+    if(gsSource) return Promise.resolve(gsSource);
+    return fetch("apps-script-properties.gs", { cache: "no-store" }).then(function(r){
+      if(!r.ok) throw new Error("HTTP " + r.status);
+      return r.text();
+    }).then(function(text){
+      gsSource = text;
+      el.gsCode.textContent = text;
+      return text;
+    }).catch(function(){
+      el.gsCode.textContent = "코드를 불러오지 못했습니다. 저장소의 apps-script-properties.gs 파일을 열어 복사해 주세요.";
+      return "";
+    });
+  }
+  function copyText(text, okMsg){
+    function fb(){
+      var ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); toast(okMsg); } catch(e){ toast("복사하지 못했습니다", true); }
+      ta.remove();
+    }
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(text).then(function(){ toast(okMsg); }, fb);
+    } else fb();
+  }
+
+  /* ══════════════ 새 매물 폼 ══════════════ */
+  function chip(label, value){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "chip";
+    b.textContent = label;
+    b.dataset.val = value;
+    b.setAttribute("aria-pressed", "false");
+    return b;
+  }
+  function buildChips(container, list, key, extra){
+    container.innerHTML = "";
+    list.forEach(function(v){
+      var b = chip(v, v);
+      b.addEventListener("click", function(){
+        state.add[key] = v;
+        markChips(container, v);
+        if(key === "region") $("regionCustomWrap").hidden = (v !== "직접입력");
+        if(key === "floor") $("floorCustomWrap").hidden = (v !== "기타(직접입력)");
+        if(key === "power" && v !== "확인문의") $("fPower").value = v;
+        if(key === "power" && v === "확인문의") $("fPower").value = "확인문의";
+        if(key === "road" && v !== "확인문의") $("fRoad").value = v;
+        if(key === "road" && v === "확인문의") $("fRoad").value = "확인문의";
+        if(extra) extra(v);
+        syncAdd(true);
+      });
+      container.appendChild(b);
+    });
+  }
+  function markChips(container, val){
+    Array.prototype.forEach.call(container.querySelectorAll(".chip"), function(b){
+      b.setAttribute("aria-pressed", b.dataset.val === val ? "true" : "false");
+    });
+  }
+
+  function resetAddForm(){
+    state.add = {
+      deal: "공장임대", region: "석남동", floor: "지상 1층", expose: "노출(공개)",
+      hoist: "없음", power: ""
+    };
+    $("fRegionCustom").value = ""; $("regionCustomWrap").hidden = true;
+    $("fFloorCustom").value = ""; $("floorCustomWrap").hidden = true;
+    ["fTitle","fDep","fRent","fArea","fHeight","fPower","fHoistSpec","fRoad","fJibun","fOwner","fOwnerPhone",
+     "fFeature","fOffice","fMoveIn","fIndustry","fZone"].forEach(function(id){ $(id).value = ""; });
+    markChips($("dealChips"), state.add.deal);
+    markChips($("regionChips"), state.add.region);
+    markChips($("floorChips"), state.add.floor);
+    markChips($("hoistSeg"), state.add.hoist);
+    markChips($("exposeSeg"), state.add.expose);
+    markChips($("powerChips"), "");
+    markChips($("roadChips"), "");
+    exposeHint();
+    el.addResult.innerHTML = "";
+    el.btnReset.hidden = true;
+  }
+
+  function exposeHint(){
+    var open = $("exposeSeg").querySelector('[aria-pressed="true"]').dataset.expose === "노출(공개)";
+    $("exposeHint").textContent = open
+      ? "공개하면 손님용 홈페이지에 바로 보입니다. 상세지번·건물주 성함·연락처는 공개되지 않습니다."
+      : "비공개는 내부 장부에만 저장되고, 홈페이지 공개 시트에는 들어가지 않습니다.";
+  }
+
+  function floorShort(f){
+    if(!f) return "";
+    return String(f).replace("지상 ", "").replace("지하 ", "지하 ").replace("건물 전체(통임대/통매매)", "건물 전체");
+  }
+
+  function composeTitle(){
+    var a = state.add;
+    var region = a.region === "직접입력" ? ($("fRegionCustom").value.trim() || "인천") : (a.region || "");
+    var floor = a.floor === "기타(직접입력)" ? ($("fFloorCustom").value.trim() || "") : (a.floor || "");
+    var area = $("fArea").value.trim();
+    var deal = a.deal || "";
+    var bits = [region, floorShort(floor)];
+    if(area) bits.push(area + "평");
+    bits.push(deal);
+    return bits.filter(Boolean).join(" ").trim();
+  }
+
+  function composePrice(){
+    var a = state.add;
+    var dep = num($("fDep").value), rent = num($("fRent").value);
+    var isRent = /임대/.test(a.deal || "");
+    if(!dep && !rent) return "";
+    if(isRent) return "보증금 " + (dep ? comma(dep) + "만" : "0") + " / 월 " + (rent ? comma(rent) + "만" : "0");
+    return "매매가 " + (dep ? comma(dep) + "만원" : "-");
+  }
+
+  var titleDirty = false;
+  function syncAdd(forceTitle){
+    if(forceTitle || !titleDirty) $("fTitle").value = composeTitle();
+    el.btnGo.disabled = !(state.add.deal && state.add.region);
+    el.barInfo.innerHTML = state.add.deal
+      ? "<b>" + esc(state.add.deal) + "</b> · " + esc(state.add.region === "직접입력" ? ($("fRegionCustom").value || "권역 미정") : state.add.region) +
+        (String(state.add.expose).indexOf("공개") >= 0 ? " · 🌐 공개" : " · 🔒 비공개")
+      : "";
+  }
+
+  /* ══════════════ 목록 ══════════════ */
+  function propSearchText(p){
+    return [p["매물번호"], p["매물제목"], p["권역"], p["상세지번"], p["핵심특징"], p["가격설명"]]
+      .join(" ").toLowerCase();
+  }
+
+  function loadProps(force){
+    if(!state.url || !state.pw) return Promise.resolve(false);
+    if(state.props && !force) return Promise.resolve(true);
+    state.loading = true;
+    setConn("", "매물 장부를 불러오는 중…");
+    return apiGet({ action: "list" }).then(function(d){
+      state.props = d.properties || [];
+      state.loading = false;
+      setConn("on", "연결됨 · 매물 " + state.props.length + "건");
+      stamp();
+      renderStats();
+      renderList();
+      return true;
+    }).catch(function(e){
+      state.loading = false;
+      setConn("err", "연결 실패 — " + (e.message || ""));
+      toast(e.message || "장부를 불러오지 못했습니다", true);
+      return false;
+    });
+  }
+
+  function renderStats(){
+    if(!state.props) return;
+    var total = state.props.length;
+    var open = state.props.filter(function(p){ return String(p["홈페이지노출"]).indexOf("공개") >= 0 && String(p["홈페이지노출"]).indexOf("비공개") < 0; }).length;
+    var noPower = state.props.filter(function(p){ return isNeed(p["전력"]); }).length;
+    var noRoad = state.props.filter(function(p){ return isNeed(p["도로조건"]); }).length;
+    el.statRow.innerHTML =
+      '<span>전체 <b>' + total + "</b>건</span>" +
+      '<span>공개 <b>' + open + "</b>건</span>" +
+      '<span class="' + (noPower ? "warn" : "") + '">전력 미기재 <b>' + noPower + "</b></span>" +
+      '<span class="' + (noRoad ? "warn" : "") + '">도로 미기재 <b>' + noRoad + "</b></span>";
+  }
+
+  function sortedProps(){
+    return (state.props || []).slice().sort(function(a, b){
+      var da = a["등록일자"] || "", db = b["등록일자"] || "";
+      if(da !== db) return da < db ? 1 : -1;
+      return (b.row || 0) - (a.row || 0);
+    });
+  }
+
+  function renderList(){
+    if(!state.props){ el.plist.innerHTML = ""; return; }
+    var q = (el.qSearch.value || "").trim().toLowerCase();
+    var list = sortedProps();
+    if(q) list = list.filter(function(p){ return propSearchText(p).indexOf(q) >= 0; });
+    var shown = list.slice(0, 40);
+
+    el.plist.innerHTML = shown.map(function(p){
+      var isOpen = String(p["홈페이지노출"]).indexOf("비공개") < 0;
+      var need = isNeed(p["전력"]) || isNeed(p["도로조건"]);
+      var tags = '<span class="tag ' + (isOpen ? "ok" : "off") + '">' + (isOpen ? "공개" : "비공개") + "</span>" +
+        (need ? '<span class="tag need">값 확인</span>' : "");
+      var price = p["가격설명"] || ((num(p["보증금_매매가"]) ? "보증 " + comma(p["보증금_매매가"]) + "만" : "") +
+        (num(p["월세"]) ? " / 월 " + comma(p["월세"]) + "만" : ""));
+      return '<div class="pitem" data-row="' + p.row + '">' +
+        '<div class="main">' +
+          '<div class="no">' + esc(p["매물번호"] || "-") + " · " + esc(p["등록일자"] || "") + "</div>" +
+          '<div class="ttl">' + esc(p["매물제목"] || "(제목 없음)") + "</div>" +
+          '<div class="meta">' + esc([p["권역"], p["해당층수"], p["전용평수"] ? p["전용평수"] + "평" : "", price].filter(Boolean).join(" · ")) + "</div>" +
+        "</div>" +
+        '<div class="tags">' + tags + "</div>" +
+      "</div>";
+    }).join("");
+
+    el.listEmpty.innerHTML = shown.length ? (list.length > shown.length
+      ? '<div class="empty">' + list.length + "건 중 최근 40건만 보입니다. 검색어로 좁혀 주세요.</div>" : "")
+      : '<div class="empty">검색 결과가 없습니다.<br>매물번호(W-...)나 동 이름으로 검색해 보세요.</div>';
+
+    Array.prototype.forEach.call(el.plist.querySelectorAll(".pitem"), function(node){
+      node.addEventListener("click", function(){
+        var row = Number(node.dataset.row);
+        var p = (state.props || []).filter(function(x){ return x.row === row; })[0];
+        if(p) openEditor(p);
+      });
+    });
+  }
+
+  /* ══════════════ 편집 카드 ══════════════ */
+  function openEditor(p){
+    state.editing = JSON.parse(JSON.stringify(p));
+    Array.prototype.forEach.call(el.plist.querySelectorAll(".pitem"), function(n){
+      n.classList.toggle("on", Number(n.dataset.row) === p.row);
+    });
+
+    var isOpen = String(p["홈페이지노출"]).indexOf("비공개") < 0;
+    var needP = isNeed(p["전력"]), needR = isNeed(p["도로조건"]);
+
+    el.editCard.hidden = false;
+    el.editCard.innerHTML =
+      '<div class="card" style="border-color:#bfdbfe;">' +
+        '<div class="editHead">' +
+          '<span class="no">' + esc(p["매물번호"]) + "</span>" +
+          (needP || needR ? '<span class="badgeNeed">값 확인 필요</span>' : "") +
+          '<span class="sp"></span>' +
+          '<button type="button" class="btn sm" id="btnCloseEdit">닫기</button>' +
+        "</div>" +
+        '<div class="fld"><label>' + esc([p["권역"], p["해당층수"], p["전용평수"] ? p["전용평수"] + "평" : "", p["거래구분"]].filter(Boolean).join(" · ")) + "</label>" +
+          '<div class="hintline" style="margin-top:-2px;">' + esc(p["핵심특징"] || "특징 미입력") + "</div></div>" +
+
+        '<div class="fld"><label>홈페이지 노출</label>' +
+          '<div class="seg" id="editExpose">' +
+            '<button type="button" data-expose="노출(공개)" aria-pressed="' + (isOpen ? "true" : "false") + '">노출(공개)</button>' +
+            '<button type="button" data-expose="비공개(내부장부용)" aria-pressed="' + (isOpen ? "false" : "true") + '">비공개</button>' +
+          "</div></div>" +
+
+        '<div class="grid2">' +
+          '<div class="fld"><label>보증금 (매매가)</label><input type="number" inputmode="numeric" id="eDep" value="' + esc(num(p["보증금_매매가"])) + '"></div>' +
+          '<div class="fld"><label>월세</label><input type="number" inputmode="numeric" id="eRent" value="' + esc(num(p["월세"])) + '"></div>' +
+        "</div>" +
+
+        '<div class="fld"><label>전력 (kW)' + (needP ? ' <span class="badgeNeed">확인 필요</span>' : "") + "</label>" +
+          '<input type="text" id="ePower" value="' + esc(p["전력"]) + '" placeholder="30 / 확인문의">' +
+          '<div class="chips" id="ePowerChips" style="margin-top:7px;"></div></div>' +
+
+        '<div class="fld"><label>도로조건' + (needR ? ' <span class="badgeNeed">확인 필요</span>' : "") + "</label>" +
+          '<input type="text" id="eRoad" value="' + esc(p["도로조건"]) + '" placeholder="츄레라(40ft) 진입 가능">' +
+          '<div class="chips" id="eRoadChips" style="margin-top:7px;"></div></div>' +
+
+        '<div class="fld"><label>매물제목</label><input type="text" id="eTitle" value="' + esc(p["매물제목"]) + '"></div>' +
+
+        '<div class="grid2">' +
+          '<div class="fld"><label>상세지번 <span class="lock">비공개</span></label><input type="text" id="eJibun" value="' + esc(p["상세지번"]) + '" placeholder="석남동 123-45"></div>' +
+          '<div class="fld"><label>건물주 연락처 <span class="lock">비공개</span></label><input type="text" id="eOwnerPhone" value="' + esc(p["건물주연락처"]) + '" placeholder="010-0000-0000"></div>' +
+        "</div>" +
+
+        '<div class="fld"><label>핵심특징</label><textarea id="eFeature">' + esc(p["핵심특징"]) + "</textarea></div>" +
+
+        '<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:2px;">' +
+          '<button type="button" class="btn primary" id="btnSaveEdit">💾 수정 저장</button>' +
+          '<button type="button" class="btn" id="btnRevertEdit">↺ 되돌리기</button>' +
+        "</div>" +
+      "</div>";
+
+    $("btnCloseEdit").addEventListener("click", function(){
+      el.editCard.hidden = true; el.editCard.innerHTML = ""; state.editing = null;
+      Array.prototype.forEach.call(el.plist.querySelectorAll(".pitem"), function(n){ n.classList.remove("on"); });
+    });
+
+    /* 노출 토글 */
+    $("editExpose").addEventListener("click", function(e){
+      var b = e.target.closest("button[data-expose]"); if(!b) return;
+      Array.prototype.forEach.call(this.querySelectorAll("button"), function(x){
+        x.setAttribute("aria-pressed", x === b ? "true" : "false");
+      });
+    });
+    /* 칩 */
+    var pc = $("ePowerChips");
+    POWERS.forEach(function(v){
+      var b = chip(v, v);
+      b.addEventListener("click", function(){ $("ePower").value = v; markChips(pc, v); });
+      pc.appendChild(b);
+    });
+    markChips(pc, p["전력"]);
+    var rc = $("eRoadChips");
+    ROADS.forEach(function(v){
+      var b = chip(v, v);
+      b.addEventListener("click", function(){ $("eRoad").value = v; markChips(rc, v); });
+      rc.appendChild(b);
+    });
+    markChips(rc, p["도로조건"]);
+
+    $("btnRevertEdit").addEventListener("click", function(){ openEditor(p); });
+
+    $("btnSaveEdit").addEventListener("click", function(){ saveEdit(p); });
+
+    el.editCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    syncEditBar();
+  }
+
+  function syncEditBar(){
+    if(state.mode === "edit"){
+      el.btnGo.textContent = state.editing ? "💾 수정 저장" : "매물을 먼저 고르세요";
+      el.btnGo.disabled = !state.editing;
+      el.barInfo.innerHTML = state.editing
+        ? "<b>" + esc(state.editing["매물번호"]) + "</b> 수정 중"
+        : "목록에서 매물을 눌러 불러오세요";
+    }else{
+      el.btnGo.textContent = "＋ 장부에 등록하기";
+      el.btnGo.disabled = !(state.add.deal && state.add.region);
+      syncAdd(false);
+    }
+  }
+
+  function saveEdit(p){
+    var body = { action: "update", row: p.row };
+    var pair = [
+      ["expose", $("editExpose").querySelector('[aria-pressed="true"]').dataset.expose],
+      ["dep", num($("eDep").value)],
+      ["rent", num($("eRent").value)],
+      ["power", $("ePower").value.trim()],
+      ["road", $("eRoad").value.trim()],
+      ["title", $("eTitle").value.trim()],
+      ["jibun", $("eJibun").value.trim()],
+      ["ownerPhone", $("eOwnerPhone").value.trim()],
+      ["feature", $("eFeature").value.trim()]
+    ];
+    var changed = [];
+    pair.forEach(function(kv){
+      body[kv[0]] = kv[1];
+      var name = { expose:"홈페이지노출", dep:"보증금_매매가", rent:"월세", power:"전력", road:"도로조건",
+        title:"매물제목", jibun:"상세지번", ownerPhone:"건물주연락처", feature:"핵심특징" }[kv[0]];
+      var old = kv[0] === "expose" ? (String(p["홈페이지노출"]).indexOf("비공개") < 0 ? "노출(공개)" : "비공개(내부장부용)")
+        : kv[0] === "dep" ? num(p["보증금_매매가"])
+        : kv[0] === "rent" ? num(p["월세"])
+        : String(p[name] || "").trim();
+      var nowv = kv[0] === "dep" || kv[0] === "rent" ? num(kv[1]) : String(kv[1]).trim();
+      if(String(old) !== String(nowv)) changed.push(name);
+    });
+    /* 보증금/월세가 바뀌면 가격설명도 다시 */
+    if(changed.indexOf("보증금_매매가") >= 0 || changed.indexOf("월세") >= 0){
+      var dep = num($("eDep").value), rent = num($("eRent").value);
+      var isRent = /임대/.test(p["거래구분"] || "");
+      body.priceDesc = isRent
+        ? "보증금 " + (dep ? comma(dep) + "만" : "0") + " / 월 " + (rent ? comma(rent) + "만" : "0")
+        : "매매가 " + (dep ? comma(dep) + "만원" : "-");
+      changed.push("가격설명");
+    }
+
+    if(!changed.length){ toast("바뀐 내용이 없습니다"); return; }
+
+    var btn = $("btnSaveEdit");
+    btn.disabled = true; btn.textContent = "저장 중…";
+    apiWrite(body).then(function(d){
+      btn.disabled = false; btn.textContent = "💾 수정 저장";
+      toast("✅ " + (d.changed ? d.changed.join(" · ") : "저장") + " 수정 완료" +
+        (d.publicRemoved ? " (홈페이지에서 내림)" : ""));
+      return loadProps(true).then(function(){
+        el.editCard.hidden = true; el.editCard.innerHTML = ""; state.editing = null;
+        syncEditBar();
+      });
+    }).catch(function(e){
+      btn.disabled = false; btn.textContent = "💾 수정 저장";
+      toast(e.message || "저장하지 못했습니다", true);
+    });
+  }
+
+  /* ══════════════ 등록 ══════════════ */
+  function submitAdd(){
+    var a = state.add;
+    var region = a.region === "직접입력" ? ($("fRegionCustom").value.trim()) : a.region;
+    var floor = a.floor === "기타(직접입력)" ? ($("fFloorCustom").value.trim()) : a.floor;
+    if(!a.deal){ toast("거래구분을 골라 주세요", true); return; }
+    if(!region){ toast("권역을 골라 주세요", true); return; }
+    if(!floor){ toast("층수를 골라 주세요", true); return; }
+
+    var body = {
+      action: "add",
+      deal: a.deal, region: region, floor: floor, expose: a.expose,
+      title: $("fTitle").value.trim() || composeTitle(),
+      priceDesc: composePrice(),
+      dep: num($("fDep").value), rent: num($("fRent").value),
+      area: num($("fArea").value), office: num($("fOffice").value),
+      height: $("fHeight").value.trim(), power: $("fPower").value.trim(),
+      hoist: a.hoist, hoistSpec: a.hoist === "있음" ? ($("fHoistSpec").value.trim() || "있음") : "없음",
+      road: $("fRoad").value.trim(), moveIn: $("fMoveIn").value.trim(),
+      industry: $("fIndustry").value.trim(), zone: $("fZone").value.trim(),
+      jibun: $("fJibun").value.trim(), owner: $("fOwner").value.trim(), ownerPhone: $("fOwnerPhone").value.trim(),
+      feature: $("fFeature").value.trim()
+    };
+    if(!body.dep && !body.rent){ toast("보증금(매매가)이나 월세 중 하나는 넣 주세요", true); return; }
+
+    el.btnGo.disabled = true; el.btnGo.textContent = "저장 중…";
+    apiWrite(body).then(function(d){
+      el.btnGo.disabled = false; el.btnGo.textContent = "＋ 장부에 등록하기";
+      el.addResult.innerHTML =
+        '<div class="result">' +
+          "<h3>✅ 장부에 등록했습니다</h3>" +
+          '<div class="no">' + esc(d.no) + "</div>" +
+          "<p>" + (String(a.expose).indexOf("공개") >= 0
+            ? (d.publicAdded ? "홈페이지 공개 시트에도 넣었습니다 — 바로 노출됩니다." : "⚠️ 공개 시트 반영은 실패했습니다. 잠시 뒤 다시 저장해 주세요.")
+            : "비공개로 저장했습니다 — 내부 장부에만 있습니다.") + "</p>" +
+          '<div class="acts">' +
+            '<a class="btn sm" href="' + HOME + '" target="_blank" rel="noopener">↗ 홈페이지 보기</a>' +
+            '<button type="button" class="btn sm" id="btnAnother">＋ 한 건 더</button>' +
+            '<button type="button" class="btn sm" id="btnEditNow">✏️ 바로 수정</button>' +
+          "</div>" +
+        "</div>";
+      $("btnAnother").addEventListener("click", function(){ resetAddForm(); syncAdd(true); window.scrollTo({top:0,behavior:"smooth"}); });
+      $("btnEditNow").addEventListener("click", function(){
+        setMode("edit");
+        el.qSearch.value = d.no;
+        renderList();
+      });
+      el.btnReset.hidden = false;
+      state.props = null;       /* 다음에 수정 탭 열 때 새로 */
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      toast("등록 완료 — " + d.no);
+    }).catch(function(e){
+      el.btnGo.disabled = false; el.btnGo.textContent = "＋ 장부에 등록하기";
+      toast(e.message || "등록하지 못했습니다", true);
+    });
+  }
+
+  /* ══════════════ 모드 ══════════════ */
+  function setMode(mode){
+    state.mode = mode;
+    Array.prototype.forEach.call(el.modeTabs.querySelectorAll("button"), function(b){
+      b.setAttribute("aria-selected", b.dataset.mode === mode ? "true" : "false");
+    });
+    el.addPane.hidden = mode !== "add";
+    el.editPane.hidden = mode !== "edit";
+    el.btnReset.hidden = !(mode === "add" && (el.btnReset.dataset.show === "1"));
+    if(mode === "edit"){
+      if(!state.url || !state.pw){
+        el.plist.innerHTML = "";
+        el.listEmpty.innerHTML = '<div class="empty">먼저 <b>[연결 설정]</b>에서 Apps Script 주소와 비밀번호를 넣어 주세요.<br>매물 장부는 공개 홈페이지에 저장하지 않고, 사장님 구글 계정에서만 열립니다.</div>';
+      }else{
+        loadProps(false);
+      }
+    }
+    syncEditBar();
+  }
+
+  /* ══════════════ 이벤트 ══════════════ */
+  el.modeTabs.addEventListener("click", function(e){
+    var b = e.target.closest("button[data-mode]"); if(!b) return;
+    setMode(b.dataset.mode);
+  });
+
+  $("btnSetup").addEventListener("click", function(){
+    el.setupPanel.hidden = !el.setupPanel.hidden;
+    if(!el.setupPanel.hidden){ loadGsSource(); el.cfgUrl.focus(); }
+  });
+
+  $("btnConnect").addEventListener("click", function(){
+    var url = el.cfgUrl.value.trim();
+    var pw = el.cfgPw.value;
+    if(!url || !pw){ toast("주소와 비밀번호를 모두 넣어 주세요", true); return; }
+    if(!/^https:\/\/script\.google\.com\//.test(url)){
+      toast("script.google.com 에서 배포한 .../exec 주소를 넣어 주세요", true); return;
+    }
+    state.url = url; state.pw = pw;
+    saveConfig();
+    setConn("", "연결을 확인하는 중…");
+    apiGet({ action: "ping" }).then(function(d){
+      setConn("on", "연결됨 · " + (d.sheetTitle || "매물 장부"));
+      stamp();
+      toast("연결되었습니다 — 매물 장부를 읽습니다");
+      el.setupPanel.hidden = true;
+      state.props = null;
+      loadProps(true).then(function(){ setMode(state.mode); });
+    }).catch(function(e){
+      setConn("err", "연결 실패 — " + (e.message || ""));
+      toast(e.message || "연결하지 못했습니다", true);
+    });
+  });
+
+  $("btnDisconnect").addEventListener("click", function(){
+    try {
+      localStorage.removeItem(LS_URL); localStorage.removeItem(LS_PW); localStorage.removeItem(LS_REM);
+    } catch(e){}
+    state.url = ""; state.pw = ""; state.props = null;
+    el.cfgUrl.value = ""; el.cfgPw.value = "";
+    setConn("", "아직 연결하지 않았습니다");
+    el.connTime.textContent = "";
+    toast("연결을 해제했습니다");
+  });
+
+  $("btnRefresh").addEventListener("click", function(){
+    if(state.mode === "edit"){ state.props = null; loadProps(true); }
+    else toast("입력 중인 내용은 그대로 둡니다");
+  });
+
+  $("btnCopyGs").addEventListener("click", function(){
+    loadGsSource().then(function(text){
+      if(!text){ toast("코드를 불러오지 못했습니다", true); return; }
+      copyText(text, "✅ Apps Script 코드를 복사했습니다 — script.google.com에 붙여넣으세요");
+    });
+  });
+
+  /* 새 매물 입력 */
+  $("fTitle").addEventListener("input", function(){ titleDirty = true; });
+  $("btnTitleAuto").addEventListener("click", function(){ titleDirty = false; $("fTitle").value = composeTitle(); toast("제목을 다시 조합했습니다"); });
+  ["fDep","fRent","fArea","fHeight","fPower","fHoistSpec","fRoad","fJibun","fOwner","fOwnerPhone",
+   "fFeature","fOffice","fMoveIn","fIndustry","fZone","fRegionCustom","fFloorCustom"].forEach(function(id){
+    $(id).addEventListener("input", function(){
+      if(id === "fRegionCustom" || id === "fFloorCustom" || id === "fArea") syncAdd(true);
+      else syncAdd(false);
+      if(id === "fPower") markChips($("powerChips"), $(id).value.trim());
+      if(id === "fRoad") markChips($("roadChips"), $(id).value.trim());
+    });
+  });
+  $("exposeSeg").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-expose]"); if(!b) return;
+    state.add.expose = b.dataset.expose;
+    markChips(this, b.dataset.expose);
+    exposeHint();
+    syncAdd(false);
+  });
+  $("hoistSeg").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-hoist]"); if(!b) return;
+    state.add.hoist = b.dataset.hoist;
+    markChips(this, b.dataset.hoist);
+    $("fHoistSpec").disabled = (b.dataset.hoist === "없음");
+    if(b.dataset.hoist === "없음") $("fHoistSpec").value = "";
+  });
+
+  el.btnGo.addEventListener("click", function(){
+    if(state.mode === "edit"){
+      if(state.editing) $("btnSaveEdit") && $("btnSaveEdit").click();
+    }else{
+      submitAdd();
+    }
+  });
+  el.btnReset.addEventListener("click", function(){ resetAddForm(); syncAdd(true); el.btnReset.hidden = true; });
+
+  el.qSearch.addEventListener("input", renderList);
+  $("qClear").addEventListener("click", function(){ el.qSearch.value = ""; renderList(); });
+
+  /* ══════════════ 시작 ══════════════ */
+  buildChips($("dealChips"), DEALS, "deal");
+  buildChips($("regionChips"), REGIONS, "region");
+  buildChips($("floorChips"), FLOORS, "floor");
+  buildChips($("powerChips"), POWERS, "power");
+  buildChips($("roadChips"), ROADS, "road");
+
+  loadConfig();
+  resetAddForm();
+  syncAdd(true);
+
+  if(state.url && state.pw){
+    setConn("", "연결 확인 중…");
+    apiGet({ action: "ping" }).then(function(d){
+      setConn("on", "연결됨 · " + (d.sheetTitle || "매물 장부"));
+      stamp();
+      return loadProps(true);
+    }).catch(function(e){
+      setConn("err", "연결 실패 — " + (e.message || ""));
+    });
+  }else{
+    setConn("", "아직 연결하지 않았습니다 · [⚙ 연결 설정]");
+  }
+})();
+</script>
+</body>
+</html>
