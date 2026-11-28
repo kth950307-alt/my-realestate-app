@@ -1009,6 +1009,7 @@
       html = '<div class="winner tie"><span class="wtrophy">⚖️</span><div class="wtxt"><b>두 제목을 넣어 주세요</b>' +
         '<p>위 A·B 칸에 후보 제목을 넣으면 어느 쪽이 앞 15자에 핵심을 잘 박았는지 비교해 드립니다.</p></div></div>';
       $('reportTwo').innerHTML = html;
+      $('reportMeta').textContent = '제목 A·B를 넣으면 비교표가 나와요';
       return;
     }
 
@@ -1034,6 +1035,18 @@
 
     function cell(v, cls){ return '<td class="' + (cls || '') + '">' + v + '</td>'; }
     function yn(ok, txt){ return ok ? '<span class="yes">✓ ' + txt + '</span>' : '<span class="nope">✗ ' + txt + '</span>'; }
+    function numCell(a){
+      if (!a.len) return '<span class="mut">–</span>';
+      return yn(a.hasDigit, a.hasDigit ? esc(a.numM || '있음') : '없음');
+    }
+    function lenCell(a){
+      if (!a.len) return '<span class="mut">–</span>';
+      return a.len + '자' + (a.len > 34 ? ' <span class="nope">넘침</span>' : ' <span class="yes">OK</span>');
+    }
+    function cutCell(a){
+      if (!a.len) return '<span class="mut">–</span>';
+      return (a.feed.truncated ? a.feed.cut + '자' : '전부') + ' / ' + (a.serp.truncated ? a.serp.cut + '자' : '전부');
+    }
 
     html += '<div style="overflow-x:auto"><table class="cmpTable"><thead><tr><th>항목</th>' +
       '<th class="' + (winner === 1 ? 'win' : '') + '">A</th><th class="' + (winner === 2 ? 'win' : '') + '">B</th></tr></thead><tbody>';
@@ -1043,28 +1056,28 @@
       cell('<span class="score">' + (B.len ? B.score : '–') + '</span> <span class="mut">(' + gB.label + ')</span>', winner === 2 ? 'win' : '') + '</tr>';
 
     html += '<tr><td class="rowh">앞 15자</td>' +
-      cell('<span class="f15"><mark>' + esc(A.front15) + '</mark>' + esc(A.chars.slice(15, 26).join('')) + '</span>', winner === 1 ? 'win' : '') +
-      cell('<span class="f15"><mark>' + esc(B.front15) + '</mark>' + esc(B.chars.slice(15, 26).join('')) + '</span>', winner === 2 ? 'win' : '') + '</tr>';
+      cell(A.len ? '<span class="f15"><mark>' + esc(A.front15) + '</mark>' + esc(A.chars.slice(15, 26).join('')) + '</span>' : '<span class="mut">–</span>', winner === 1 ? 'win' : '') +
+      cell(B.len ? '<span class="f15"><mark>' + esc(B.front15) + '</mark>' + esc(B.chars.slice(15, 26).join('')) + '</span>' : '<span class="mut">–</span>', winner === 2 ? 'win' : '') + '</tr>';
 
     html += '<tr><td class="rowh">지역·단지·핵심</td>' +
       cell(yn(!!A.frontHit, A.frontHit ? esc(frontWords(A)) : '없음'), winner === 1 ? 'win' : '') +
       cell(yn(!!B.frontHit, B.frontHit ? esc(frontWords(B)) : '없음'), winner === 2 ? 'win' : '') + '</tr>';
 
     html += '<tr><td class="rowh">숫자·조건</td>' +
-      cell(yn(A.hasDigit, esc(A.numM || '있음')), winner === 1 ? 'win' : '') +
-      cell(yn(B.hasDigit, esc(B.numM || '있음')), winner === 2 ? 'win' : '') + '</tr>';
+      cell(numCell(A), winner === 1 ? 'win' : '') +
+      cell(numCell(B), winner === 2 ? 'win' : '') + '</tr>';
 
     html += '<tr><td class="rowh">혜택·호기심</td>' +
       cell(yn(A.hooks.length > 0, A.hooks.length ? A.hooks.slice(0, 2).map(function(h){ return esc(h.word); }).join(', ') : '없음'), winner === 1 ? 'win' : '') +
       cell(yn(B.hooks.length > 0, B.hooks.length ? B.hooks.slice(0, 2).map(function(h){ return esc(h.word); }).join(', ') : '없음'), winner === 2 ? 'win' : '') + '</tr>';
 
     html += '<tr><td class="rowh">길이</td>' +
-      cell(A.len + '자' + (A.len > 34 ? ' <span class="nope">넘침</span>' : ' <span class="yes">OK</span>'), winner === 1 ? 'win' : '') +
-      cell(B.len + '자' + (B.len > 34 ? ' <span class="nope">넘침</span>' : ' <span class="yes">OK</span>'), winner === 2 ? 'win' : '') + '</tr>';
+      cell(lenCell(A), winner === 1 ? 'win' : '') +
+      cell(lenCell(B), winner === 2 ? 'win' : '') + '</tr>';
 
     html += '<tr><td class="rowh">홈판 / 검색 잘림</td>' +
-      cell((A.feed.truncated ? A.feed.cut + '자' : '전부') + ' / ' + (A.serp.truncated ? A.serp.cut + '자' : '전부'), winner === 1 ? 'win' : '') +
-      cell((B.feed.truncated ? B.feed.cut + '자' : '전부') + ' / ' + (B.serp.truncated ? B.serp.cut + '자' : '전부'), winner === 2 ? 'win' : '') + '</tr>';
+      cell(cutCell(A), winner === 1 ? 'win' : '') +
+      cell(cutCell(B), winner === 2 ? 'win' : '') + '</tr>';
 
     function warnCell(a){
       if (!a.warnings.length) return '<span class="yes">없음</span>';
@@ -1084,6 +1097,7 @@
     $('reportTwo').innerHTML = html;
     $('lenA2').innerHTML = lenRowHtml(A);
     $('lenB2').innerHTML = lenRowHtml(B);
+    $('reportMeta').textContent = '두 제목 비교 · 점수 높은 쪽이 유리';
   }
 
   var lastA = null, lastB = null;
