@@ -533,6 +533,7 @@
     props: null, loading: false,
     editing: null,        /* 선택한 매물 객체 */
     add: {},              /* 새 매물 입력값 */
+    justAdded: false,     /* 방금 등록 완료 — 실수로 두 번 등록되지 않게 잠금 */
     busy: false
   };
 
@@ -652,7 +653,7 @@
         if(action === "add"){
           var p = {
             row: 100, 등록일자: todayStr(),
-            매물번호: "W-" + todayStr().slice(2,4) + todayStr().slice(5,7) + todayStr().slice(8,10) + "-" + String(new Date().getHours()) + String(new Date().getMinutes()),
+            매물번호: "W-" + todayStr().slice(2,4) + todayStr().slice(5,7) + todayStr().slice(8,10) + "-" + pad2(new Date().getHours()) + pad2(new Date().getMinutes()),
             거래구분: params.deal, 권역: params.region, 해당층수: params.floor,
             홈페이지노출: params.expose, 매물제목: params.title, 가격설명: params.priceDesc,
             보증금_매매가: params.dep, 월세: params.rent, 전용평수: params.area, 사무실평수: params.office,
@@ -729,6 +730,7 @@
     list.forEach(function(v){
       var b = chip(v, v);
       b.addEventListener("click", function(){
+        if(state.justAdded){ state.justAdded = false; el.addResult.innerHTML = ""; }
         state.add[key] = v;
         markChips(container, v);
         if(key === "region") $("regionCustomWrap").hidden = (v !== "직접입력");
@@ -768,6 +770,7 @@
     exposeHint();
     el.addResult.innerHTML = "";
     el.btnReset.hidden = true;
+    state.justAdded = false;
   }
 
   function exposeHint(){
@@ -806,7 +809,13 @@
   var titleDirty = false;
   function syncAdd(forceTitle){
     if(forceTitle || !titleDirty) $("fTitle").value = composeTitle();
-    el.btnGo.disabled = !(state.add.deal && state.add.region);
+    if(state.justAdded){
+      el.btnGo.disabled = true;
+      el.btnGo.textContent = "✅ 등록 완료 — [한 건 더]";
+    }else{
+      el.btnGo.textContent = "＋ 장부에 등록하기";
+      el.btnGo.disabled = !(state.add.deal && state.add.region);
+    }
     el.barInfo.innerHTML = state.add.deal
       ? "<b>" + esc(state.add.deal) + "</b> · " + esc(state.add.region === "직접입력" ? ($("fRegionCustom").value || "권역 미정") : state.add.region) +
         (String(state.add.expose).indexOf("공개") >= 0 ? " · 🌐 공개" : " · 🔒 비공개")
@@ -827,7 +836,7 @@
     return apiGet({ action: "list" }).then(function(d){
       state.props = d.properties || [];
       state.loading = false;
-      setConn("on", "연결됨 · 매물 " + state.props.length + "건");
+      setConn("on", (state.url === "demo" ? "(데모) " : "") + "연결됨 · 매물 " + state.props.length + "건");
       stamp();
       renderStats();
       renderList();
@@ -998,8 +1007,6 @@
         ? "<b>" + esc(state.editing["매물번호"]) + "</b> 수정 중"
         : "목록에서 매물을 눌러 불러오세요";
     }else{
-      el.btnGo.textContent = "＋ 장부에 등록하기";
-      el.btnGo.disabled = !(state.add.deal && state.add.region);
       syncAdd(false);
     }
   }
@@ -1116,6 +1123,11 @@
         renderList();
       });
       el.btnReset.hidden = false;
+      el.btnReset.dataset.show = "1";
+      /* 같은 매물이 두 번 등록되지 않도록 잠근다 (값을 바꾸거나 [한 건 더]를 누르면 풀림) */
+      state.justAdded = true;
+      el.btnGo.disabled = true;
+      el.btnGo.textContent = "✅ 등록 완료 — [한 건 더]";
       state.props = null;       /* 다음에 수정 탭 열 때 새로 */
       window.scrollTo({ top: 0, behavior: "smooth" });
       toast("등록 완료 — " + d.no);
@@ -1208,6 +1220,7 @@
   ["fDep","fRent","fArea","fHeight","fPower","fHoistSpec","fRoad","fJibun","fOwner","fOwnerPhone",
    "fFeature","fOffice","fMoveIn","fIndustry","fZone","fRegionCustom","fFloorCustom"].forEach(function(id){
     $(id).addEventListener("input", function(){
+      if(state.justAdded){ state.justAdded = false; el.addResult.innerHTML = ""; }
       if(id === "fRegionCustom" || id === "fFloorCustom" || id === "fArea") syncAdd(true);
       else syncAdd(false);
       if(id === "fPower") markChips($("powerChips"), $(id).value.trim());
