@@ -779,21 +779,58 @@
   var D_INSET = 13, D_L = 78, D_R = W - 78, D_W = D_R - D_L;
 
   function dWrap(g, text, draw, x, y, maxW, size, lh, align){
-    /* 단순 래핑(서식 없음) — measure·draw 공용. 다음 y 반환 */
+    /* 단순 래핑 + 양쪽 정렬(마지막 줄은 왼쪽) — measure·draw 공용. 다음 y 반환 */
     g.font = serifFnt(400, size);
-    var words = String(text == null ? "" : text).split(/(\s+)/).filter(function(s){ return s !== ""; });
-    var line = "", lines = [];
-    words.forEach(function(w){
-      var t = line + w;
-      if(g.measureText(t).width > maxW && line !== ""){ lines.push(line.replace(/\s+$/,"")); line = w.replace(/^\s+/,""); }
-      else line = t;
+    var raw = String(text == null ? "" : text);
+    var spaceW = g.measureText(" ").width || size * 0.32;
+    var words = [];
+    raw.split(/\s+/).filter(function(s){ return s !== ""; }).forEach(function(word){
+      if(g.measureText(word).width <= maxW){ words.push(word); return; }
+      var buf = "";
+      for(var i = 0; i < word.length; i++){
+        var t = buf + word.charAt(i);
+        if(g.measureText(t).width > maxW && buf){ words.push(buf); buf = word.charAt(i); }
+        else buf = t;
+      }
+      if(buf) words.push(buf);
     });
-    if(line) lines.push(line.replace(/\s+$/,""));
-    if(!lines.length) lines.push("");
+    var lines = [], line = [], w = 0;
+
+    words.forEach(function(word){
+      var ww = g.measureText(word).width;
+      if(line.length && w + spaceW + ww > maxW){
+        lines.push(line); line = [word]; w = ww;
+      }else{
+        w += (line.length ? spaceW : 0) + ww; line.push(word);
+      }
+    });
+    if(line.length) lines.push(line);
+    if(!lines.length) lines.push([]);
+
     if(draw){
       g.textAlign = align || "left";
-      var xx = align === "center" ? x + maxW / 2 : x;
-      lines.forEach(function(t){ g.fillText(t, xx, y); y += lh; });
+      var cx0 = (align === "center") ? x + maxW / 2 : x;
+      lines.forEach(function(ln, idx){
+        if(align === "center"){
+          g.fillText(ln.join(" "), cx0, y);
+        }else if(lines.length > 1 && idx < lines.length - 1){
+          var sum = 0;
+          ln.forEach(function(wd){ sum += g.measureText(wd).width; });
+          var gaps = ln.length > 1 ? (maxW - sum) / (ln.length - 1) : 0;
+          if(gaps > spaceW * 2.6 || gaps < 0){        /* 너무 벌어지면 그냥 왼쪽 정렬 */
+            g.fillText(ln.join(" "), x, y);
+          }else{
+            var cx = x;
+            for(var i = 0; i < ln.length; i++){
+              g.fillText(ln[i], cx, y);
+              cx += g.measureText(ln[i]).width + gaps;
+            }
+          }
+        }else{
+          g.fillText(ln.join(" "), x, y);
+        }
+        y += lh;
+      });
       g.textAlign = "left";
     }else{
       y += lh * lines.length;
