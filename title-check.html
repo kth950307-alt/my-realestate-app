@@ -219,7 +219,8 @@
   .winner{display:flex; gap:10px; align-items:center; padding:13px; border-radius:14px; margin-bottom:12px;
     background:linear-gradient(135deg,#0b2447,#1d4ed8); color:#fff;}
   .winner .wtrophy{font-size:22px;}
-  .winner .wtxt b{display:block; font-size:15px; font-weight:900; letter-spacing:-.3px;}
+  .winner .wtxt > b{display:block; font-size:15px; font-weight:900; letter-spacing:-.3px;}
+  .winner .wtxt p b{font-weight:900; color:#fff;}
   .winner .wtxt p{margin:3px 0 0; font-size:12.3px; color:#cfdcf5; line-height:1.5;}
   .winner.tie{background:linear-gradient(135deg,#334155,#475569);}
   .cmpTable{width:100%; border-collapse:collapse; font-size:12.5px;}
@@ -383,7 +384,7 @@
       </div>
 
       <div class="prev-block">
-        <div class="prev-cap"><b>🔎 네이버 검색 결과 (PC)</b><span>제목 1줄 · 폭 540px</span></div>
+        <div class="prev-cap"><b>🔎 네이버 검색 결과 (PC)</b><span>제목 1줄 · PC 540px 기준</span></div>
         <div class="mockWrap" id="serpWrap">
           <div class="mockSerp" id="serpMock">
             <div class="msTop">
@@ -1089,6 +1090,7 @@
       cell(cutCell(B), winner === 2 ? 'win' : '') + '</tr>';
 
     function warnCell(a){
+      if (!a.len) return '<span class="mut">–</span>';
       if (!a.warnings.length) return '<span class="yes">없음</span>';
       return '<span class="nope">' + a.warnings.length + '건</span> <span class="mut">' +
         esc(a.warnings.slice(0, 2).map(function(w){ return w.t; }).join(' / ')) + '</span>';
