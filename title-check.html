@@ -62,7 +62,7 @@
   .modes .m[aria-checked="true"]{border-color:var(--accent); background:#f7faff; box-shadow:0 0 0 3px rgba(29,78,216,.09);}
 
   /* ── 카드 배치 ── */
-  .layout{display:grid; grid-template-columns:1fr; gap:12px;}
+  .layout{display:grid; grid-template-columns:1fr; gap:12px; align-items:start;}
   .card{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:15px;}
   .card-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;}
   .card-head .tt{font-size:14.5px; font-weight:900; letter-spacing:-.3px; display:flex; align-items:center; gap:6px;}
@@ -362,7 +362,7 @@
     <section class="card card-preview" id="previewCard">
       <div class="card-head">
         <div class="tt"><span class="num">2</span> 어디서 잘리나</div>
-        <div class="meta">노란 글자 = 앞 15자</div>
+        <div class="meta">노란 표시 = 앞 15자</div>
       </div>
 
       <div class="prev-block">
@@ -513,13 +513,20 @@
         if (w + cw > maxW + 0.01) break;
         w += cw; end++;
       }
-      /* 영어·숫자 단어는 중간에서 자르지 않음 */
+      /* 띄어쓰기 단위로 끊기 (단어가 통째로 다음 줄로) */
       if (end < n && end > start){
-        var a = chars[end], b = chars[end-1];
-        if (/[A-Za-z0-9%]/.test(a) && /[A-Za-z0-9%]/.test(b)){
-          var k = end;
-          while (k > start && /[A-Za-z0-9%]/.test(chars[k-1])) k--;
-          if (k > start) end = k;
+        var sp = -1;
+        for (var s3 = end; s3 > start; s3--){ if (chars[s3-1] === ' '){ sp = s3 - 1; break; } }
+        if (sp > start && (sp - start) >= (end - start) * 0.45){
+          end = sp;
+        } else {
+          /* 영어·숫자 단어는 중간에서 자르지 않음 */
+          var a = chars[end], b = chars[end-1];
+          if (/[A-Za-z0-9%]/.test(a) && /[A-Za-z0-9%]/.test(b)){
+            var k = end;
+            while (k > start && /[A-Za-z0-9%]/.test(chars[k-1])) k--;
+            if (k > start) end = k;
+          }
         }
       }
       while (end > start && chars[end-1] === ' ') end--;
@@ -554,10 +561,19 @@
     if (!chars.length) return '<span class="ln" style="color:#b0b8c1">제목을 넣으면 여기에 그대로 보여요</span>';
     var out = '';
     for (var i = 0; i < sim.lines.length; i++){
-      var ln = sim.lines[i], s = '';
+      var ln = sim.lines[i];
+      if (ln.end <= ln.start) continue;
+      var parts = [], buf = '', mode = null;
       for (var k = ln.start; k < ln.end; k++){
-        var ch = esc(chars[k]);
-        s += (k < hlEnd) ? '<em class="hl">' + ch + '</em>' : ch;
+        var isHl = k < hlEnd;
+        if (mode === null) mode = isHl;
+        if (isHl !== mode){ parts.push({hl:mode, t:buf}); buf = ''; mode = isHl; }
+        buf += esc(chars[k]);
+      }
+      if (buf) parts.push({hl:mode, t:buf});
+      var s = '';
+      for (var p = 0; p < parts.length; p++){
+        s += parts[p].hl ? ('<em class="hl">' + parts[p].t + '</em>') : parts[p].t;
       }
       if (ln.ellipsis) s += '<i class="ell">…</i>';
       if (!s) s = '&nbsp;';
@@ -621,14 +637,32 @@
     var brands = findWords(text, BRANDS);
     var cores = findWords(text, CORE);
 
-    function inFront(arr){
-      for (var i = 0; i < arr.length; i++) if (arr[i].ci < 15) return arr[i];
-      return null;
+    function inFrontAll(arr){
+      var out = [];
+      for (var i = 0; i < arr.length; i++) if (arr[i].ci < 15) out.push(arr[i]);
+      return out;
     }
-    var regionFront = inFront(regions), brandFront = inFront(brands), coreFront = inFront(cores);
-    var frontHit = regionFront || brandFront || coreFront || null;
+    var frontHits = inFrontAll(regions).concat(inFrontAll(brands), inFrontAll(cores));
+    frontHits.sort(function(x, y){ return x.ci - y.ci || y.len - x.len; });
+    var seenFront = {}, frontList = [];
+    for (var ff = 0; ff < frontHits.length; ff++){
+      if (seenFront[frontHits[ff].word]) continue;
+      seenFront[frontHits[ff].word] = 1;
+      frontList.push(frontHits[ff]);
+    }
+    var frontHit = frontList[0] || null;
 
-    var numM = text.match(/\d[\d,.]*\s?(?:평|㎡|m2|m²|세대|가구|만원|억|천만|%|개|층|kW|kw|KW|년|월|일|분|시간|위|호|차|대|명|건|배|점|원|번지|미터|톤|kg)/);
+    /* 숫자·구체 조건 */
+    var numRe = /\d[\d,.]*\s?(?:평|㎡|m2|m²|세대|가구|만원|억|천만|%|개|층|kW|kw|KW|년|월|일|분|시간|위|호|차|대|명|건|배|점|원|번지|미터|톤|kg)/g;
+    var numList = [], nmm, seenNum = {};
+    while ((nmm = numRe.exec(text)) !== null){
+      var ntok = nmm[0].replace(/\s+/g, '');
+      if (!seenNum[ntok]){ seenNum[ntok] = 1; numList.push(ntok); }
+      if (numList.length > 8) break;
+    }
+    var prior = /평|세대|가구|만원|억|천만|㎡|%|kW|kw|KW|톤|kg/;
+    numList.sort(function(x, y){ return (prior.test(y) ? 1 : 0) - (prior.test(x) ? 1 : 0); });
+    var numM = numList.slice(0, 3).join(' · ');
     var hasDigit = /\d/.test(text);
 
     var hooksFound = [], hookSeen = {};
@@ -726,8 +760,8 @@
       text: text, chars: chars, len: len, lenNoSpace: toChars(text.replace(/\s/g, '')).length,
       front15: front15,
       regions: regions, brands: brands, cores: cores,
-      regionFront: regionFront, brandFront: brandFront, coreFront: coreFront, frontHit: frontHit,
-      numM: numM ? numM[0].replace(/\s+/g, '') : '', hasDigit: hasDigit,
+      frontList: frontList, frontHit: frontHit,
+      numM: numM, numList: numList, hasDigit: hasDigit,
       hooks: hooksFound, score: score,
       warnings: warnings, exag: exagFound,
       feed: feed, serp: serp
@@ -740,6 +774,15 @@
     if (a.score >= 70) return {k:'good', label:'좋아요', msg:'한 군데만 다듬으면 훨씬 좋아져요.'};
     if (a.score >= 55) return {k:'mid', label:'보통', msg:'앞부분을 손보면 클릭률이 올라갑니다.'};
     return {k:'low', label:'아쉬움', msg:'아래 제안대로 제목을 다시 짜 보세요.'};
+  }
+
+  function frontWords(a){
+    var out = [], se = {};
+    for (var i = 0; i < a.frontList.length; i++){
+      var w = a.frontList[i].word;
+      if (!se[w]){ se[w] = 1; out.push(w); }
+    }
+    return out.slice(0, 3).join(' · ');
   }
 
   function feedText(a){
@@ -788,7 +831,7 @@
   function lenRowHtml(a){
     if (!a.len) return '<span>0자</span><span style="color:#a8b1ba">· 권장 24~34자</span>';
     var flag;
-    if (a.len >= 24 && a.len <= 34) flag = '<span class="flag ok">딱 좋아요</span>';
+    if (a.len >= 18 && a.len <= 34) flag = '<span class="flag ok">딱 좋아요</span>';
     else if (a.len > 34 && a.len < 45) flag = '<span class="flag over">조금 길어요</span>';
     else if (a.len >= 45) flag = '<span class="flag bad">너무 길어요</span>';
     else flag = '<span class="flag over">조금 짧아요</span>';
@@ -811,7 +854,7 @@
     /* ① 앞 15자 */
     var fh;
     if (a.frontHit){
-      fh = '앞 15자 "' + esc(a.front15) + '" 안에 <b>' + esc(a.frontHit.word) + '</b>이(가) 들어 있어요.';
+      fh = '앞 15자 "' + esc(a.front15) + '" 안에 <b>' + esc(frontWords(a)) + '</b>이(가) 들어 있어요.';
     } else {
       var behind = a.regions[0] || a.brands[0] || null;
       fh = '앞 15자 "' + esc(a.front15) + '"에 지역·단지·핵심 단어가 없어요.' +
@@ -967,7 +1010,7 @@
     var reasons = [];
     if (winner === 1 || winner === 2){
       var W = winner === 1 ? A : B, L = winner === 1 ? B : A;
-      if (!L.frontHit && W.frontHit) reasons.push('앞 15자에 <b>' + esc(W.frontHit.word) + '</b>이(가) 들어 있어 홈판에서 바로 보입니다.');
+      if (!L.frontHit && W.frontHit) reasons.push('앞 15자에 <b>' + esc(frontWords(W)) + '</b>이(가) 들어 있어 홈판에서 바로 보입니다.');
       if (!L.hasDigit && W.hasDigit) reasons.push('<b>' + esc(W.numM || '숫자') + '</b>처럼 구체적인 숫자가 있습니다.');
       if (!L.hooks.length && W.hooks.length) reasons.push('<b>' + esc(W.hooks[0].word) + '</b> 같은 단어로 클릭할 이유를 줍니다.');
       if (W.len <= 34 && L.len > 34) reasons.push('길이가 ' + W.len + '자로 더 짧아 잘리지 않습니다.');
@@ -991,16 +1034,16 @@
       '<th class="' + (winner === 1 ? 'win' : '') + '">A</th><th class="' + (winner === 2 ? 'win' : '') + '">B</th></tr></thead><tbody>';
 
     html += '<tr><td class="rowh">점수</td>' +
-      cell('<span class="score">' + A.score + '</span> <span class="mut">(' + gA.label + ')</span>', winner === 1 ? 'win' : '') +
-      cell('<span class="score">' + B.score + '</span> <span class="mut">(' + gB.label + ')</span>', winner === 2 ? 'win' : '') + '</tr>';
+      cell('<span class="score">' + (A.len ? A.score : '–') + '</span> <span class="mut">(' + gA.label + ')</span>', winner === 1 ? 'win' : '') +
+      cell('<span class="score">' + (B.len ? B.score : '–') + '</span> <span class="mut">(' + gB.label + ')</span>', winner === 2 ? 'win' : '') + '</tr>';
 
     html += '<tr><td class="rowh">앞 15자</td>' +
       cell('<span class="f15"><mark>' + esc(A.front15) + '</mark>' + esc(A.chars.slice(15, 26).join('')) + '</span>', winner === 1 ? 'win' : '') +
       cell('<span class="f15"><mark>' + esc(B.front15) + '</mark>' + esc(B.chars.slice(15, 26).join('')) + '</span>', winner === 2 ? 'win' : '') + '</tr>';
 
     html += '<tr><td class="rowh">지역·단지·핵심</td>' +
-      cell(yn(!!A.frontHit, A.frontHit ? esc(A.frontHit.word) : '없음'), winner === 1 ? 'win' : '') +
-      cell(yn(!!B.frontHit, B.frontHit ? esc(B.frontHit.word) : '없음'), winner === 2 ? 'win' : '') + '</tr>';
+      cell(yn(!!A.frontHit, A.frontHit ? esc(frontWords(A)) : '없음'), winner === 1 ? 'win' : '') +
+      cell(yn(!!B.frontHit, B.frontHit ? esc(frontWords(B)) : '없음'), winner === 2 ? 'win' : '') + '</tr>';
 
     html += '<tr><td class="rowh">숫자·조건</td>' +
       cell(yn(A.hasDigit, esc(A.numM || '있음')), winner === 1 ? 'win' : '') +
