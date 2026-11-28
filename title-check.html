@@ -777,10 +777,15 @@
   }
 
   function frontWords(a){
-    var out = [], se = {};
-    for (var i = 0; i < a.frontList.length; i++){
-      var w = a.frontList[i].word;
-      if (!se[w]){ se[w] = 1; out.push(w); }
+    var list = a.frontList.slice().sort(function(x, y){ return x.ci - y.ci || y.len - x.len; });
+    var out = [], kept = [];
+    for (var i = 0; i < list.length; i++){
+      var m = list[i], clash = false;
+      for (var k = 0; k < kept.length; k++){
+        var o = kept[k];
+        if (m.ci < o.ci + o.len && o.ci < m.ci + m.len){ clash = true; break; }
+      }
+      if (!clash){ kept.push(m); out.push(m.word); }
     }
     return out.slice(0, 3).join(' · ');
   }
