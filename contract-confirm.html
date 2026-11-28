@@ -1460,17 +1460,51 @@
 
   function printDocs(){
     var kinds = style === "doc" ? ["doc"] : [role];
+    var title = fileName(kinds[0]).replace(/\.png$/, "");
+    var imgs = kinds.map(function(k){ return '<img src="' + buildFor(k).toDataURL("image/png") + '" alt="계약 확인서">'; }).join("");
+
+    /* 작업실(iframe) 안에서는 window.print() 가 막히므로 새 창에서 인쇄한다 */
+    if(window.self !== window.top){
+      openPrintWindow(title, imgs);
+      return;
+    }
+
     var area = $("printArea");
-    area.innerHTML = kinds.map(function(k){
-      return '<img src="' + buildFor(k).toDataURL("image/png") + '" alt="계약 확인서">';
-    }).join("");
-    /* 인쇄 PDF 파일 이름이 문서 제목으로 저장되도록 잠시 바꿔 둔다 */
+    area.innerHTML = imgs;
     var oldTitle = document.title;
-    try { document.title = fileName(kinds[0]).replace(/\.png$/, ""); } catch(e){}
+    try { document.title = title; } catch(e){}
     setTimeout(function(){ window.print(); }, 240);
     var restore = function(){ document.title = oldTitle; window.removeEventListener("afterprint", restore); };
     window.addEventListener("afterprint", restore);
     setTimeout(restore, 8000);
+  }
+
+  function openPrintWindow(title, imgs){
+    var w = null;
+    try {
+      w = window.open("", "_blank");
+    } catch(e){ w = null; }
+    if(!w){
+      toast("새 창이 막혔습니다 — 작업실 위 [↗ 크게 열기]로 연 뒤 인쇄해 주세요", true);
+      return;
+    }
+    try {
+      w.document.open();
+      w.document.write(
+        '<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>' + title + '</title>' +
+        '<style>@page{size:A4;margin:9mm;} html,body{margin:0;padding:0;background:#fff;}' +
+        'img{display:block;width:100%;height:auto;margin:0 0 6mm;page-break-inside:avoid;page-break-after:always;}' +
+        'img:last-child{page-break-after:auto;}' +
+        '@media print{body{margin:0;}}</style></head><body>' + imgs + '</body></html>'
+      );
+      w.document.close();
+      toast("인쇄 창이 열렸습니다 — 인쇄 대상을 [PDF로 저장]으로 고르세요");
+      setTimeout(function(){
+        try { w.focus(); w.print(); } catch(e){}
+      }, 500);
+    } catch(e){
+      toast("인쇄 창을 열지 못했습니다", true);
+    }
   }
 
   /* ══════════════════════════════════════════════════════════
