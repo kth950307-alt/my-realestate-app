@@ -584,8 +584,10 @@
   function monthsBetween(a, b){
     var s = parseDate(a), e = parseDate(b);
     if(!s || !e) return 0;
-    var m = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth());
-    if(e.getDate() < s.getDate()) m -= 1;
+    /* 종료일을 포함한 기간(12/05~다음해 12/04 = 12개월)으로 계산 */
+    var e2 = new Date(e.getTime()); e2.setDate(e2.getDate() + 1);
+    var m = (e2.getFullYear() - s.getFullYear()) * 12 + (e2.getMonth() - s.getMonth());
+    if(e2.getDate() < s.getDate()) m -= 1;
     return m > 0 ? m : 0;
   }
   function num(id){ return Number(String($(id).value).replace(/[^\d.-]/g, "")) || 0; }
@@ -839,7 +841,7 @@
 
     /* 소재지 · 소유자 · 동의 문구 */
     g.font = serifFnt(400, S); g.fillStyle = "#111";
-    y = dLines(g, "부동산 소재지: " + (data.address || "-") + (data.part ? " ," + data.part : ""), draw, left, y, maxW, S, LH);
+    y = dLines(g, "부동산 소재지: " + (data.address || "-") + (data.part ? " , " + data.part : ""), draw, left, y, maxW, S, LH);
     y = dLines(g, "소유자: " + (data.ownerName || "-"), draw, left, y, maxW, S, LH);
     y = dLines(g, "-상기소재지의 부동산을 계약함에 동의하며 계약금 " + wonDoc(data.contractTotal) + "을 송금하기로 한다.", draw, left, y, maxW, S, LH);
     y += 16;
