@@ -1532,7 +1532,15 @@
         '<style>@page{size:A4;margin:9mm;} html,body{margin:0;padding:0;background:#fff;}' +
         'img{display:block;width:auto;height:auto;max-width:100%;max-height:274mm;margin:0 auto 6mm;page-break-inside:avoid;page-break-after:always;}' +
         'img:last-child{page-break-after:auto;}' +
-        '@media print{body{margin:0;}}</style></head><body>' + imgs + '</body></html>'
+        '.pbar{position:sticky;top:0;z-index:9;display:flex;gap:8px;align-items:center;justify-content:center;' +
+        'padding:10px 12px;background:#172e6c;color:#fff;font:800 14px/1.4 "Malgun Gothic",sans-serif;}' +
+        '.pbar button{font:800 13.5px "Malgun Gothic",sans-serif;padding:9px 16px;border-radius:9px;border:0;' +
+        'background:#fff;color:#172e6c;cursor:pointer;}' +
+        '.pbar span{opacity:.85;font-weight:600;font-size:12.5px;}' +
+        '@media print{.pbar{display:none !important;} body{margin:0;}}</style></head><body>' +
+        '<div class="pbar"><button type="button" onclick="window.print()">🖨️ 인쇄 · PDF로 저장</button>' +
+        '<span>인쇄 대상에서 [PDF로 저장]을 고르세요</span></div>' +
+        imgs + '</body></html>'
       );
       w.document.close();
       toast("인쇄 창이 열렸습니다 — 인쇄 대상을 [PDF로 저장]으로 고르세요");
