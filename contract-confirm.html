@@ -1463,9 +1463,10 @@
     var title = fileName(kinds[0]).replace(/\.png$/, "");
     var imgs = kinds.map(function(k){ return '<img src="' + buildFor(k).toDataURL("image/png") + '" alt="계약 확인서">'; }).join("");
 
-    /* 작업실(iframe) 안에서는 window.print() 가 막히므로 새 창에서 인쇄한다 */
+    /* 작업실(iframe) 안에서는 window.print() 가 자기 문서만 인쇄하지 못하므로,
+       ① 같은 주소의 부모 문서(작업실)에 인쇄용 영역을 넣고 부모에서 인쇄 → ② 안 되면 새 창 인쇄 */
     if(window.self !== window.top){
-      openPrintWindow(title, imgs);
+      if(!printViaParent(title, imgs)) openPrintWindow(title, imgs);
       return;
     }
 
@@ -1477,6 +1478,43 @@
     var restore = function(){ document.title = oldTitle; window.removeEventListener("afterprint", restore); };
     window.addEventListener("afterprint", restore);
     setTimeout(restore, 8000);
+  }
+
+  function printViaParent(title, imgs){
+    try {
+      var pd = window.top.document;
+      var old = pd.getElementById("__wooriPrintArea");
+      if(old) old.parentNode.removeChild(old);
+      var wrap = pd.createElement("div");
+      wrap.id = "__wooriPrintArea";
+      wrap.setAttribute("style", "display:none;");
+      wrap.innerHTML = imgs;
+      pd.body.appendChild(wrap);
+
+      var st = pd.getElementById("__wooriPrintStyle");
+      if(!st){
+        st = pd.createElement("style");
+        st.id = "__wooriPrintStyle";
+        st.textContent = "@media print{@page{size:A4;margin:9mm;}" +
+          "body>*:not(#__wooriPrintArea){display:none !important;}" +
+          "#__wooriPrintArea{display:block !important;}" +
+          "#__wooriPrintArea img{display:block;width:auto;height:auto;max-width:100%;max-height:274mm;margin:0 auto;page-break-inside:avoid;page-break-after:always;}" +
+          "#__wooriPrintArea img:last-child{page-break-after:auto;}}";
+        pd.head.appendChild(st);
+      }
+
+      var oldTitle = pd.title;
+      try { pd.title = title; } catch(e){}
+      setTimeout(function(){
+        try { window.top.focus(); window.top.print(); } catch(e){}
+        setTimeout(function(){ try { pd.title = oldTitle; } catch(e){} }, 1200);
+      }, 320);
+      setTimeout(function(){ try { wrap.parentNode.removeChild(wrap); } catch(e){} }, 90000);
+      toast("인쇄 창이 열립니다 — 인쇄 대상을 [PDF로 저장]으로 고르세요");
+      return true;
+    } catch(e){
+      return false;
+    }
   }
 
   function openPrintWindow(title, imgs){
