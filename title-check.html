@@ -1,0 +1,1279 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="블로그 제목을 넣으면 네이버 모바일 홈판 카드와 검색 결과에서 어디가 잘리는지, 앞 15자에 지역·숫자·혜택 단어가 들어갔는지 1초에 점검해 주는 도구">
+<title>홈판 제목·클릭률 점검기 · 우리부동산</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%8E%AF%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --navy:#0b2447; --navy2:#123a6b; --accent:#1d4ed8; --accent-soft:#eef4ff;
+    --ink:#191f28; --ink2:#4e5968; --ink3:#8b95a1;
+    --line:#e5e8eb; --bg:#f2f4f6; --card:#fff;
+    --gold:#b45309; --gold-soft:#fff4dd;
+    --ok:#0b8f4d; --ok-soft:#e7f7ee;
+    --warn:#b3261e; --warn-soft:#fdecea;
+    --soft:#8a6a12; --soft-soft:#fff9e6;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕","Noto Sans KR",system-ui,sans-serif;
+    font-size:16px; line-height:1.55; -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:1120px; margin:0 auto; padding:16px 14px 40px;}
+
+  /* ── 상단 머리 ── */
+  .hero{
+    background:linear-gradient(135deg,#0b2447 0%,#123a6b 55%,#1d4ed8 100%);
+    color:#fff; border-radius:20px; padding:20px 18px 18px;
+    box-shadow:0 10px 26px rgba(11,36,71,.18);
+  }
+  .hero .tag{
+    display:inline-block; background:rgba(255,255,255,.16); color:#dbe7ff;
+    font-size:11.5px; font-weight:800; letter-spacing:.2px;
+    padding:4px 10px; border-radius:999px; margin-bottom:10px;
+    border:1px solid rgba(255,255,255,.18);
+  }
+  .hero h1{margin:0 0 8px; font-size:23px; line-height:1.3; letter-spacing:-.6px; font-weight:900;}
+  .hero p{margin:0; font-size:13.5px; line-height:1.65; color:#c9d8f0;}
+  .hero p b{color:#fff; font-weight:800;}
+
+  .steps{display:flex; gap:8px; margin:12px 0 4px; flex-wrap:wrap;}
+  .steps .s{flex:1 1 200px; background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:10px 12px; display:flex; gap:8px; align-items:flex-start;}
+  .steps .n{flex:0 0 21px; height:21px; border-radius:50%; background:var(--navy); color:#fff;
+    font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-top:2px;}
+  .steps .t{font-size:12.8px; color:var(--ink2); line-height:1.45;}
+  .steps .t b{color:var(--ink); font-weight:800;}
+
+  /* ── 모드 전환 ── */
+  .modes{display:flex; gap:8px; margin:12px 0;}
+  .modes .m{flex:1; background:var(--card); border:2px solid var(--line); border-radius:14px;
+    padding:11px 13px; cursor:pointer; text-align:left; font-family:inherit; color:inherit;
+    transition:border-color .12s, background .12s, box-shadow .12s;}
+  .modes .m .mh{display:flex; align-items:center; gap:6px; font-size:14px; font-weight:800; letter-spacing:-.2px;}
+  .modes .m small{display:block; margin-top:3px; font-size:12px; color:var(--ink3); font-weight:500; line-height:1.4;}
+  .modes .m[aria-checked="true"]{border-color:var(--accent); background:#f7faff; box-shadow:0 0 0 3px rgba(29,78,216,.09);}
+
+  /* ── 카드 배치 ── */
+  .layout{display:grid; grid-template-columns:1fr; gap:12px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:15px;}
+  .card-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;}
+  .card-head .tt{font-size:14.5px; font-weight:900; letter-spacing:-.3px; display:flex; align-items:center; gap:6px;}
+  .card-head .tt .num{display:inline-flex; width:19px; height:19px; border-radius:50%; background:var(--navy);
+    color:#fff; font-size:11px; align-items:center; justify-content:center; font-weight:800;}
+  .card-head .meta{font-size:11.5px; font-weight:700; color:var(--ink3); white-space:nowrap;}
+  .card-head .tools{display:flex; gap:6px; align-items:center;}
+
+  .mini{border:0; background:#eef1f4; color:var(--ink2); font-family:inherit; font-size:11.5px;
+    font-weight:800; padding:5px 9px; border-radius:8px; cursor:pointer; white-space:nowrap;}
+  .mini:active{background:#e3e7eb;}
+  .mini.danger{background:#fdecea; color:#b3261e;}
+
+  /* ── 입력 ── */
+  .ttl-label{display:flex; align-items:center; gap:7px; font-size:12px; font-weight:800; color:var(--ink2); margin:2px 0 6px;}
+  .ttl-label .badgeA{background:var(--navy); color:#fff; font-size:11px; font-weight:800; padding:1px 7px; border-radius:6px;}
+  textarea.ttl{
+    width:100%; border:1.5px solid #dfe4ea; border-radius:12px; background:#fff;
+    padding:12px 13px; font-family:inherit; font-size:16.5px; font-weight:700; line-height:1.5;
+    color:var(--ink); letter-spacing:-.2px; resize:none; overflow:hidden; min-height:54px;
+  }
+  textarea.ttl:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(29,78,216,.10);}
+  textarea.ttl::placeholder{font-weight:600; color:#b0b8c1; letter-spacing:0;}
+  .lenrow{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:7px; font-size:12px; color:var(--ink2); font-weight:600;}
+  .lenrow b{color:var(--ink); font-weight:900;}
+  .lenrow .flag{font-weight:800; padding:1px 7px; border-radius:999px; font-size:11.5px;}
+  .lenrow .flag.ok{background:var(--ok-soft); color:var(--ok);}
+  .lenrow .flag.over{background:var(--soft-soft); color:var(--soft);}
+  .lenrow .flag.bad{background:var(--warn-soft); color:var(--warn);}
+
+  .chiprow{display:flex; gap:6px; flex-wrap:wrap; margin-top:11px;}
+  .chip{border:1px solid var(--line); background:#fbfcfd; color:var(--ink2); font-family:inherit;
+    font-size:12px; font-weight:700; padding:5px 10px; border-radius:999px; cursor:pointer;}
+  .chip:active{background:#eef1f4;}
+  .chip.plus{background:var(--accent-soft); border-color:#c7d8ff; color:var(--accent);}
+  .chiprow .hintlbl{font-size:11.5px; font-weight:800; color:var(--ink3); align-self:center; margin-right:2px;}
+
+  /* ── 길이 게이지 ── */
+  .ruler{margin:26px 0 2px;}
+  .rbar{position:relative; height:11px; border-radius:6px; background:#eef1f4; display:flex;}
+  .rbar i{display:block; height:100%;}
+  .rbar .b1{width:30%; background:#ffe3a8; border-radius:6px 0 0 6px;}
+  .rbar .b2{width:26%; background:#b9e9cd;}
+  .rbar .b3{width:12%; background:#c5d9ff;}
+  .rbar .b4{width:32%; background:#f6c9c4; border-radius:0 6px 6px 0;}
+  .rmark{position:absolute; top:-7px; width:2px; height:25px; background:var(--navy); border-radius:2px; transform:translateX(-1px);}
+  .rmark b{position:absolute; top:-20px; left:50%; transform:translateX(-50%); background:var(--navy); color:#fff;
+    font-size:10.5px; font-weight:800; padding:1px 6px; border-radius:6px; white-space:nowrap;}
+  .rticks{position:relative; height:15px; margin-top:4px; font-size:10.5px; color:var(--ink3); font-weight:700;}
+  .rticks span{position:absolute; transform:translateX(-50%); top:0;}
+  .rticks span:first-child{transform:none; left:0 !important;}
+  .rlegend{display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; font-size:11px; font-weight:700; color:var(--ink3);}
+  .rlegend i{width:9px; height:9px; border-radius:3px; display:inline-block; margin-right:4px; vertical-align:-1px;}
+
+  /* ── 미리보기 목업 ── */
+  .prev-block + .prev-block{margin-top:14px; border-top:1px dashed var(--line); padding-top:14px;}
+  .prev-cap{display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:8px; flex-wrap:wrap;}
+  .prev-cap b{font-size:12.5px; font-weight:900; color:var(--ink);}
+  .prev-cap span{font-size:11px; font-weight:700; color:var(--ink3);}
+  .mockWrap{position:relative; overflow:hidden;}
+  .mockFeed{width:260px; background:#fff; border:1px solid #e3e7ea; border-radius:16px; padding:12px;
+    box-shadow:0 3px 12px rgba(20,40,80,.06);}
+  .mfHead{display:flex; align-items:center; gap:6px; margin-bottom:8px;}
+  .mfAv{width:20px; height:20px; border-radius:50%; background:#03c75a; color:#fff; font-size:10px; font-weight:900;
+    display:flex; align-items:center; justify-content:center; flex:0 0 auto;}
+  .mfName{font-size:11px; font-weight:800; color:#4e5968; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .mfTime{font-size:10.5px; color:#a8b1ba; margin-left:auto; white-space:nowrap;}
+  .mockTitle{font:700 17px/1.42 "Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    color:#191f28; letter-spacing:0; overflow:hidden;}
+  .mockTitle .ln{display:block; white-space:nowrap;}
+  .mockTitle em.hl{font-style:normal; background:linear-gradient(transparent 58%, #ffe9a8 58%);}
+  .mockTitle i.ell{font-style:normal; color:#5f6b7a;}
+  .mfDesc{margin-top:7px; font-size:12.5px; color:#8b95a1; line-height:1.5;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .mfShot{margin-top:9px; height:78px; border-radius:10px; background:linear-gradient(135deg,#dbe7f5,#c7d8ea);
+    display:flex; align-items:center; justify-content:center; font-size:26px;}
+  .mockSerp{width:540px; background:#fff; border:1px solid #e3e7ea; border-radius:14px; padding:13px 15px;
+    box-shadow:0 3px 12px rgba(20,40,80,.06);}
+  .msTop{display:flex; align-items:center; gap:6px; margin-bottom:5px;}
+  .msFav{width:17px; height:17px; border-radius:5px; background:#03c75a; color:#fff; font-size:10px; font-weight:900;
+    display:flex; align-items:center; justify-content:center; flex:0 0 auto;}
+  .msUrl{font-size:11.5px; color:#5f6b7a; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .msUrl .p{color:#a3adb8;}
+  .mockSerp .mockTitle{color:#1a56c4; font-size:17px;}
+  .msDesc{margin-top:4px; font-size:12.8px; color:#3b4653; line-height:1.5;}
+  .cutline{display:flex; gap:6px; align-items:flex-start; margin-top:9px; padding:8px 10px; border-radius:10px;
+    background:#fbfcfd; border:1px solid var(--line); font-size:11.8px; color:var(--ink2); font-weight:600; line-height:1.5;}
+  .cutline b{color:var(--navy); font-weight:900;}
+  .cutline .lost{color:var(--ink3);}
+  .cutline.warnline{background:var(--warn-soft); border-color:#f3cfcb; color:#8c2b24;}
+  .cutline.warnline b{color:#b3261e;}
+
+  /* ── 점수 ── */
+  .scoreTop{display:flex; gap:14px; align-items:center; padding:12px; border-radius:14px; background:#f8fafc;
+    border:1px solid var(--line); margin-bottom:12px;}
+  .scoreNum{flex:0 0 auto; text-align:center; min-width:76px;}
+  .scoreNum b{display:block; font-size:34px; line-height:1; font-weight:900; letter-spacing:-1.5px; color:var(--navy);}
+  .scoreNum span{font-size:11px; font-weight:700; color:var(--ink3);}
+  .scoreMeta{flex:1; min-width:0;}
+  .grade{display:inline-block; font-size:12px; font-weight:900; padding:3px 9px; border-radius:999px; margin-bottom:5px;}
+  .g-great{background:var(--ok-soft); color:var(--ok);}
+  .g-good{background:var(--accent-soft); color:var(--accent);}
+  .g-mid{background:var(--soft-soft); color:var(--soft);}
+  .g-low{background:var(--warn-soft); color:var(--warn);}
+  .g-none{background:#eef1f4; color:var(--ink3);}
+  .scoreMeta p{margin:0; font-size:12.5px; color:var(--ink2); font-weight:600;}
+  .sbar{height:7px; border-radius:99px; background:#e6ebf1; margin-top:8px; overflow:hidden;}
+  .sbar i{display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,#3b82f6,#1d4ed8); transition:width .25s;}
+  .sbar.low i{background:linear-gradient(90deg,#f59e0b,#dc2626);}
+
+  /* ── 체크 목록 ── */
+  .chk{display:flex; gap:9px; padding:9px 0; border-bottom:1px solid #f0f3f6;}
+  .chk:last-child{border-bottom:0;}
+  .chk .ci{flex:0 0 20px; height:20px; border-radius:50%; font-size:11.5px; font-weight:900;
+    display:flex; align-items:center; justify-content:center; margin-top:2px;}
+  .chk.ok .ci{background:var(--ok-soft); color:var(--ok);}
+  .chk.no .ci{background:#f1f3f5; color:#a3adb8;}
+  .chk.bad .ci{background:var(--warn-soft); color:var(--warn);}
+  .chk .ct b{display:block; font-size:13px; font-weight:800; letter-spacing:-.2px;}
+  .chk .ct p{margin:2px 0 0; font-size:12.3px; color:var(--ink2); line-height:1.5;}
+  .chk .ct p b{display:inline; color:var(--navy);}
+
+  /* ── 경고 / 팁 ── */
+  .subhead{display:flex; align-items:center; gap:6px; font-size:13px; font-weight:900; margin:14px 0 7px; letter-spacing:-.2px;}
+  .subhead .cnt{font-size:11px; font-weight:800; padding:1px 7px; border-radius:999px; background:#eef1f4; color:var(--ink2);}
+  .subhead .cnt.warn{background:var(--warn-soft); color:var(--warn);}
+  .wlist{display:flex; flex-direction:column; gap:7px;}
+  .witem{display:flex; gap:8px; padding:9px 11px; border-radius:11px; background:var(--warn-soft); border:1px solid #f3cfcb;}
+  .witem.soft{background:var(--soft-soft); border-color:#f0e0b6;}
+  .witem .wi{flex:0 0 auto; font-size:12px; line-height:1.4;}
+  .witem .wt b{display:block; font-size:12.5px; font-weight:900; color:#8c2b24; letter-spacing:-.2px;}
+  .witem.soft .wt b{color:#7a5c0f;}
+  .witem .wt p{margin:2px 0 0; font-size:11.8px; line-height:1.5; color:#7d3b35;}
+  .witem.soft .wt p{color:#7a5c0f;}
+  .witem .wt p b{display:inline; font-weight:800;}
+  .wnone{display:flex; gap:8px; align-items:center; padding:11px; border-radius:11px;
+    background:var(--ok-soft); color:#0a7a42; font-size:12.5px; font-weight:800;}
+
+  .tips{display:flex; flex-direction:column; gap:8px;}
+  .tip{display:flex; gap:8px; padding:9px 11px; border-radius:11px; background:var(--accent-soft); border:1px solid #d3e0ff;}
+  .tip .ti{flex:0 0 auto; font-size:12px;}
+  .tip .tx{font-size:12.3px; color:#1e3f8a; font-weight:600; line-height:1.55;}
+  .tip .tx b{font-weight:900; color:#12306b;}
+  .suggest{margin-top:8px; padding:10px 11px; border-radius:11px; background:#fff; border:1.5px dashed #b9cdf5;}
+  .suggest .sl{font-size:11px; font-weight:800; color:var(--accent); margin-bottom:5px;}
+  .suggest .st{font-size:14px; font-weight:900; color:var(--navy); line-height:1.4; word-break:keep-all;}
+  .suggest .sb{margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;}
+  .sbtn{border:0; background:var(--accent); color:#fff; font-family:inherit; font-size:12px; font-weight:800;
+    padding:7px 11px; border-radius:8px; cursor:pointer;}
+  .sbtn.ghost{background:#eef4ff; color:var(--accent);}
+
+  /* ── 비교 모드 ── */
+  .cmpInputs{display:grid; grid-template-columns:1fr; gap:12px;}
+  .winner{display:flex; gap:10px; align-items:center; padding:13px; border-radius:14px; margin-bottom:12px;
+    background:linear-gradient(135deg,#0b2447,#1d4ed8); color:#fff;}
+  .winner .wtrophy{font-size:22px;}
+  .winner .wtxt b{display:block; font-size:15px; font-weight:900; letter-spacing:-.3px;}
+  .winner .wtxt p{margin:3px 0 0; font-size:12.3px; color:#cfdcf5; line-height:1.5;}
+  .winner.tie{background:linear-gradient(135deg,#334155,#475569);}
+  .cmpTable{width:100%; border-collapse:collapse; font-size:12.5px;}
+  .cmpTable th, .cmpTable td{border-bottom:1px solid #eef1f4; padding:8px 6px; text-align:left; vertical-align:top;}
+  .cmpTable th{font-size:11.5px; font-weight:900; color:var(--ink3); background:#fbfcfd;}
+  .cmpTable td.rowh{font-weight:800; color:var(--ink2); width:31%; font-size:12px;}
+  .cmpTable td.win{background:#f2fbf6;}
+  .cmpTable .yes{color:var(--ok); font-weight:900;}
+  .cmpTable .nope{color:#b3261e; font-weight:900;}
+  .cmpTable .mut{color:var(--ink3); font-weight:700;}
+  .cmpTable .score{font-size:16px; font-weight:900; color:var(--navy);}
+  .f15{font-size:12px; line-height:1.6; word-break:keep-all;}
+  .f15 mark{background:#ffe9a8; color:inherit; padding:0 1px; border-radius:3px; font-weight:900;}
+  .cmpBtns{display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;}
+  .cmpBtns .sbtn{background:#eef4ff; color:var(--accent);}
+
+  /* ── 하단 버튼 ── */
+  .actionbar{margin-top:14px; display:flex; gap:9px;}
+  .btn-main{flex:1; border:0; border-radius:15px; background:linear-gradient(135deg,#1d4ed8,#123a6b); color:#fff;
+    font-family:inherit; font-size:16px; font-weight:900; letter-spacing:-.3px; padding:15px 12px; cursor:pointer;
+    box-shadow:0 6px 16px rgba(29,78,216,.22);}
+  .btn-main:active{transform:scale(.99);}
+  .btn-ghost{border:1px solid var(--line); background:var(--card); color:var(--ink2); font-family:inherit;
+    font-size:13.5px; font-weight:800; padding:14px 14px; border-radius:15px; cursor:pointer; white-space:nowrap;}
+  .btn-ghost:active{background:#f2f4f6;}
+
+  .toast{position:fixed; left:50%; bottom:96px; transform:translate(-50%,14px); opacity:0; pointer-events:none;
+    transition:opacity .18s, transform .18s; z-index:60; background:#0b2447; color:#fff; font-size:13.5px;
+    font-weight:800; line-height:1.5; padding:13px 17px; border-radius:13px; max-width:min(92vw,440px);
+    text-align:center; box-shadow:0 10px 26px rgba(0,0,0,.24);}
+  .toast.show{opacity:1; transform:translate(-50%,0);}
+  .toast small{display:block; font-weight:600; font-size:12px; color:#c9d8f0; margin-top:4px;}
+
+  footer{margin-top:22px; padding-top:14px; border-top:1px solid var(--line); font-size:12px; color:var(--ink3);
+    display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between;}
+  footer a{color:var(--ink3); text-decoration:none; border-bottom:1px dotted #c8ced4;}
+
+  @media (min-width:980px){
+    .wrap{padding:26px 22px 54px;}
+    .hero{padding:26px 26px 24px;}
+    .hero h1{font-size:30px;}
+    .hero p{font-size:14.5px;}
+    .card{padding:18px;}
+    .layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:14px;}
+    .card-report{grid-column:1 / -1;}
+    .layout.cmp{grid-template-columns:1fr;}
+    .cmpInputs{grid-template-columns:1fr 1fr;}
+    .report2col{display:grid; grid-template-columns:1fr 1fr; gap:0 22px; align-items:start;}
+  }
+  @media (max-width:979px){
+    .actionbar{position:fixed; left:0; right:0; bottom:0; margin:0; padding:9px 12px calc(10px + env(safe-area-inset-bottom));
+      background:rgba(255,255,255,.97); border-top:1px solid var(--line); box-shadow:0 -6px 18px rgba(0,0,0,.07); z-index:50;}
+    .btn-main{font-size:15px; padding:14px 10px;}
+    .btn-ghost{font-size:12.5px; padding:13px 11px;}
+    body{padding-bottom:96px;}
+    .toast{bottom:96px;}
+    .mockSerp{transform-origin:top left;}
+  }
+  @media (max-width:420px){
+    .hero h1{font-size:20px;}
+    .modes .m .mh{font-size:13px;}
+    .modes .m small{display:none;}
+    .scoreNum b{font-size:30px;}
+    .steps .s{flex:1 1 100%;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="tag">네이버 홈판 · 검색 클릭률 점검</span>
+    <h1>🎯 홈판 제목 점검기</h1>
+    <p>글 올리기 전에 <b>제목</b>만 넣어 보세요. 홈판 카드와 검색 결과에서 <b>어디가 잘리는지</b>, 앞 15자에 <b>지역·숫자·혜택 단어</b>가 들어갔는지 바로 보여 드립니다.</p>
+  </header>
+
+  <div class="steps">
+    <div class="s"><div class="n">1</div><div class="t"><b>제목 붙여넣기</b> (또는 후보 2개 비교)</div></div>
+    <div class="s"><div class="n">2</div><div class="t">홈판·검색에서 <b>잘리는 곳</b> 확인</div></div>
+    <div class="s"><div class="n">3</div><div class="t">점수·경고 보고 <b>복사</b>해서 쓰기</div></div>
+  </div>
+
+  <div class="modes" role="radiogroup" aria-label="점검 방식">
+    <button type="button" class="m" data-mode="one" role="radio" aria-checked="true">
+      <div class="mh">📄 제목 1개 점검</div>
+      <small>지금 쓰려는 제목 하나를 자세히 봅니다.</small>
+    </button>
+    <button type="button" class="m" data-mode="two" role="radio" aria-checked="false">
+      <div class="mh">⚖️ 제목 2개 비교</div>
+      <small>후보 A·B 중 어느 쪽이 앞 15자에 핵심을 더 잘 박았는지 비교합니다.</small>
+    </button>
+  </div>
+
+  <div class="layout" id="layout">
+
+    <!-- ① 제목 입력 -->
+    <section class="card card-input">
+      <div class="card-head">
+        <div class="tt"><span class="num">1</span> 제목 입력</div>
+        <div class="tools">
+          <button type="button" class="mini" id="btnSample">예시</button>
+          <button type="button" class="mini danger" id="btnClear">지우기</button>
+        </div>
+      </div>
+
+      <div id="oneInput">
+        <label class="ttl-label" for="titleA">블로그 제목 <span style="font-weight:600;color:#8b95a1">— 지금 쓰려는 제목 그대로</span></label>
+        <textarea class="ttl" id="titleA" rows="2" spellcheck="false" placeholder="예) 인천 석남동 1층 공장 60평 임대 총정리"></textarea>
+        <div class="lenrow" id="lenA"><span>0자</span></div>
+      </div>
+
+      <div id="twoInput" style="display:none">
+        <div class="cmpInputs">
+          <div>
+            <label class="ttl-label" for="titleA2"><span class="badgeA">A</span> 제목 후보 1</label>
+            <textarea class="ttl" id="titleA2" rows="2" spellcheck="false" placeholder="예) 인천 석남동 1층 공장 60평 임대 총정리"></textarea>
+            <div class="lenrow" id="lenA2"><span>0자</span></div>
+          </div>
+          <div>
+            <label class="ttl-label" for="titleB2"><span class="badgeA" style="background:#03c75a">B</span> 제목 후보 2</label>
+            <textarea class="ttl" id="titleB2" rows="2" spellcheck="false" placeholder="예) 석남동 공장 임대합니다 (사진 많음)"></textarea>
+            <div class="lenrow" id="lenB2"><span>0자</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chiprow" id="hookChips">
+        <span class="hintlbl">한 단어 붙이기</span>
+        <button type="button" class="chip plus" data-add="총정리">총정리</button>
+        <button type="button" class="chip plus" data-add="솔직후기">솔직후기</button>
+        <button type="button" class="chip plus" data-add="조건">조건</button>
+        <button type="button" class="chip plus" data-add="비교">비교</button>
+        <button type="button" class="chip plus" data-add="주의">주의</button>
+        <button type="button" class="chip plus" data-add="신청방법">신청방법</button>
+        <button type="button" class="chip plus" data-add="가성비">가성비</button>
+      </div>
+    </section>
+
+    <!-- ② 미리보기 -->
+    <section class="card card-preview" id="previewCard">
+      <div class="card-head">
+        <div class="tt"><span class="num">2</span> 어디서 잘리나</div>
+        <div class="meta">노란 글자 = 앞 15자</div>
+      </div>
+
+      <div class="prev-block">
+        <div class="prev-cap"><b>📱 네이버 모바일 홈판 카드</b><span>제목 2줄 · 카드 폭 260px</span></div>
+        <div class="mockWrap" id="feedWrap">
+          <div class="mockFeed" id="feedMock">
+            <div class="mfHead">
+              <span class="mfAv">N</span>
+              <span class="mfName">인천공장전문 우리부동산 김소장</span>
+              <span class="mfTime">2시간 전</span>
+            </div>
+            <div class="mockTitle" id="feedTitle"></div>
+            <div class="mfDesc">안녕하세요, 인천 공장·창고 전문 우리부동산 김소장입니다. 오늘은 현장 사진과 조건을 자세히 정리했습니다.</div>
+            <div class="mfShot">🏭</div>
+          </div>
+        </div>
+        <div class="cutline" id="feedCut"></div>
+      </div>
+
+      <div class="prev-block">
+        <div class="prev-cap"><b>🔎 네이버 검색 결과 (PC)</b><span>제목 1줄 · 폭 540px</span></div>
+        <div class="mockWrap" id="serpWrap">
+          <div class="mockSerp" id="serpMock">
+            <div class="msTop">
+              <span class="msFav">N</span>
+              <span class="msUrl">blog.naver.com<span class="p"> › 인천공장전문 우리부동산 김소장</span></span>
+            </div>
+            <div class="mockTitle" id="serpTitle"></div>
+            <div class="msDesc">인천 석남동 1층 공장 60평 임대 매물입니다. 보증금·월세·층고·전력까지 사진으로 확인하세요.</div>
+          </div>
+        </div>
+        <div class="cutline" id="serpCut"></div>
+      </div>
+
+      <div class="ruler" id="ruler">
+        <div class="rbar">
+          <i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i>
+          <span class="rmark" id="rMark" style="left:0%"><b>0자</b></span>
+        </div>
+        <div class="rticks">
+          <span style="left:0%">0</span><span style="left:30%">15</span><span style="left:56%">28</span><span style="left:68%">34</span><span style="left:90%">45</span><span style="left:100%">50</span>
+        </div>
+        <div class="rlegend">
+          <span><i style="background:#ffe3a8"></i>앞 15자 핵심</span>
+          <span><i style="background:#b9e9cd"></i>홈판 2줄(~28자)</span>
+          <span><i style="background:#c5d9ff"></i>검색 1줄(~34자)</span>
+          <span><i style="background:#f6c9c4"></i>넘치면 뒤가 잘림</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ③ 판정 -->
+    <section class="card card-report" id="reportCard">
+      <div class="card-head">
+        <div class="tt"><span class="num">3</span> 점검 결과</div>
+        <div class="meta" id="reportMeta">제목을 넣으면 바로 나와요</div>
+      </div>
+      <div id="reportOne"></div>
+      <div id="reportTwo" style="display:none"></div>
+      <div class="actionbar" id="actionbar">
+        <button type="button" class="btn-main" id="btnCopy">📋 제목 복사</button>
+        <button type="button" class="btn-ghost" id="btnCopySum">점검 요약 복사</button>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <span>우리부동산 사장님 작업실 · 홈판 제목 점검기</span>
+    <span>홈판·검색 폭은 네이버 화면과 비슷하게 맞춘 기준값입니다. 실제 화면은 기기·글자체에 따라 1~2자 차이가 날 수 있어요.</span>
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ══════════════════════════════════════════
+     기준 데이터
+     ══════════════════════════════════════════ */
+  var FONT_STACK = '"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
+  var FEED_W = 236, FEED_LINES = 2;      /* 홈판 카드: 260px 카드 - 좌우 여백 12px씩 */
+  var SERP_W = 510, SERP_LINES = 1;      /* 검색 결과: 540px - 좌우 여백 15px씩 */
+  var FEED_FONT = '700 17px ' + FONT_STACK;
+  var SERP_FONT = '700 17px ' + FONT_STACK;
+
+  var REGION_WORDS = [
+    '인천','서울','부천','시흥','김포','안산','광명','구로','강서','영등포','수원','일산','판교','분당','청주','김해','진영',
+    '서해구','검단구','계양','부평','남동','연수','미추홀','청라','석남','가좌','원창','도화','송현','송림','주안','경서',
+    '검암','마전','신현','백석','불로','심곡','연희','중동','상동','역곡','송내','원미','부천동','논현','구월','만수'
+  ];
+
+  var BRANDS = [
+    '힐스테이트','자이','래미안','푸르지오','더샵','e편한세상','편한세상','아이파크','롯데캐슬','두산위브','한신더휴',
+    '호반','데시앙','센트레빌','SK뷰','르엘','아크로','포레나','써밋','반도유보라','제일풍경채','금호어울림','하늘채',
+    '벽산','모아엘가','서희스타힐스','스타힐스','파밀리에','로얄듀크','유보라','본사임','웰가','리슈빌','휴먼시아'
+  ];
+
+  var CORE = [
+    '공장','창고','공업','물류','지식산업센터','아파트','오피스텔','상가','토지','분양','청약','행복주택','국민임대',
+    '공공임대','뉴홈','재건축','재개발','경매','공매','임대','매매','전세','월세','맛집','카페','체험단','식당','술집',
+    '고기','디저트','베이커리','호텔','캠핑','여행','축제','대회','농구'
+  ];
+
+  /* 혜택·호기심 단어 (단어 → 분류) */
+  var HOOKS = {
+    '총정리':'정보','정리':'정보','비교':'정보','조건':'정보','자격':'정보','기준':'정보','일정':'정보','절차':'정보',
+    '신청방법':'방법','신청':'방법','방법':'방법','서류':'방법','준비물':'방법',
+    '마감':'혜택','마감일':'혜택','혜택':'혜택','지원':'혜택','무료':'혜택','특가':'혜택','가성비':'혜택','할인':'혜택',
+    '최대':'혜택','한도':'혜택','금리':'혜택','대출':'혜택','보증금':'혜택',
+    '솔직후기':'후기','후기':'후기','다녀왔':'후기','방문':'후기','실착':'후기','사용기':'후기','체험':'후기','직접':'후기',
+    '주의':'주의','주의사항':'주의','놓치면':'주의','손해':'주의','함정':'주의','실수':'주의','위험':'주의','체크':'주의',
+    '공개':'호기심','알려드림':'호기심','진짜':'호기심','비밀':'호기심','숨겨진':'호기심','반전':'호기심','결론':'호기심','3분':'호기심'
+  };
+
+  var EXAG = ['최고','최저','최초','유일','완벽','무조건','100%','절대','보장','확정','원금보장','확정수익','대박','충격',
+              '경악','소름','인생역전','떼돈','파격','초특가','품절임박','마지막기회','단하루','전액환불'];
+
+  var SOFT = ['급매','급구','초급매','특가','무료','최대','1위','베스트','역대급'];
+
+  var SPECIAL_RE = /[★☆♥♡◆◇■□●○▲△▼▽◀▶◁▷※♣♠【】《》〈〉〔〕]/g;
+  var BANG_RE = /[!?]{2,}/g;
+  var PHONE_RE = /0\d{1,2}[-.\s]?\d{3,4}[-.\s]?\d{4}/;
+  var URL_RE = /(https?:\/\/|www\.|\.com|\.co\.kr|\.net|\.kr\b)/i;
+
+  /* ══════════════════════════════════════════
+     글자 폭으로 줄 나눔 계산 (캔버스 측정)
+     ══════════════════════════════════════════ */
+  var cvs = document.createElement('canvas');
+  var ctx2 = cvs.getContext('2d');
+
+  function toChars(s){
+    try { return Array.from(s); } catch(e){ return s.split(''); }
+  }
+
+  function wrapSim(chars, font, maxW, maxLines){
+    ctx2.font = font;
+    var n = chars.length;
+    var ellW = ctx2.measureText('…').width;
+    var lines = [], i = 0, truncated = false, cut = n;
+
+    for (var l = 0; l < maxLines; l++){
+      var w = 0, start = i, end = i;
+      while (end < n){
+        var cw = ctx2.measureText(chars[end]).width;
+        if (w + cw > maxW + 0.01) break;
+        w += cw; end++;
+      }
+      /* 영어·숫자 단어는 중간에서 자르지 않음 */
+      if (end < n && end > start){
+        var a = chars[end], b = chars[end-1];
+        if (/[A-Za-z0-9%]/.test(a) && /[A-Za-z0-9%]/.test(b)){
+          var k = end;
+          while (k > start && /[A-Za-z0-9%]/.test(chars[k-1])) k--;
+          if (k > start) end = k;
+        }
+      }
+      while (end > start && chars[end-1] === ' ') end--;
+      lines.push({start:start, end:end, ellipsis:false});
+      i = end;
+      while (i < n && chars[i] === ' ') i++;
+      if (i >= n){ truncated = false; break; }
+      if (l === maxLines - 1) truncated = true;
+    }
+
+    if (truncated && lines.length){
+      var last = lines[lines.length-1];
+      var keep = last.end - last.start;
+      var lw = 0;
+      for (var q = last.start; q < last.end; q++) lw += ctx2.measureText(chars[q]).width;
+      while (keep > 0 && lw + ellW > maxW){
+        lw -= ctx2.measureText(chars[last.start + keep - 1]).width;
+        keep--;
+      }
+      while (keep > 0 && chars[last.start + keep - 1] === ' '){
+        lw -= ctx2.measureText(' ').width;
+        keep--;
+      }
+      last.end = last.start + keep;
+      last.ellipsis = true;
+      cut = last.end;
+    }
+    return {lines:lines, truncated:truncated, cut:cut, len:n, ellipsis:truncated};
+  }
+
+  function lineHtml(chars, sim, hlEnd){
+    if (!chars.length) return '<span class="ln" style="color:#b0b8c1">제목을 넣으면 여기에 그대로 보여요</span>';
+    var out = '';
+    for (var i = 0; i < sim.lines.length; i++){
+      var ln = sim.lines[i], s = '';
+      for (var k = ln.start; k < ln.end; k++){
+        var ch = esc(chars[k]);
+        s += (k < hlEnd) ? '<em class="hl">' + ch + '</em>' : ch;
+      }
+      if (ln.ellipsis) s += '<i class="ell">…</i>';
+      if (!s) s = '&nbsp;';
+      out += '<span class="ln">' + s + '</span>';
+    }
+    return out;
+  }
+
+  function esc(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ══════════════════════════════════════════
+     제목 분석
+     ══════════════════════════════════════════ */
+  function charIndexOf(text, idx){
+    return toChars(text.slice(0, idx)).length;
+  }
+
+  function findWords(text, list){
+    var out = [];
+    for (var i = 0; i < list.length; i++){
+      var idx = text.indexOf(list[i]);
+      if (idx >= 0) out.push({word:list[i], idx:idx, ci:charIndexOf(text, idx), len:toChars(list[i]).length});
+    }
+    out.sort(function(x, y){ return x.ci - y.ci || y.len - x.len; });
+    var picked = [];
+    for (var j = 0; j < out.length; j++){
+      var m = out[j], clash = false;
+      for (var p = 0; p < picked.length; p++){
+        var o = picked[p];
+        if (m.ci < o.ci + o.len && o.ci < m.ci + m.len){ clash = true; break; }
+      }
+      if (!clash) picked.push(m);
+    }
+    return picked;
+  }
+
+  function findPlaces(text, existing){
+    var res = [], re = /([가-힣]{2,4}(?:동|읍|면|구|시|로|길))(?![가-힣])/g, m;
+    while ((m = re.exec(text)) !== null){
+      var w = m[1], skip = false;
+      for (var i = 0; i < existing.length; i++){
+        if (existing[i].word === w) { skip = true; break; }
+      }
+      if (skip) continue;
+      res.push({word:w, idx:m.index, ci:charIndexOf(text, m.index), len:toChars(w).length, place:true});
+    }
+    return res;
+  }
+
+  function analyze(raw){
+    var text = String(raw || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').replace(/^\s+|\s+$/g, '');
+    var chars = toChars(text);
+    var len = chars.length;
+    var front15 = chars.slice(0, 15).join('');
+
+    var regions = findWords(text, REGION_WORDS);
+    var places = findPlaces(text, regions);
+    regions = regions.concat(places).sort(function(a, b){ return a.ci - b.ci; });
+    var brands = findWords(text, BRANDS);
+    var cores = findWords(text, CORE);
+
+    function inFront(arr){
+      for (var i = 0; i < arr.length; i++) if (arr[i].ci < 15) return arr[i];
+      return null;
+    }
+    var regionFront = inFront(regions), brandFront = inFront(brands), coreFront = inFront(cores);
+    var frontHit = regionFront || brandFront || coreFront || null;
+
+    var numM = text.match(/\d[\d,.]*\s?(?:평|㎡|m2|m²|세대|가구|만원|억|천만|%|개|층|kW|kw|KW|년|월|일|분|시간|위|호|차|대|명|건|배|점|원|번지|미터|톤|kg)/);
+    var hasDigit = /\d/.test(text);
+
+    var hooksFound = [], hookSeen = {};
+    for (var hw in HOOKS){
+      if (!Object.prototype.hasOwnProperty.call(HOOKS, hw)) continue;
+      if (text.indexOf(hw) >= 0 && !hookSeen[hw]){
+        hookSeen[hw] = 1;
+        hooksFound.push({word:hw, cat:HOOKS[hw]});
+      }
+    }
+
+    /* 경고 */
+    var warnings = [];
+    var specials = text.match(SPECIAL_RE);
+    if (specials && specials.length){
+      warnings.push({level:'warn', t:'특수문자 ' + specials.length + '개',
+        d:'★ ♥ ◆ 【】 같은 기호는 광고·낚시 글로 보여 노출이 줄 수 있어요. 지금: ' + specials.slice(0, 8).join(' ')});
+    }
+    var bangs = text.match(BANG_RE);
+    if (bangs && bangs.length){
+      warnings.push({level:'warn', t:'느낌표·물음표 반복 ' + bangs.length + '곳',
+        d:'"!!" "??"를 반복하면 저품질 제목으로 볼 수 있어요. 한 번만 쓰거나 빼 주세요.'});
+    }
+    try {
+      var emoRe = new RegExp('\\p{Extended_Pictographic}', 'gu');
+      var emo = text.match(emoRe);
+      if (emo && emo.length >= 3){
+        warnings.push({level:'soft', t:'이모지 ' + emo.length + '개',
+          d:'제목에는 1개 이하가 안전해요. 많으면 검색에서 잘려 보이기도 합니다.'});
+      }
+    } catch(e){}
+
+    var toks = text.split(/[^가-힣A-Za-z0-9]+/), cnt = {}, reps = [];
+    for (var ti = 0; ti < toks.length; ti++){
+      var tk = toks[ti];
+      if (tk.length < 2) continue;
+      cnt[tk] = (cnt[tk] || 0) + 1;
+    }
+    for (var kk in cnt) if (cnt[kk] >= 3) reps.push(kk + ' ×' + cnt[kk]);
+    if (reps.length){
+      warnings.push({level:'warn', t:'같은 단어 3회 이상 반복',
+        d:'키워드 반복은 어뷰징으로 보일 수 있어요. (' + reps.join(', ') + ')'});
+    }
+
+    if (len >= 45){
+      warnings.push({level:'warn', t:'제목이 ' + len + '자 (45자 이상)',
+        d:'검색에서 제목 대부분이 잘리고 저품질 위험도 있어요. 28~34자로 줄여 주세요.'});
+    } else if (len > 34){
+      warnings.push({level:'soft', t:'제목이 ' + len + '자 (35자 이상)',
+        d:'홈판 2줄(약 28자)과 검색 1줄(약 34자)을 넘어 뒤쪽은 잘려 보입니다.'});
+    }
+
+    var exagFound = [];
+    for (var e = 0; e < EXAG.length; e++) if (text.indexOf(EXAG[e]) >= 0) exagFound.push(EXAG[e]);
+    if (exagFound.length){
+      warnings.push({level:'warn', t:'과장·금칙 표현: ' + exagFound.join(', '),
+        d:'사실 근거가 없으면 광고성·저품질로 판정될 수 있어요. 빼는 게 안전합니다.'});
+    }
+    var softFound = [];
+    for (var s2 = 0; s2 < SOFT.length; s2++) if (text.indexOf(SOFT[s2]) >= 0) softFound.push(SOFT[s2]);
+    if (softFound.length){
+      warnings.push({level:'soft', t:'주의해서 쓸 표현: ' + softFound.join(', '),
+        d:'근거가 분명할 때만 쓰세요. 사실과 다르면 소비자 오인이 됩니다.'});
+    }
+    if (PHONE_RE.test(text)){
+      warnings.push({level:'warn', t:'제목에 전화번호',
+        d:'제목 속 번호는 스팸·광고 판정 위험이 커요. 번호는 본문 하단으로 빼 주세요.'});
+    }
+    if (URL_RE.test(text)){
+      warnings.push({level:'warn', t:'제목에 주소·도메인',
+        d:'링크성 문구는 노출 감점 요인이에요. 제목에서는 빼 주세요.'});
+    }
+
+    /* 점수 */
+    var lenBand = (len >= 15 && len <= 34) ? 20 : (len >= 35 && len <= 44 ? 10 : (len < 15 ? 8 : 0));
+    var score = 0;
+    if (frontHit) score += 35;
+    if (hasDigit) score += 25;
+    if (hooksFound.length) score += 20;
+    score += lenBand;
+    score -= (specials && specials.length ? 8 : 0);
+    score -= (bangs && bangs.length ? 6 : 0);
+    score -= (reps.length ? 8 : 0);
+    score -= (len >= 45 ? 6 : 0);
+    score -= Math.min(exagFound.length * 7, 14);
+    score -= (PHONE_RE.test(text) ? 10 : 0);
+    score -= (URL_RE.test(text) ? 8 : 0);
+    if (len === 0) score = 0;
+    score = Math.max(0, Math.min(100, Math.round(score)));
+
+    var feed = wrapSim(chars, FEED_FONT, FEED_W, FEED_LINES);
+    var serp = wrapSim(chars, SERP_FONT, SERP_W, SERP_LINES);
+
+    return {
+      text: text, chars: chars, len: len, lenNoSpace: toChars(text.replace(/\s/g, '')).length,
+      front15: front15,
+      regions: regions, brands: brands, cores: cores,
+      regionFront: regionFront, brandFront: brandFront, coreFront: coreFront, frontHit: frontHit,
+      numM: numM ? numM[0].replace(/\s+/g, '') : '', hasDigit: hasDigit,
+      hooks: hooksFound, score: score,
+      warnings: warnings, exag: exagFound,
+      feed: feed, serp: serp
+    };
+  }
+
+  function gradeOf(a){
+    if (!a.len) return {k:'none', label:'제목을 넣어 주세요', msg:'위 칸에 제목을 붙여넣으면 바로 점검합니다.'};
+    if (a.score >= 85) return {k:'great', label:'아주 좋아요', msg:'이대로 올려도 됩니다. 뒤가 잘려도 핵심은 다 보여요.'};
+    if (a.score >= 70) return {k:'good', label:'좋아요', msg:'한 군데만 다듬으면 훨씬 좋아져요.'};
+    if (a.score >= 55) return {k:'mid', label:'보통', msg:'앞부분을 손보면 클릭률이 올라갑니다.'};
+    return {k:'low', label:'아쉬움', msg:'아래 제안대로 제목을 다시 짜 보세요.'};
+  }
+
+  function feedText(a){
+    if (!a.len) return '제목을 넣으면 여기에 바로 보여요';
+    return a.feed.truncated ? ('홈판 카드에서 <b>' + a.feed.cut + '자</b>에서 잘려요') : ('홈판 카드 2줄에 <b>다 들어가요</b> (' + a.len + '자)');
+  }
+  function serpText(a){
+    if (!a.len) return '검색 결과는 1줄로 잘려 보입니다';
+    return a.serp.truncated ? ('검색 결과에서 <b>' + a.serp.cut + '자</b>까지 보여요') : ('검색 결과 1줄에 <b>다 들어가요</b> (' + a.len + '자)');
+  }
+  function lostHtml(a, which){
+    var sim = (which === 'feed') ? a.feed : a.serp;
+    if (!sim.truncated) return '';
+    var rest = a.chars.slice(sim.cut).join('');
+    if (!rest) return '';
+    return '<span class="lost"> … 뒤로 안 보임: "' + esc(rest) + '"</span>';
+  }
+
+  /* ══════════════════════════════════════════
+     화면 그리기
+     ══════════════════════════════════════════ */
+  var $ = function(id){ return document.getElementById(id); };
+  var state = { mode:'one', a:'', b:'' };
+  var toastTimer = null;
+
+  function toast(msg, sub){
+    var t = $('toast');
+    t.innerHTML = msg + (sub ? '<small>' + sub + '</small>' : '');
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+  }
+
+  function fitMock(wrapId, innerId){
+    var wrap = $(wrapId), inner = $(innerId);
+    if (!wrap || !inner) return;
+    var avail = wrap.clientWidth;
+    if (!avail) return;
+    var w = inner.offsetWidth || 1;
+    var s = Math.min(1, avail / w);
+    inner.style.transform = 'scale(' + s + ')';
+    inner.style.transformOrigin = 'top left';
+    wrap.style.height = Math.ceil(inner.offsetHeight * s) + 'px';
+  }
+
+  function lenRowHtml(a){
+    if (!a.len) return '<span>0자</span><span style="color:#a8b1ba">· 권장 24~34자</span>';
+    var flag;
+    if (a.len >= 24 && a.len <= 34) flag = '<span class="flag ok">딱 좋아요</span>';
+    else if (a.len > 34 && a.len < 45) flag = '<span class="flag over">조금 길어요</span>';
+    else if (a.len >= 45) flag = '<span class="flag bad">너무 길어요</span>';
+    else flag = '<span class="flag over">조금 짧아요</span>';
+    return '<span>공백 포함 <b>' + a.len + '</b>자</span><span>공백 제외 <b>' + a.lenNoSpace + '</b>자</span>' + flag;
+  }
+
+  function checksHtml(a){
+    var g = gradeOf(a);
+    if (!a.len){
+      return '<div class="scoreTop"><div class="scoreNum"><b>–</b><span>/100</span></div>' +
+        '<div class="scoreMeta"><span class="grade g-none">대기</span><p>제목을 넣으면 점수와 체크리스트가 바로 나옵니다.</p></div></div>';
+    }
+    var html = '<div class="scoreTop">' +
+      '<div class="scoreNum"><b>' + a.score + '</b><span>/100점</span></div>' +
+      '<div class="scoreMeta"><span class="grade g-' + g.k + '">' + g.label + '</span>' +
+      '<p>' + g.msg + '</p>' +
+      '<div class="sbar' + (a.score < 55 ? ' low' : '') + '"><i style="width:' + a.score + '%"></i></div>' +
+      '</div></div>';
+
+    /* ① 앞 15자 */
+    var fh;
+    if (a.frontHit){
+      fh = '앞 15자 "' + esc(a.front15) + '" 안에 <b>' + esc(a.frontHit.word) + '</b>이(가) 들어 있어요.';
+    } else {
+      var behind = a.regions[0] || a.brands[0] || null;
+      fh = '앞 15자 "' + esc(a.front15) + '"에 지역·단지·핵심 단어가 없어요.' +
+           (behind ? ' <b>' + esc(behind.word) + '</b>이 뒤로 밀려 있습니다.' : '');
+    }
+    html += '<div class="chk ' + (a.frontHit ? 'ok' : 'no') + '"><span class="ci">' + (a.frontHit ? '✓' : '·') + '</span>' +
+      '<div class="ct"><b>앞 15자에 지역·단지·핵심</b><p>' + fh + '</p></div></div>';
+
+    /* ② 숫자 */
+    html += '<div class="chk ' + (a.hasDigit ? 'ok' : 'no') + '"><span class="ci">' + (a.hasDigit ? '✓' : '·') + '</span>' +
+      '<div class="ct"><b>숫자·구체 조건</b><p>' +
+      (a.hasDigit ? ('<b>' + esc(a.numM || '숫자') + '</b>' + (a.numM ? ' 같은 구체적인 숫자가 들어 있어요.' : '가 들어 있어요. 단위까지 붙이면 더 좋아요.'))
+                  : '숫자가 없어요. 60평·3억·12세대·D-5처럼 하나만 넣어도 눈에 띕니다.') +
+      '</p></div></div>';
+
+    /* ③ 훅 */
+    var hookChips = a.hooks.length
+      ? a.hooks.slice(0, 4).map(function(h){ return '<b>' + esc(h.word) + '</b>'; }).join(' · ')
+      : '';
+    html += '<div class="chk ' + (a.hooks.length ? 'ok' : 'no') + '"><span class="ci">' + (a.hooks.length ? '✓' : '·') + '</span>' +
+      '<div class="ct"><b>혜택·호기심 단어</b><p>' +
+      (a.hooks.length ? (hookChips + ' — 클릭할 이유가 들어 있어요.')
+                      : '없어요. 총정리·조건·솔직후기·가성비 중 하나를 붙여 보세요.') +
+      '</p></div></div>';
+
+    /* ④ 길이 */
+    var lenMsg, lenIcon = '✓', lenCls = 'ok';
+    if (a.len <= 28){ lenMsg = a.len + '자 — 홈판 카드 2줄 안에 다 들어갑니다.'; }
+    else if (a.len <= 34){ lenMsg = a.len + '자 — 홈판에서는 뒤가 조금 잘리고, 검색에는 다 들어갑니다.'; }
+    else if (a.len < 45){ lenMsg = a.len + '자 — 홈판·검색에서 뒤쪽이 잘립니다.'; lenIcon = '!'; lenCls = 'bad'; }
+    else { lenMsg = a.len + '자 — 45자 이상은 저품질 위험이 있어요.'; lenIcon = '!'; lenCls = 'bad'; }
+    html += '<div class="chk ' + lenCls + '"><span class="ci">' + lenIcon + '</span>' +
+      '<div class="ct"><b>길이</b><p>' + lenMsg + '</p></div></div>';
+
+    return html;
+  }
+
+  function warningsHtml(a){
+    if (!a.len) return '';
+    if (!a.warnings.length){
+      return '<div class="subhead">⚠️ 노출 감점·저품질 주의 <span class="cnt">0</span></div>' +
+        '<div class="wnone"><span>👍</span><span>걸리는 표현이 없어요. 이대로 올려도 괜찮습니다.</span></div>';
+    }
+    var hard = a.warnings.filter(function(w){ return w.level === 'warn'; }).length;
+    var html = '<div class="subhead">⚠️ 노출 감점·저품질 주의 <span class="cnt ' + (hard ? 'warn' : '') + '">' + a.warnings.length + '</span></div><div class="wlist">';
+    for (var i = 0; i < a.warnings.length; i++){
+      var w = a.warnings[i];
+      html += '<div class="witem ' + (w.level === 'soft' ? 'soft' : '') + '">' +
+        '<span class="wi">' + (w.level === 'soft' ? 'ℹ️' : '⚠️') + '</span>' +
+        '<div class="wt"><b>' + esc(w.t) + '</b><p>' + esc(w.d) + '</p></div></div>';
+    }
+    return html + '</div>';
+  }
+
+  function tipsHtml(a){
+    if (!a.len) return '';
+    var tips = [];
+    if (!a.frontHit){
+      if (a.regions[0] || a.brands[0]){
+        var mm = a.regions[0] || a.brands[0];
+        tips.push('앞 15자 안에 <b>지역·단지 이름</b>을 넣으세요. 홈판·검색에서 먼저 보이는 구간입니다.');
+      } else {
+        tips.push('<b>지역·단지 이름</b>을 앞쪽에 넣으세요. 예) 인천 석남동 · 부천 중동 …');
+      }
+    }
+    if (!a.hasDigit) tips.push('<b>숫자</b>를 하나 넣으세요. 60평·3억·12세대·마감 D-5처럼 구체적일수록 클릭이 늘어요.');
+    if (!a.hooks.length) tips.push('<b>혜택·호기심 단어</b> 하나. 총정리 · 조건 · 솔직후기 · 가성비 중에서 골라 붙이면 됩니다.');
+    if (a.len > 34) tips.push('뒤쪽 <b>' + (a.len - 28) + '자</b>는 홈판에서 안 보입니다. 핵심만 남기고 <b>28자 안</b>으로 줄여 보세요.');
+    if (a.warnings.some(function(w){ return w.t.indexOf('특수문자') >= 0; })) tips.push('<b>★·♥ 같은 기호</b>는 빼고, 대신 숫자와 조건으로 눈에 띄게 만드세요.');
+    if (!tips.length) tips.push('지금 제목 그대로 올려도 좋습니다. 본문 첫 문단에 핵심 조건을 한 번 더 적어 주세요.');
+
+    var html = '<div class="subhead">💡 이렇게 바꿔 보세요</div><div class="tips">';
+    for (var i = 0; i < tips.length; i++){
+      html += '<div class="tip"><span class="ti">→</span><div class="tx">' + tips[i] + '</div></div>';
+    }
+    html += '</div>';
+
+    /* 자동 제안 제목: 지역·단지가 뒤에 있으면 앞으로 옮김 */
+    var mv = a.regions[0] || a.brands[0];
+    if (mv && mv.ci >= 15){
+      var rest = a.text.slice(0, mv.idx) + a.text.slice(mv.idx + mv.word.length);
+      var sug = (mv.word + ' ' + rest).replace(/\s+/g, ' ').replace(/^[\s,·\-]+|[\s,·\-]+$/g, '');
+      if (sug && sug !== a.text){
+        html += '<div class="suggest"><div class="sl">이렇게 바꾸면 앞 15자에 핵심이 들어갑니다</div>' +
+          '<div class="st">' + esc(sug) + '</div><div class="sb">' +
+          '<button type="button" class="sbtn" data-apply="' + esc(sug) + '">이 제목으로 바꾸기</button>' +
+          '<button type="button" class="sbtn ghost" data-copyone="' + esc(sug) + '">복사만</button>' +
+          '</div></div>';
+      }
+    }
+    return html;
+  }
+
+  function summaryText(a){
+    var g = gradeOf(a);
+    var lines = [];
+    lines.push('제목: ' + a.text);
+    lines.push('점수: ' + a.score + '점 (' + g.label + ')');
+    lines.push('· 앞 15자: ' + a.front15 + ' — ' + (a.frontHit ? a.frontHit.word + ' 포함' : '지역·단지·핵심 없음'));
+    lines.push('· 홈판 카드: ' + (a.feed.truncated ? a.feed.cut + '자에서 잘림' : '2줄에 다 들어감') +
+               ' / 검색: ' + (a.serp.truncated ? a.serp.cut + '자까지 보임' : '1줄에 다 들어감'));
+    lines.push('· 숫자·조건: ' + (a.hasDigit ? (a.numM || '있음') : '없음') +
+               ' / 혜택·호기심: ' + (a.hooks.length ? a.hooks.map(function(h){ return h.word; }).slice(0,3).join(', ') : '없음'));
+    lines.push('· 주의: ' + (a.warnings.length ? a.warnings.map(function(w){ return w.t; }).join(' / ') : '없음'));
+    return lines.join('\n');
+  }
+
+  function renderOne(a){
+    /* 미리보기 */
+    $('feedTitle').innerHTML = lineHtml(a.chars, a.feed, 15);
+    $('serpTitle').innerHTML = lineHtml(a.chars, a.serp, 15);
+    $('feedCut').innerHTML = '<span>' + feedText(a) + '</span>' + lostHtml(a, 'feed');
+    $('serpCut').innerHTML = '<span>' + serpText(a) + '</span>' + lostHtml(a, 'serp');
+    $('feedCut').className = 'cutline' + (a.feed.truncated ? ' warnline' : '');
+    $('serpCut').className = 'cutline' + (a.serp.truncated ? ' warnline' : '');
+
+    var pct = Math.min(100, (a.len / 50) * 100);
+    $('rMark').style.left = pct + '%';
+    $('rMark').innerHTML = '<b>' + a.len + '자</b>';
+
+    $('lenA').innerHTML = lenRowHtml(a);
+
+    /* 판정 */
+    var html = checksHtml(a);
+    if (a.len){
+      html += '<div class="report2col"><div>' + warningsHtml(a) + '</div><div>' + tipsHtml(a) + '</div></div>';
+    }
+    $('reportOne').innerHTML = html;
+    $('reportMeta').textContent = a.len ? ('홈판 ' + (a.feed.truncated ? a.feed.cut + '자에서 잘림' : 'OK') + ' · 검색 ' + (a.serp.truncated ? a.serp.cut + '자' : 'OK')) : '제목을 넣으면 바로 나와요';
+  }
+
+  function renderTwo(A, B){
+    var gA = gradeOf(A), gB = gradeOf(B);
+    var nameA = 'A', nameB = 'B';
+    var winner = 0;
+    if (A.len || B.len){
+      if (A.score !== B.score) winner = A.score > B.score ? 1 : 2;
+      else {
+        var ca = (A.frontHit ? 1 : 0) + (A.hasDigit ? 1 : 0) + (A.hooks.length ? 1 : 0);
+        var cb = (B.frontHit ? 1 : 0) + (B.hasDigit ? 1 : 0) + (B.hooks.length ? 1 : 0);
+        winner = ca === cb ? 0 : (ca > cb ? 1 : 2);
+      }
+    }
+
+    var html = '';
+    if (!A.len && !B.len){
+      html = '<div class="winner tie"><span class="wtrophy">⚖️</span><div class="wtxt"><b>두 제목을 넣어 주세요</b>' +
+        '<p>위 A·B 칸에 후보 제목을 넣으면 어느 쪽이 앞 15자에 핵심을 잘 박았는지 비교해 드립니다.</p></div></div>';
+      $('reportTwo').innerHTML = html;
+      return;
+    }
+
+    var reasons = [];
+    if (winner === 1 || winner === 2){
+      var W = winner === 1 ? A : B, L = winner === 1 ? B : A;
+      if (!L.frontHit && W.frontHit) reasons.push('앞 15자에 <b>' + esc(W.frontHit.word) + '</b>이(가) 들어 있어 홈판에서 바로 보입니다.');
+      if (!L.hasDigit && W.hasDigit) reasons.push('<b>' + esc(W.numM || '숫자') + '</b>처럼 구체적인 숫자가 있습니다.');
+      if (!L.hooks.length && W.hooks.length) reasons.push('<b>' + esc(W.hooks[0].word) + '</b> 같은 단어로 클릭할 이유를 줍니다.');
+      if (W.len <= 34 && L.len > 34) reasons.push('길이가 ' + W.len + '자로 더 짧아 잘리지 않습니다.');
+      if (L.warnings.length > W.warnings.length) reasons.push('경고 표현이 ' + W.warnings.length + '개로 더 적습니다.');
+      if (!reasons.length) reasons.push('점수가 ' + W.score + '점으로 더 높습니다.');
+    }
+
+    if (winner === 0){
+      html += '<div class="winner tie"><span class="wtrophy">🤝</span><div class="wtxt"><b>두 제목이 비슷해요 (' + A.score + '점 · ' + B.score + '점)</b>' +
+        '<p>점수가 같습니다. 아래 표에서 앞 15자와 잘리는 지점을 보고 고르세요.</p></div></div>';
+    } else {
+      html += '<div class="winner"><span class="wtrophy">🏆</span><div class="wtxt"><b>제목 ' + (winner === 1 ? nameA : nameB) + '가 더 좋아요 (' +
+        (winner === 1 ? A.score : B.score) + '점 vs ' + (winner === 1 ? B.score : A.score) + '점)</b>' +
+        '<p>' + reasons.slice(0, 3).join(' ') + '</p></div></div>';
+    }
+
+    function cell(v, cls){ return '<td class="' + (cls || '') + '">' + v + '</td>'; }
+    function yn(ok, txt){ return ok ? '<span class="yes">✓ ' + txt + '</span>' : '<span class="nope">✗ ' + txt + '</span>'; }
+
+    html += '<div style="overflow-x:auto"><table class="cmpTable"><thead><tr><th>항목</th>' +
+      '<th class="' + (winner === 1 ? 'win' : '') + '">A</th><th class="' + (winner === 2 ? 'win' : '') + '">B</th></tr></thead><tbody>';
+
+    html += '<tr><td class="rowh">점수</td>' +
+      cell('<span class="score">' + A.score + '</span> <span class="mut">(' + gA.label + ')</span>', winner === 1 ? 'win' : '') +
+      cell('<span class="score">' + B.score + '</span> <span class="mut">(' + gB.label + ')</span>', winner === 2 ? 'win' : '') + '</tr>';
+
+    html += '<tr><td class="rowh">앞 15자</td>' +
+      cell('<span class="f15"><mark>' + esc(A.front15) + '</mark>' + esc(A.chars.slice(15, 26).join('')) + '</span>', winner === 1 ? 'win' : '') +
+      cell('<span class="f15"><mark>' + esc(B.front15) + '</mark>' + esc(B.chars.slice(15, 26).join('')) + '</span>', winner === 2 ? 'win' : '') + '</tr>';
+
+    html += '<tr><td class="rowh">지역·단지·핵심</td>' +
+      cell(yn(!!A.frontHit, A.frontHit ? esc(A.frontHit.word) : '없음'), winner === 1 ? 'win' : '') +
+      cell(yn(!!B.frontHit, B.frontHit ? esc(B.frontHit.word) : '없음'), winner === 2 ? 'win' : '') + '</tr>';
+
+    html += '<tr><td class="rowh">숫자·조건</td>' +
+      cell(yn(A.hasDigit, esc(A.numM || '있음')), winner === 1 ? 'win' : '') +
+      cell(yn(B.hasDigit, esc(B.numM || '있음')), winner === 2 ? 'win' : '') + '</tr>';
+
+    html += '<tr><td class="rowh">혜택·호기심</td>' +
+      cell(yn(A.hooks.length > 0, A.hooks.length ? A.hooks.slice(0, 2).map(function(h){ return esc(h.word); }).join(', ') : '없음'), winner === 1 ? 'win' : '') +
+      cell(yn(B.hooks.length > 0, B.hooks.length ? B.hooks.slice(0, 2).map(function(h){ return esc(h.word); }).join(', ') : '없음'), winner === 2 ? 'win' : '') + '</tr>';
+
+    html += '<tr><td class="rowh">길이</td>' +
+      cell(A.len + '자' + (A.len > 34 ? ' <span class="nope">넘침</span>' : ' <span class="yes">OK</span>'), winner === 1 ? 'win' : '') +
+      cell(B.len + '자' + (B.len > 34 ? ' <span class="nope">넘침</span>' : ' <span class="yes">OK</span>'), winner === 2 ? 'win' : '') + '</tr>';
+
+    html += '<tr><td class="rowh">홈판 / 검색 잘림</td>' +
+      cell((A.feed.truncated ? A.feed.cut + '자' : '전부') + ' / ' + (A.serp.truncated ? A.serp.cut + '자' : '전부'), winner === 1 ? 'win' : '') +
+      cell((B.feed.truncated ? B.feed.cut + '자' : '전부') + ' / ' + (B.serp.truncated ? B.serp.cut + '자' : '전부'), winner === 2 ? 'win' : '') + '</tr>';
+
+    function warnCell(a){
+      if (!a.warnings.length) return '<span class="yes">없음</span>';
+      return '<span class="nope">' + a.warnings.length + '건</span> <span class="mut">' +
+        esc(a.warnings.slice(0, 2).map(function(w){ return w.t; }).join(' / ')) + '</span>';
+    }
+    html += '<tr><td class="rowh">경고</td>' + cell(warnCell(A), winner === 1 ? 'win' : '') + cell(warnCell(B), winner === 2 ? 'win' : '') + '</tr>';
+    html += '</tbody></table></div>';
+
+    html += '<div class="cmpBtns">' +
+      '<button type="button" class="sbtn" data-copyone="' + esc(A.text) + '">A 복사</button>' +
+      '<button type="button" class="sbtn" data-copyone="' + esc(B.text) + '">B 복사</button>' +
+      '<button type="button" class="sbtn" data-copyone="' + esc((winner === 2 ? B : A).text) + '">' +
+      (winner === 0 ? 'A' : (winner === 1 ? 'A' : 'B')) + ' (추천) 복사</button>' +
+      '</div>';
+
+    $('reportTwo').innerHTML = html;
+    $('lenA2').innerHTML = lenRowHtml(A);
+    $('lenB2').innerHTML = lenRowHtml(B);
+  }
+
+  var lastA = null, lastB = null;
+
+  function render(){
+    var A = analyze(state.a);
+    var B = analyze(state.b);
+
+    if (state.mode === 'one'){
+      lastA = A;
+      renderOne(A);
+    } else {
+      lastA = A; lastB = B;
+      renderTwo(A, B);
+    }
+    /* 미리보기 줄바꿈 다시 계산된 뒤 크기 맞춤 */
+    if (state.mode === 'one'){
+      fitMock('feedWrap', 'feedMock');
+      fitMock('serpWrap', 'serpMock');
+    }
+  }
+
+  function setMode(mode){
+    state.mode = mode;
+    var ms = document.querySelectorAll('.modes .m');
+    for (var i = 0; i < ms.length; i++){
+      ms[i].setAttribute('aria-checked', ms[i].dataset.mode === mode ? 'true' : 'false');
+    }
+    var cmp = (mode === 'two');
+    $('oneInput').style.display = cmp ? 'none' : '';
+    $('twoInput').style.display = cmp ? '' : 'none';
+    $('previewCard').style.display = cmp ? 'none' : '';
+    $('reportOne').style.display = cmp ? 'none' : '';
+    $('reportTwo').style.display = cmp ? '' : 'none';
+    $('layout').className = 'layout' + (cmp ? ' cmp' : '');
+    if (cmp){
+      if (!$('titleA2').value && state.a) $('titleA2').value = state.a;
+      if (!$('titleB2').value && state.b) $('titleB2').value = state.b;
+      state.a = $('titleA2').value;
+      state.b = $('titleB2').value;
+    } else {
+      if (!$('titleA').value && $('titleA2').value) $('titleA').value = $('titleA2').value;
+      state.a = $('titleA').value;
+    }
+    render();
+    autosize();
+  }
+
+  /* 입력칸 높이 자동 */
+  function autosize(){
+    var tas = document.querySelectorAll('textarea.ttl');
+    for (var i = 0; i < tas.length; i++){
+      var t = tas[i];
+      if (!t.offsetParent) continue;
+      t.style.height = 'auto';
+      t.style.height = Math.max(54, t.scrollHeight) + 'px';
+    }
+  }
+
+  var saveTimer = null;
+  function save(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){
+      try {
+        localStorage.setItem('woori.titleCheck.v1', JSON.stringify({m:state.mode, a:state.a, b:state.b}));
+      } catch(e){}
+    }, 300);
+  }
+
+  function onInput(){
+    if (state.mode === 'one') state.a = $('titleA').value;
+    else { state.a = $('titleA2').value; state.b = $('titleB2').value; }
+    autosize();
+    render();
+    save();
+  }
+
+  /* ══════════════════════════════════════════
+     복사
+     ══════════════════════════════════════════ */
+  function legacyCopy(text){
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '-2000px';
+    ta.style.left = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    if (ta.setSelectionRange) ta.setSelectionRange(0, text.length);
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch(e){ ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  function copyText(text, label){
+    if (!text){ toast('복사할 제목이 없어요', '위 칸에 제목을 먼저 넣어 주세요.'); return; }
+    function done(ok){
+      if (ok) toast('복사했어요 👍', label || '네이버 글쓰기 제목 칸에 붙여넣으세요.');
+      else toast('복사가 안 됐어요', '제목을 길게 눌러 직접 복사해 주세요.');
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText && (window.isSecureContext !== false)){
+      navigator.clipboard.writeText(text).then(function(){ done(true); }, function(){ done(legacyCopy(text)); });
+    } else {
+      done(legacyCopy(text));
+    }
+  }
+
+  function currentTitle(){
+    if (state.mode === 'two'){
+      var A = analyze(state.a), B = analyze(state.b);
+      return (B.score > A.score ? state.b : state.a) || state.a || state.b;
+    }
+    return state.a;
+  }
+
+  /* ══════════════════════════════════════════
+     이벤트
+     ══════════════════════════════════════════ */
+  var modeBtns = document.querySelectorAll('.modes .m');
+  for (var mb = 0; mb < modeBtns.length; mb++){
+    modeBtns[mb].addEventListener('click', function(){ setMode(this.dataset.mode); });
+  }
+
+  $('titleA').addEventListener('input', onInput);
+  $('titleA2').addEventListener('input', onInput);
+  $('titleB2').addEventListener('input', onInput);
+
+  $('btnClear').addEventListener('click', function(){
+    if (state.mode === 'one'){ $('titleA').value = ''; }
+    else { $('titleA2').value = ''; $('titleB2').value = ''; }
+    onInput();
+    if (state.mode === 'one') $('titleA').focus(); else $('titleA2').focus();
+  });
+
+  var SAMPLES = [
+    '인천 석남동 1층 공장 60평 임대 총정리',
+    '부천 중동 미리내마을 전세 2억 2천 솔직후기',
+    '2026 행복주택 신청 조건 3가지 총정리',
+    '★★ 인천 공장 급매 최고 !!! 무조건 대박 ★★'
+  ];
+  var sampleIdx = 0;
+  $('btnSample').addEventListener('click', function(){
+    var s = SAMPLES[sampleIdx % SAMPLES.length];
+    sampleIdx++;
+    if (state.mode === 'one'){ $('titleA').value = s; }
+    else { $('titleA2').value = s; $('titleB2').value = SAMPLES[(sampleIdx) % SAMPLES.length]; }
+    onInput();
+    toast('예시 제목을 넣었어요 (' + (sampleIdx) + '/' + SAMPLES.length + ')', '다음 예시를 보려면 [예시]를 한 번 더 누르세요.');
+  });
+
+  /* 훅 단어 붙이기 */
+  var addBtns = document.querySelectorAll('[data-add]');
+  for (var ab = 0; ab < addBtns.length; ab++){
+    addBtns[ab].addEventListener('click', function(){
+      var w = this.dataset.add;
+      if (state.mode === 'one'){
+        var v = $('titleA').value.replace(/\s+$/, '');
+        if (v.indexOf(w) >= 0){ toast('"' + w + '"은 이미 들어 있어요'); return; }
+        $('titleA').value = v ? (v + ' ' + w) : w;
+      } else {
+        var v2 = $('titleA2').value.replace(/\s+$/, '');
+        if (v2.indexOf(w) >= 0){ toast('"' + w + '"은 이미 들어 있어요'); return; }
+        $('titleA2').value = v2 ? (v2 + ' ' + w) : w;
+      }
+      onInput();
+    });
+  }
+
+  /* 결과 영역 안 버튼 (위임) */
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if (!t || !t.getAttribute) return;
+
+    var apply = t.getAttribute('data-apply');
+    if (apply){
+      if (state.mode === 'one'){ $('titleA').value = apply; }
+      else { $('titleA2').value = apply; }
+      onInput();
+      toast('제목을 바꿨어요');
+      return;
+    }
+    var cp = t.getAttribute('data-copyone');
+    if (cp){ copyText(cp, '복사한 제목을 네이버 제목 칸에 붙여넣으세요.'); return; }
+  });
+
+  $('btnCopy').addEventListener('click', function(){
+    copyText(currentTitle(), '네이버 글쓰기 제목 칸에 붙여넣으세요.');
+  });
+
+  $('btnCopySum').addEventListener('click', function(){
+    if (!state.a && !state.b){ toast('점검할 제목이 없어요'); return; }
+    var txt;
+    if (state.mode === 'two'){
+      txt = '제목 A: ' + state.a + '\n' + summaryText(analyze(state.a)) + '\n\n제목 B: ' + state.b + '\n' + summaryText(analyze(state.b));
+    } else {
+      txt = summaryText(analyze(state.a));
+    }
+    copyText(txt, '제목과 점검 결과를 메모장에 붙여넣어 두세요.');
+  });
+
+  /* 크기·글꼴 준비되면 다시 그리기 */
+  var rz;
+  window.addEventListener('resize', function(){
+    clearTimeout(rz);
+    rz = setTimeout(function(){ render(); }, 120);
+  });
+  if (document.fonts && document.fonts.ready){
+    document.fonts.ready.then(function(){ render(); });
+  }
+  window.addEventListener('load', function(){ render(); });
+
+  /* 저장된 제목 복원 */
+  try {
+    var saved = JSON.parse(localStorage.getItem('woori.titleCheck.v1') || 'null');
+    if (saved){
+      state.a = saved.a || '';
+      state.b = saved.b || '';
+      $('titleA').value = state.a;
+      $('titleA2').value = state.a;
+      $('titleB2').value = state.b;
+    }
+  } catch(e){}
+
+  if (savedMode()) setMode(savedMode()); else { setMode('one'); }
+  function savedMode(){
+    try {
+      var s = JSON.parse(localStorage.getItem('woori.titleCheck.v1') || 'null');
+      return s && s.m === 'two' ? 'two' : '';
+    } catch(e){ return ''; }
+  }
+
+  autosize();
+  render();
+})();
+</script>
+</body>
+</html>
