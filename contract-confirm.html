@@ -1479,6 +1479,7 @@
   function resetToExample(){
     data = Object.assign({}, EXAMPLE);
     notesEdited = { common:false, tenant:false, landlord:false };
+    $("exampleTag").hidden = false;
     writeForm(); syncAutoTexts(true); writeForm(); draw();
     toast("가좌동 289-18 예시 값을 불러왔습니다");
   }
@@ -1494,6 +1495,7 @@
     data.powerKw = "";
     data.rentDay = 5; data.rentTiming = "후불";
     notesEdited = { common:false, tenant:false, landlord:false };
+    $("exampleTag").hidden = true;
     writeForm(); syncAutoTexts(true); writeForm(); draw();
     toast("입력칸을 비웠습니다 — 값을 새로 넣어 주세요");
   }
