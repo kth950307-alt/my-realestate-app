@@ -1463,10 +1463,12 @@
     var title = fileName(kinds[0]).replace(/\.png$/, "");
     var imgs = kinds.map(function(k){ return '<img src="' + buildFor(k).toDataURL("image/png") + '" alt="계약 확인서">'; }).join("");
 
-    /* 작업실(iframe) 안에서는 window.print() 가 자기 문서만 인쇄하지 못하므로,
-       ① 같은 주소의 부모 문서(작업실)에 인쇄용 영역을 넣고 부모에서 인쇄 → ② 안 되면 새 창 인쇄 */
+    /* 작업실(iframe) 안에서는 window.print() 가 작업실 화면을 인쇄해 버리므로,
+       ① 확인서만 담은 새 창을 열어 인쇄 → ② 새 창이 막히면 부모(작업실) 문서에 인쇄용 영역을 넣어 인쇄 */
     if(window.self !== window.top){
-      if(!printViaParent(title, imgs)) openPrintWindow(title, imgs);
+      if(openPrintWindow(title, imgs)) return;
+      if(printViaParent(title, imgs)) return;
+      toast("인쇄 창을 열지 못했습니다 — 위 [↗ 크게 열기]로 연 뒤 인쇄해 주세요", true);
       return;
     }
 
@@ -1522,16 +1524,13 @@
     try {
       w = window.open("", "_blank");
     } catch(e){ w = null; }
-    if(!w){
-      toast("새 창이 막혔습니다 — 작업실 위 [↗ 크게 열기]로 연 뒤 인쇄해 주세요", true);
-      return;
-    }
+    if(!w) return false;
     try {
       w.document.open();
       w.document.write(
         '<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>' + title + '</title>' +
         '<style>@page{size:A4;margin:9mm;} html,body{margin:0;padding:0;background:#fff;}' +
-        'img{display:block;width:100%;height:auto;margin:0 0 6mm;page-break-inside:avoid;page-break-after:always;}' +
+        'img{display:block;width:auto;height:auto;max-width:100%;max-height:274mm;margin:0 auto 6mm;page-break-inside:avoid;page-break-after:always;}' +
         'img:last-child{page-break-after:auto;}' +
         '@media print{body{margin:0;}}</style></head><body>' + imgs + '</body></html>'
       );
@@ -1540,8 +1539,10 @@
       setTimeout(function(){
         try { w.focus(); w.print(); } catch(e){}
       }, 500);
+      return true;
     } catch(e){
-      toast("인쇄 창을 열지 못했습니다", true);
+      try { w.close(); } catch(e2){}
+      return false;
     }
   }
 
