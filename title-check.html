@@ -803,7 +803,7 @@
   function lostHtml(a, which){
     var sim = (which === 'feed') ? a.feed : a.serp;
     if (!sim.truncated) return '';
-    var rest = a.chars.slice(sim.cut).join('');
+    var rest = a.chars.slice(sim.cut).join('').replace(/^\s+/, '');
     if (!rest) return '';
     return '<span class="lost"> … 뒤로 안 보임: "' + esc(rest) + '"</span>';
   }
