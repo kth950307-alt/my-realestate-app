@@ -888,10 +888,15 @@
 
     /* ④ 길이 */
     var lenMsg, lenIcon = '✓', lenCls = 'ok';
-    if (a.len <= 28){ lenMsg = a.len + '자 — 홈판 카드 2줄 안에 다 들어갑니다.'; }
-    else if (a.len <= 34){ lenMsg = a.len + '자 — 홈판에서는 뒤가 조금 잘리고, 검색에는 다 들어갑니다.'; }
-    else if (a.len < 45){ lenMsg = a.len + '자 — 홈판·검색에서 뒤쪽이 잘립니다.'; lenIcon = '!'; lenCls = 'bad'; }
-    else { lenMsg = a.len + '자 — 45자 이상은 저품질 위험이 있어요.'; lenIcon = '!'; lenCls = 'bad'; }
+    if (a.len >= 45){
+      lenMsg = a.len + '자 — 45자 이상은 저품질 위험이 있어요.'; lenIcon = '!'; lenCls = 'bad';
+    } else if (!a.feed.truncated){
+      lenMsg = a.len + '자 — 홈판 카드 2줄에 다 들어갑니다.';
+    } else {
+      lenMsg = a.len + '자 — 홈판 카드에서는 ' + a.feed.cut + '자까지만 보입니다.';
+      if (a.serp.truncated) lenMsg += ' 검색에서는 ' + a.serp.cut + '자까지.';
+      if (a.len > 34){ lenIcon = '!'; lenCls = 'bad'; }
+    }
     html += '<div class="chk ' + lenCls + '"><span class="ci">' + lenIcon + '</span>' +
       '<div class="ct"><b>길이</b><p>' + lenMsg + '</p></div></div>';
 
