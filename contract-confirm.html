@@ -136,7 +136,8 @@
     body{background:#fff;}
     body > *{display:none !important;}
     #printArea{display:block !important;}
-    #printArea img{display:block; width:100%; margin:0 0 7mm; page-break-inside:avoid;}
+    #printArea img{display:block; width:auto; height:auto; max-width:100%; max-height:274mm; margin:0 auto; page-break-inside:avoid; page-break-after:always;}
+    #printArea img:last-child{page-break-after:auto;}
   }
 </style>
 </head>
@@ -1463,7 +1464,13 @@
     area.innerHTML = kinds.map(function(k){
       return '<img src="' + buildFor(k).toDataURL("image/png") + '" alt="계약 확인서">';
     }).join("");
+    /* 인쇄 PDF 파일 이름이 문서 제목으로 저장되도록 잠시 바꿔 둔다 */
+    var oldTitle = document.title;
+    try { document.title = fileName(kinds[0]).replace(/\.png$/, ""); } catch(e){}
     setTimeout(function(){ window.print(); }, 240);
+    var restore = function(){ document.title = oldTitle; window.removeEventListener("afterprint", restore); };
+    window.addEventListener("afterprint", restore);
+    setTimeout(restore, 8000);
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -1547,13 +1554,13 @@
   $("btnPngBoth").addEventListener("click", function(){
     readForm(); syncAutoTexts(false);
     var btn = this; btn.disabled = true;
+    toast("임차인용부터 저장합니다 — 임대인용이 안 열리면 [PNG 저장]에서 ‘임대인용’을 골라 다시 저장해 주세요");
     savePng("tenant").then(function(){
       setTimeout(function(){
         savePng("landlord").then(function(){
           btn.disabled = false;
-          toast("2장을 저장했습니다 (임차인용·임대인용)");
         });
-      }, 700);
+      }, 900);
     });
   });
 

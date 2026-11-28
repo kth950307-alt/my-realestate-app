@@ -61,6 +61,8 @@
   .fld input, .fld select, .fld textarea{width:100%; padding:10px 12px; border:1.5px solid #dfe4ea; border-radius:10px;
     font-family:inherit; font-size:14px; font-weight:600; color:var(--ink); background:#fff;}
   .fld input:focus, .fld select:focus, .fld textarea:focus{outline:none; border-color:var(--royal); box-shadow:0 0 0 3px rgba(37,99,235,.10);}
+  .fld input::placeholder, .fld textarea::placeholder{color:#c2cbd8; font-weight:600;}
+  .searchbar input::placeholder{color:#c2cbd8;}
   .fld textarea{resize:vertical; min-height:60px; line-height:1.5; font-weight:500;}
   .setup-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:4px;}
   .chk{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:var(--ink2); cursor:pointer;}
@@ -421,6 +423,95 @@
   var LS_URL = "wreal_prop_url", LS_PW = "wreal_prop_pw", LS_REM = "wreal_prop_remember";
   var HOME = "index.html";
 
+  /* UI 확인용 데모 (?demo=1 로만 열립니다 — 실제 장부에는 아무것도 쓰지 않습니다) */
+  var DEMO = /[?&]demo=1/.test(location.search);
+  var DEMO_ROWS = [
+      {
+        "row": 3,
+        "등록일자": "2026-11-27",
+        "매물번호": "W-261127-1042",
+        "거래구분": "공장임대",
+        "권역": "원창동",
+        "해당층수": "지상 1층",
+        "홈페이지노출": "노출(공개)",
+        "매물제목": "원창동 대로변 1층 30평 다목적 매장·사무실·창고 임대",
+        "가격설명": "보증금 1,500만 / 월 150만 (관리비 월 2만)",
+        "보증금_매매가": "1500",
+        "월세": "150",
+        "전용평수": "30",
+        "사무실평수": "0",
+        "층고": "확인필요",
+        "전력": "확인필요",
+        "호이스트유무": "없음",
+        "호이스트제원": "없음",
+        "도로조건": "대로변 전면 접합 (광고효과·차량 접근 우수)",
+        "입주날짜": "즉시입주 / 협의가능",
+        "추천업종": "공구·자재 판매 매장, 기업 현장 사무실, 소형 물류·쇼핑몰 창고, 경량 조립 작업장",
+        "상세지번": "",
+        "건물주성함": "",
+        "건물주연락처": "",
+        "용도지역": "확인필요",
+        "사용승인일": "확인필요",
+        "핵심특징": "원창동 대로변 1층 전용 30평(99.17㎡) 다목적 상가·창고 임대 / 보증금 1,500만 / 월 150만 (평당 5만), 관리비 월 2만 고정 / 전면 통유리 도어, 우드 데코타일 바닥, 매립형 LED 면조명, "
+      },
+      {
+        "row": 4,
+        "등록일자": "2026-11-27",
+        "매물번호": "W-261127-1104",
+        "거래구분": "공장임대",
+        "권역": "원창동",
+        "해당층수": "지상 2층",
+        "홈페이지노출": "노출(공개)",
+        "매물제목": "원창동 대로변 2층 40평 사무실·소형 창고 임대 (초가성비)",
+        "가격설명": "보증금 800만 / 월 60만 (평당 1.5만, 관리비 월 2만)",
+        "보증금_매매가": "800",
+        "월세": "60",
+        "전용평수": "40",
+        "사무실평수": "0",
+        "층고": "확인필요",
+        "전력": "확인필요",
+        "호이스트유무": "없음",
+        "호이스트제원": "없음",
+        "도로조건": "대로변 접합 (창문·간판 광고효과 우수)",
+        "입주날짜": "즉시입주 / 협의가능",
+        "추천업종": "물류·무역 기업 사무실, 온라인 쇼핑몰 사무·보관실, 설계·연구실, 경량 자재 창고",
+        "상세지번": "",
+        "건물주성함": "",
+        "건물주연락처": "",
+        "용도지역": "확인필요",
+        "사용승인일": "확인필요",
+        "핵심특징": "원창동 대로변 2층 전용 40평(132.23㎡) 사무실·소형 창고 임대 / 보증금 800만 / 월 60만(평당 1.5만), 관리비 월 2만 고정, 공실 즉시 입주 / 우드 데코타일 바닥, 매립형 LED 조명, 전면·"
+      },
+      {
+        "row": 5,
+        "등록일자": "2026-11-19",
+        "매물번호": "W-261119-1611",
+        "거래구분": "공장매매",
+        "권역": "송림동",
+        "해당층수": "지상 1~2층",
+        "홈페이지노출": "노출(공개)",
+        "매물제목": "송림공구상가 1층 20평(2개 호실 통합) + 2층 17평 공구판매점 매매",
+        "가격설명": "매매가 3억 (2층 2개 호실 월 45만 임대 수익)",
+        "보증금_매매가": "30000",
+        "월세": "0",
+        "전용평수": "37",
+        "사무실평수": "0",
+        "층고": "4m",
+        "전력": "",
+        "호이스트유무": "있음",
+        "호이스트제원": "호이스트 2T (권리금 별도 유상 인수)",
+        "도로조건": "1톤~2.5톤 진입",
+        "입주날짜": "임대 중(협의)",
+        "추천업종": "공구·기계부품 판매, 모터·펌프 수리, 소형 임가공",
+        "상세지번": "",
+        "건물주성함": "",
+        "건물주연락처": "",
+        "용도지역": "",
+        "사용승인일": "",
+        "핵심특징": "송림공구상가 내 총 37평 매매 / 1층 20평(2개 호실 통합) + 2층 17평(각 8.5평 x 2호실) / 2층 2개 호실 월 45만원 임대 수익 발생 중 / 층고 4m, 2톤 호이스트 유상 인수 옵션 / 1톤 "
+      }
+    ];
+
   var DEALS = ["공장임대","공장매매","창고임대","창고매매","신축공장분양","토지매매","지식산업센터"];
   var REGIONS = ["석남동","가좌동","원창동","도화동","송현동","송림동","주안동","청라동","경서동","직접입력"];
   var FLOORS = ["지상 1층","지상 2층","지상 3층","지상 4층","지상 5층 이상","지하 1층","건물 전체(통임대/통매매)","기타(직접입력)"];
@@ -508,6 +599,7 @@
   }
 
   function apiGet(params){
+    if(state.url === "demo") return demoApi(params);
     var all = { pw: state.pw };
     for(var k in params) all[k] = params[k];
     var url = state.url + (state.url.indexOf("?") >= 0 ? "&" : "?") + qs(all);
@@ -529,6 +621,7 @@
   }
 
   function apiWrite(params){
+    if(state.url === "demo") return demoApi(params);
     var payload = { pw: state.pw };
     for(var k in params) payload[k] = params[k];
     return fetch(state.url, {
@@ -547,6 +640,49 @@
     }).catch(function(e){
       if(e && /비밀번호|시트를|열 순서|넣어 주세요|찾지 못했습니다/.test(e.message || "")) throw e;
       return apiGet(params);
+    });
+  }
+
+  function demoApi(params){
+    var action = (params && params.action) || "ping";
+    return new Promise(function(resolve){
+      setTimeout(function(){
+        if(action === "ping") return resolve({ ok:true, sheetTitle:"(데모) 우리부동산 장부" });
+        if(action === "list") return resolve({ ok:true, properties: state.props || DEMO_ROWS });
+        if(action === "add"){
+          var p = {
+            row: 100, 등록일자: todayStr(),
+            매물번호: "W-" + todayStr().slice(2,4) + todayStr().slice(5,7) + todayStr().slice(8,10) + "-" + String(new Date().getHours()) + String(new Date().getMinutes()),
+            거래구분: params.deal, 권역: params.region, 해당층수: params.floor,
+            홈페이지노출: params.expose, 매물제목: params.title, 가격설명: params.priceDesc,
+            보증금_매매가: params.dep, 월세: params.rent, 전용평수: params.area, 사무실평수: params.office,
+            층고: params.height, 전력: params.power, 호이스트유무: params.hoist, 호이스트제원: params.hoistSpec,
+            도로조건: params.road, 입주날짜: params.moveIn, 추천업종: params.industry, 상세지번: params.jibun,
+            건물주성함: params.owner, 건물주연락처: params.ownerPhone, 용도지역: params.zone, 핵심특징: params.feature
+          };
+          state.props = (state.props || DEMO_ROWS.slice()).concat([p]);
+          return resolve({ ok:true, no:p.매물번호, row:p.row,
+            publicAdded: String(params.expose).indexOf("비공개") < 0 });
+        }
+        if(action === "update"){
+          var list = state.props || DEMO_ROWS, target = null;
+          list.forEach(function(x){ if(x.row === Number(params.row)) target = x; });
+          var changed = [];
+          var map = { title:"매물제목", expose:"홈페이지노출", dep:"보증금_매매가", rent:"월세",
+            power:"전력", road:"도로조건", jibun:"상세지번", ownerPhone:"건물주연락처",
+            feature:"핵심특징", priceDesc:"가격설명" };
+          if(target){
+            for(var k in map){
+              if(params[k] === undefined) continue;
+              var old = String(target[map[k]] == null ? "" : target[map[k]]).trim();
+              var now = String(params[k]).trim();
+              if(old !== now){ target[map[k]] = now; changed.push(map[k]); }
+            }
+          }
+          return resolve({ ok:true, changed: changed, publicRemoved:false });
+        }
+        resolve({ ok:false, error:"데모에서 지원하지 않는 요청입니다." });
+      }, 260);
     });
   }
 
@@ -869,6 +1005,7 @@
   }
 
   function saveEdit(p){
+    if(needConnect()) return;
     var body = { action: "update", row: p.row };
     var pair = [
       ["expose", $("editExpose").querySelector('[aria-pressed="true"]').dataset.expose],
@@ -922,7 +1059,17 @@
   }
 
   /* ══════════════ 등록 ══════════════ */
+  function needConnect(){
+    if(state.url && state.pw) return false;
+    toast("먼저 [⚙ 연결 설정]에서 Apps Script 주소와 비밀번호를 넣어 주세요", true);
+    el.setupPanel.hidden = false;
+    loadGsSource();
+    try { el.setupPanel.scrollIntoView({ behavior: "smooth", block: "start" }); } catch(e){}
+    return true;
+  }
+
   function submitAdd(){
+    if(needConnect()) return;
     var a = state.add;
     var region = a.region === "직접입력" ? ($("fRegionCustom").value.trim()) : a.region;
     var floor = a.floor === "기타(직접입력)" ? ($("fFloorCustom").value.trim()) : a.floor;
@@ -1105,7 +1252,12 @@
   resetAddForm();
   syncAdd(true);
 
-  if(state.url && state.pw){
+  if(DEMO){
+    state.url = "demo"; state.pw = "demo";
+    setConn("on", "(데모) 연결됨 · 매물 " + DEMO_ROWS.length + "건 미리보기");
+    stamp();
+    loadProps(true);
+  }else if(state.url && state.pw){
     setConn("", "연결 확인 중…");
     apiGet({ action: "ping" }).then(function(d){
       setConn("on", "연결됨 · " + (d.sheetTitle || "매물 장부"));

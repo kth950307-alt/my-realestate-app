@@ -120,7 +120,8 @@ function listProperties() {
   checkHeader(sh);
   var last = sh.getLastRow();
   if (last < 2) return [];
-  var width = COLS.length;
+  /* 대표사진(Z열, base64 수만 자)은 빼고 A~Y만 읽어 가볍게 */
+  var width = COLS.length - 1;
   var values = sh.getRange(2, 1, last - 1, width).getDisplayValues();
   var out = [];
   for (var i = 0; i < values.length; i++) {
@@ -130,10 +131,8 @@ function listProperties() {
     if (!no && !date) continue;
     var o = { row: i + 2 };
     for (var c = 0; c < width; c++) {
-      if (COLS[c] === '대표사진') continue;
       o[COLS[c]] = String(r[c] == null ? '' : r[c]).trim();
     }
-    o.hasPhoto = String(r[25] || '').length > 20;
     out.push(o);
   }
   return out;
