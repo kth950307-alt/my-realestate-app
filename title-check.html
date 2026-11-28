@@ -666,9 +666,10 @@
     var hasDigit = /\d/.test(text);
 
     var hooksFound = [], hookSeen = {};
+    var hookSrc = text.replace(/무조건/g, '@@@');
     for (var hw in HOOKS){
       if (!Object.prototype.hasOwnProperty.call(HOOKS, hw)) continue;
-      if (text.indexOf(hw) >= 0 && !hookSeen[hw]){
+      if (hookSrc.indexOf(hw) >= 0 && !hookSeen[hw]){
         hookSeen[hw] = 1;
         hooksFound.push({word:hw, cat:HOOKS[hw]});
       }
@@ -929,6 +930,9 @@
     if (!a.hooks.length) tips.push('<b>혜택·호기심 단어</b> 하나. 총정리 · 조건 · 솔직후기 · 가성비 중에서 골라 붙이면 됩니다.');
     if (a.len > 34) tips.push('뒤쪽 <b>' + (a.len - 28) + '자</b>는 홈판에서 안 보입니다. 핵심만 남기고 <b>28자 안</b>으로 줄여 보세요.');
     if (a.warnings.some(function(w){ return w.t.indexOf('특수문자') >= 0; })) tips.push('<b>★·♥ 같은 기호</b>는 빼고, 대신 숫자와 조건으로 눈에 띄게 만드세요.');
+    if (a.warnings.some(function(w){ return w.t.indexOf('과장') === 0; })) tips.push('<b>최고·무조건·대박</b> 같은 과장 표현은 빼고, 확인된 숫자로 말하세요.');
+    if (a.warnings.some(function(w){ return w.t.indexOf('전화번호') >= 0; })) tips.push('<b>전화번호</b>는 제목에서 빼고 본문 맨 아래에 한 번만 넣으세요.');
+    if (a.warnings.some(function(w){ return w.t.indexOf('3회') >= 0; })) tips.push('같은 단어를 <b>3번 반복</b>하면 어뷰징입니다. 한 번만 쓰세요.');
     if (!tips.length) tips.push('지금 제목 그대로 올려도 좋습니다. 본문 첫 문단에 핵심 조건을 한 번 더 적어 주세요.');
 
     var html = '<div class="subhead">💡 이렇게 바꿔 보세요</div><div class="tips">';
